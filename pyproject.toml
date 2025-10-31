@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=45", "wheel", "setuptools_scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "multiwfn-vesta-interface"
+dynamic = ["version"]
+dependencies = [
+    "pydantic>=2.0",
+    "click>=8.0",
+    "numpy>=1.21",
+    "scipy>=1.7",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "black",
+    "isort",
+    "mypy",
+    "pre-commit",
+]
