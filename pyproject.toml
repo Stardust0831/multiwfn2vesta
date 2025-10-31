@@ -1,22 +1,11 @@
 [build-system]
-requires = ["setuptools>=45", "wheel", "setuptools_scm"]
+requires = ["setuptools>=45", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "multiwfn-vesta-interface"
-dynamic = ["version"]
-dependencies = [
-    "pydantic>=2.0",
-    "click>=8.0",
-    "numpy>=1.21",
-    "scipy>=1.7",
-]
-
-[project.optional-dependencies]
-dev = [
-    "pytest>=7.0",
-    "black",
-    "isort",
-    "mypy",
-    "pre-commit",
-]
+version = "0.1.0"
+description = "Interface for Multiwfn calculations and VESTA visualization"
+authors = [{name = "Stardust0831", email = "13862180016@163.com"}]
+dependencies = []  
+requires-python = ">=3.6"  
