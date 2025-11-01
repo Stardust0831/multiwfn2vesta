@@ -10,20 +10,31 @@ class VestaController:
         self.commands.extend(["-open", str(file_path)])
         return self
     
-    def flush(self):
-        self.commands.append("-flush")
-        return self
-    
     def export_image(self, output_path, scale=3):
         self.commands.extend(["-export_img", f"scale={scale}", str(output_path)])
         return self
     
+    def save(self, output_path):
+        self.commands.extend(["-save", str(output_path)])
+        return self
+
     def rotate_x(self, degrees):
         self.commands.extend(["-rotate_x", str(degrees)])
+        self.commands.append("-flush")
         return self
     
     def rotate_y(self, degrees):
         self.commands.extend(["-rotate_y", str(degrees)])
+        self.commands.append("-flush")
+        return self
+    
+    def rotate_z(self, degrees):
+        self.commands.extend(["-rotate_z", str(degrees)])
+        self.commands.append("-flush")
+        return self
+
+    def close(self):
+        self.commands.extend(["-close"])
         return self
     
     def execute(self):
@@ -32,19 +43,16 @@ class VestaController:
         self.commands = []
         return result.returncode == 0
 
-# 使用示例
-vesta = VestaController("vesta.exe")
-success = (vesta
-    .open("FAPbI3.cif")
-    .flush()
-    .export_image("test_1.png", scale=3)
-    .rotate_x(90)
-    .flush()
-    .export_image("test_2.png", scale=3)
-    .rotate_y(90)
-    .flush()
-    .export_image("test_3.png", scale=3)
-    .execute()
-)
+if __name__ == "__main__":
+    vesta = VestaController("vesta.exe")
+    success = (vesta
+        .open("GC_IRI.vesta")
+        .export_image("test_1.png", scale=3)
+        .rotate_x(90)
+        .export_image("test_2.png", scale=3)
+        .rotate_y(90)
+        .export_image("test_3.png", scale=3)
+        .execute()
+    )
 
-print(f"执行{'成功' if success else '失败'}")
+    print(f"执行{'成功' if success else '失败'}")
