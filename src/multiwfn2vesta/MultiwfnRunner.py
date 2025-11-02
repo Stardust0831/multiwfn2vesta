@@ -5,10 +5,11 @@ import glob
 import shutil
 
 class MultiwfnRunner:
-    """最简单的 Multiwfn 运行器"""
+    """Multiwfn 运行器"""
     
     def __init__(self, multiwfn_path="Multiwfn"):
         self.multiwfn_path = multiwfn_path
+        os.environ['MULTIWFNPATH'] = os.path.dirname(shutil.which('Multiwfn'))
     
     def run_commands(self, input_file, commands, nproc=1):
         """
@@ -116,7 +117,7 @@ def IRI():
             "q"    
         ]
         
-        if not Multiwfn.run_commands("func1.cub", commands_step2):
+        if Multiwfn.run_commands("func1.cub", commands_step2):
             logging.error(f"第二步处理失败: {inf}")
             # 继续处理，但记录错误
         
