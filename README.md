@@ -1,6 +1,7 @@
 # Multiwfn-VESTA Interface
 
 自动化Multiwfn计算和VESTA可视化的Python接口。
+项目仍在施工中，非正式版.
 
 ## 特性
 - 🔄 自动调用Multiwfn计算格点数据
