@@ -11,9 +11,4 @@
 
 ## 快速开始
 ```bash
-git clone https://github.com/yourusername/multiwfn-vesta-interface
-cd multiwfn-vesta-interface
-pip install -e .
-
-# 使用示例
-python -m multiwfn_vesta molecule.fchk
+施工中
