@@ -1,5 +1,47 @@
 import numpy as np
-from scipy.interpolate import RegularGridInterpolator
+
+
+IRI_COLOR_LOWER = -0.04
+IRI_COLOR_UPPER = 0.04
+IRI_POSITIVE_SCALE = 2.0
+
+
+def transform_iri_color_values(
+    values,
+    lower=IRI_COLOR_LOWER,
+    upper=IRI_COLOR_UPPER,
+    positive_scale=IRI_POSITIVE_SCALE,
+):
+    """Apply the VESTA color-field remapping used for Multiwfn IRI plots.
+
+    Multiwfn's old interactive sequence was equivalent to keeping negative
+    sign(lambda2)rho values unchanged, multiplying positive values by two,
+    then clipping the data to [-0.04, 0.04].
+    """
+    data = np.asarray(values, dtype=float)
+    transformed = np.where(data > 0, data * positive_scale, data)
+    return np.clip(transformed, lower, upper)
+
+
+def process_iri_color_cube(
+    input_cube,
+    output_cube,
+    lower=IRI_COLOR_LOWER,
+    upper=IRI_COLOR_UPPER,
+    positive_scale=IRI_POSITIVE_SCALE,
+    strict=True,
+):
+    """Read a sign(lambda2)rho cube, remap values for VESTA coloring, and write it."""
+    processor = CubeFileInterpolator()
+    cube_data = processor.read_cube_file(str(input_cube), strict=strict)
+    transformed = transform_iri_color_values(
+        cube_data["data"],
+        lower=lower,
+        upper=upper,
+        positive_scale=positive_scale,
+    )
+    processor.write_cube_file(transformed, str(output_cube), cube_data)
+    return transformed
 
 class CubeFileInterpolator:
     def __init__(self):
@@ -7,7 +49,7 @@ class CubeFileInterpolator:
         self.potential_data = None
         self.isodensity_value = 0.001
     
-    def read_cube_file(self, filename):
+    def read_cube_file(self, filename, strict=False):
         """读取cub文件"""
         with open(filename, 'r') as f:
             # 读取头两行注释
@@ -46,6 +88,11 @@ class CubeFileInterpolator:
             nx, ny, nz = grid_info[0][0], grid_info[1][0], grid_info[2][0]
             expected_points = nx * ny * nz
             
+            if strict and len(data) != expected_points:
+                raise ValueError(
+                    f"Cube data point count mismatch in {filename}: "
+                    f"got {len(data)}, expected {expected_points}"
+                )
             if len(data) < expected_points:
                 print(f"警告: 数据点数({len(data)})少于预期({expected_points})")
                 data.extend([0.0] * (expected_points - len(data)))
@@ -84,6 +131,8 @@ class CubeFileInterpolator:
     
     def interpolate_potential_to_density_grid(self):
         """将势能数据插值到密度网格上"""
+        from scipy.interpolate import RegularGridInterpolator
+
         print("开始势能插值...")
         
         # 创建势能网格坐标

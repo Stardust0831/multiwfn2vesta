@@ -3,13 +3,18 @@ import os
 import logging
 import glob
 import shutil
+from pathlib import Path
+
+from multiwfn2vesta.cub import process_iri_color_cube
 
 class MultiwfnRunner:
     """Multiwfn 运行器"""
-    
+
     def __init__(self, multiwfn_path="Multiwfn"):
         self.multiwfn_path = multiwfn_path
-        os.environ['MULTIWFNPATH'] = os.path.dirname(shutil.which('Multiwfn'))
+        resolved = shutil.which(multiwfn_path)
+        if resolved:
+            os.environ['MULTIWFNPATH'] = os.path.dirname(resolved)
     
     def run_commands(self, input_file, commands, nproc=1):
         """
@@ -20,7 +25,7 @@ class MultiwfnRunner:
             commands: 命令列表，如 ["5", "1", "10", "0"]
         
         Returns:
-            bool: 是否成功执行
+            int: Multiwfn 进程返回码，0 表示成功
         """
         # 构建命令行参数
         cmd_args = [self.multiwfn_path, input_file]
@@ -48,14 +53,19 @@ class MultiwfnRunner:
             if result.stderr:
                 f.write(f"错误:\n{result.stderr}\n")
         
-        return 0
+        return result.returncode
 
 def get_file_basename(filename):
     """获取文件名（最后一个点之前的部分）"""
     return filename.rsplit('.', 1)[0]
 
-def IRI():
-    Multiwfn = MultiwfnRunner()
+def IRI(
+    multiwfn_path="Multiwfn",
+    color_lower=-0.04,
+    color_upper=0.04,
+    color_positive_scale=2.0,
+):
+    Multiwfn = MultiwfnRunner(multiwfn_path=multiwfn_path)
     # 设置日志
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
     
@@ -91,36 +101,33 @@ def IRI():
             logging.error(f"第一步处理失败: {inf}")
             continue
         
-        # 第二步：处理 func1.cub 来等效满足 midpoint 颜色要求并处理上下限
-        commands_step2 = [
-            "13",
-            "11",
-            "13",
-            "11",
-            "7",
-            "3",
-            "11",
-            "2",
-            "func1.cub",
-            "11",
-            "5",
-            "1.5",
-            "15",
-            "-0.1000000E+99,-0.04",
-            "-0.04",
-            "15",
-            "0.04,0.1000000E+99",
-            "0.04",
-            "0",
-            f"{basename}_IRI1.cub", 
-            "-1",  
-            "q"    
-        ]
-        
-        if Multiwfn.run_commands("func1.cub", commands_step2):
-            logging.error(f"第二步处理失败: {inf}")
-            # 继续处理，但记录错误
-        
+        # 第二步：直接用 Python 处理 func1.cub 的 sign(lambda2)rho 色标场。
+        iri1_output = f"{basename}_IRI1.cub"
+        iri2_output = f"{basename}_IRI2.cub"
+        try:
+            if Path("func1.cub").exists():
+                process_iri_color_cube(
+                    "func1.cub",
+                    iri1_output,
+                    lower=color_lower,
+                    upper=color_upper,
+                    positive_scale=color_positive_scale,
+                )
+            else:
+                logging.error(f"未找到 func1.cub，无法生成 {basename}_IRI1.cub")
+                continue
+        except Exception as exc:
+            logging.error(f"Python 处理 IRI 染色 cube 失败: {inf}: {exc}")
+            continue
+
+        if not os.path.exists("func2.cub"):
+            logging.error(f"未找到 func2.cub，无法生成 {iri2_output}")
+            if os.path.exists(iri1_output):
+                os.remove(iri1_output)
+            if os.path.exists("func1.cub"):
+                os.remove("func1.cub")
+            continue
+
         # 清理和重命名文件
         try:
             # 删除 func1.cub
@@ -129,11 +136,14 @@ def IRI():
             
             # 重命名 output.txt（强制覆盖）
             if os.path.exists("output.txt"):
+                if os.path.exists(f"{basename}_output.txt"):
+                    os.remove(f"{basename}_output.txt")
                 shutil.move("output.txt", f"{basename}_output.txt")
 
             # 重命名 func2.cub（强制覆盖）
-            if os.path.exists("func2.cub"):
-                shutil.move("func2.cub", f"{basename}_IRI2.cub")
+            if os.path.exists(iri2_output):
+                os.remove(iri2_output)
+            shutil.move("func2.cub", iri2_output)
                 
             logging.info(f"完成处理: {inf} -> {basename}_IRI1.cub, {basename}_IRI2.cub")
             
