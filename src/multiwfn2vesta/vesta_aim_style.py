@@ -9,10 +9,10 @@ from typing import Dict, Iterable, List, Optional, Set, Tuple
 AimAtomType = Tuple[float, Tuple[int, int, int]]
 
 AIM_ATOM_TYPES: Dict[str, AimAtomType] = {
-    "C": (0.0400, (120, 120, 120)),
-    "N": (0.3200, (255, 128, 0)),
-    "O": (0.2000, (255, 255, 0)),
-    "F": (0.2000, (0, 255, 0)),
+    "C": (0.0200, (120, 120, 120)),
+    "N": (0.0700, (255, 128, 0)),
+    "O": (0.0700, (255, 255, 0)),
+    "F": (0.0700, (0, 255, 0)),
 }
 
 

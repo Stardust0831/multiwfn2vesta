@@ -113,11 +113,13 @@ Prefer generating a `.vesta` file directly instead of asking VESTA to infer chem
 - Either:
   - keep `C/N/O/F` and override each CP site's style via `SITET`, or
   - map CP/path pseudo-sites to rarely used valid element symbols and use `ATOMT` for compact element-level styling.
-- Use larger radii for CPs than path points and distinct colors.  Multiwfn's
-  3D defaults (`settings.ini` `CP_RGB` and `examples/scripts/AIM.vmd`) use
-  purple for `(3,-3)`, orange for `(3,-1)` BCP, yellow for `(3,+1)`, and green
-  for `(3,+3)`.  Current converter defaults use gray path points, BCP `N`
-  `0.3200` orange, and other CPs `0.2000`.
+- Use the same size relationship as Multiwfn's VMD script by default:
+  `pathsize=0.02` and `CPsize=0.07` for all CP types.  Multiwfn's 3D color
+  defaults (`settings.ini` `CP_RGB` and `examples/scripts/AIM.vmd`) use purple
+  for `(3,-3)`, orange for `(3,-1)` BCP, yellow for `(3,+1)`, and green for
+  `(3,+3)`.
+- If a particular figure needs stronger BCP emphasis, override radii at
+  conversion time instead of changing the default style.
 - After VESTA saves a multi-phase overlay, inspect the final global `ATOMT`.
   VESTA can drop AIM C/N/O/F atom-type rows while preserving `SITET`; run
   `multiwfn2vesta.vesta_aim_style` to add missing AIM pseudo atom types before

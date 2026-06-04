@@ -110,11 +110,26 @@ class TestAimVesta(unittest.TestCase):
         self.assertIn("CP0001_C", text)
         self.assertIn("CP0002_N", text)
         self.assertIn("  N         CP0002_N", text)
+        self.assertRegex(text, r"P0001_0001\s+0\.0200\s+120\s+120\s+120")
+        self.assertRegex(text, r"CP0001_C\s+0\.0700\s+184\s+0\s+184")
+        self.assertRegex(text, r"CP0002_N\s+0\.0700\s+255\s+128\s+0")
+        self.assertRegex(text, r"CP0003_O\s+0\.0700\s+255\s+255\s+0")
+        self.assertRegex(text, r"CP0004_F\s+0\.0700\s+0\s+255\s+0")
+
+    def test_convert_with_custom_bcp_radius_can_emphasize_bcps(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            paths = Path(tmp) / "paths.pdb"
+            cps = Path(tmp) / "CPs.pdb"
+            output = Path(tmp) / "aim.vesta"
+            paths.write_text(PATHS_PDB, encoding="utf-8")
+            cps.write_text(CP_PDB, encoding="utf-8")
+
+            convert_aim_pdb_to_vesta(paths, output, cps_pdb=cps, path_radius=0.04, cp_radius=0.14, bcp_radius=0.20)
+            text = output.read_text(encoding="utf-8")
+
         self.assertRegex(text, r"P0001_0001\s+0\.0400\s+120\s+120\s+120")
-        self.assertRegex(text, r"CP0001_C\s+0\.2000\s+184\s+0\s+184")
-        self.assertRegex(text, r"CP0002_N\s+0\.3200\s+255\s+128\s+0")
-        self.assertRegex(text, r"CP0003_O\s+0\.2000\s+255\s+255\s+0")
-        self.assertRegex(text, r"CP0004_F\s+0\.2000\s+0\s+255\s+0")
+        self.assertRegex(text, r"CP0001_C\s+0\.1400\s+184\s+0\s+184")
+        self.assertRegex(text, r"CP0002_N\s+0\.2000\s+255\s+128\s+0")
 
     def test_convert_with_skewed_cryst1_uses_lattice_coordinates(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -142,9 +157,9 @@ ATOMT
 
         patched = inject_aim_atom_types_text(text)
 
-        self.assertIn("  3          C  0.0400 120 120 120 120 120 120 204", patched)
-        self.assertIn("  4          N  0.3200 255 128   0 255 128   0 204", patched)
-        self.assertIn("  5          F  0.2000   0 255   0   0 255   0 204", patched)
+        self.assertIn("  3          C  0.0200 120 120 120 120 120 120 204", patched)
+        self.assertIn("  4          N  0.0700 255 128   0 255 128   0 204", patched)
+        self.assertIn("  5          F  0.0700   0 255   0   0 255   0 204", patched)
         self.assertEqual(patched.count("          O "), 1)
 
 

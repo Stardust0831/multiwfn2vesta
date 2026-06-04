@@ -19,6 +19,19 @@ PYTHONPATH=src python -m multiwfn2vesta.aim_vesta \
   --title "AIM paths and CPs"
 ```
 
+默认半径按 Multiwfn 自带 `AIM.vmd` 的比例：路径点 `0.02`，四类 CP
+包括 BCP 都是 `0.07`。若某张图确实需要强化某类点，可以显式传：
+
+```bash
+PYTHONPATH=src python -m multiwfn2vesta.aim_vesta \
+  paths.pdb \
+  aim_atoms_only_emphasis.vesta \
+  --cps-pdb CPs.pdb \
+  --path-radius 0.04 \
+  --cp-radius 0.14 \
+  --bcp-radius 0.20
+```
+
 ## AIM paths 到无键 VESTA
 
 这会生成 atoms-only `.vesta`：`SBOND` 为空，`BONDS   0`，避免 VESTA 对

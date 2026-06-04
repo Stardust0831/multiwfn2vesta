@@ -9,6 +9,8 @@ from typing import Iterable, List, Optional, Sequence, Tuple
 
 
 BOHR_TO_ANGSTROM = 0.529177210903
+DEFAULT_PATH_RADIUS = 0.02
+DEFAULT_CP_RADIUS = 0.07
 
 
 @dataclass
@@ -136,7 +138,7 @@ def _bounding_cell(
     return (a, b, c, 90.0, 90.0, 90.0), (minx, miny, minz)
 
 
-def paths_to_sites(points: Iterable[PdbPoint], radius: float = 0.04) -> List[AimSite]:
+def paths_to_sites(points: Iterable[PdbPoint], radius: float = DEFAULT_PATH_RADIUS) -> List[AimSite]:
     per_path_counts = {}
     sites: List[AimSite] = []
     for point in points:
@@ -160,7 +162,11 @@ def paths_to_sites(points: Iterable[PdbPoint], radius: float = 0.04) -> List[Aim
     return sites
 
 
-def cps_to_sites(points: Iterable[PdbPoint], radius: float = 0.20, bcp_radius: float = 0.32) -> List[AimSite]:
+def cps_to_sites(
+    points: Iterable[PdbPoint],
+    radius: float = DEFAULT_CP_RADIUS,
+    bcp_radius: Optional[float] = None,
+) -> List[AimSite]:
     cp_colors = {
         "C": (184, 0, 184),
         "N": (255, 128, 0),
@@ -168,6 +174,7 @@ def cps_to_sites(points: Iterable[PdbPoint], radius: float = 0.20, bcp_radius: f
         "F": (0, 255, 0),
     }
     sites: List[AimSite] = []
+    effective_bcp_radius = radius if bcp_radius is None else bcp_radius
     for index, point in enumerate(points, start=1):
         cp_code = (point.element or point.name or "C").upper()
         sites.append(
@@ -177,7 +184,7 @@ def cps_to_sites(points: Iterable[PdbPoint], radius: float = 0.20, bcp_radius: f
                 x=point.x,
                 y=point.y,
                 z=point.z,
-                radius=bcp_radius if cp_code == "N" else radius,
+                radius=effective_bcp_radius if cp_code == "N" else radius,
                 color=cp_colors.get(cp_code, (180, 180, 180)),
                 kind="cp",
                 group_index=point.resseq,
@@ -318,10 +325,10 @@ def render_atoms_only_vesta(
             "SPLAN",
             "  0   0   0   0",
             "ATOMT",
-            "  1          C  0.0400 120 120 120 120 120 120 204",
-            "  2          N  0.3200 255 128   0 255 128   0 204",
-            "  3          O  0.2000 255 255   0 255 255   0 204",
-            "  4          F  0.2000   0 255   0   0 255   0 204",
+            "  1          C  0.0200 120 120 120 120 120 120 204",
+            "  2          N  0.0700 255 128   0 255 128   0 204",
+            "  3          O  0.0700 255 255   0 255 255   0 204",
+            "  4          F  0.0700   0 255   0   0 255   0 204",
             "  0 0 0 0 0 0",
             "SCENE",
             " 1.000000  0.000000  0.000000  0.000000",
@@ -358,14 +365,17 @@ def convert_aim_pdb_to_vesta(
     cps_pdb: Optional[Path] = None,
     title: str = "Multiwfn AIM paths",
     margin: float = 2.0,
+    path_radius: float = DEFAULT_PATH_RADIUS,
+    cp_radius: float = DEFAULT_CP_RADIUS,
+    bcp_radius: Optional[float] = None,
 ) -> None:
     path_points, path_cell = read_pdb_points(paths_pdb)
-    sites = paths_to_sites(path_points)
+    sites = paths_to_sites(path_points, radius=path_radius)
     cell = path_cell
 
     if cps_pdb is not None:
         cp_points, cp_cell = read_pdb_points(cps_pdb)
-        sites.extend(cps_to_sites(cp_points))
+        sites.extend(cps_to_sites(cp_points, radius=cp_radius, bcp_radius=bcp_radius))
         cell = cell or cp_cell
 
     output_vesta.write_text(
@@ -383,6 +393,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser.add_argument("--cps-pdb", type=Path)
     parser.add_argument("--title", default="Multiwfn AIM paths")
     parser.add_argument("--margin", type=float, default=2.0)
+    parser.add_argument("--path-radius", type=float, default=DEFAULT_PATH_RADIUS)
+    parser.add_argument("--cp-radius", type=float, default=DEFAULT_CP_RADIUS)
+    parser.add_argument("--bcp-radius", type=float)
     args = parser.parse_args(argv)
 
     convert_aim_pdb_to_vesta(
@@ -391,6 +404,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         cps_pdb=args.cps_pdb,
         title=args.title,
         margin=args.margin,
+        path_radius=args.path_radius,
+        cp_radius=args.cp_radius,
+        bcp_radius=args.bcp_radius,
     )
     return 0
 

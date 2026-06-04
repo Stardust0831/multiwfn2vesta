@@ -35,11 +35,14 @@ without generating dense automatic bonds between path points.
   `MOLECULE` phase with raw Cartesian coordinates.  Do not build an artificial
   bounding cell for these files; that shifts/scales the AIM layer relative to a
   molecule layer saved from `mol.pdb`.
-- BCPs are encoded as `N`; use a radius clearly larger than path points and a
-  color distinct from the path color.  Multiwfn's 3D defaults (`CP_RGB` in
-  `settings.ini`) use purple, orange, yellow, and green for `(3,-3)`, `(3,-1)`,
-  `(3,+1)`, and `(3,+3)`.  Current converter defaults are path `0.0400` gray,
-  BCP `0.3200` orange, and other CPs `0.2000`.
+- BCPs are encoded as `N`; use the same radius as other CPs by default and a
+  color distinct from the path color.  Multiwfn's VMD script uses
+  `pathsize=0.02` and `CPsize=0.07`; Multiwfn's 3D `CP_RGB` defaults use
+  purple, orange, yellow, and green for `(3,-3)`, `(3,-1)`, `(3,+1)`, and
+  `(3,+3)`.
+- Use `--path-radius`, `--cp-radius`, and `--bcp-radius` only when a
+  publication figure needs deliberate size emphasis beyond the Multiwfn-style
+  default.
 
 ## Steps
 
@@ -94,7 +97,7 @@ without generating dense automatic bonds between path points.
   - `SBOND` followed by `0 0 0 0`
   - `BONDS   0`
   - BCP labels such as `CP0004_N`
-  - `CP000*_N  0.3200 255 128 0` in `SITET`
+  - `CP000*_N  0.0700 255 128 0` in `SITET`
 - For overlay figures, inspect the molecule layer radii.  VESTA's PDB import
   can use large VDW radii (`H` around `0.4600` in the H2O smoke case), which
   hides BCPs even when coordinates are correct.  Use a small-atom base layer or
@@ -125,7 +128,7 @@ smoke/20260605_aim_overlay_alignment/products/
 Observed:
 
 - `h2o_aim_molecule_aligned.vesta` is `MOLECULE`, not `CRYSTAL`.
-- `CP0004_N` and `CP0005_N` retain raw H2O AIM coordinates and orange `0.3200`
+- `CP0004_N` and `CP0005_N` retain raw H2O AIM coordinates and orange `0.0700`
   `SITET` styling.
 - `h2o_mol_small_plus_aim_aligned_postatomt.png` shows BCPs after using a
   small-atom base molecule and post-processing merged `ATOMT`.

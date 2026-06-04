@@ -28,11 +28,13 @@ Behavior:
   Multiwfn/PDB Cartesian coordinates in `STRUC`.  This keeps AIM paths/CPs
   aligned with molecule layers saved by VESTA from `mol.pdb`.
 - Labels path points as `P<path>_<point>`, for example `P0003_0012`.
-- Optionally adds CP sites from `CPs.pdb` with larger radii and type colors:
+- Optionally adds CP sites from `CPs.pdb` with Multiwfn-style radii and type colors:
   `(3,-3)` `C` purple, `(3,-1)` BCP `N` orange, `(3,+1)` `O` yellow, and
   `(3,+3)` `F` green.  These follow Multiwfn's 3D `CP_RGB` defaults in
-  `settings.ini`; path points are gray so BCPs do not merge visually with the
-  bond path.
+  `settings.ini` and `examples/scripts/AIM.vmd`: path points default to
+  radius `0.02`, and all CP types default to radius `0.07`.
+- For publication figures that need stronger emphasis, use `--path-radius`,
+  `--cp-radius`, and `--bcp-radius` to override the defaults.
 - Emits an empty `SBOND` section.
 - Sets `BONDS   0`.
 
