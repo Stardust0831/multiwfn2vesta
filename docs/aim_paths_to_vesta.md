@@ -22,10 +22,17 @@ Behavior:
 
 - Parses PDB `ATOM`/`HETATM` fixed columns, with whitespace fallback.
 - Uses `CRYST1` as the VESTA cell when present.
-- Otherwise builds an orthorhombic bounding cell around all AIM points.
-- Converts Cartesian Angstrom coordinates to fractional `STRUC` coordinates.
+- If `CRYST1` is present, writes a `CRYSTAL` phase and converts Cartesian
+  Angstrom coordinates to fractional `STRUC` coordinates.
+- If `CRYST1` is absent, writes a `MOLECULE` phase and keeps the raw
+  Multiwfn/PDB Cartesian coordinates in `STRUC`.  This keeps AIM paths/CPs
+  aligned with molecule layers saved by VESTA from `mol.pdb`.
 - Labels path points as `P<path>_<point>`, for example `P0003_0012`.
-- Optionally adds CP sites from `CPs.pdb` with larger radii and type colors.
+- Optionally adds CP sites from `CPs.pdb` with larger radii and type colors:
+  `(3,-3)` `C` purple, `(3,-1)` BCP `N` orange, `(3,+1)` `O` yellow, and
+  `(3,+3)` `F` green.  These follow Multiwfn's 3D `CP_RGB` defaults in
+  `settings.ini`; path points are gray so BCPs do not merge visually with the
+  bond path.
 - Emits an empty `SBOND` section.
 - Sets `BONDS   0`.
 
@@ -33,3 +40,16 @@ This is intentionally an atoms-only representation. It avoids VESTA automatic
 bond creation and does not try to draw continuous tubes/lines between path
 points.
 
+When an AIM layer is imported over a molecular layer and VESTA saves the merged
+file, VESTA may keep only the base layer's global `ATOMT` table.  If the AIM
+colors fall back to defaults, patch the saved merged file before exporting:
+
+```bash
+PYTHONPATH=src python -m multiwfn2vesta.vesta_aim_style \
+  merged.vesta \
+  merged_aim_style.vesta
+```
+
+Large VDW-style base molecule radii can also hide BCPs because BCPs sit close
+to nuclei.  Use smaller base atom/bond radii for AIM overlay figures when the
+CPs need to be inspected directly.

@@ -34,3 +34,18 @@ Multiwfn `paths.pdb` 中密集的伪 C 原子自动成键。
 
 当前 AIM converter 的输出路径由命令行第二个参数指定，例如
 `aim_atoms_only.vesta`。
+
+## AIM 叠层样式后处理
+
+VESTA 把 AIM `.vesta` 作为第二 phase 导入并保存后，可能只保留基底分子
+的全局 `ATOMT` 表，导致 AIM 的 C/N/O/F 伪原子颜色回退。保存 merged 文件
+后可运行：
+
+```bash
+PYTHONPATH=src python -m multiwfn2vesta.vesta_aim_style \
+  merged.vesta \
+  merged_aim_style.vesta
+```
+
+此外，BCP 通常靠近原子核。若基底分子使用 VDW 大球显示，BCP 会被原子球
+遮挡；AIM 图建议使用较小的基底原子/键半径。

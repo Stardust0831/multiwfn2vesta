@@ -15,7 +15,7 @@ should be shown together in one VESTA graphics area.
   #VESTA_FORMAT_VERSION ...
   MOLECULE or CRYSTAL  phase 1
   ...
-  CRYSTAL              phase 2
+  MOLECULE or CRYSTAL  phase 2
   ...
   STYLE                shared style
   ...
@@ -57,7 +57,19 @@ should be shown together in one VESTA graphics area.
    /mnt/c/WINDOWS/system32/cmd.exe /c "taskkill /IM VESTA.exe /F" || true
    ```
 
-4. Verify phase structure.
+4. Patch AIM atom types after VESTA saves the merged file.
+
+   VESTA may keep only the base phase's global `ATOMT` rows when it writes a
+   multi-phase file.  If the AIM phase uses C/N/O/F pseudo atom types for path
+   and CP colors, patch the saved file before the final image export.
+
+   ```bash
+   PYTHONPATH=project/src python -m multiwfn2vesta.vesta_aim_style \
+     "$MULTIPHASE_VESTA" \
+     "$MULTIPHASE_VESTA_PATCHED"
+   ```
+
+5. Verify phase structure.
 
    ```bash
    PYTHONPATH=project/src python - <<'PY'
@@ -105,6 +117,16 @@ Important detail: first save `mol.pdb` to `h2o_mol.vesta`, then import the AIM
 `.vesta` with `-i`. Direct `-open mol.pdb -i aim.vesta -save ...` did not save
 successfully in the local smoke test.
 
+For AIM-focused overlays, avoid VDW-sized base molecule atoms.  In the H2O
+alignment smoke, VESTA's default H radius was large enough to completely cover
+nearby BCPs.  A small-atom base layer plus `vesta_aim_style` post-processing
+produced a visible BCP overlay:
+
+```text
+smoke/20260605_aim_overlay_alignment/products/h2o_mol_small_plus_aim_aligned_postatomt.vesta
+smoke/20260605_aim_overlay_alignment/products/h2o_mol_small_plus_aim_aligned_postatomt.png
+```
+
 ## Failure notes
 
 - If VESTA reports that `smoke\...` cannot be saved, the Windows path was
@@ -113,3 +135,6 @@ successfully in the local smoke test.
   string.
 - Shared `STYLE` may contain `BONDS   1` for the base molecular phase. The AIM
   phase can still avoid path-point bonds because its `SBOND` section is empty.
+- If CP colors disappear after `-save`, inspect the final `ATOMT` section.
+  Missing C/N/O/F rows mean VESTA dropped the AIM atom type table; run
+  `multiwfn2vesta.vesta_aim_style` on the saved merged file.

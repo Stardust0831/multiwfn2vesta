@@ -91,8 +91,13 @@ Prefer generating a `.vesta` file directly instead of asking VESTA to infer chem
 ### Structure and cell
 
 - Use a simple `P 1` / identity-symmetry model unless a real periodic cell is present.
-- If `paths.pdb` has `CRYST1`, use that cell.
-- If no cell exists, create an orthorhombic bounding cell around all AIM points and molecular atoms, with a small margin, then convert Cartesian Angstrom coordinates to fractional coordinates for `STRUC`.
+- If `paths.pdb` has `CRYST1`, use that cell, write a `CRYSTAL` phase, and
+  convert Cartesian Angstrom coordinates to fractional coordinates for
+  `STRUC`.
+- If no cell exists, write a `MOLECULE` phase and keep the raw Cartesian
+  Multiwfn/PDB coordinates in `STRUC`.  Do not create an artificial bounding
+  cell for ordinary molecular AIM exports; doing so shifts/scales the AIM
+  layer relative to a molecule layer saved by VESTA from `mol.pdb`.
 - Set `BOUND` to one visible cell only, for example `0 1 0 1 0 1`, and do not ask VESTA to replicate path points.
 - If Multiwfn option `-6` already exported boundary images, treat those images as explicit sites and still keep `BOUND` at one cell.
 
@@ -108,7 +113,15 @@ Prefer generating a `.vesta` file directly instead of asking VESTA to infer chem
 - Either:
   - keep `C/N/O/F` and override each CP site's style via `SITET`, or
   - map CP/path pseudo-sites to rarely used valid element symbols and use `ATOMT` for compact element-level styling.
-- Use larger radii for CPs than path points and distinct colors matching the tutorial convention.
+- Use larger radii for CPs than path points and distinct colors.  Multiwfn's
+  3D defaults (`settings.ini` `CP_RGB` and `examples/scripts/AIM.vmd`) use
+  purple for `(3,-3)`, orange for `(3,-1)` BCP, yellow for `(3,+1)`, and green
+  for `(3,+3)`.  Current converter defaults use gray path points, BCP `N`
+  `0.3200` orange, and other CPs `0.2000`.
+- After VESTA saves a multi-phase overlay, inspect the final global `ATOMT`.
+  VESTA can drop AIM C/N/O/F atom-type rows while preserving `SITET`; run
+  `multiwfn2vesta.vesta_aim_style` to add missing AIM pseudo atom types before
+  final image export.
 
 ### Disable bonds
 

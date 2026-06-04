@@ -136,7 +136,7 @@ def _bounding_cell(
     return (a, b, c, 90.0, 90.0, 90.0), (minx, miny, minz)
 
 
-def paths_to_sites(points: Iterable[PdbPoint], radius: float = 0.06) -> List[AimSite]:
+def paths_to_sites(points: Iterable[PdbPoint], radius: float = 0.04) -> List[AimSite]:
     per_path_counts = {}
     sites: List[AimSite] = []
     for point in points:
@@ -151,7 +151,7 @@ def paths_to_sites(points: Iterable[PdbPoint], radius: float = 0.06) -> List[Aim
                 y=point.y,
                 z=point.z,
                 radius=radius,
-                color=(245, 166, 35),
+                color=(120, 120, 120),
                 kind="path",
                 group_index=path_index,
                 point_index=point_index,
@@ -160,12 +160,12 @@ def paths_to_sites(points: Iterable[PdbPoint], radius: float = 0.06) -> List[Aim
     return sites
 
 
-def cps_to_sites(points: Iterable[PdbPoint], radius: float = 0.14) -> List[AimSite]:
+def cps_to_sites(points: Iterable[PdbPoint], radius: float = 0.20, bcp_radius: float = 0.32) -> List[AimSite]:
     cp_colors = {
-        "C": (145, 92, 182),
-        "N": (255, 148, 36),
-        "O": (245, 220, 64),
-        "F": (78, 170, 82),
+        "C": (184, 0, 184),
+        "N": (255, 128, 0),
+        "O": (255, 255, 0),
+        "F": (0, 255, 0),
     }
     sites: List[AimSite] = []
     for index, point in enumerate(points, start=1):
@@ -177,7 +177,7 @@ def cps_to_sites(points: Iterable[PdbPoint], radius: float = 0.14) -> List[AimSi
                 x=point.x,
                 y=point.y,
                 z=point.z,
-                radius=radius,
+                radius=bcp_radius if cp_code == "N" else radius,
                 color=cp_colors.get(cp_code, (180, 180, 180)),
                 kind="cp",
                 group_index=point.resseq,
@@ -226,14 +226,22 @@ def render_atoms_only_vesta(
     pdb_cell: Optional[Tuple[float, float, float, float, float, float]] = None,
     margin: float = 2.0,
 ) -> str:
-    cell, origin = _bounding_cell(sites, pdb_cell, margin)
+    if not sites:
+        raise ValueError("Cannot build VESTA file without at least one AIM point")
+
+    is_periodic = pdb_cell is not None
+    structure_kind = "CRYSTAL" if is_periodic else "MOLECULE"
+    if is_periodic:
+        cell, origin = _bounding_cell(sites, pdb_cell, margin)
+    else:
+        cell, origin = (1.0, 1.0, 1.0, 90.0, 90.0, 90.0), (0.0, 0.0, 0.0)
     a, b, c, alpha, beta, gamma = cell
 
     lines: List[str] = [
         "#VESTA_FORMAT_VERSION 3.5.4",
         "",
         "",
-        "CRYSTAL",
+        structure_kind,
         "",
         "TITLE",
         title,
@@ -265,10 +273,15 @@ def render_atoms_only_vesta(
     ]
 
     for index, site in enumerate(sites, start=1):
-        fx, fy, fz = _frac(site, cell, origin)
+        if is_periodic:
+            x1, x2, x3 = _frac(site, cell, origin)
+            site_suffix = "    1a     1"
+        else:
+            x1, x2, x3 = site.x, site.y, site.z
+            site_suffix = "    1        -"
         lines.append(
             f"{index:4d}  {site.element:<2s}        {site.label:<12s} 1.0000"
-            f" {fx:10.6f} {fy:10.6f} {fz:10.6f}    1a     1"
+            f" {x1:10.6f} {x2:10.6f} {x3:10.6f}{site_suffix}"
         )
         lines.append("                            0.000000   0.000000   0.000000  0.00")
     lines.extend(["  0 0 0 0 0 0 0", "THERI 1"])
@@ -305,10 +318,10 @@ def render_atoms_only_vesta(
             "SPLAN",
             "  0   0   0   0",
             "ATOMT",
-            "  1          C  0.0600 245 166  35 245 166  35 204",
-            "  2          N  0.1400 255 148  36 255 148  36 204",
-            "  3          O  0.1400 245 220  64 245 220  64 204",
-            "  4          F  0.1400  78 170  82  78 170  82 204",
+            "  1          C  0.0400 120 120 120 120 120 120 204",
+            "  2          N  0.3200 255 128   0 255 128   0 204",
+            "  3          O  0.2000 255 255   0 255 255   0 204",
+            "  4          F  0.2000   0 255   0   0 255   0 204",
             "  0 0 0 0 0 0",
             "SCENE",
             " 1.000000  0.000000  0.000000  0.000000",
