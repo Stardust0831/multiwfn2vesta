@@ -19,6 +19,17 @@ PYTHONPATH=src python -m multiwfn2vesta.aim_vesta \
   --title "AIM paths and CPs"
 ```
 
+如果这个 AIM 图层要叠到 VESTA 直接打开的 Multiwfn/Gaussian cube 上，需要加
+cube-frame 平移；当前实现按 cube header origin 单位为 Bohr 处理：
+
+```bash
+PYTHONPATH=src python -m multiwfn2vesta.aim_vesta \
+  paths.pdb \
+  aim_atoms_only_cube_frame.vesta \
+  --cps-pdb CPs.pdb \
+  --cube-frame-from-cube molecule_IRI2.cub
+```
+
 默认半径按 Multiwfn 自带 `AIM.vmd` 的比例：路径点 `0.02`，四类 CP
 包括 BCP 都是 `0.07`。若某张图确实需要强化某类点，可以显式传：
 

@@ -2,7 +2,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from multiwfn2vesta.aim_vesta import convert_aim_pdb_to_vesta, read_pdb_points
+from multiwfn2vesta.aim_vesta import convert_aim_pdb_to_vesta, cube_origin_shift_angstrom, read_pdb_points
 from multiwfn2vesta.vesta_aim_style import inject_aim_atom_types_text
 from multiwfn2vesta.vesta_parser import parse_vesta_text
 
@@ -27,6 +27,17 @@ HETATM    1  C   CPS A   1       0.000   0.000   0.119  1.00  0.00           C
 HETATM    2  N   CPS A   1       0.000   0.603  -0.360  1.00  0.00           N
 HETATM    3  O   CPS A   1       0.000   0.000   0.000  1.00  0.00           O
 HETATM    4  F   CPS A   1       0.000   0.000   1.000  1.00  0.00           F
+"""
+
+CUBE_HEADER = """\
+comment one
+comment two
+    1    -1.500000    -2.000000     0.500000
+    2     0.100000     0.000000     0.000000
+    2     0.000000     0.100000     0.000000
+    2     0.000000     0.000000     0.100000
+    8     8.000000     0.000000     0.000000     0.000000
+  0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 """
 
 NONPERIODIC_PATHS_PDB = """\
@@ -95,6 +106,46 @@ class TestAimVesta(unittest.TestCase):
         self.assertAlmostEqual(float(fields[4]), -0.5, places=3)
         self.assertAlmostEqual(float(fields[5]), 0.603, places=3)
         self.assertAlmostEqual(float(fields[6]), -0.36, places=3)
+
+    def test_cube_frame_shift_places_aim_sites_in_vesta_cube_coordinates(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            paths = tmp_path / "paths.pdb"
+            cps = tmp_path / "CPs.pdb"
+            cube = tmp_path / "iri.cub"
+            output = tmp_path / "paths_cube_frame.vesta"
+            paths.write_text(NONPERIODIC_PATHS_PDB, encoding="utf-8")
+            cps.write_text(CP_PDB, encoding="utf-8")
+            cube.write_text(CUBE_HEADER, encoding="utf-8")
+
+            shift = cube_origin_shift_angstrom(cube)
+            convert_aim_pdb_to_vesta(paths, output, cps_pdb=cps, cube_frame_from_cube=cube)
+            text = output.read_text(encoding="utf-8")
+
+        self.assertAlmostEqual(shift[0], 1.5 * 0.529177210903, places=9)
+        self.assertAlmostEqual(shift[1], 2.0 * 0.529177210903, places=9)
+        self.assertAlmostEqual(shift[2], -0.5 * 0.529177210903, places=9)
+        site_line = next(line for line in text.splitlines() if "P0001_0001" in line and "1.0000" in line)
+        fields = site_line.split()
+        self.assertAlmostEqual(float(fields[4]), -0.5 + shift[0], places=6)
+        self.assertAlmostEqual(float(fields[5]), 0.603 + shift[1], places=6)
+        self.assertAlmostEqual(float(fields[6]), -0.36 + shift[2], places=6)
+        cp_line = next(line for line in text.splitlines() if "CP0002_N" in line and "1.0000" in line)
+        cp_fields = cp_line.split()
+        self.assertAlmostEqual(float(cp_fields[4]), 0.0 + shift[0], places=6)
+        self.assertAlmostEqual(float(cp_fields[5]), 0.603 + shift[1], places=6)
+        self.assertAlmostEqual(float(cp_fields[6]), -0.360 + shift[2], places=6)
+
+    def test_cube_frame_shift_rejects_periodic_pdb(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            paths = Path(tmp) / "skewed_paths.pdb"
+            cube = Path(tmp) / "iri.cub"
+            output = Path(tmp) / "out.vesta"
+            paths.write_text(SKEWED_CELL_PATHS_PDB, encoding="utf-8")
+            cube.write_text(CUBE_HEADER, encoding="utf-8")
+
+            with self.assertRaisesRegex(ValueError, "CRYST1"):
+                convert_aim_pdb_to_vesta(paths, output, cube_frame_from_cube=cube)
 
     def test_convert_with_cps_writes_bcp_labels_and_styles(self):
         with tempfile.TemporaryDirectory() as tmp:

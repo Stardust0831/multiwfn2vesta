@@ -18,6 +18,23 @@ PYTHONPATH=src python -m multiwfn2vesta.aim_vesta \
   --title "AIM topology"
 ```
 
+If the AIM layer will be imported over a VESTA-opened cube, generate it in the
+cube import coordinate frame:
+
+```bash
+PYTHONPATH=src python -m multiwfn2vesta.aim_vesta \
+  /path/to/paths.pdb \
+  /path/to/aim_paths_cube_frame.vesta \
+  --cps-pdb /path/to/CPs.pdb \
+  --cube-frame-from-cube /path/to/molecule_IRI2.cub \
+  --title "AIM topology in cube frame"
+```
+
+VESTA displays atoms from cube files relative to the cube origin.  For
+Multiwfn/Gaussian cube files whose header origin is in Bohr, this option adds
+`-cube_origin_bohr * 0.529177210903` to every non-periodic AIM PDB coordinate
+so paths/CPs align with the cube-opened molecular layer.
+
 Behavior:
 
 - Parses PDB `ATOM`/`HETATM` fixed columns, with whitespace fallback.
@@ -27,6 +44,9 @@ Behavior:
 - If `CRYST1` is absent, writes a `MOLECULE` phase and keeps the raw
   Multiwfn/PDB Cartesian coordinates in `STRUC`.  This keeps AIM paths/CPs
   aligned with molecule layers saved by VESTA from `mol.pdb`.
+- With `--cube-frame-from-cube`, shifts non-periodic AIM coordinates into
+  VESTA's cube import frame before writing `STRUC`; the cube origin is treated
+  as a Multiwfn/Gaussian cube origin in Bohr.
 - Labels path points as `P<path>_<point>`, for example `P0003_0012`.
 - Optionally adds CP sites from `CPs.pdb` with Multiwfn-style radii and type colors:
   `(3,-3)` `C` purple, `(3,-1)` BCP `N` orange, `(3,+1)` `O` yellow, and
@@ -35,6 +55,8 @@ Behavior:
   radius `0.02`, and all CP types default to radius `0.07`.
 - For publication figures that need stronger emphasis, use `--path-radius`,
   `--cp-radius`, and `--bcp-radius` to override the defaults.
+- `--cube-frame-from-cube` is rejected for `CRYST1` periodic AIM PDB files;
+  periodic data should stay in the lattice frame.
 - Emits an empty `SBOND` section.
 - Sets `BONDS   0`.
 

@@ -116,6 +116,42 @@ def read_pdb_points(path: Path) -> Tuple[List[PdbPoint], Optional[Tuple[float, f
     return points, cell
 
 
+def cube_origin_shift_angstrom(cube_path: Path) -> Tuple[float, float, float]:
+    """Return the Angstrom shift needed to place raw PDB coordinates in a cube frame.
+
+    VESTA displays atoms from cube files in coordinates relative to the cube
+    origin.  Multiwfn AIM PDB output is in raw Angstrom coordinates, so AIM
+    sites must be shifted by ``-origin_bohr * bohr_to_angstrom`` before being
+    imported over a VESTA-opened cube.
+    """
+    with cube_path.open(encoding="utf-8", errors="replace") as handle:
+        handle.readline()
+        handle.readline()
+        fields = handle.readline().split()
+    if len(fields) < 4:
+        raise ValueError(f"Cannot read cube origin from {cube_path}")
+    origin_bohr = tuple(float(value) for value in fields[1:4])
+    return tuple(-value * BOHR_TO_ANGSTROM for value in origin_bohr)
+
+
+def shift_pdb_points(points: Iterable[PdbPoint], shift: Tuple[float, float, float]) -> List[PdbPoint]:
+    sx, sy, sz = shift
+    return [
+        PdbPoint(
+            serial=point.serial,
+            name=point.name,
+            resname=point.resname,
+            chain=point.chain,
+            resseq=point.resseq,
+            x=point.x + sx,
+            y=point.y + sy,
+            z=point.z + sz,
+            element=point.element,
+        )
+        for point in points
+    ]
+
+
 def _bounding_cell(
     sites: Sequence[AimSite],
     pdb_cell: Optional[Tuple[float, float, float, float, float, float]],
@@ -368,13 +404,23 @@ def convert_aim_pdb_to_vesta(
     path_radius: float = DEFAULT_PATH_RADIUS,
     cp_radius: float = DEFAULT_CP_RADIUS,
     bcp_radius: Optional[float] = None,
+    cube_frame_from_cube: Optional[Path] = None,
 ) -> None:
     path_points, path_cell = read_pdb_points(paths_pdb)
+    if cube_frame_from_cube is not None:
+        if path_cell is not None:
+            raise ValueError("Cannot combine CRYST1 periodic AIM PDB data with cube-frame shifting")
+        shift = cube_origin_shift_angstrom(cube_frame_from_cube)
+        path_points = shift_pdb_points(path_points, shift)
     sites = paths_to_sites(path_points, radius=path_radius)
     cell = path_cell
 
     if cps_pdb is not None:
         cp_points, cp_cell = read_pdb_points(cps_pdb)
+        if cube_frame_from_cube is not None:
+            if cp_cell is not None:
+                raise ValueError("Cannot combine CRYST1 periodic CP PDB data with cube-frame shifting")
+            cp_points = shift_pdb_points(cp_points, shift)
         sites.extend(cps_to_sites(cp_points, radius=cp_radius, bcp_radius=bcp_radius))
         cell = cell or cp_cell
 
@@ -396,6 +442,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser.add_argument("--path-radius", type=float, default=DEFAULT_PATH_RADIUS)
     parser.add_argument("--cp-radius", type=float, default=DEFAULT_CP_RADIUS)
     parser.add_argument("--bcp-radius", type=float)
+    parser.add_argument(
+        "--cube-frame-from-cube",
+        type=Path,
+        help=(
+            "Shift AIM coordinates by -cube_origin from a Multiwfn/Gaussian cube "
+            "header in Bohr so they align with VESTA's cube import frame."
+        ),
+    )
     args = parser.parse_args(argv)
 
     convert_aim_pdb_to_vesta(
@@ -407,6 +461,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         path_radius=args.path_radius,
         cp_radius=args.cp_radius,
         bcp_radius=args.bcp_radius,
+        cube_frame_from_cube=args.cube_frame_from_cube,
     )
     return 0
 

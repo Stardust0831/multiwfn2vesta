@@ -69,5 +69,28 @@ the converter raises an error instead of padding or truncating the color field.
   VESTA color mapping.
 - Missing `func1.cub`, missing `func2.cub`, or malformed cube data should be
   treated as incomplete IRI output, not as a successful VESTA-ready result.
+- If an AIM `.vesta` layer is imported over a VESTA-opened cube, generate it
+  with `multiwfn2vesta.aim_vesta --cube-frame-from-cube <surface.cub>`.  VESTA
+  shifts cube atoms into a cube-origin frame, while Multiwfn AIM PDB
+  coordinates are raw Angstrom coordinates.  The current converter treats the
+  cube origin as a Multiwfn/Gaussian cube origin in Bohr.
 - Spatial cube stretching/resampling is a separate operation.  The historical
   project code only showed scalar-value remapping for the coloring field.
+
+## VESTA Isosurface Caveat
+
+Multiwfn's `IRIfill.vmd` loads two cube files:
+
+- `func1.cub`: color volume, `sign(lambda2)rho`
+- `func2.cub`: IRI volume, drawn as `Isosurface 1.0`
+
+VESTA CLI smoke tests showed that simply opening `func2.cub` and patching the
+saved `.vesta` `ISURF` value to `1.0` does not reproduce the VMD scene.  The
+saved VESTA files still contain section/texture-related state such as `SECTS`,
+`TEX3P`, `SECTP`, and `CONTR`, and the export can show a large colored plane
+instead of a clean IRI isosurface.
+
+Do not treat direct `ISURF=1.0` patching as a maintained IRI rendering path.
+The next robust route is to create one GUI-authored VESTA template containing
+both the IRI surface cube and the `sign(lambda2)rho` color cube, save it, and
+diff its surface/style fields against the CLI-generated file.
