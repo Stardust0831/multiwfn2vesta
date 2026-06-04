@@ -62,7 +62,7 @@ def get_file_basename(filename):
 def IRI(
     multiwfn_path="Multiwfn",
     color_lower=-0.04,
-    color_upper=0.04,
+    color_upper=None,
     color_positive_scale=2.0,
 ):
     Multiwfn = MultiwfnRunner(multiwfn_path=multiwfn_path)

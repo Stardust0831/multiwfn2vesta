@@ -2,7 +2,8 @@ import numpy as np
 
 
 IRI_COLOR_LOWER = -0.04
-IRI_COLOR_UPPER = 0.04
+IRI_COLOR_UPPER = None
+IRI_COLOR_TARGET_UPPER = 0.04
 IRI_POSITIVE_SCALE = 2.0
 
 
@@ -14,13 +15,41 @@ def transform_iri_color_values(
 ):
     """Apply the VESTA color-field remapping used for Multiwfn IRI plots.
 
-    Multiwfn's old interactive sequence was equivalent to keeping negative
-    sign(lambda2)rho values unchanged, multiplying positive values by two,
-    then clipping the data to [-0.04, 0.04].
+    Negative sign(lambda2)rho values are unchanged and positive values are
+    multiplied by ``positive_scale``.  By default only the lower bound is
+    clipped; keep values above 0.04 so VESTA percentage ranges can be computed
+    from the actual color field.  Pass ``upper=0.04`` to reproduce the older
+    fully clipped cube.
     """
     data = np.asarray(values, dtype=float)
     transformed = np.where(data > 0, data * positive_scale, data)
-    return np.clip(transformed, lower, upper)
+    if lower is not None:
+        transformed = np.maximum(transformed, lower)
+    if upper is not None:
+        transformed = np.minimum(transformed, upper)
+    return transformed
+
+
+def vesta_percent_range_for_values(
+    values,
+    target_lower=IRI_COLOR_LOWER,
+    target_upper=IRI_COLOR_TARGET_UPPER,
+):
+    """Convert a physical color range to VESTA's normalized TEX3P percentages."""
+    data = np.asarray(values, dtype=float)
+    finite = data[np.isfinite(data)]
+    if finite.size == 0:
+        raise ValueError("Cannot compute VESTA percentage range from empty values")
+
+    value_min = float(np.min(finite))
+    value_max = float(np.max(finite))
+    span = value_max - value_min
+    if span == 0:
+        raise ValueError("Cannot compute VESTA percentage range from zero-span values")
+
+    lower_percent = (target_lower - value_min) / span
+    upper_percent = (target_upper - value_min) / span
+    return lower_percent, upper_percent
 
 
 def process_iri_color_cube(
