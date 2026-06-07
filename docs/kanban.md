@@ -4,8 +4,8 @@ Updated: 2026-06-08
 
 ## Doing
 
-- Design a maintained three-view export entry point based on the existing
-  `SCENE` patching utilities, with rendering disabled by default until a
+- Test and refine the maintained three-view export entry point based on
+  `SCENE` patching.  Rendering remains disabled by default until a
   non-focus-stealing VESTA route is available.
 
 ## Done
@@ -24,10 +24,13 @@ Updated: 2026-06-08
   not a no-disruption renderer.
 - Fixed the post-render compass arrowhead geometry so arrowheads no longer
   appear reversed.
+- Added `scripts/vesta_three_views.py`, which starts from one `.vesta`, writes
+  front/right/top `SCENE` variants, copies relative cube files, sets `COMPS 0`
+  by default, and only renders when an explicit command template is supplied.
 
 ## Next
 
 - Try a non-activating launcher path or isolate rendering in a different
   desktop/session before using VESTA automation while the user is active.
-- Promote three-view generation and single-compass post-processing from smoke
-  scripts into reusable maintained project commands.
+- Add tests for `scripts/vesta_three_views.py` once script-level tests are
+  organized for project utilities.

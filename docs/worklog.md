@@ -56,3 +56,20 @@ Limitations recorded:
 - Fixed the post-render compass arrowhead geometry in
   `scripts/add_single_view_compass.py`.  The previous head geometry made the
   triangle appear to point backward even when the axis vector was correct.
+
+## 2026-06-08: Maintained three-view generator
+
+- Added `scripts/vesta_three_views.py`.
+- The script starts from one `.vesta` file and writes front/right/top view
+  variants by replacing the global `SCENE` block.
+- It copies relative `IMPORT_DENSITY` and `IMPORT_TEXTURE` cube files into the
+  output directory so generated view files remain self-contained for VESTA
+  export.
+- It sets `COMPS 0` by default for multi-phase overlays, avoiding duplicated
+  VESTA compass arrows; post-render compass drawing remains a separate step.
+- Rendering is opt-in through `--render-command` because local VESTA automation
+  still steals desktop focus.
+- Smoke-verified without rendering on the Ag(111)+benzene IGMH+AIM preferred
+  style file: original structure colors, yellow AIM path points, orange BCPs,
+  relative cube copies, and `COMPS 0` were preserved in the generated right
+  view.

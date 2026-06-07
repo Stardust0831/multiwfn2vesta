@@ -95,6 +95,28 @@ Initial named views:
 Allow `--camera-source tuned.vesta` so the user can tune pan/zoom once and let
 the exporter reuse that baseline.
 
+Maintained script:
+
+```bash
+python3 scripts/vesta_three_views.py input.vesta three_views_out --comps off
+```
+
+This writes `*_front.vesta`, `*_right.vesta`, and `*_top.vesta` from the same
+input file, replaces only `SCENE` for the view angle, and copies relative cube
+files referenced by `IMPORT_DENSITY` or `IMPORT_TEXTURE` into the output
+directory.  It does not render by default.
+
+Rendering must be explicit:
+
+```bash
+python3 scripts/vesta_three_views.py input.vesta three_views_out \
+  --render-command 'python3 scripts/render_vesta_nofocus.py {input} {output}' \
+  --add-compass
+```
+
+Only use a render command when focus stealing is acceptable or a non-activating
+renderer is available.
+
 For multi-phase overlays, suppress VESTA's native compass before rendering:
 
 1. Set `COMPS 0` in the render-copy `.vesta`.
