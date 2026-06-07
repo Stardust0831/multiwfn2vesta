@@ -23,3 +23,27 @@ Limitations recorded:
 - This is generator-side per-site RGB patching, not VESTA-native scalar
   colormap support.
 - VESTA will not know the scalar values or create a legend automatically.
+
+## 2026-06-08: VESTA no-focus rendering and single compass
+
+- Added `scripts/render_vesta_nofocus.py`, an experimental Windows interop
+  wrapper that launches VESTA through PowerShell
+  `Start-Process -WindowStyle Minimized`, waits for export, and cleans only
+  workspace-scoped `VESTA.exe` processes.
+- Added `docs/vesta_nofocus_rendering.md`.
+- Retested on the current Ag(111)+benzene IGMH+AIM right-view `.vesta` outside
+  this Git repository's tracked tree.  The minimized route returned success
+  and wrote a valid `3014 x 1600` PNG.  A correctly quoted PowerShell process
+  check found no residual `VESTA.exe` with command line matching
+  `G:\work\multiwfn2vesta`.
+- Added `scripts/add_single_view_compass.py`, which adds one screen-fixed
+  VESTA-like lower-left compass to an exported PNG.
+- Current multi-phase overlay recommendation: set `COMPS 0` in render-copy
+  `.vesta` files, export the PNG, then draw one post-render compass.  The
+  compass script clears its lower-left area before drawing, so repeated runs do
+  not accumulate arrows.
+- Updated `docs/skills/vesta_camera_and_layers_skill.md` with the no-focus
+  wrapper and single-compass workflow.
+- WSL/PowerShell pitfall: quote `Where-Object { $_.Name ... }` scripts with
+  bash single quotes or escape `$`; bash double quotes expand `$_` before
+  PowerShell receives the script.

@@ -1,24 +1,28 @@
 # Project Kanban
 
-Updated: 2026-06-05
+Updated: 2026-06-08
 
 ## Doing
 
-- VESTA atom scalar value coloring.
-  - Implement reusable API/CLI that colors atoms by patching per-site `SITET`
-    RGB values.
-  - Add tests for ordered values, keyed values, strict/partial behavior, and
-    missing `SITET` row insertion.
-  - Add docs and skill notes explaining this is per-site RGB patching, not a
-    native VESTA scalar colormap.
+- Wait for user-side confirmation on whether minimized Windows VESTA rendering
+  still steals mouse focus.
 
 ## Done
 
 - IRI color cube processing notes and skill were added in earlier work.
 - AIM path/CP VESTA conversion and style patching were added in earlier work.
+- Added experimental minimized Windows VESTA renderer:
+  `scripts/render_vesta_nofocus.py`.
+- Added `docs/vesta_nofocus_rendering.md` with the 2026-06-08 Ag(111)+benzene
+  retest result and PowerShell quoting pitfall.
+- Added `scripts/add_single_view_compass.py` for one VESTA-like lower-left
+  compass after PNG export.
+- Updated `docs/skills/vesta_camera_and_layers_skill.md` with the current
+  `COMPS 0` plus post-render single-compass workflow.
 
 ## Next
 
-- Main agent may review these changes and commit/push when ready.
-- Optional future work: generate a standalone colorbar/legend for atom scalar
-  colored VESTA figures.
+- If the minimized renderer still steals focus, try a non-activating launcher
+  path or isolate rendering in a different desktop/session.
+- Promote three-view generation and single-compass post-processing from smoke
+  scripts into reusable maintained project commands.

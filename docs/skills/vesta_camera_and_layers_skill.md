@@ -95,6 +95,23 @@ Initial named views:
 Allow `--camera-source tuned.vesta` so the user can tune pan/zoom once and let
 the exporter reuse that baseline.
 
+For multi-phase overlays, suppress VESTA's native compass before rendering:
+
+1. Set `COMPS 0` in the render-copy `.vesta`.
+2. Export the PNG.
+3. Add exactly one screen-fixed lower-left compass in post-processing.
+
+Current local implementation:
+
+```bash
+python3 scripts/add_single_view_compass.py view.png --view right
+```
+
+The post-processing script clears its lower-left compass area before drawing,
+so repeated runs do not accumulate arrows.  This is more reliable than leaving
+`COMPS 1` in multi-phase VESTA files, where native compass arrows can appear
+duplicated.
+
 ### `export-frame-sequence`
 
 Use this for trajectory-style visualization or progressive layer reveal.
@@ -131,6 +148,19 @@ timeout 40s /mnt/c/WINDOWS/system32/cmd.exe /c "$VESTA" \
 VESTA can time out or return a nonzero code after producing output. Always
 check that the target `.vesta` or `.png` exists.
 
+For lower focus interference on Windows, use the experimental branch-local
+wrapper:
+
+```bash
+python3 project/scripts/render_vesta_nofocus.py input.vesta output.png \
+  --scale 2 --clean-before
+```
+
+It launches VESTA through PowerShell `Start-Process -WindowStyle Minimized`,
+waits for export, and cleans only `VESTA.exe` processes whose command line
+contains this workspace path.  This is not true headless rendering; user-side
+confirmation is still needed for whether it steals desktop focus.
+
 ## Validation checklist
 
 Before relying on a generated image sequence:
@@ -144,6 +174,8 @@ Before relying on a generated image sequence:
 - For oversized structures, verify boundary fit and CP visibility visually.
 - For three-view presets, validate on a non-planar molecule to catch sign
   convention mistakes.
+- For multi-phase overlays, confirm generated render copies have `COMPS 0` and
+  final PNGs have only one lower-left compass.
 
 ## Known risks
 
@@ -168,4 +200,3 @@ Before relying on a generated image sequence:
 4. Validate `style` hiding by zeroing phase 2 `SITET` radii/alpha and clearing
    phase 2 `SBOND`.
 5. Calibrate front/right/top matrices on H2O and a larger AIM example.
-
