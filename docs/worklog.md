@@ -47,3 +47,12 @@ Limitations recorded:
 - WSL/PowerShell pitfall: quote `Where-Object { $_.Name ... }` scripts with
   bash single quotes or escape `$`; bash double quotes expand `$_` before
   PowerShell receives the script.
+
+## 2026-06-08: Follow-up on focus and compass
+
+- User confirmed the minimized Windows VESTA wrapper still steals mouse focus.
+  Keep `scripts/render_vesta_nofocus.py` as an explicit one-shot automation
+  path only; do not treat it as a no-disruption renderer.
+- Fixed the post-render compass arrowhead geometry in
+  `scripts/add_single_view_compass.py`.  The previous head geometry made the
+  triangle appear to point backward even when the axis vector was correct.

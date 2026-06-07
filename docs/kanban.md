@@ -4,8 +4,9 @@ Updated: 2026-06-08
 
 ## Doing
 
-- Wait for user-side confirmation on whether minimized Windows VESTA rendering
-  still steals mouse focus.
+- Design a maintained three-view export entry point based on the existing
+  `SCENE` patching utilities, with rendering disabled by default until a
+  non-focus-stealing VESTA route is available.
 
 ## Done
 
@@ -19,10 +20,14 @@ Updated: 2026-06-08
   compass after PNG export.
 - Updated `docs/skills/vesta_camera_and_layers_skill.md` with the current
   `COMPS 0` plus post-render single-compass workflow.
+- User confirmed the minimized Windows VESTA wrapper still steals focus; it is
+  not a no-disruption renderer.
+- Fixed the post-render compass arrowhead geometry so arrowheads no longer
+  appear reversed.
 
 ## Next
 
-- If the minimized renderer still steals focus, try a non-activating launcher
-  path or isolate rendering in a different desktop/session.
+- Try a non-activating launcher path or isolate rendering in a different
+  desktop/session before using VESTA automation while the user is active.
 - Promote three-view generation and single-compass post-processing from smoke
   scripts into reusable maintained project commands.

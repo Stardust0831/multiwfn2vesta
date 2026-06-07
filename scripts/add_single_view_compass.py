@@ -49,7 +49,7 @@ def arrow(
     head = max(12, width * 4)
     angle = math.atan2(vy, vx)
     points = [(ex, ey)]
-    for delta in (2.55, -2.55):
+    for delta in (0.48, -0.48):
         points.append(
             (
                 ex - int(math.cos(angle + delta) * head),

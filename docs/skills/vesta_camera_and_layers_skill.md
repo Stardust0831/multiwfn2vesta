@@ -158,8 +158,9 @@ python3 project/scripts/render_vesta_nofocus.py input.vesta output.png \
 
 It launches VESTA through PowerShell `Start-Process -WindowStyle Minimized`,
 waits for export, and cleans only `VESTA.exe` processes whose command line
-contains this workspace path.  This is not true headless rendering; user-side
-confirmation is still needed for whether it steals desktop focus.
+contains this workspace path.  This is not true headless rendering and has
+been confirmed to still steal desktop focus, so only use it when that
+interruption is acceptable.
 
 ## Validation checklist
 

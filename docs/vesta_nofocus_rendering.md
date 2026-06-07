@@ -49,8 +49,17 @@ Result:
 - output: valid `3014 x 1600` RGB PNG;
 - post-render process check: no `VESTA.exe` process with command line matching
   `G:\work\multiwfn2vesta`;
-- user-side focus stealing still needs visual confirmation from the desktop.
+- user-side focus stealing was later confirmed, so this wrapper is not an
+  acceptable no-disruption renderer.
 
 When checking Windows processes from WSL, quote PowerShell scripts with bash
 single quotes or escape `$`.  Bash double quotes expand `$_` before PowerShell
 sees it and can produce thousands of false `/bin/bash.Name` errors.
+
+Current status:
+
+- keep this script only as a controlled one-shot Windows VESTA automation path;
+- do not use it as the default renderer while the user is actively using the
+  desktop;
+- prefer generating patched `.vesta` files without rendering until a
+  non-activating or true headless render path is available.
