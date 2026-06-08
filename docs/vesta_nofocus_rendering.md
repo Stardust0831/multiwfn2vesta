@@ -63,3 +63,12 @@ Current status:
   desktop;
 - prefer generating patched `.vesta` files without rendering until a
   non-activating or true headless render path is available.
+
+Additional failed experiments:
+
+- Linux VESTA through the local wrapper did not start because
+  `libwebkit2gtk-4.0.so.37` was missing from the workspace-local library set.
+- Windows WSH `WScript.Shell.Run(..., 7, True)` returned without creating a
+  PNG.
+- PowerShell `Start-Process -WindowStyle Hidden` timed out without creating a
+  PNG.

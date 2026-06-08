@@ -43,6 +43,15 @@ without generating dense automatic bonds between path points.
 - Use `--path-radius`, `--cp-radius`, and `--bcp-radius` only when a
   publication figure needs deliberate size emphasis beyond the Multiwfn-style
   default.
+- For VESTA overlays, prefer one pseudo-element for all AIM path sample points
+  instead of assigning different rare gases per path branch.  Mixed
+  `He/Ne/Ar/Kr/Xe/Rn` path elements make the style table harder to reason
+  about and can produce inconsistent rendering if VESTA drops or reorders
+  `ATOMT` rows.  A single rare element such as `Xe`, with yellow path points
+  and larger orange BCPs, is easier to maintain.
+- If BCPs are invisible, first check whether path sample points occupy the same
+  coordinates and draw over them.  Reduce path point radius, increase BCP
+  radius, and use a distinct BCP color before adding VESTA bonds.
 
 ## Steps
 

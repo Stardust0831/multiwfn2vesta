@@ -7,6 +7,8 @@ Updated: 2026-06-08
 - Test and refine the maintained three-view export entry point based on
   `SCENE` patching.  Rendering remains disabled by default until a
   non-focus-stealing VESTA route is available.
+- Find or build a real non-focus renderer.  Windows minimized/hidden/WSH
+  launch routes and the current Linux wrapper are not yet usable.
 
 ## Done
 
@@ -27,6 +29,8 @@ Updated: 2026-06-08
 - Added `scripts/vesta_three_views.py`, which starts from one `.vesta`, writes
   front/right/top `SCENE` variants, copies relative cube files, sets `COMPS 0`
   by default, and only renders when an explicit command template is supplied.
+- Recorded AIM overlay style guidance: use one pseudo-element for path sample
+  points and tune path/BCP radii before drawing AIM bonds.
 
 ## Next
 
@@ -34,3 +38,5 @@ Updated: 2026-06-08
   desktop/session before using VESTA automation while the user is active.
 - Add tests for `scripts/vesta_three_views.py` once script-level tests are
   organized for project utilities.
+- If continuing Linux VESTA, add missing GUI libraries inside the workspace
+  rather than modifying system packages.

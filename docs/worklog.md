@@ -73,3 +73,14 @@ Limitations recorded:
   style file: original structure colors, yellow AIM path points, orange BCPs,
   relative cube copies, and `COMPS 0` were preserved in the generated right
   view.
+
+## 2026-06-08: Rendering and AIM style follow-up
+
+- Additional non-focus rendering attempts did not produce a usable renderer:
+  Linux VESTA lacked `libwebkit2gtk-4.0.so.37`, WSH minimized/no-active launch
+  returned without a PNG, and PowerShell hidden launch timed out without a PNG.
+- Updated AIM workflow notes: use one pseudo-element such as `Xe` for all AIM
+  path sample points in VESTA overlays instead of mixed rare gases per branch.
+  This keeps `ATOMT`/`SITET` styling deterministic and easier to inspect.
+- For BCP visibility, prefer smaller yellow path points plus larger orange
+  BCPs before enabling AIM bonds.
