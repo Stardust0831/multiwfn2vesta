@@ -8,12 +8,18 @@ repeatable figure-ready `.vesta` product plus optional front/right/top PNGs.
 
 ## Maintained CLI
 
-The high-level wrapper is:
+Preferred unified entry point:
 
 ```bash
-PYTHONPATH=project/src python -m multiwfn2vesta.aim_igmh_vesta \
+multiwfn2vesta aim-igmh \
   input_overlay.vesta \
   output_dir
+```
+
+If `multiwfn2vesta` is not on `PATH`, add the workspace-local launcher:
+
+```bash
+export PATH=/mnt/g/work/multiwfn2vesta/project/bin:$PATH
 ```
 
 It writes:
@@ -25,7 +31,7 @@ It writes:
 Rendering is explicit because Windows VESTA automation still steals focus:
 
 ```bash
-PYTHONPATH=project/src python -m multiwfn2vesta.aim_igmh_vesta \
+multiwfn2vesta aim-igmh \
   input_overlay.vesta \
   output_dir \
   --render-three-views \
@@ -117,21 +123,21 @@ Before trusting an AIM+IGMH product:
 Dry smoke command:
 
 ```bash
-PYTHONPATH=/mnt/g/work/multiwfn2vesta/project/src python3 -m multiwfn2vesta.aim_igmh_vesta \
+bin/multiwfn2vesta aim-igmh \
   /mnt/g/work/multiwfn2vesta/smoke/ag111_benzene_igmh_aim_periodic_cell_20260607/products/ag111_benzene_igmh_aim_paths_single_xe_yellow_bcp_periodic_overlay.vesta \
-  /mnt/g/work/multiwfn2vesta/smoke/ag111_benzene_igmh_aim_periodic_cell_20260607/reusable_cli_smoke_20260610 \
-  --stem ag111_benzene_igmh_aim_reusable_cli \
+  /mnt/g/work/multiwfn2vesta/smoke/ag111_benzene_igmh_aim_periodic_cell_20260607/unified_cli_smoke_20260610 \
+  --stem ag111_benzene_igmh_aim_unified_cli \
   --label-bcp-sites
 ```
 
 Observed output:
 
 ```text
-smoke/ag111_benzene_igmh_aim_periodic_cell_20260607/reusable_cli_smoke_20260610/
+smoke/ag111_benzene_igmh_aim_periodic_cell_20260607/unified_cli_smoke_20260610/
 ```
 
-- `ag111_benzene_igmh_aim_reusable_cli_styled.vesta`
-- `ag111_benzene_igmh_aim_reusable_cli_aim_igmh_recipe.md`
+- `ag111_benzene_igmh_aim_unified_cli_styled.vesta`
+- `ag111_benzene_igmh_aim_unified_cli_aim_igmh_recipe.md`
 - `dg_inter.cub`
 - `sl2r.cub`
 

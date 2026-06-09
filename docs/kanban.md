@@ -19,6 +19,16 @@ Updated: 2026-06-10
 
 ## Done
 
+- Added an easier global/interactive CLI entry point.  The user can add only
+  `/mnt/g/work/multiwfn2vesta/project/bin` to `PATH`, run `multiwfn2vesta`,
+  choose maintained workflows interactively, or call scriptable subcommands
+  such as `multiwfn2vesta aim-igmh ...` without manually setting
+  `PYTHONPATH`.
+- Added `multiwfn2vesta.cli`, `bin/multiwfn2vesta`, editable-install console
+  scripts, no-GUI CLI tests, and skill documentation
+  `docs/skills/multiwfn2vesta_cli_skill.md`.
+- Ran a unified CLI dry smoke without VESTA rendering under
+  `/mnt/g/work/multiwfn2vesta/smoke/ag111_benzene_igmh_aim_periodic_cell_20260607/unified_cli_smoke_20260610/`.
 - Closed the Ag(111)+benzene AIM+IGMH drawing experience into a reusable
   Python/CLI workflow: `multiwfn2vesta.aim_igmh_vesta`.  It patches AIM
   path/BCP styles with the maintained yellow `Xe` path and orange `Rn` BCP

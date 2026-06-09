@@ -6,13 +6,46 @@ pip install -e .
 ```
 
 ## 基本使用
+当前推荐入口是工作区内的统一 CLI。只需要把项目的 `bin` 目录加入 `PATH`：
+
+```bash
+export PATH=/mnt/g/work/multiwfn2vesta/project/bin:$PATH
+```
+
+之后可以直接运行交互式向导：
+
+```bash
+multiwfn2vesta
+```
+
+也可以用子命令脚本化调用当前维护的流程：
+
+```bash
+multiwfn2vesta aim-pdb --help
+multiwfn2vesta aim-igmh --help
+```
+
+已维护的子命令：
+
+- `aim-pdb`: Multiwfn `paths.pdb`/`CPs.pdb` 转 atoms-only `.vesta`
+- `aim-igmh`: 已保存的 AIM+IGMH 多 phase `.vesta` 叠层样式化，可选三视图导出
+
+如果使用 editable 安装，也会安装同名 console script：
+
+```bash
+cd /mnt/g/work/multiwfn2vesta/project
+pip install -e .
+multiwfn2vesta --help
+```
+
 当前包名是 `multiwfn2vesta`。下面旧命令中的 `multiwfn_vesta` 是早期草稿名，
-当前批处理主入口仍在施工中，`multiwfn2vesta.main` 还不能作为稳定 CLI 使用。
+`multiwfn2vesta.main` 仍不是稳定入口；请使用 `multiwfn2vesta` 统一 CLI 或
+明确的子命令模块。
 
 当前已验证可用的命令是 AIM paths/CPs 到 atoms-only VESTA 的转换器：
 
 ```bash
-PYTHONPATH=src python -m multiwfn2vesta.aim_vesta \
+multiwfn2vesta aim-pdb \
   paths.pdb \
   aim_atoms_only.vesta \
   --cps-pdb CPs.pdb \
@@ -23,7 +56,7 @@ PYTHONPATH=src python -m multiwfn2vesta.aim_vesta \
 cube-frame 平移；当前实现按 cube header origin 单位为 Bohr 处理：
 
 ```bash
-PYTHONPATH=src python -m multiwfn2vesta.aim_vesta \
+multiwfn2vesta aim-pdb \
   paths.pdb \
   aim_atoms_only_cube_frame.vesta \
   --cps-pdb CPs.pdb \
@@ -34,7 +67,7 @@ PYTHONPATH=src python -m multiwfn2vesta.aim_vesta \
 包括 BCP 都是 `0.07`。若某张图确实需要强化某类点，可以显式传：
 
 ```bash
-PYTHONPATH=src python -m multiwfn2vesta.aim_vesta \
+multiwfn2vesta aim-pdb \
   paths.pdb \
   aim_atoms_only_emphasis.vesta \
   --cps-pdb CPs.pdb \
@@ -80,7 +113,7 @@ PYTHONPATH=src python -m multiwfn2vesta.vesta_aim_style \
 `.vesta`，现在有稳定的高层 CLI：
 
 ```bash
-PYTHONPATH=src python -m multiwfn2vesta.aim_igmh_vesta \
+multiwfn2vesta aim-igmh \
   input_overlay.vesta \
   output_dir
 ```
@@ -102,7 +135,7 @@ PYTHONPATH=src python -m multiwfn2vesta.aim_igmh_vesta \
 需要编号 BCP 时：
 
 ```bash
-PYTHONPATH=src python -m multiwfn2vesta.aim_igmh_vesta \
+multiwfn2vesta aim-igmh \
   input_overlay.vesta \
   output_dir \
   --label-bcp-sites
@@ -114,7 +147,7 @@ VESTA 原生 label 可能重叠，正式图仍可考虑 PNG/SVG 后处理标注�
 需要导出三视图时必须显式开启，因为 Windows VESTA 自动化仍会抢鼠标：
 
 ```bash
-PYTHONPATH=src python -m multiwfn2vesta.aim_igmh_vesta \
+multiwfn2vesta aim-igmh \
   input_overlay.vesta \
   output_dir \
   --render-three-views \

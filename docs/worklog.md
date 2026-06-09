@@ -275,3 +275,25 @@ Limitations recorded:
   `smoke/ag111_benzene_igmh_aim_periodic_cell_20260607/reusable_cli_smoke_20260610/`.
   The directory contains the styled `.vesta`, recipe markdown, `dg_inter.cub`,
   and `sl2r.cub`.
+
+## 2026-06-10: Unified interactive CLI
+
+- User asked for better interactivity and a more convenient global CLI entry,
+  ideally requiring only one path to be added to the environment.
+- Added `multiwfn2vesta.cli`, a maintained dispatcher for stable workflows.
+  With no arguments it opens an interactive chooser.  With subcommands it
+  dispatches scriptable workflows:
+  `multiwfn2vesta aim-pdb ...` and `multiwfn2vesta aim-igmh ...`.
+- Added workspace-local launcher `bin/multiwfn2vesta`.  It automatically adds
+  `project/src` to Python's import path, so the user can run it after only:
+  `export PATH=/mnt/g/work/multiwfn2vesta/project/bin:$PATH`.
+- Registered editable-install console scripts in both `pyproject.toml` and
+  `setup.py`: `multiwfn2vesta`, `multiwfn2vesta-aim-pdb`, and
+  `multiwfn2vesta-aim-igmh`.
+- Added no-GUI tests in `tests/test_cli.py` for help text, command dispatch,
+  aliases, unknown-command handling, interactive quit, and the AIM+IGMH
+  interactive argument builder.
+- Ran a real unified CLI dry smoke without rendering:
+  `smoke/ag111_benzene_igmh_aim_periodic_cell_20260607/unified_cli_smoke_20260610/`.
+  The output contains the styled `.vesta`, recipe markdown, `dg_inter.cub`,
+  and `sl2r.cub`.
