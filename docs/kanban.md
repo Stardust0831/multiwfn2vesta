@@ -33,6 +33,8 @@ Updated: 2026-06-10
 - Validation completed for the Multiwfn/VESTA discovery and wavefunction AIM
   runner integration: focused no-GUI tests, `py_compile`, CLI help,
   `multiwfn2vesta discover`, real H2O smoke, and `git diff --check`.
+- Pushed the Multiwfn/VESTA discovery and wavefunction AIM runner integration
+  to GitHub branch `vesta-nofocus-render` at commit `ce0fecb`.
 - Added an easier global/interactive CLI entry point.  The user can add only
   `/mnt/g/work/multiwfn2vesta/project/bin` to `PATH`, run `multiwfn2vesta`,
   choose maintained workflows interactively, or call scriptable subcommands
