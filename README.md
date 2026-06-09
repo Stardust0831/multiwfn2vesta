@@ -22,6 +22,8 @@ point.
 
 - Discover workspace, environment, and `PATH` executables for Multiwfn and
   VESTA.
+- Check Molden files before Multiwfn workflows, including ABACUS-specific
+  `[Cell]` and `[Nval]` requirements.
 - Run Multiwfn AIM topology analysis from a wavefunction file such as
   `.molden`, `.fch`, `.fchk`, `.wfn`, or `.wfx`.
 - Convert Multiwfn `paths.pdb` and `CPs.pdb` to an atoms-only `.vesta` file
@@ -54,6 +56,7 @@ multiwfn2vesta --help
 
 ```bash
 multiwfn2vesta discover
+multiwfn2vesta molden-check ABACUS_Multiwfn.molden --abacus
 ```
 
 Multiwfn discovery checks, in order:
@@ -74,6 +77,17 @@ VESTA discovery checks:
 4. Shell `PATH`.
 
 ## Wavefunction to AIM VESTA
+
+For ABACUS-generated Molden files, check the file before using it as a
+Multiwfn wavefunction input:
+
+```bash
+multiwfn2vesta molden-check ABACUS_Multiwfn.molden --abacus
+```
+
+ABACUS mode requires `[Cell]`, `[Atoms]`, `[GTO]`, `[MO]`, and `[Nval]`.
+`[Nval]` is required for pseudopotential systems so Multiwfn sees effective
+valence nuclear charges instead of all-electron atomic numbers.
 
 Run Multiwfn AIM analysis and convert the generated AIM PDB files:
 
@@ -171,12 +185,25 @@ Current focused no-GUI checks:
 
 ```bash
 PYTHONPATH=src python3 -m unittest \
+  tests.test_molden_check \
   tests.test_cli \
   tests.test_aim_igmh_vesta \
   tests.test_vesta_aim_overlay_style \
   tests.test_executables \
   tests.test_multiwfn_aim
 ```
+
+Smoke-tested ABACUS Molden check:
+
+```bash
+multiwfn2vesta molden-check \
+  /mnt/g/work/multiwfn2vesta/smoke/abacus_server_artifacts_20260606/ag111_benzene/ag111_benzene_lcao_cont3_nval.molden \
+  --abacus
+```
+
+The Ag(111)+benzene Molden check reported 60 atoms, 566 MO blocks, three
+`[Nval]` entries (`Ag=19`, `C=4`, `H=1`), three numeric `[Cell]` rows, and
+`Result: OK`.
 
 Smoke-tested Multiwfn noGUI AIM run:
 

@@ -381,3 +381,19 @@ Limitations recorded:
   checklist for deciding whether to use ABACUS direct cubes, ABACUS Molden plus
   Multiwfn, PDB pseudo-site overlays, dual-cube surface coloring, or atom
   scalar coloring.
+
+## 2026-06-10: Molden sanity checker
+
+- Started the first low-risk P0 implementation from the analysis matrix:
+  `multiwfn2vesta molden-check`.
+- Added `multiwfn2vesta.molden_check`, a no-GUI/no-Multiwfn text-level checker
+  for Molden files.  Generic mode requires `[Atoms]`, `[GTO]`, and `[MO]`.
+  ABACUS mode additionally requires `[Cell]` and `[Nval]`.
+- Added the `molden-check` command and `check-molden` alias to the unified CLI,
+  plus an interactive launcher entry.
+- Documented the check in README, usage notes, and the ABACUS/Multiwfn/VESTA
+  planning skill.
+- Real ABACUS Ag(111)+benzene Molden smoke passed:
+  `/mnt/g/work/multiwfn2vesta/smoke/abacus_server_artifacts_20260606/ag111_benzene/ag111_benzene_lcao_cont3_nval.molden`.
+  Reported values: 60 atoms, 566 MO blocks, 3 `[Nval]` entries, 3 numeric
+  `[Cell]` rows, `[Nval]` detail `Ag=19, C=4, H=1`, and `Result: OK`.

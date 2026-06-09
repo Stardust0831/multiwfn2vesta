@@ -22,6 +22,7 @@ multiwfn2vesta
 
 ```bash
 multiwfn2vesta discover
+multiwfn2vesta molden-check --help
 multiwfn2vesta aim-run --help
 multiwfn2vesta aim-pdb --help
 multiwfn2vesta aim-igmh --help
@@ -30,6 +31,8 @@ multiwfn2vesta aim-igmh --help
 已维护的子命令：
 
 - `discover`: 报告 Multiwfn 和 VESTA 可执行文件候选，以及当前会选择的路径
+- `molden-check`: 在调用 Multiwfn 前检查 Molden 文件是否含有必要段；ABACUS
+  模式会要求 `[Cell]` 和 `[Nval]`
 - `aim-run`: 从 `.molden`、`.fch`、`.wfn` 等波函数文件调用 Multiwfn AIM，
   再把生成的 `paths.pdb`/`CPs.pdb` 转成 atoms-only `.vesta`
 - `aim-pdb`: Multiwfn `paths.pdb`/`CPs.pdb` 转 atoms-only `.vesta`
@@ -76,6 +79,16 @@ VESTA 查找顺序：
 `aim-igmh --render-three-views` 这种显式渲染命令里被调用。
 
 ## 波函数文件到 AIM VESTA
+
+ABACUS 生成的 Molden 文件建议先检查：
+
+```bash
+multiwfn2vesta molden-check ABACUS_Multiwfn.molden --abacus
+```
+
+`--abacus` 会要求 `[Cell]`、`[Atoms]`、`[GTO]`、`[MO]` 和 `[Nval]`。对于
+赝势体系，`[Nval]` 是关键段；缺失时 Multiwfn 可能把价电子波函数按全电子
+核电荷解释。
 
 从 Molden/FCHK/WFN 等 Multiwfn 可读波函数文件开始：
 

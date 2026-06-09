@@ -14,6 +14,7 @@ class TestUnifiedCli(unittest.TestCase):
         self.assertEqual(code, 0)
         text = output.getvalue()
         self.assertIn("discover", text)
+        self.assertIn("molden-check", text)
         self.assertIn("aim-run", text)
         self.assertIn("aim-pdb", text)
         self.assertIn("aim-igmh", text)
@@ -34,6 +35,13 @@ class TestUnifiedCli(unittest.TestCase):
 
         self.assertEqual(code, 0)
         mocked.assert_called_once_with(["input.molden", "out", "--timeout", "30"])
+
+    def test_dispatches_molden_check_command(self):
+        with patch("multiwfn2vesta.cli.molden_check.main", return_value=0) as mocked:
+            code = cli.main(["molden-check", "input.molden", "--abacus"])
+
+        self.assertEqual(code, 0)
+        mocked.assert_called_once_with(["input.molden", "--abacus"])
 
     def test_dispatches_aim_igmh_command(self):
         with patch("multiwfn2vesta.cli.aim_igmh_vesta.main", return_value=0) as mocked:
@@ -116,6 +124,16 @@ class TestUnifiedCli(unittest.TestCase):
                 "surface.cub",
             ]
         )
+
+    def test_interactive_molden_check_builds_expected_args(self):
+        answers = iter(["4", "ABACUS_Multiwfn.molden", "y"])
+        with patch("builtins.input", lambda _prompt: next(answers)):
+            with patch("sys.stdout", io.StringIO()):
+                with patch("multiwfn2vesta.cli.molden_check.main", return_value=0) as mocked:
+                    code = cli.main([])
+
+        self.assertEqual(code, 0)
+        mocked.assert_called_once_with(["ABACUS_Multiwfn.molden", "--abacus"])
 
 
 if __name__ == "__main__":

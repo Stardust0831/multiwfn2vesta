@@ -23,6 +23,12 @@ Updated: 2026-06-10
 
 ## Done
 
+- Added `multiwfn2vesta molden-check`, a no-GUI Molden sanity checker.
+  Generic mode checks `[Atoms]`, `[GTO]`, and `[MO]`; ABACUS mode also
+  requires `[Cell]` and `[Nval]` before Multiwfn wavefunction workflows.
+- Real Ag(111)+benzene ABACUS Molden smoke passed with `--abacus`:
+  60 atoms, 566 MO blocks, 3 `[Nval]` entries, 3 numeric `[Cell]` rows, and
+  `[Nval]` detail `Ag=19, C=4, H=1`.
 - Added the Multiwfn/ABACUS/VESTA analysis matrix under
   `docs/research/multiwfn_abacus_vesta_analysis_matrix.md`.  It ranks useful
   Multiwfn wavefunction/grid analyses by VESTA visualization value, ABACUS

@@ -6,12 +6,13 @@ from pathlib import Path
 from typing import Dict, List, Optional, Sequence, Tuple
 import sys
 
-from . import aim_igmh_vesta, aim_vesta, multiwfn_aim
+from . import aim_igmh_vesta, aim_vesta, molden_check, multiwfn_aim
 from .executables import discovery_report
 
 
 COMMANDS: Dict[str, Tuple[str, str]] = {
     "discover": ("Find Multiwfn and VESTA executables", "executables"),
+    "molden-check": ("Check Molden sections before Multiwfn workflows", "molden_check"),
     "aim-run": ("Run Multiwfn AIM on a wavefunction file, then convert PDB to VESTA", "multiwfn_aim"),
     "aim-pdb": ("Convert Multiwfn paths.pdb/CPs.pdb to atoms-only VESTA", "aim_vesta"),
     "aim-igmh": ("Style/render a saved AIM+IGMH VESTA overlay", "aim_igmh_vesta"),
@@ -21,6 +22,8 @@ COMMANDS: Dict[str, Tuple[str, str]] = {
 ALIASES = {
     "where": "discover",
     "env": "discover",
+    "check-molden": "molden-check",
+    "abacus-molden-check": "molden-check",
     "multiwfn-aim": "aim-run",
     "aim-vesta": "aim-pdb",
     "igmh": "aim-igmh",
@@ -40,6 +43,8 @@ Usage:
 
 Commands:
   discover   Find Multiwfn and VESTA executables from env/PATH/workspace.
+  molden-check
+             Check Molden sections before Multiwfn workflows.
   aim-run    Run Multiwfn AIM on a wavefunction file, then convert to VESTA.
   aim-pdb    Convert Multiwfn paths.pdb/CPs.pdb to atoms-only VESTA.
   aim-igmh   Style a saved AIM+IGMH VESTA overlay, optionally render views.
@@ -50,6 +55,7 @@ Aliases:
 
 Examples:
   multiwfn2vesta discover
+  multiwfn2vesta molden-check ABACUS_Multiwfn.molden --abacus
   multiwfn2vesta aim-run input.molden aim_out
   multiwfn2vesta aim-pdb paths.pdb aim_atoms_only.vesta --cps-pdb CPs.pdb
   multiwfn2vesta aim-igmh overlay.vesta products --label-bcp-sites
@@ -176,6 +182,7 @@ def interactive_main() -> int:
     print("1) Wavefunction -> Multiwfn AIM -> atoms-only VESTA")
     print("2) AIM PDB -> atoms-only VESTA")
     print("3) AIM+IGMH overlay -> styled VESTA / optional three views")
+    print("4) Check Molden file for Multiwfn/ABACUS use")
     print("q) Quit")
     choice = _prompt("choice", default="3").lower()
     if choice in {"0", "discover", "where", "env"}:
@@ -187,6 +194,12 @@ def interactive_main() -> int:
         return interactive_aim_pdb()
     if choice in {"3", "aim-igmh", "igmh"}:
         return interactive_aim_igmh()
+    if choice in {"4", "molden-check", "check-molden"}:
+        molden = _prompt("Molden file", required=True)
+        argv: List[str] = [molden]
+        if _yes_no("ABACUS pseudopotential Molden", default=True):
+            argv.append("--abacus")
+        return molden_check.main(argv)
     if choice in {"q", "quit", "exit"}:
         return 0
     print(f"Unknown choice: {choice}")
@@ -197,6 +210,8 @@ def run_command(command: str, args: Sequence[str]) -> int:
     if command == "discover":
         print(discovery_report(), end="")
         return 0
+    if command == "molden-check":
+        return molden_check.main(args)
     if command == "aim-run":
         return multiwfn_aim.main(args)
     if command == "aim-pdb":

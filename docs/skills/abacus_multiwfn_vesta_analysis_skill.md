@@ -56,7 +56,7 @@ python interfaces/Multiwfn_interface/molden.py \
 Verify the Molden header before starting Multiwfn:
 
 ```bash
-rg -n "^\\[Cell\\]|^\\[Nval\\]|^\\[Atoms\\]|^\\[GTO\\]|^\\[MO\\]" ABACUS_Multiwfn.molden
+multiwfn2vesta molden-check ABACUS_Multiwfn.molden --abacus
 ```
 
 `[Nval]` must be present for pseudopotential systems.
