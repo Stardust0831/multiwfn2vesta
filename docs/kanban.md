@@ -4,6 +4,12 @@ Updated: 2026-06-10
 
 ## Doing
 
+- Continue the long-running objective: research and turn valuable
+  Multiwfn wavefunction analyses into maintained VESTA workflows, especially
+  routes that can start from ABACUS LCAO Molden files.  Next concrete target:
+  inspect Multiwfn source/menu command streams for orbital, density-derived,
+  ELF/LOL, ESP/MEP, and IGMH-style cube generation and implement one
+  maintainable runner beyond the existing `iri-run`.
 - Turn the 2026-06-10 Multiwfn/ABACUS/VESTA research into the next
   maintainable features: IGMH command streams, real-system `abacus-molden`
   smoke coverage, Multiwfn atom scalar parsers, and more real IRI/RDG
@@ -24,6 +30,16 @@ Updated: 2026-06-10
 
 ## Done
 
+- Rechecked README/branch state for the user's 2026-06-10 cleanup request:
+  after `git fetch --prune`, the project has local `main`, `origin/main`,
+  and `origin/HEAD -> origin/main`; `git ls-remote --heads origin` reports
+  only `refs/heads/main`.  There is no extra local or remote feature branch
+  to merge back.
+- Updated README repository-status notes so the current branch state is
+  explicit: the historical experiment work is already represented as commits
+  on `main`, future experiment branches should be short-lived, and
+  repository-local commit identity remains
+  `Stardust0831 <13862180016@163.com>`.
 - Added `multiwfn2vesta iri-run`, a maintained Multiwfn IRI/RDG command-stream
   wrapper.  It discovers Multiwfn, writes the exact command stream and logs,
   runs in `multiwfn_iri_raw/`, preserves raw `func1.cub`/`func2.cub`, writes

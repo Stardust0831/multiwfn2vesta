@@ -17,10 +17,27 @@ point.
 - Current local/remote branch check on 2026-06-10: local `main` tracks
   `origin/main`; `git ls-remote --heads origin` returns only
   `refs/heads/main`.
-- Previous experiment branches have been merged into `main` and removed from
-  the remote when no longer needed.
+- Current cleanup result on 2026-06-10: there is no extra local or remote
+  feature branch to merge back.  The apparently strange branch history is
+  already represented as commits on `main`.
+- Previous experiment branches should be treated as short-lived workspaces:
+  merge or fast-forward the useful commits into `main`, then remove the
+  experiment branch once `origin/main` contains the maintained result.
 - Repository-local commit identity is
   `Stardust0831 <13862180016@163.com>`.
+
+Maintainer branch check:
+
+```bash
+git fetch --prune origin
+git status --short --branch
+git branch --all --verbose --no-abbrev
+git ls-remote --heads origin
+```
+
+At the time of this README refresh, the expected remote-head output is only
+`refs/heads/main`.  If a future experiment branch appears, keep all final
+project code, tests, and docs on `main` before pushing a release-style state.
 
 ## Maintained Features
 
@@ -69,6 +86,11 @@ editable install also provides console scripts:
 pip install -e .
 multiwfn2vesta --help
 ```
+
+The supported day-to-day entry point is the global `multiwfn2vesta` command.
+Avoid running package modules from inside `src/multiwfn2vesta`; from the repo
+root, either add `project/bin` to `PATH` as above or run with
+`PYTHONPATH=src python3 -m multiwfn2vesta.cli`.
 
 ## Find Multiwfn and VESTA
 

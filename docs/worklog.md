@@ -1,5 +1,25 @@
 # Worklog
 
+## 2026-06-10: README branch-state refresh
+
+- User requested a README update and branch simplification because the branch
+  state looked confusing.  Commits for this maintenance pass use the
+  repository-local identity `Stardust0831 <13862180016@163.com>`.
+- Rechecked project branch state with `git fetch --prune`,
+  `git status --short --branch`, `git branch --all --verbose --no-abbrev`,
+  and `git ls-remote --heads origin`.
+- Result: local `main` tracks `origin/main`, `origin/HEAD` points to
+  `origin/main`, and the GitHub remote exposes only `refs/heads/main`.
+  There is no extra branch to merge back in this pass.
+- Updated README to state that the apparently strange branch history is
+  already represented as commits on `main`, and that future experiment
+  branches should be short-lived workspaces whose useful commits are merged or
+  fast-forwarded into `main`.
+- README now also repeats the supported day-to-day CLI entry point:
+  add `/mnt/g/work/multiwfn2vesta/project/bin` to `PATH` and use
+  `multiwfn2vesta`, or run from the repo root with
+  `PYTHONPATH=src python3 -m multiwfn2vesta.cli`.
+
 ## 2026-06-10: Multiwfn IRI/RDG runner and README branch check
 
 - User requested another README update, branch simplification if needed, and
