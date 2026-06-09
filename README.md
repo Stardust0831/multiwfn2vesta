@@ -8,6 +8,16 @@ AIM+IGMH multi-phase VESTA figures.
 The project is still experimental, but the CLI below is the maintained entry
 point.
 
+## Repository Status
+
+- Maintained branch: `main`.
+- GitHub remote: `origin` points to `Github:Stardust0831/multiwfn2vesta.git`,
+  with `origin/HEAD -> origin/main`.
+- Previous experiment branches have been merged into `main` and removed from
+  the remote when no longer needed.
+- Repository-local commit identity is
+  `Stardust0831 <13862180016@163.com>`.
+
 ## Maintained Features
 
 - Discover workspace, environment, and `PATH` executables for Multiwfn and

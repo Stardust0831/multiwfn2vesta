@@ -352,3 +352,7 @@ Limitations recorded:
   the maintained CLI, AIM runner, VESTA utilities, tests, docs, and README.
 - Deleted the merged `vesta-nofocus-render` branch locally and remotely.
   Remote `origin` now tracks only `main`, with `origin/HEAD -> origin/main`.
+- Follow-up README cleanup recorded the current repository status directly in
+  the front page: maintained branch `main`, GitHub remote
+  `Github:Stardust0831/multiwfn2vesta.git`, `origin/HEAD -> origin/main`, and
+  repository-local identity `Stardust0831 <13862180016@163.com>`.

@@ -19,6 +19,11 @@ Updated: 2026-06-10
 
 ## Done
 
+- Refreshed the README repository-status section so the front page explicitly
+  says `main` is the maintained branch, `origin` points to
+  `Github:Stardust0831/multiwfn2vesta.git`, `origin/HEAD -> origin/main`, and
+  commits use repository-local identity
+  `Stardust0831 <13862180016@163.com>`.
 - Updated the README so the repository front page now documents the maintained
   `multiwfn2vesta` CLI, executable discovery, wavefunction-to-AIM runner,
   AIM PDB conversion, AIM+IGMH overlay workflow, rendering caveats, validation,
