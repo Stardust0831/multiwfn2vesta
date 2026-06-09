@@ -193,6 +193,10 @@ and `aim_atoms_only.vesta` without launching VESTA.
 - `docs/skills/multiwfn2vesta_cli_skill.md`: CLI operating notes.
 - `docs/skills/aim_paths_to_vesta_skill.md`: AIM topology to VESTA workflow.
 - `docs/skills/aim_igmh_vesta_skill.md`: reusable AIM+IGMH overlay workflow.
+- `docs/research/multiwfn_abacus_vesta_analysis_matrix.md`: roadmap for
+  Multiwfn analyses that are useful in VESTA, especially ABACUS-driven ones.
+- `docs/skills/abacus_multiwfn_vesta_analysis_skill.md`: checklist for choosing
+  ABACUS direct-cube, ABACUS Molden, Multiwfn, and VESTA routes.
 - `docs/skills/vesta_camera_and_layers_skill.md`: VESTA camera, layers, and
   three-view export notes.
 - `docs/worklog.md`: implementation history and smoke results.

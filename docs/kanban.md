@@ -4,6 +4,10 @@ Updated: 2026-06-10
 
 ## Doing
 
+- Turn the 2026-06-10 Multiwfn/ABACUS/VESTA research into maintainable
+  features: generic cube-to-VESTA styling, latest ABACUS Molden wrapper with
+  `[Nval]` validation, RDG/IRI/IGMH command streams, and ABACUS/Multiwfn atom
+  scalar parsers.
 - Keep non-empty `LBLAT` generation out of maintained code until a GUI-saved
   VESTA diff proves the record syntax; the verified native route now uses
   `LABEL 1` plus site labels.
@@ -19,6 +23,18 @@ Updated: 2026-06-10
 
 ## Done
 
+- Added the Multiwfn/ABACUS/VESTA analysis matrix under
+  `docs/research/multiwfn_abacus_vesta_analysis_matrix.md`.  It ranks useful
+  Multiwfn wavefunction/grid analyses by VESTA visualization value, ABACUS
+  input feasibility, and project priority.
+- Added `docs/skills/abacus_multiwfn_vesta_analysis_skill.md` as a reusable
+  planning checklist for ABACUS direct-cube routes, latest ABACUS Molden
+  generation, `[Nval]` validation, and VESTA representation choice.
+- Confirmed ABACUS `develop` moved the Molden converter to
+  `interfaces/Multiwfn_interface/molden.py` at commit `19511fd`; latest
+  checked `origin/develop` is `707f092`.  The current converter writes
+  `[Nval]` by default and restricts the Molden path to LCAO, `nspin=1/2`, and
+  Gamma/single-k calculations.
 - Refreshed the README repository-status section so the front page explicitly
   says `main` is the maintained branch, `origin` points to
   `Github:Stardust0831/multiwfn2vesta.git`, `origin/HEAD -> origin/main`, and

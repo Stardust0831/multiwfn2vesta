@@ -356,3 +356,28 @@ Limitations recorded:
   the front page: maintained branch `main`, GitHub remote
   `Github:Stardust0831/multiwfn2vesta.git`, `origin/HEAD -> origin/main`, and
   repository-local identity `Stardust0831 <13862180016@163.com>`.
+
+## 2026-06-10: Multiwfn/ABACUS/VESTA analysis matrix
+
+- Continued the long-running research goal: identify Multiwfn analyses worth
+  turning into VESTA workflows, with emphasis on inputs ABACUS can provide.
+- Spawned two read-only sidecar agents.  One reviewed Multiwfn 2026.6.2 source
+  and bundled scripts for VESTA-suitable cube/PDB products.  The other
+  reviewed ABACUS Molden, `[Nval]`, cube outputs, and local Ag(111)+benzene
+  smoke evidence.
+- Checked ABACUS `origin/develop` on 2026-06-10.  Latest remote head observed
+  was `707f09266842c3340a0d5f7a21d3224306aafd58`.  The Molden converter moved
+  to `interfaces/Multiwfn_interface/molden.py` in commit
+  `19511fd68bebb5fb44b5d7d89bd1d7262023df34`.
+- Recorded the current ABACUS Molden rule: use the latest
+  `interfaces/Multiwfn_interface/molden.py`; keep `[Nval]` enabled; treat the
+  route as LCAO, `nspin=1/2`, Gamma/single-k only; and warn that NAO2GTO is an
+  approximation for quantitative density-topology work.
+- Added `docs/research/multiwfn_abacus_vesta_analysis_matrix.md`.  The matrix
+  ranks direct ABACUS cube routes, ABACUS Molden wavefunction routes, Multiwfn
+  AIM/IGMH/IRI/RDG/orbital/surface/basin/excited-state analyses, VESTA
+  representations, and project implementation priorities.
+- Added `docs/skills/abacus_multiwfn_vesta_analysis_skill.md` as a reusable
+  checklist for deciding whether to use ABACUS direct cubes, ABACUS Molden plus
+  Multiwfn, PDB pseudo-site overlays, dual-cube surface coloring, or atom
+  scalar coloring.
