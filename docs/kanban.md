@@ -19,6 +19,20 @@ Updated: 2026-06-10
 
 ## Done
 
+- Added Multiwfn/VESTA executable discovery to the maintained CLI.
+  `multiwfn2vesta discover` reports selected and candidate paths from
+  environment variables, workspace tools, and `PATH`.
+- Added `multiwfn2vesta aim-run <wavefunction> <output_dir>`.  It accepts
+  Molden/FCHK/WFN-style inputs, runs Multiwfn AIM in the output directory,
+  writes the exact command stream and logs, and converts generated
+  `paths.pdb`/`CPs.pdb` into `aim_atoms_only.vesta` by default.
+- Real H2O noGUI smoke succeeded under
+  `/mnt/g/work/multiwfn2vesta/smoke/multiwfn_aim_cli_smoke_20260610/h2o/`.
+  It produced `paths.pdb`, `CPs.pdb`, `CPprop.txt`, `mol.pdb`, logs, and
+  `aim_atoms_only.vesta` without launching VESTA.
+- Validation completed for the Multiwfn/VESTA discovery and wavefunction AIM
+  runner integration: focused no-GUI tests, `py_compile`, CLI help,
+  `multiwfn2vesta discover`, real H2O smoke, and `git diff --check`.
 - Added an easier global/interactive CLI entry point.  The user can add only
   `/mnt/g/work/multiwfn2vesta/project/bin` to `PATH`, run `multiwfn2vesta`,
   choose maintained workflows interactively, or call scriptable subcommands

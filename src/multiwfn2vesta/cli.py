@@ -6,16 +6,22 @@ from pathlib import Path
 from typing import Dict, List, Optional, Sequence, Tuple
 import sys
 
-from . import aim_igmh_vesta, aim_vesta
+from . import aim_igmh_vesta, aim_vesta, multiwfn_aim
+from .executables import discovery_report
 
 
 COMMANDS: Dict[str, Tuple[str, str]] = {
+    "discover": ("Find Multiwfn and VESTA executables", "executables"),
+    "aim-run": ("Run Multiwfn AIM on a wavefunction file, then convert PDB to VESTA", "multiwfn_aim"),
     "aim-pdb": ("Convert Multiwfn paths.pdb/CPs.pdb to atoms-only VESTA", "aim_vesta"),
     "aim-igmh": ("Style/render a saved AIM+IGMH VESTA overlay", "aim_igmh_vesta"),
 }
 
 
 ALIASES = {
+    "where": "discover",
+    "env": "discover",
+    "multiwfn-aim": "aim-run",
     "aim-vesta": "aim-pdb",
     "igmh": "aim-igmh",
 }
@@ -33,6 +39,8 @@ Usage:
       Run a scriptable workflow.
 
 Commands:
+  discover   Find Multiwfn and VESTA executables from env/PATH/workspace.
+  aim-run    Run Multiwfn AIM on a wavefunction file, then convert to VESTA.
   aim-pdb    Convert Multiwfn paths.pdb/CPs.pdb to atoms-only VESTA.
   aim-igmh   Style a saved AIM+IGMH VESTA overlay, optionally render views.
 
@@ -41,6 +49,8 @@ Aliases:
   igmh       Alias for aim-igmh.
 
 Examples:
+  multiwfn2vesta discover
+  multiwfn2vesta aim-run input.molden aim_out
   multiwfn2vesta aim-pdb paths.pdb aim_atoms_only.vesta --cps-pdb CPs.pdb
   multiwfn2vesta aim-igmh overlay.vesta products --label-bcp-sites
 
@@ -101,6 +111,38 @@ def interactive_aim_pdb() -> int:
     return aim_vesta.main(argv)
 
 
+def interactive_aim_run() -> int:
+    print("\nWavefunction -> Multiwfn AIM -> atoms-only VESTA")
+    wavefunction = _prompt("wavefunction file (.molden/.fch/.wfn/etc.)", required=True)
+    output_dir = _prompt("output directory", default=_default_output_dir(wavefunction, "multiwfn_aim"))
+    argv: List[str] = [wavefunction, output_dir]
+
+    multiwfn = _prompt("Multiwfn executable or directory (empty for auto-discovery)")
+    if multiwfn:
+        argv.extend(["--multiwfn", multiwfn])
+
+    nthreads = _prompt("Multiwfn -nt threads (empty for default)")
+    if nthreads:
+        argv.extend(["--nthreads", nthreads])
+
+    timeout = _prompt("timeout seconds (empty for no timeout)")
+    if timeout:
+        argv.extend(["--timeout", timeout])
+
+    commands_file = _prompt("custom Multiwfn AIM command file (empty for default)")
+    if commands_file:
+        argv.extend(["--commands-file", commands_file])
+
+    if _yes_no("skip atoms-only VESTA conversion", default=False):
+        argv.append("--no-vesta")
+
+    cube = _prompt("cube file for cube-frame shift during VESTA conversion (empty to skip)")
+    if cube:
+        argv.extend(["--cube-frame-from-cube", cube])
+
+    return multiwfn_aim.main(argv)
+
+
 def interactive_aim_igmh() -> int:
     print("\nAIM+IGMH VESTA overlay styling")
     input_vesta = _prompt("input overlay .vesta", required=True)
@@ -130,13 +172,20 @@ def interactive_aim_igmh() -> int:
 
 def interactive_main() -> int:
     print("multiwfn2vesta interactive launcher\n")
-    print("1) AIM PDB -> atoms-only VESTA")
-    print("2) AIM+IGMH overlay -> styled VESTA / optional three views")
+    print("0) Discover Multiwfn/VESTA executables")
+    print("1) Wavefunction -> Multiwfn AIM -> atoms-only VESTA")
+    print("2) AIM PDB -> atoms-only VESTA")
+    print("3) AIM+IGMH overlay -> styled VESTA / optional three views")
     print("q) Quit")
-    choice = _prompt("choice", default="2").lower()
-    if choice in {"1", "aim-pdb", "aim-vesta"}:
+    choice = _prompt("choice", default="3").lower()
+    if choice in {"0", "discover", "where", "env"}:
+        print(discovery_report())
+        return 0
+    if choice in {"1", "aim-run", "multiwfn-aim"}:
+        return interactive_aim_run()
+    if choice in {"2", "aim-pdb", "aim-vesta"}:
         return interactive_aim_pdb()
-    if choice in {"2", "aim-igmh", "igmh"}:
+    if choice in {"3", "aim-igmh", "igmh"}:
         return interactive_aim_igmh()
     if choice in {"q", "quit", "exit"}:
         return 0
@@ -145,6 +194,11 @@ def interactive_main() -> int:
 
 
 def run_command(command: str, args: Sequence[str]) -> int:
+    if command == "discover":
+        print(discovery_report(), end="")
+        return 0
+    if command == "aim-run":
+        return multiwfn_aim.main(args)
     if command == "aim-pdb":
         return aim_vesta.main(args)
     if command == "aim-igmh":

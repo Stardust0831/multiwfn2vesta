@@ -18,6 +18,7 @@ import sys
 from pathlib import Path
 from typing import List, NamedTuple, Optional, Sequence, Tuple
 
+from .executables import vesta_windows_dir
 from .vesta_aim_overlay_style import (
     DEFAULT_BCP_ELEMENT,
     DEFAULT_BCP_RADIUS,
@@ -165,7 +166,7 @@ def build_three_view_command(
     comps: Optional[str] = None,
     scale: int = 2,
     timeout: int = 240,
-    vesta_dir: str = "tools/VESTA-win64",
+    vesta_dir: str = "auto",
     render_suffix: str = ".png",
     clean_before: bool = False,
     clean_after: bool = True,
@@ -174,6 +175,7 @@ def build_three_view_command(
     """Build the script command for the maintained one-session renderer."""
 
     script = _project_dir() / "scripts" / "vesta_three_views.py"
+    resolved_vesta_dir = resolve_vesta_dir(vesta_dir)
     command = [
         sys.executable,
         str(script),
@@ -195,7 +197,7 @@ def build_three_view_command(
             "--timeout",
             str(timeout),
             "--vesta-dir",
-            vesta_dir,
+            resolved_vesta_dir,
             "--render-suffix",
             render_suffix,
             "--mode",
@@ -213,6 +215,15 @@ def build_three_view_command(
     else:
         command.append("--no-clean-after")
     return command
+
+
+def resolve_vesta_dir(value: str) -> str:
+    if value != "auto":
+        return value
+    discovered = vesta_windows_dir()
+    if discovered is not None:
+        return str(discovered)
+    return "tools/VESTA-win64"
 
 
 def render_manifest_text(
@@ -335,7 +346,7 @@ def run_workflow(
     comps: Optional[str] = None,
     scale: int = 2,
     timeout: int = 240,
-    vesta_dir: str = "tools/VESTA-win64",
+    vesta_dir: str = "auto",
     render_suffix: str = ".png",
     clean_before: bool = False,
     clean_after: bool = True,
@@ -467,7 +478,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser.add_argument("--comps", choices=["off", "on", "keep"], help="Override renderer COMPS mode")
     parser.add_argument("--scale", type=int, default=2)
     parser.add_argument("--timeout", type=int, default=240)
-    parser.add_argument("--vesta-dir", default="tools/VESTA-win64")
+    parser.add_argument(
+        "--vesta-dir",
+        default="auto",
+        help="VESTA directory or `auto` to use VESTA_PATH/VESTAPATH/PATH/workspace discovery.",
+    )
     parser.add_argument("--render-suffix", default=".png")
     parser.add_argument("--clean-before", action="store_true")
     parser.add_argument("--no-clean-after", action="store_true")

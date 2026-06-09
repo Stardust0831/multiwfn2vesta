@@ -117,6 +117,24 @@ without generating dense automatic bonds between path points.
 
 ## Steps
 
+0. Prefer the unified CLI when starting from a wavefunction file.  It runs
+   Multiwfn AIM and performs the atoms-only VESTA conversion in one isolated
+   output directory.
+
+   ```bash
+   export PATH=/mnt/g/work/multiwfn2vesta/project/bin:$PATH
+   multiwfn2vesta discover
+   multiwfn2vesta aim-run /path/to/input.molden /path/to/aim_out --timeout 180
+   ```
+
+   Default `aim-run` outputs:
+   `multiwfn_aim_input.txt`, `multiwfn.stdout.txt`,
+   `multiwfn.stderr.txt`, `paths.pdb`, `CPs.pdb`, `CPprop.txt`, `mol.pdb`,
+   and `aim_atoms_only.vesta`.  The command sets `Multiwfnpath`,
+   `MULTIWFNPATH`, and `MultiwfnPATH` for the Multiwfn subprocess based on
+   the selected executable.  If Multiwfn returns 0 but `paths.pdb` is absent,
+   the CLI returns 3 unless `--allow-missing-paths` is supplied.
+
 1. Run Multiwfn AIM topology analysis in an isolated working directory.
 
    ```bash
@@ -188,6 +206,22 @@ without generating dense automatic bonds between path points.
   or BCP coordinates for the final figure.
 
 ## Real smoke result
+
+Unified H2O `aim-run` smoke:
+
+```text
+smoke/multiwfn_aim_cli_smoke_20260610/h2o/
+```
+
+Observed:
+
+- `Multiwfn_noGUI` selected from
+  `/mnt/g/work/multiwfn2vesta/tools/Multiwfn_2026.6.2_bin_Linux_noGUI/`
+- `paths.pdb`: 124 lines
+- `CPs.pdb`: 6 lines
+- `mol.pdb`: 5 lines
+- `aim_atoms_only.vesta`: 579 lines
+- `multiwfn.stderr.txt`: empty
 
 H2O smoke directory:
 

@@ -21,12 +21,17 @@ multiwfn2vesta
 也可以用子命令脚本化调用当前维护的流程：
 
 ```bash
+multiwfn2vesta discover
+multiwfn2vesta aim-run --help
 multiwfn2vesta aim-pdb --help
 multiwfn2vesta aim-igmh --help
 ```
 
 已维护的子命令：
 
+- `discover`: 报告 Multiwfn 和 VESTA 可执行文件候选，以及当前会选择的路径
+- `aim-run`: 从 `.molden`、`.fch`、`.wfn` 等波函数文件调用 Multiwfn AIM，
+  再把生成的 `paths.pdb`/`CPs.pdb` 转成 atoms-only `.vesta`
 - `aim-pdb`: Multiwfn `paths.pdb`/`CPs.pdb` 转 atoms-only `.vesta`
 - `aim-igmh`: 已保存的 AIM+IGMH 多 phase `.vesta` 叠层样式化，可选三视图导出
 
@@ -41,6 +46,84 @@ multiwfn2vesta --help
 当前包名是 `multiwfn2vesta`。下面旧命令中的 `multiwfn_vesta` 是早期草稿名，
 `multiwfn2vesta.main` 仍不是稳定入口；请使用 `multiwfn2vesta` 统一 CLI 或
 明确的子命令模块。
+
+## 可执行文件发现
+
+先检查当前会调用哪个 Multiwfn 和 VESTA：
+
+```bash
+multiwfn2vesta discover
+```
+
+Multiwfn 查找顺序：
+
+1. 命令行显式 `--multiwfn /path/to/Multiwfn_noGUI`
+2. 环境变量：`MULTIWFN_PATH`、`MULTIWFNPATH`、`Multiwfnpath`、
+   `MultiwfnPATH`、`MultiwfnPath`、`MULTIWFN_EXECUTABLE`
+3. 工作区内已下载工具，优先 noGUI：
+   `/mnt/g/work/multiwfn2vesta/tools/Multiwfn_2026.6.2_bin_Linux_noGUI/Multiwfn_noGUI`
+4. shell 的 `PATH`
+
+VESTA 查找顺序：
+
+1. 命令行显式 `--vesta-dir` 或相关渲染命令的显式路径
+2. 环境变量：`VESTA_PATH`、`VESTA_DIR`、`VESTAPATH`、`VestaPATH`、
+   `Vestapath`、`VESTA_EXECUTABLE`
+3. 工作区内 VESTA：`tools/VESTA-win64/VESTA.exe` 和 Linux VESTA
+4. shell 的 `PATH`
+
+`aim-run` 本身只启动 Multiwfn，不启动 VESTA；VESTA 只在
+`aim-igmh --render-three-views` 这种显式渲染命令里被调用。
+
+## 波函数文件到 AIM VESTA
+
+从 Molden/FCHK/WFN 等 Multiwfn 可读波函数文件开始：
+
+```bash
+multiwfn2vesta aim-run \
+  input.molden \
+  aim_out \
+  --timeout 180
+```
+
+默认输出写在 `aim_out/`：
+
+- `multiwfn_aim_input.txt`: 实际喂给 Multiwfn 的 AIM 命令流
+- `multiwfn.stdout.txt` / `multiwfn.stderr.txt`: Multiwfn 日志
+- `paths.pdb`、`CPs.pdb`、`CPprop.txt`、`mol.pdb`: Multiwfn AIM 输出
+- `aim_atoms_only.vesta`: 本项目转换出的无 AIM 键 `.vesta`
+
+显式指定 Multiwfn：
+
+```bash
+multiwfn2vesta aim-run \
+  input.fch \
+  aim_out \
+  --multiwfn /mnt/g/work/multiwfn2vesta/tools/Multiwfn_2026.6.2_bin_Linux_noGUI/Multiwfn_noGUI
+```
+
+传入相对 `--multiwfn ./Multiwfn_noGUI` 时，程序会在启动 Multiwfn 前解析为
+绝对路径；随后即使 Multiwfn 的 `cwd` 切到输出目录，也不会找错可执行文件。
+
+Multiwfn 源码读取 `Multiwfnpath` 来找 `settings.ini`。本项目启动 Multiwfn
+时会把 `Multiwfnpath`、`MULTIWFNPATH`、`MultiwfnPATH` 同步设置为所选
+Multiwfn 可执行文件所在目录，避免外部环境残留路径影响本次运行。
+
+如果 Multiwfn 返回 0 但没有生成 `paths.pdb`，`aim-run` 默认返回 CLI 退出码
+`3` 并提示检查日志。确实只想保留 Multiwfn 原始退出码时，显式加：
+
+```bash
+multiwfn2vesta aim-run input.fch aim_out --allow-missing-paths
+```
+
+真实 H2O smoke：
+
+```text
+/mnt/g/work/multiwfn2vesta/smoke/multiwfn_aim_cli_smoke_20260610/h2o/
+```
+
+这次使用 `H2O.fch` 和工作区 noGUI Multiwfn，成功生成
+`paths.pdb`、`CPs.pdb`、`mol.pdb` 和 `aim_atoms_only.vesta`。
 
 当前已验证可用的命令是 AIM paths/CPs 到 atoms-only VESTA 的转换器：
 

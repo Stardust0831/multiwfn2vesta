@@ -28,16 +28,74 @@ multiwfn2vesta
 Scriptable subcommands:
 
 ```bash
+multiwfn2vesta discover
+multiwfn2vesta aim-run --help
 multiwfn2vesta aim-pdb --help
 multiwfn2vesta aim-igmh --help
 ```
 
 Aliases:
 
+- `multiwfn2vesta where` and `multiwfn2vesta env` are aliases for `discover`.
+- `multiwfn2vesta multiwfn-aim ...` is the same as `aim-run`.
 - `multiwfn2vesta aim-vesta ...` is the same as `aim-pdb`.
 - `multiwfn2vesta igmh ...` is the same as `aim-igmh`.
 
 ## Maintained workflows
+
+### Discover executables
+
+```bash
+multiwfn2vesta discover
+```
+
+Use this before a new run.  It prints every Multiwfn/VESTA candidate and a
+`selected:` line for the path that will be used by default.  Discovery prefers
+explicit paths, environment variables, workspace-local tools, then `PATH`.
+
+Multiwfn environment variables accepted:
+
+- `MULTIWFN_PATH`
+- `MULTIWFNPATH`
+- `Multiwfnpath`
+- `MultiwfnPATH`
+- `MultiwfnPath`
+- `MULTIWFN_EXECUTABLE`
+
+VESTA environment variables accepted:
+
+- `VESTA_PATH`
+- `VESTA_DIR`
+- `VESTAPATH`
+- `VestaPATH`
+- `Vestapath`
+- `VESTA_EXECUTABLE`
+
+### Wavefunction to Multiwfn AIM to VESTA
+
+```bash
+multiwfn2vesta aim-run \
+  input.molden \
+  aim_out \
+  --timeout 180
+```
+
+Inputs can be any wavefunction file Multiwfn accepts, such as `.molden`,
+`.fch`, `.fchk`, `.wfn`, or `.wfx`.  The command writes the exact Multiwfn
+input stream and stdout/stderr logs into `aim_out/`, then converts
+`paths.pdb` and `CPs.pdb` into `aim_atoms_only.vesta`.
+
+Explicit executable override:
+
+```bash
+multiwfn2vesta aim-run input.fch aim_out \
+  --multiwfn /path/to/Multiwfn_noGUI
+```
+
+The runner sets `Multiwfnpath`, `MULTIWFNPATH`, and `MultiwfnPATH` to the
+selected executable directory for the subprocess.  If Multiwfn returns `0` but
+does not write `paths.pdb`, the CLI returns `3` unless
+`--allow-missing-paths` is explicitly supplied.
 
 ### AIM PDB to atoms-only VESTA
 
@@ -76,10 +134,25 @@ No-GUI checks:
 
 ```bash
 bin/multiwfn2vesta --help
+bin/multiwfn2vesta discover
+bin/multiwfn2vesta aim-run --help
 bin/multiwfn2vesta aim-igmh --help
 printf 'q\n' | bin/multiwfn2vesta
-PYTHONPATH=src python3 -m unittest tests.test_cli
+PYTHONPATH=src python3 -m unittest tests.test_cli tests.test_executables tests.test_multiwfn_aim
 ```
+
+Real H2O Multiwfn noGUI smoke:
+
+```bash
+bin/multiwfn2vesta aim-run \
+  /mnt/g/work/multiwfn2vesta/smoke/20260605_iri_aim_h2o/H2O.fch \
+  /mnt/g/work/multiwfn2vesta/smoke/multiwfn_aim_cli_smoke_20260610/h2o \
+  --timeout 180
+```
+
+Observed output: `paths.pdb`, `CPs.pdb`, `CPprop.txt`, `mol.pdb`,
+`multiwfn_aim_input.txt`, `multiwfn.stdout.txt`, `multiwfn.stderr.txt`, and
+`aim_atoms_only.vesta`.
 
 Dry smoke for the current Ag(111)+benzene overlay:
 

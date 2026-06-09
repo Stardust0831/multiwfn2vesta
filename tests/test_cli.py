@@ -13,8 +13,27 @@ class TestUnifiedCli(unittest.TestCase):
 
         self.assertEqual(code, 0)
         text = output.getvalue()
+        self.assertIn("discover", text)
+        self.assertIn("aim-run", text)
         self.assertIn("aim-pdb", text)
         self.assertIn("aim-igmh", text)
+
+    def test_dispatches_discover_command(self):
+        with patch("multiwfn2vesta.cli.discovery_report", return_value="report\n") as mocked:
+            output = io.StringIO()
+            with patch("sys.stdout", output):
+                code = cli.main(["discover"])
+
+        self.assertEqual(code, 0)
+        mocked.assert_called_once_with()
+        self.assertEqual(output.getvalue(), "report\n")
+
+    def test_dispatches_aim_run_command(self):
+        with patch("multiwfn2vesta.cli.multiwfn_aim.main", return_value=0) as mocked:
+            code = cli.main(["aim-run", "input.molden", "out", "--timeout", "30"])
+
+        self.assertEqual(code, 0)
+        mocked.assert_called_once_with(["input.molden", "out", "--timeout", "30"])
 
     def test_dispatches_aim_igmh_command(self):
         with patch("multiwfn2vesta.cli.aim_igmh_vesta.main", return_value=0) as mocked:
@@ -45,7 +64,7 @@ class TestUnifiedCli(unittest.TestCase):
     def test_interactive_aim_igmh_builds_expected_args(self):
         answers = iter(
             [
-                "2",
+                "3",
                 "overlay.vesta",
                 "products",
                 "case",
@@ -61,6 +80,41 @@ class TestUnifiedCli(unittest.TestCase):
         self.assertEqual(code, 0)
         mocked.assert_called_once_with(
             ["overlay.vesta", "products", "--stem", "case", "--label-bcp-sites"]
+        )
+
+    def test_interactive_aim_run_builds_expected_args(self):
+        answers = iter(
+            [
+                "1",
+                "input.molden",
+                "aim_out",
+                "/opt/Multiwfn",
+                "4",
+                "120",
+                "",
+                "n",
+                "surface.cub",
+            ]
+        )
+        with patch("builtins.input", lambda _prompt: next(answers)):
+            with patch("sys.stdout", io.StringIO()):
+                with patch("multiwfn2vesta.cli.multiwfn_aim.main", return_value=0) as mocked:
+                    code = cli.main([])
+
+        self.assertEqual(code, 0)
+        mocked.assert_called_once_with(
+            [
+                "input.molden",
+                "aim_out",
+                "--multiwfn",
+                "/opt/Multiwfn",
+                "--nthreads",
+                "4",
+                "--timeout",
+                "120",
+                "--cube-frame-from-cube",
+                "surface.cub",
+            ]
         )
 
 

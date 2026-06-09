@@ -297,3 +297,43 @@ Limitations recorded:
   `smoke/ag111_benzene_igmh_aim_periodic_cell_20260607/unified_cli_smoke_20260610/`.
   The output contains the styled `.vesta`, recipe markdown, `dg_inter.cub`,
   and `sl2r.cub`.
+
+## 2026-06-10: Multiwfn/VESTA discovery and wavefunction AIM runner
+
+- User asked whether Multiwfn invocation is integrated, and requested a scheme
+  where Multiwfn and VESTA can be found from environment variables and `PATH`,
+  while the workflow accepts a Molden/wavefunction path rather than only
+  existing `paths.pdb`/`CPs.pdb`.
+- Added `multiwfn2vesta.executables`.  `multiwfn2vesta discover` now reports
+  candidate executables and a selected default.  Multiwfn discovery accepts
+  explicit `--multiwfn`, `MULTIWFN_PATH`, `MULTIWFNPATH`, `Multiwfnpath`,
+  `MultiwfnPATH`, `MultiwfnPath`, `MULTIWFN_EXECUTABLE`, workspace-local
+  tools, and then `PATH`.  VESTA discovery accepts `VESTA_PATH`, `VESTA_DIR`,
+  `VESTAPATH`, `VestaPATH`, `Vestapath`, `VESTA_EXECUTABLE`, workspace-local
+  tools, and then `PATH`.
+- Discovery prefers workspace-local Multiwfn noGUI and workspace-local
+  `tools/VESTA-win64/VESTA.exe` before arbitrary external `PATH` hits, unless
+  an explicit path or environment variable is supplied.
+- Added `multiwfn2vesta.multiwfn_aim` and the unified CLI command
+  `multiwfn2vesta aim-run <wavefunction> <output_dir>`.  It runs Multiwfn AIM
+  in the output directory, writes `multiwfn_aim_input.txt`,
+  `multiwfn.stdout.txt`, and `multiwfn.stderr.txt`, then converts generated
+  `paths.pdb`/`CPs.pdb` to `aim_atoms_only.vesta` by default.
+- Multiwfn subprocess environment is pinned to the selected executable
+  directory through `Multiwfnpath`, `MULTIWFNPATH`, and `MultiwfnPATH`.
+  Relative explicit `--multiwfn ./...` paths are resolved before changing
+  `cwd` to the output directory.
+- Failure semantics: if Multiwfn returns 0 but does not generate `paths.pdb`,
+  the CLI returns 3 and points to the logs.  `--allow-missing-paths` keeps
+  Multiwfn's raw return code for diagnostic-only runs.
+- Added installable console scripts: `multiwfn2vesta-discover` and
+  `multiwfn2vesta-aim-run`, while keeping the preferred entry point as
+  `multiwfn2vesta discover` and `multiwfn2vesta aim-run`.
+- Added focused no-GUI tests in `tests/test_executables.py` and
+  `tests/test_multiwfn_aim.py`, plus CLI dispatch/interactive coverage.
+- Real H2O smoke succeeded:
+  `/mnt/g/work/multiwfn2vesta/smoke/multiwfn_aim_cli_smoke_20260610/h2o/`.
+  The run used the workspace `Multiwfn_noGUI`, returned 0, and produced
+  `paths.pdb` (124 lines), `CPs.pdb` (6 lines), `mol.pdb` (5 lines),
+  `CPprop.txt`, logs, and `aim_atoms_only.vesta` (579 lines).  VESTA was not
+  launched during this smoke.
