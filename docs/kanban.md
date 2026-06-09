@@ -11,9 +11,9 @@ Updated: 2026-06-09
   launch routes and the current Linux wrapper are not yet usable.
 - Keep the current Ag(111)+benzene IGMH+AIM overlay state inspectable without
   forcing VESTA rendering.  Latest preferred files are under
-  `smoke/ag111_benzene_igmh_aim_periodic_cell_20260607/three_views_single_xe_yellow_bcp/`;
+  `smoke/ag111_benzene_igmh_aim_periodic_cell_20260607/three_views_single_xe_yellow_bcp_visible/`;
   they use original structure colors, one yellow Xe pseudo-element for AIM
-  path samples, orange BCPs, no AIM bonds, and `COMPS 0`.
+  path samples, Rn pseudo-elements for BCPs, no AIM bonds, and `COMPS 0`.
 
 ## Done
 
@@ -36,6 +36,11 @@ Updated: 2026-06-09
   by default, and only renders when an explicit command template is supplied.
 - Recorded AIM overlay style guidance: use one pseudo-element for path sample
   points and tune path/BCP radii before drawing AIM bonds.
+- Added `multiwfn2vesta.vesta_aim_overlay_style` for post-processing
+  multi-phase AIM overlays.  It keeps all path sample points, maps path samples
+  to a single pseudo-element such as `Xe`, maps BCPs to a distinct
+  pseudo-element such as `Rn`, clears AIM `SBOND`, and preserves global
+  structure bonds by default.
 
 ## Next
 

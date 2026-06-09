@@ -1,0 +1,75 @@
+import unittest
+
+from multiwfn2vesta.vesta_aim_overlay_style import patch_aim_overlay_style_text
+
+
+SAMPLE = """\
+#VESTA_FORMAT_VERSION 3.5.4
+CRYSTAL
+TITLE
+base
+STRUC
+   1  C         C1           1.0000   0.100000   0.200000   0.300000    1a     1
+                            0.000000   0.000000   0.000000  0.00
+  0 0 0 0 0 0 0
+SBOND
+  0 0 0 0
+SITET
+   1           C1  0.7700 128  73  41 128  73  41 204  0
+  0 0 0 0 0 0
+CRYSTAL
+TITLE
+aim
+STRUC
+   1  C         P0001_0001   1.0000   0.426201   0.426125   0.514607    1a     1
+                            0.000000   0.000000   0.000000  0.00
+   2  N         CP0001_N     1.0000   0.426201   0.426125   0.514607    1a     1
+                            0.000000   0.000000   0.000000  0.00
+  0 0 0 0 0 0 0
+SBOND
+  1    Xe    Xe    0.00000    0.02200  0  1  1  0  1  0.220  2.000 255 230   0
+  0 0 0 0
+SITET
+   1   P0001_0001  0.0550 255 230   0 255 230   0 204  0
+   2     CP0001_N  0.0700 255 128   0 255 128   0 204  0
+  0 0 0 0 0 0
+ATOMT
+  1          C  0.7700 128  73  41 128  73  41 204
+  2          N  0.0700 255 128   0 255 128   0 204
+  3         Xe  0.0550 255 230   0 255 230   0 204
+  0 0 0 0 0 0
+STYLE
+BONDS   1
+"""
+
+
+class TestVestaAimOverlayStyle(unittest.TestCase):
+    def test_patch_keeps_path_point_and_assigns_bcp_pseudo_element(self):
+        patched = patch_aim_overlay_style_text(
+            SAMPLE,
+            path_element="Xe",
+            bcp_element="Rn",
+            path_radius=0.055,
+            bcp_radius=0.180,
+            path_rgb=(255, 230, 0),
+            bcp_rgb=(255, 80, 0),
+        )
+
+        self.assertIn("  Xe        P0001_0001", patched)
+        self.assertIn("  Rn        CP0001_N", patched)
+        self.assertIn("P0001_0001  0.0550 255 230   0 255 230   0 204", patched)
+        self.assertIn("CP0001_N  0.1800 255  80   0 255  80   0 204", patched)
+        self.assertIn("  4         Rn  0.1800 255  80   0 255  80   0 204", patched)
+        self.assertIn("BONDS   1", patched)
+        self.assertEqual(patched.count("P0001_0001"), 2)
+
+    def test_patch_clears_aim_sbond_without_touching_base_sbond(self):
+        patched = patch_aim_overlay_style_text(SAMPLE)
+
+        self.assertNotIn("0.02200", patched)
+        self.assertEqual(patched.count("SBOND"), 2)
+        self.assertGreaterEqual(patched.count("  0 0 0 0"), 2)
+
+
+if __name__ == "__main__":
+    unittest.main()

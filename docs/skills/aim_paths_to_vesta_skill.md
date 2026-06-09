@@ -52,6 +52,25 @@ without generating dense automatic bonds between path points.
 - If BCPs are invisible, first check whether path sample points occupy the same
   coordinates and draw over them.  Reduce path point radius, increase BCP
   radius, and use a distinct BCP color before adding VESTA bonds.
+- In saved multi-phase overlays, if BCPs still disappear and the user wants to
+  keep all path sample points, do not delete overlapping path points.  Instead
+  map paths and BCPs to different pseudo-elements.  The maintained helper is:
+
+  ```bash
+  python -m multiwfn2vesta.vesta_aim_overlay_style \
+    input_overlay.vesta \
+    output_overlay.vesta \
+    --path-element Xe \
+    --bcp-element Rn \
+    --path-radius 0.055 \
+    --bcp-radius 0.180 \
+    --path-rgb 255 230 0 \
+    --bcp-rgb 255 80 0
+  ```
+
+  This keeps every `P...._....` path sample site, keeps BCP labels such as
+  `CP0001_N`, clears AIM-phase `SBOND`, and leaves real structure bonds
+  enabled by default.
 
 ## Steps
 

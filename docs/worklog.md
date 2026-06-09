@@ -99,3 +99,28 @@ Limitations recorded:
 - Rendering remains blocked as a background/no-disruption workflow.  The known
   Windows VESTA automation path still steals focus, so fresh PNG generation
   should stay explicit/opt-in until a separate non-focus route is validated.
+
+## 2026-06-09: BCP visibility in single-Xe AIM overlay
+
+- User reported that
+  `smoke/ag111_benzene_igmh_aim_periodic_cell_20260607/three_views_single_xe_yellow_bcp/`
+  has no rendered PNGs and that BCPs are not visible when opened manually in
+  VESTA.
+- Confirmed no PNGs exist in that directory; only `.vesta` and cube files were
+  generated because rendering is disabled by default while VESTA steals focus.
+- Confirmed BCP records are present: three `CP000*_N` sites exist in `STRUC`,
+  `THERI`, and `SITET`, with orange styling.  They sit exactly on top of the
+  first path points of the corresponding AIM paths.
+- Added `src/multiwfn2vesta/vesta_aim_overlay_style.py` plus unit tests.  The
+  patcher does not remove any path points.  It assigns path samples to one
+  pseudo-element (`Xe` in the Ag smoke case), assigns BCPs to a separate
+  pseudo-element (`Rn` in the Ag smoke case), clears AIM-phase `SBOND`, and
+  leaves structure bonds enabled by default.
+- Generated the revised smoke product:
+  `smoke/ag111_benzene_igmh_aim_periodic_cell_20260607/products/ag111_benzene_igmh_aim_paths_single_xe_yellow_bcp_visible_periodic_overlay.vesta`.
+- Generated revised three-view `.vesta` files under
+  `smoke/ag111_benzene_igmh_aim_periodic_cell_20260607/three_views_single_xe_yellow_bcp_visible/`.
+  Validation found 588 `Xe` path points, 3 `Rn` BCP sites, BCP `SITET` radius
+  `0.1800` with RGB `255 80 0`, and `COMPS 0` in all three views.
+- PNG rendering was not run because the available VESTA automation route still
+  steals focus.
