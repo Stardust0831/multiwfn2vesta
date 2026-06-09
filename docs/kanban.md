@@ -1,6 +1,6 @@
 # Project Kanban
 
-Updated: 2026-06-08
+Updated: 2026-06-09
 
 ## Doing
 
@@ -9,6 +9,11 @@ Updated: 2026-06-08
   non-focus-stealing VESTA route is available.
 - Find or build a real non-focus renderer.  Windows minimized/hidden/WSH
   launch routes and the current Linux wrapper are not yet usable.
+- Keep the current Ag(111)+benzene IGMH+AIM overlay state inspectable without
+  forcing VESTA rendering.  Latest preferred files are under
+  `smoke/ag111_benzene_igmh_aim_periodic_cell_20260607/three_views_single_xe_yellow_bcp/`;
+  they use original structure colors, one yellow Xe pseudo-element for AIM
+  path samples, orange BCPs, no AIM bonds, and `COMPS 0`.
 
 ## Done
 
@@ -40,3 +45,6 @@ Updated: 2026-06-08
   organized for project utilities.
 - If continuing Linux VESTA, add missing GUI libraries inside the workspace
   rather than modifying system packages.
+- If the user asks for fresh PNGs, either run an explicitly accepted
+  focus-stealing VESTA export or continue the Linux/local-library non-focus
+  route first.

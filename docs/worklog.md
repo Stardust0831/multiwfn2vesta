@@ -84,3 +84,18 @@ Limitations recorded:
   This keeps `ATOMT`/`SITET` styling deterministic and easier to inspect.
 - For BCP visibility, prefer smaller yellow path points plus larger orange
   BCPs before enabling AIM bonds.
+
+## 2026-06-09: Status check
+
+- Confirmed the project repository is on branch `vesta-nofocus-render`, clean,
+  and tracking `origin/vesta-nofocus-render`.
+- Confirmed no workspace-scoped VESTA, ABACUS, or Multiwfn processes were
+  running at the time of the check.
+- Current recommended Ag(111)+benzene IGMH+AIM files remain the VESTA source
+  under
+  `smoke/ag111_benzene_igmh_aim_periodic_cell_20260607/products/ag111_benzene_igmh_aim_paths_single_xe_yellow_bcp_periodic_overlay.vesta`
+  and generated three-view VESTA files under
+  `smoke/ag111_benzene_igmh_aim_periodic_cell_20260607/three_views_single_xe_yellow_bcp/`.
+- Rendering remains blocked as a background/no-disruption workflow.  The known
+  Windows VESTA automation path still steals focus, so fresh PNG generation
+  should stay explicit/opt-in until a separate non-focus route is validated.
