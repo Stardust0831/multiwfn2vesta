@@ -40,6 +40,10 @@ Updated: 2026-06-10
   on `main`, future experiment branches should be short-lived, and
   repository-local commit identity remains
   `Stardust0831 <13862180016@163.com>`.
+- Validated the README/docs-only update with `git diff --check` and
+  `bin/multiwfn2vesta --help`, committed the README refresh as `dec8150`
+  (`Refresh README branch status`), and pushed it to GitHub `main`.
+  A final docs-only closure commit may sit after `dec8150`.
 - Added `multiwfn2vesta iri-run`, a maintained Multiwfn IRI/RDG command-stream
   wrapper.  It discovers Multiwfn, writes the exact command stream and logs,
   runs in `multiwfn_iri_raw/`, preserves raw `func1.cub`/`func2.cub`, writes

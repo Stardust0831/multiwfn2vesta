@@ -19,6 +19,10 @@
   add `/mnt/g/work/multiwfn2vesta/project/bin` to `PATH` and use
   `multiwfn2vesta`, or run from the repo root with
   `PYTHONPATH=src python3 -m multiwfn2vesta.cli`.
+- Validation passed with `git diff --check` and
+  `bin/multiwfn2vesta --help`.  The README refresh was committed as
+  `dec8150` (`Refresh README branch status`) and pushed to GitHub `main`;
+  any later docs-only closure commit only records this result.
 
 ## 2026-06-10: Multiwfn IRI/RDG runner and README branch check
 
