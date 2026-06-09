@@ -43,6 +43,9 @@ Updated: 2026-06-10
   staged the new implementation/test files, updated package Python metadata
   from `>=3.6` to `>=3.7`, and made `--tex-percent` recipe output record
   explicit percentage scaling instead of implying physical texture scaling.
+- Feature implementation commit for cube preset was pushed to GitHub `main` at
+  `c58600d3b4f276c43eef4095669b6402835df8ff`
+  (`Add cube analysis presets`).
 - Added `multiwfn2vesta abacus-molden`, a maintained wrapper around the
   latest ABACUS `interfaces/Multiwfn_interface/molden.py`.  It exports the
   converter from `origin/develop`, records source path/commit/SHA256, runs

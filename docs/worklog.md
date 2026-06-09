@@ -43,6 +43,9 @@
   requires Python `>=3.7`, and `--tex-percent` writes
   `effective_tex_range_source: explicit-percent` plus an explicit note that
   physical texture scaling was not applied.
+- Feature implementation commit was pushed to GitHub `main` at
+  `c58600d3b4f276c43eef4095669b6402835df8ff`
+  (`Add cube analysis presets`).
 
 ## 2026-06-10: ABACUS Molden wrapper and README branch cleanup
 
