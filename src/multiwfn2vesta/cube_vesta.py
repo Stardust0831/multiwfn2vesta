@@ -171,6 +171,11 @@ class TextureReferenceRange(NamedTuple):
     nearest_fallback: bool
 
 
+class IsosurfaceSpec(NamedTuple):
+    level: float
+    rgb: RGB
+
+
 @dataclass
 class StructureSite:
     index: int
@@ -415,6 +420,53 @@ def _percent_range_for_minmax(
     if span == 0:
         raise ValueError("Cannot compute VESTA percentage range from zero-span texture values")
     return (target_lower - value_min) / span, (target_upper - value_min) / span
+
+
+def _validate_rgb(values: Sequence[int], label: str) -> RGB:
+    if len(values) != 3:
+        raise ValueError(f"{label} requires exactly three RGB values")
+    rgb = tuple(int(value) for value in values)
+    if any(value < 0 or value > 255 for value in rgb):
+        raise ValueError(f"{label} RGB values must be in 0..255")
+    return rgb  # type: ignore[return-value]
+
+
+def _validate_opacity(values: Sequence[int]) -> Tuple[int, int]:
+    if len(values) != 2:
+        raise ValueError("Surface opacity requires exactly two values")
+    opacity = tuple(int(value) for value in values)
+    if any(value < 0 or value > 255 for value in opacity):
+        raise ValueError("Surface opacity values must be in 0..255")
+    return opacity  # type: ignore[return-value]
+
+
+def _surface_specs(
+    *,
+    isosurface: float,
+    surface_mode: str,
+    positive_rgb: RGB,
+    negative_rgb: RGB,
+) -> List[IsosurfaceSpec]:
+    if surface_mode == "single":
+        return [IsosurfaceSpec(isosurface, positive_rgb)]
+    if surface_mode == "signed":
+        level = abs(isosurface)
+        if level == 0:
+            raise ValueError("Signed surface mode requires a non-zero isosurface magnitude")
+        return [
+            IsosurfaceSpec(level, positive_rgb),
+            IsosurfaceSpec(-level, negative_rgb),
+        ]
+    raise ValueError(f"Unknown surface mode: {surface_mode}")
+
+
+def _format_isurf_lines(specs: Sequence[IsosurfaceSpec], opacity: Tuple[int, int]) -> List[str]:
+    lines = ["ISURF"]
+    for spec in specs:
+        r, g, b = spec.rgb
+        lines.append(f"  1   1 {spec.level:10.5g} {r:3d} {g:3d} {b:3d} {opacity[0]:3d} {opacity[1]:3d}")
+    lines.append("  0   0   0   0")
+    return lines
 
 
 def _default_surface_band(summary: CubeSummary, isosurface: float) -> float:
@@ -692,6 +744,10 @@ def render_cube_vesta_text(
     texture_path_text: Optional[str] = None,
     title: str = "Cube visualization",
     isosurface: float = DEFAULT_ISOSURFACE,
+    surface_mode: str = "single",
+    positive_rgb: RGB = (255, 255, 0),
+    negative_rgb: RGB = (0, 80, 255),
+    surface_opacity: Tuple[int, int] = (127, 255),
     tex_percent_range: Tuple[float, float] = DEFAULT_TEX_PERCENT_RANGE,
     structure: str = "auto",
     boundary: Tuple[float, float, float, float, float, float] = (0.0, 1.0, 0.0, 1.0, 0.0, 1.0),
@@ -725,6 +781,15 @@ def render_cube_vesta_text(
 
     sects_line = "SECTS   0  0" if sections == "off" else "SECTS  32  1"
     tex_min, tex_max = tex_percent_range
+    isurf_lines = _format_isurf_lines(
+        _surface_specs(
+            isosurface=isosurface,
+            surface_mode=surface_mode,
+            positive_rgb=positive_rgb,
+            negative_rgb=negative_rgb,
+        ),
+        surface_opacity,
+    )
     lines.extend(
         [
             "SCENE",
@@ -755,9 +820,7 @@ def render_cube_vesta_text(
             "  1  16  0.250  2.000 127 127 127",
             "POLYP",
             " 204 1  1.000 180 180 180",
-            "ISURF",
-            f"  1   1 {isosurface:10.5g} 255 255   0 127 255",
-            "  0   0   0   0",
+            *isurf_lines,
             "TEX3P",
             f"  1 {tex_min:12.5E} {tex_max:12.5E}",
             "SECTP",
@@ -881,6 +944,8 @@ def _manifest_text(
     tex_percent_range: Tuple[float, float],
     tex_physical: Optional[Tuple[float, float]],
     tex_reference_range: Optional[TextureReferenceRange],
+    surface_mode: str,
+    isosurface_specs: Sequence[IsosurfaceSpec],
     structure_mode: str,
     sections: str,
     generated_at: Optional[str] = None,
@@ -903,6 +968,9 @@ def _manifest_text(
         f"- grid: `{surface_summary.axes[0].count} x {surface_summary.axes[1].count} x {surface_summary.axes[2].count}`",
         f"- data_range: `{surface_summary.data_min}` to `{surface_summary.data_max}`",
         f"- isosurface: `{isosurface}`",
+        f"- surface_mode: `{surface_mode}`",
+        "- isosurface_levels: `%s`"
+        % ", ".join(str(spec.level) for spec in isosurface_specs),
         "",
         "## Texture Cube",
         "",
@@ -968,6 +1036,10 @@ def run_workflow(
     write_manifest: bool = True,
     title: Optional[str] = None,
     isosurface: float = DEFAULT_ISOSURFACE,
+    surface_mode: str = "single",
+    positive_rgb: RGB = (255, 255, 0),
+    negative_rgb: RGB = (0, 80, 255),
+    surface_opacity: Tuple[int, int] = (127, 255),
     tex_percent: Optional[Tuple[float, float]] = None,
     tex_physical: Optional[Tuple[float, float]] = None,
     tex_range_source: str = "full-cube",
@@ -998,11 +1070,22 @@ def run_workflow(
         if strict_compatible and not _compatible_grid(surface_summary, texture_summary):
             raise ValueError("Texture cube grid is not compatible with the surface cube")
 
+    isosurface_specs = _surface_specs(
+        isosurface=isosurface,
+        surface_mode=surface_mode,
+        positive_rgb=positive_rgb,
+        negative_rgb=negative_rgb,
+    )
     if surface_summary.data_min is not None and surface_summary.data_max is not None:
-        if isosurface < surface_summary.data_min or isosurface > surface_summary.data_max:
+        outside_levels = [
+            spec.level
+            for spec in isosurface_specs
+            if spec.level < surface_summary.data_min or spec.level > surface_summary.data_max
+        ]
+        if outside_levels:
             raise ValueError(
-                "Isosurface value %.6g is outside surface cube data range %.6g..%.6g"
-                % (isosurface, surface_summary.data_min, surface_summary.data_max)
+                "Isosurface level(s) %s outside surface cube data range %.6g..%.6g"
+                % (", ".join("%.6g" % level for level in outside_levels), surface_summary.data_min, surface_summary.data_max)
             )
 
     tex_range, tex_reference_range = _texture_percent_range(
@@ -1046,6 +1129,10 @@ def run_workflow(
             texture_path_text=texture_path_text,
             title=title,
             isosurface=isosurface,
+            surface_mode=surface_mode,
+            positive_rgb=positive_rgb,
+            negative_rgb=negative_rgb,
+            surface_opacity=surface_opacity,
             tex_percent_range=tex_range,
             structure=structure,
             boundary=boundary,
@@ -1067,6 +1154,8 @@ def run_workflow(
                 tex_percent_range=tex_range,
                 tex_physical=tex_physical,
                 tex_reference_range=tex_reference_range,
+                surface_mode=surface_mode,
+                isosurface_specs=isosurface_specs,
                 structure_mode=structure_mode,
                 sections=sections,
             ),
@@ -1093,6 +1182,14 @@ def _float_six(values: Optional[Sequence[float]]) -> Tuple[float, float, float, 
     return tuple(float(value) for value in values)  # type: ignore[return-value]
 
 
+def _rgb_arg(values: Sequence[int], label: str) -> RGB:
+    return _validate_rgb(values, label)
+
+
+def _opacity_arg(values: Sequence[int]) -> Tuple[int, int]:
+    return _validate_opacity(values)
+
+
 def main(argv: Optional[Sequence[str]] = None) -> int:
     parser = argparse.ArgumentParser(
         description="Create a VESTA file for a scalar cube, optionally with a texture/color cube."
@@ -1106,6 +1203,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser.add_argument("--no-manifest", action="store_true")
     parser.add_argument("--title")
     parser.add_argument("--isosurface", type=float, default=DEFAULT_ISOSURFACE)
+    parser.add_argument("--surface-mode", choices=["single", "signed"], default="single")
+    parser.add_argument("--positive-rgb", nargs=3, type=int, default=(255, 255, 0), metavar=("R", "G", "B"))
+    parser.add_argument("--negative-rgb", nargs=3, type=int, default=(0, 80, 255), metavar=("R", "G", "B"))
+    parser.add_argument("--surface-opacity", nargs=2, type=int, default=(127, 255), metavar=("O1", "O2"))
     parser.add_argument("--tex-percent", nargs=2, type=float, metavar=("MIN", "MAX"))
     parser.add_argument("--tex-physical", nargs=2, type=float, metavar=("MIN", "MAX"))
     parser.add_argument("--tex-range-source", choices=["full-cube", "surface-band"], default="full-cube")
@@ -1131,6 +1232,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         write_manifest=not args.no_manifest,
         title=args.title,
         isosurface=args.isosurface,
+        surface_mode=args.surface_mode,
+        positive_rgb=_rgb_arg(args.positive_rgb, "positive surface"),
+        negative_rgb=_rgb_arg(args.negative_rgb, "negative surface"),
+        surface_opacity=_opacity_arg(args.surface_opacity),
         tex_percent=_float_pair(args.tex_percent),
         tex_physical=_float_pair(args.tex_physical),
         tex_range_source=args.tex_range_source,

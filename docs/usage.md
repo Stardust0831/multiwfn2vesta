@@ -94,6 +94,23 @@ multiwfn2vesta cube-vesta \
   --isosurface 0.01
 ```
 
+对于实值轨道、实空间波函数、密度差、Fukui/dual descriptor 这类有正负号的
+cube，可以直接写 VESTA 正负两张等值面：
+
+```bash
+multiwfn2vesta cube-vesta \
+  orbital.cub \
+  cube_products \
+  --surface-mode signed \
+  --isosurface 0.02
+```
+
+`--surface-mode signed` 会把 `--isosurface X` 当成幅值，分别写
+`+abs(X)` 和 `-abs(X)` 两条 `ISURF` 记录。默认正值为黄色，负值为蓝色；
+两条等值面都必须落在 cube 数据最小/最大值范围内。需要调色时可用
+`--positive-rgb R G B`、`--negative-rgb R G B` 和
+`--surface-opacity O1 O2`。
+
 如果有一个表面 cube 和一个兼容的染色/texture cube：
 
 ```bash

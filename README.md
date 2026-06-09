@@ -13,6 +13,8 @@ point.
 - Maintained branch: `main`.
 - GitHub remote: `origin` points to `Github:Stardust0831/multiwfn2vesta.git`,
   with `origin/HEAD -> origin/main`.
+- Current local/remote branch check after `git fetch --prune`: only `main`
+  and `origin/main` are present.
 - Previous experiment branches have been merged into `main` and removed from
   the remote when no longer needed.
 - Repository-local commit identity is
@@ -25,7 +27,8 @@ point.
 - Check Molden files before Multiwfn workflows, including ABACUS-specific
   `[Cell]` and `[Nval]` requirements.
 - Create VESTA `.vesta` files directly from ABACUS or Multiwfn scalar cube
-  files, with optional texture/color cube support.
+  files, with optional texture/color cube support, surface-band texture
+  scaling, and signed positive/negative isosurface presets.
 - Run Multiwfn AIM topology analysis from a wavefunction file such as
   `.molden`, `.fch`, `.fchk`, `.wfn`, or `.wfx`.
 - Convert Multiwfn `paths.pdb` and `CPs.pdb` to an atoms-only `.vesta` file
@@ -86,6 +89,19 @@ or real-space wavefunction cubes, and for Multiwfn-generated scalar cubes:
 ```bash
 multiwfn2vesta cube-vesta density.cub cube_products --isosurface 0.01
 ```
+
+For signed scalar fields such as real orbital amplitudes, real wavefunction
+cubes, density differences, or dual-descriptor style cubes:
+
+```bash
+multiwfn2vesta cube-vesta orbital.cub cube_products \
+  --surface-mode signed \
+  --isosurface 0.02
+```
+
+In signed mode, `--isosurface X` is treated as a magnitude.  The generated
+`ISURF` block contains `+abs(X)` in yellow and `-abs(X)` in blue by default.
+Both levels must be inside the cube data range.
 
 For a surface cube colored by a compatible texture cube:
 
@@ -227,7 +243,10 @@ PYTHONPATH=src python3 -m unittest \
   tests.test_aim_igmh_vesta \
   tests.test_vesta_aim_overlay_style \
   tests.test_executables \
-  tests.test_multiwfn_aim
+  tests.test_multiwfn_aim \
+  tests.test_iri_cube \
+  tests.test_aim_vesta \
+  tests.test_vesta_atom_coloring
 ```
 
 Smoke-tested ABACUS Molden check:

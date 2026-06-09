@@ -1,5 +1,34 @@
 # Worklog
 
+## 2026-06-10: README refresh, branch check, and signed cube preset
+
+- Rechecked branch state for the README cleanup request.  After
+  `git fetch --prune`, the project has only local `main` and remote
+  `origin/main`; `origin/HEAD` points to `origin/main`, so there is no extra
+  feature branch left to merge.
+- Confirmed repository-local commit identity is
+  `Stardust0831 <13862180016@163.com>`.
+- Updated README repository status so the front page records the single
+  maintained branch, SSH remote, and local commit identity.
+- Added signed positive/negative isosurface support to
+  `multiwfn2vesta cube-vesta`.  `--surface-mode signed --isosurface X` writes
+  two `ISURF` entries, `+abs(X)` and `-abs(X)`, with yellow positive and blue
+  negative defaults.  Zero magnitudes are rejected and all generated levels
+  are checked against the cube data range.
+- Added focused tests for the signed VESTA `ISURF` block, manifest fields,
+  zero-level rejection, and negative-level range checking.
+- Updated README, usage docs, cube workflow skill notes, ABACUS/Multiwfn
+  planning notes, and the analysis matrix.  Signed cube display is now a
+  maintained generic VESTA preset; Multiwfn command streams for producing
+  orbital/density-difference/Fukui/dual-descriptor cubes remain future work.
+- Validation passed with 78 no-GUI regression tests, `py_compile` for
+  `cube_vesta.py` and `cli.py`, and `git diff --check`.
+- Ran a signed cube CLI smoke under
+  `/mnt/g/work/multiwfn2vesta/smoke/cube_vesta_signed_smoke_20260610/`.
+  The output `.vesta` contains an `ISURF` block and the recipe records
+  `surface_mode: signed`, data range `-0.3` to `0.4`, and isosurface levels
+  `0.2, -0.2`.
+
 ## 2026-06-10: AIM path radius and BCP label research
 
 - Updated `multiwfn2vesta.vesta_aim_overlay_style` so AIM bond-path sample

@@ -11,6 +11,14 @@ Single cube:
 multiwfn2vesta cube-vesta density.cub cube_products --isosurface 0.01
 ```
 
+Signed positive/negative cube:
+
+```bash
+multiwfn2vesta cube-vesta orbital.cub cube_products \
+  --surface-mode signed \
+  --isosurface 0.02
+```
+
 Surface cube plus texture/color cube:
 
 ```bash
@@ -46,6 +54,12 @@ multiwfn2vesta cube-vesta surface.cub cube_products \
 - Texture/color cube goes in `IMPORT_TEXTURE`.
 - Default sections are off: `SECTS 0 0`.
 - `ISURF` stores the requested isosurface level.
+- `--surface-mode single` writes one `ISURF` entry.
+- `--surface-mode signed` treats `--isosurface X` as a magnitude and writes
+  both `+abs(X)` and `-abs(X)`.  The default colors are yellow for positive
+  values and blue for negative values.  Use `--positive-rgb`,
+  `--negative-rgb`, and `--surface-opacity` to override the VESTA surface
+  style.
 - `TEX3P` stores VESTA percentage/normalized values, not physical scalar
   limits.
 - `--tex-physical MIN MAX` converts physical limits to percentages using the
@@ -73,7 +87,10 @@ multiwfn2vesta cube-vesta surface.cub cube_products \
 ## Current Limits
 
 - No VESTA rendering is launched by this command.
-- Positive/negative signed isosurface presets are not implemented yet.
+- Signed positive/negative isosurfaces are implemented as a generic VESTA
+  preset, but analysis-specific Multiwfn command streams for producing orbital,
+  density-difference, Fukui, or dual-descriptor cubes are still separate future
+  work.
 - Surface-band sampling uses grid-point values, not interpolation exactly on
   the triangulated VESTA isosurface.
 - AIM/BCP pseudo-site overlays remain in the AIM/AIM+IGMH workflows, not this

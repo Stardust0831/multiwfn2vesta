@@ -22,6 +22,18 @@ comment two
 """
 
 
+SIGNED_CUBE = """signed comment one
+signed comment two
+    2    -1.000000    -2.000000     0.500000
+    2     0.500000     0.000000     0.000000
+    2     0.000000     0.500000     0.000000
+    2     0.000000     0.000000     0.500000
+    8     8.000000    -1.000000    -2.000000     0.500000
+    1     1.000000    -0.500000    -2.000000     0.500000
+ -0.3 -0.2 -0.1 0.0 0.1 0.2 0.3 0.4
+"""
+
+
 TEXTURE_CUBE = """texture one
 texture two
     2    -1.000000    -2.000000     0.500000
@@ -268,6 +280,42 @@ class TestCubeVesta(unittest.TestCase):
 
             with self.assertRaisesRegex(ValueError, "outside surface cube data range"):
                 run_workflow(cube, root / "products", isosurface=2.0)
+
+    def test_signed_surface_mode_writes_positive_and_negative_isurfs(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            cube = self.write_tmp(root, "signed.cub", SIGNED_CUBE)
+
+            result = run_workflow(
+                cube,
+                root / "products",
+                isosurface=0.2,
+                surface_mode="signed",
+                stem="signed",
+            )
+
+            text = result.vesta_path.read_text(encoding="utf-8")
+            manifest = result.manifest_path.read_text(encoding="utf-8")
+
+            self.assertRegex(text, r"ISURF\n  1   1\s+0\.2 255 255\s+0 127 255\n  1   1\s+-0\.2\s+0\s+80 255 127 255")
+            self.assertIn("surface_mode: `signed`", manifest)
+            self.assertIn("isosurface_levels: `0.2, -0.2`", manifest)
+
+    def test_signed_surface_requires_nonzero_level(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            cube = self.write_tmp(root, "signed.cub", SIGNED_CUBE)
+
+            with self.assertRaisesRegex(ValueError, "non-zero"):
+                run_workflow(cube, root / "products", isosurface=0.0, surface_mode="signed")
+
+    def test_signed_surface_checks_negative_level_range(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            cube = self.write_tmp(root, "surface.cub", MOLECULE_CUBE)
+
+            with self.assertRaisesRegex(ValueError, r"level\(s\).*-0\.2.*outside surface cube data range"):
+                run_workflow(cube, root / "products", isosurface=0.2, surface_mode="signed")
 
 
 if __name__ == "__main__":

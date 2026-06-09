@@ -43,6 +43,19 @@ Prepare these cubes for VESTA with the maintained no-GUI generator:
 multiwfn2vesta cube-vesta density.cub cube_products --isosurface 0.01
 ```
 
+For signed ABACUS/Multiwfn scalar cubes such as real wavefunction amplitudes,
+real orbital cubes, density differences, Fukui functions, or dual
+descriptors:
+
+```bash
+multiwfn2vesta cube-vesta signed_scalar.cub cube_products \
+  --surface-mode signed \
+  --isosurface 0.02
+```
+
+This writes both positive and negative `ISURF` entries in one `.vesta` file,
+using yellow for positive values and blue for negative values by default.
+
 For a surface cube plus a compatible texture cube:
 
 ```bash

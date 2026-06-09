@@ -6,8 +6,7 @@ Updated: 2026-06-10
 
 - Turn the 2026-06-10 Multiwfn/ABACUS/VESTA research into maintainable
   features: latest ABACUS Molden wrapper with `[Nval]` validation,
-  signed cube presets, RDG/IRI/IGMH command streams, and ABACUS/Multiwfn atom
-  scalar parsers.
+  RDG/IRI/IGMH command streams, and ABACUS/Multiwfn atom scalar parsers.
 - Keep non-empty `LBLAT` generation out of maintained code until a GUI-saved
   VESTA diff proves the record syntax; the verified native route now uses
   `LABEL 1` plus site labels.
@@ -23,6 +22,28 @@ Updated: 2026-06-10
 
 ## Done
 
+- Refreshed README for the current single-branch state and maintained CLI:
+  after `git fetch --prune`, only local `main` and remote `origin/main` are
+  present, with repository-local identity
+  `Stardust0831 <13862180016@163.com>`.
+- Added signed positive/negative isosurface support to
+  `multiwfn2vesta cube-vesta`.  `--surface-mode signed --isosurface X` writes
+  both `+abs(X)` and `-abs(X)` `ISURF` entries, defaults to yellow positive
+  and blue negative surfaces, rejects zero magnitudes, and checks every level
+  against the cube data range.
+- Added focused signed-cube tests for the generated VESTA `ISURF` block,
+  manifest `surface_mode`/`isosurface_levels`, zero-level rejection, and
+  negative-level range validation.
+- Updated README, usage docs, cube workflow skill notes, ABACUS/Multiwfn
+  planning notes, and the analysis matrix so signed cube output is documented
+  as implemented while Multiwfn command streams for generating those cubes
+  remain future work.
+- Validated the signed cube preset and README/docs refresh with 78 no-GUI
+  regression tests, `py_compile`, `git diff --check`, and a real signed cube
+  CLI smoke under
+  `/mnt/g/work/multiwfn2vesta/smoke/cube_vesta_signed_smoke_20260610/`.
+  The recipe records `surface_mode: signed` and isosurface levels
+  `0.2, -0.2`.
 - Checked branch/remote state for the user's README cleanup follow-up:
   `git fetch --prune` and `git ls-remote --heads origin` show only `main`,
   with `origin/HEAD -> origin/main`; there is no extra branch left to merge
