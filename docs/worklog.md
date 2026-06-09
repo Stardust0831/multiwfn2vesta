@@ -1,5 +1,31 @@
 # Worklog
 
+## 2026-06-10: README branch follow-up audit
+
+- User asked to update README again, noted that the branch state looked odd,
+  suggested merging back to one branch if needed, and requested
+  `Stardust0831` identity for the work.
+- Rechecked `/mnt/g/work/multiwfn2vesta/project` with `git fetch --prune`,
+  `git status --short --branch`, `git branch --all --verbose --no-abbrev`,
+  and `git ls-remote --heads origin`.
+- Result: local `main` and `origin/main` both point at
+  `17667f2a1a7380fb7a2c2495f9df04ef633e0577`; `origin/HEAD` points to
+  `origin/main`; the GitHub remote exposes only `refs/heads/main`.  There is
+  no feature branch to merge back during this pass.
+- Confirmed repository-local identity remains
+  `Stardust0831 <13862180016@163.com>`.
+- Updated `README.md` so the repository-status section records the verified
+  commit, the one-branch remote state, the maintainer identity commands, and
+  a future fast-forward merge pattern for short-lived experiment branches.
+- Validation before commit passed with `git diff --check` and
+  `bin/multiwfn2vesta --help`.  A read-only sub-agent review found no content
+  blocker and explicitly warned not to use `git add .` because the separate
+  `grid-run` draft is still untracked.
+- The working tree also contains the ongoing `grid-run` implementation draft
+  (`src/multiwfn2vesta/multiwfn_grid.py`) and related kanban notes.  That
+  feature remains a separate increment and is intentionally not treated as a
+  branch-merge cleanup.
+
 ## 2026-06-10: README branch-state refresh
 
 - User requested a README update and branch simplification because the branch

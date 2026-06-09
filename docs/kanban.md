@@ -4,6 +4,12 @@ Updated: 2026-06-10
 
 ## Doing
 
+- Implement the next maintained Multiwfn cube-generation workflow beyond
+  `iri-run`: a generic `grid-run` wrapper around Multiwfn main function 5
+  (`study3dim`) for real-space function cubes such as density, orbital/MO,
+  Laplacian, ELF, LOL, ESP/MEP, RDG/IRI-like scalar grids, and related
+  fields.  First verify the noGUI command stream on H2O, then wire the output
+  into the existing `cube-preset`/`cube-vesta` backends.
 - Continue the long-running objective: research and turn valuable
   Multiwfn wavefunction analyses into maintained VESTA workflows, especially
   routes that can start from ABACUS LCAO Molden files.  Next concrete target:
@@ -30,6 +36,16 @@ Updated: 2026-06-10
 
 ## Done
 
+- Rechecked the branch state for the user's README/merge-back follow-up:
+  local `main` and `origin/main` both point at
+  `17667f2a1a7380fb7a2c2495f9df04ef633e0577`, and
+  `git ls-remote --heads origin` returns only `refs/heads/main`.  There is
+  no feature branch to merge back in this pass.
+- Confirmed repository-local commit identity remains
+  `Stardust0831 <13862180016@163.com>`.
+- Updated README branch-maintenance notes with the current verified commit,
+  expected one-branch remote state, maintainer identity commands, and the
+  future fast-forward merge pattern for short-lived experiment branches.
 - Rechecked README/branch state for the user's 2026-06-10 cleanup request:
   after `git fetch --prune`, the project has local `main`, `origin/main`,
   and `origin/HEAD -> origin/main`; `git ls-remote --heads origin` reports

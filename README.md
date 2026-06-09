@@ -14,21 +14,24 @@ point.
 - Maintained branch: `main`.
 - GitHub remote: `origin` points to `Github:Stardust0831/multiwfn2vesta.git`,
   with `origin/HEAD -> origin/main`.
-- Current local/remote branch check on 2026-06-10: local `main` tracks
-  `origin/main`; `git ls-remote --heads origin` returns only
-  `refs/heads/main`.
+- Latest local/remote branch audit on 2026-06-10: local `main` tracks
+  `origin/main`, `origin/HEAD` points to `origin/main`, and
+  `git ls-remote --heads origin` returns only `refs/heads/main`.
 - Current cleanup result on 2026-06-10: there is no extra local or remote
-  feature branch to merge back.  The apparently strange branch history is
-  already represented as commits on `main`.
+  feature branch to merge back, so no merge action is required.  The
+  apparently strange branch history is already represented as commits on
+  `main`.
 - Previous experiment branches should be treated as short-lived workspaces:
   merge or fast-forward the useful commits into `main`, then remove the
   experiment branch once `origin/main` contains the maintained result.
 - Repository-local commit identity is
   `Stardust0831 <13862180016@163.com>`.
 
-Maintainer branch check:
+Maintainer branch check and one-branch closeout:
 
 ```bash
+git config user.name Stardust0831
+git config user.email 13862180016@163.com
 git fetch --prune origin
 git status --short --branch
 git branch --all --verbose --no-abbrev
@@ -37,7 +40,18 @@ git ls-remote --heads origin
 
 At the time of this README refresh, the expected remote-head output is only
 `refs/heads/main`.  If a future experiment branch appears, keep all final
-project code, tests, and docs on `main` before pushing a release-style state.
+project code, tests, and docs on `main` before pushing a release-style state:
+
+```bash
+git switch main
+git pull --ff-only origin main
+git merge --ff-only <experiment-branch>
+git push origin main
+```
+
+If a fast-forward merge is impossible, make a normal reviewed merge commit on
+`main` with the same `Stardust0831` identity, run the no-GUI tests, and only
+then delete the temporary branch.
 
 ## Maintained Features
 
