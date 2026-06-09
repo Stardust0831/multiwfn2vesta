@@ -53,6 +53,10 @@ Updated: 2026-06-10
   AIM+IGMH, executable discovery, Multiwfn AIM, IRI cube handling, AIM VESTA
   conversion, and VESTA atom coloring.  `multiwfn2vesta iri-run --help`,
   top-level `multiwfn2vesta --help`, and `git diff --check` also passed.
+- Feature implementation commit was pushed to GitHub `main` at
+  `16f345c76053454cdca026d707f885383d9122c3`
+  (`Add Multiwfn IRI runner`), and `HEAD` matched `origin/main` after
+  `git fetch origin main`.
 - Added `multiwfn2vesta cube-preset`, a thin analysis-preset layer over the
   maintained `cube-vesta` backend.  Current presets cover density-like scalar
   cubes, signed orbital/wavefunction/density-difference cubes, ELF/LOL cubes,
