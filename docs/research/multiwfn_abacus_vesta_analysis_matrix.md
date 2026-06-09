@@ -71,7 +71,7 @@ occupations, and density derivatives from the wavefunction representation.
 
 | Analysis | Multiwfn input | ABACUS feasibility | Multiwfn output | VESTA representation | Project action |
 | --- | --- | --- | --- | --- | --- |
-| Generic cube visualizer | Any `.cub` from Multiwfn or ABACUS | Strong: `out_chg`, `out_pot`, `out_pchg`, `out_wfc_*`, `out_elf` | Cube | Density/texture import, isosurface, section off by default | Add reusable VESTA cube style/template CLI |
+| Generic cube visualizer | Any `.cub` from Multiwfn or ABACUS | Strong: `out_chg`, `out_pot`, `out_pchg`, `out_wfc_*`, `out_elf` | Cube | Density/texture import, isosurface, section off by default | Implemented as `multiwfn2vesta cube-vesta`; improve texture sampling later |
 | Molecular orbitals and band wavefunctions | Full wavefunction Molden/FCH/WFN, or ABACUS real-space `get_wf` cubes | Strong for Gamma LCAO Molden; direct cube route for selected bands | `orb*.cub`, `MOvalue.cub`, `orbdens.cub`, or ABACUS `wfi*.cube` | Positive/negative isosurfaces; magnitude as single surface | Add `orbital-cube` and `cube-vesta` workflows |
 | Electron density, spin density, Laplacian, kinetic density | Full wavefunction, or ABACUS density cubes for density only | Strong for density cube; Molden route for derivatives | `density.cub`, `spindensity.cub`, `laplacian.cub`, `K(r).cub`, `G(r).cub` | Single/positive-negative isosurfaces or slices | Add generic scalar cube presets |
 | ELF/LOL | Full wavefunction; ABACUS direct `out_elf` for ELF | Strong for ELF direct; Molden route for Multiwfn ELF/LOL | `ELF.cub`, `LOL.cub`, ABACUS `elf*.cube` | Isosurfaces around localized regions | Add ELF preset and ABACUS direct input route |
@@ -139,9 +139,9 @@ Known limitations:
 
 ## Recommended Development Roadmap
 
-1. Add a generic `cube-vesta` CLI that accepts one density cube and optional
-   texture cube, turns off `SECTS`, sets `ISURF`, patches `TEX3P`, copies cube
-   dependencies, and optionally renders three views.
+1. Improve the generic `cube-vesta` CLI beyond the current first version:
+   add surface-sampled texture statistics, signed positive/negative surface
+   presets, and optional render hooks.
 2. Add ABACUS-oriented discovery/docs for the latest
    `interfaces/Multiwfn_interface/molden.py` and validate `[Nval]` in input
    Molden headers before running Multiwfn wavefunction analyses.
@@ -169,7 +169,8 @@ Implemented or partly implemented:
 
 Main gaps:
 
-- No generic cube-to-VESTA CLI yet.
+- Generic cube-to-VESTA CLI now exists as `multiwfn2vesta cube-vesta`;
+  remaining work is richer presets and surface-sampled texture scaling.
 - No direct ABACUS Molden converter wrapper yet.
 - No ABACUS `mulliken.txt` parser yet.
 - No maintained Multiwfn command streams for orbital/density/ELF/RDG/IRI cube

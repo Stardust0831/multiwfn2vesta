@@ -6,13 +6,14 @@ from pathlib import Path
 from typing import Dict, List, Optional, Sequence, Tuple
 import sys
 
-from . import aim_igmh_vesta, aim_vesta, molden_check, multiwfn_aim
+from . import aim_igmh_vesta, aim_vesta, cube_vesta, molden_check, multiwfn_aim
 from .executables import discovery_report
 
 
 COMMANDS: Dict[str, Tuple[str, str]] = {
     "discover": ("Find Multiwfn and VESTA executables", "executables"),
     "molden-check": ("Check Molden sections before Multiwfn workflows", "molden_check"),
+    "cube-vesta": ("Create a VESTA file from cube data", "cube_vesta"),
     "aim-run": ("Run Multiwfn AIM on a wavefunction file, then convert PDB to VESTA", "multiwfn_aim"),
     "aim-pdb": ("Convert Multiwfn paths.pdb/CPs.pdb to atoms-only VESTA", "aim_vesta"),
     "aim-igmh": ("Style/render a saved AIM+IGMH VESTA overlay", "aim_igmh_vesta"),
@@ -24,6 +25,7 @@ ALIASES = {
     "env": "discover",
     "check-molden": "molden-check",
     "abacus-molden-check": "molden-check",
+    "cube": "cube-vesta",
     "multiwfn-aim": "aim-run",
     "aim-vesta": "aim-pdb",
     "igmh": "aim-igmh",
@@ -45,6 +47,8 @@ Commands:
   discover   Find Multiwfn and VESTA executables from env/PATH/workspace.
   molden-check
              Check Molden sections before Multiwfn workflows.
+  cube-vesta
+             Create a VESTA isosurface file from one cube and optional texture cube.
   aim-run    Run Multiwfn AIM on a wavefunction file, then convert to VESTA.
   aim-pdb    Convert Multiwfn paths.pdb/CPs.pdb to atoms-only VESTA.
   aim-igmh   Style a saved AIM+IGMH VESTA overlay, optionally render views.
@@ -56,6 +60,7 @@ Aliases:
 Examples:
   multiwfn2vesta discover
   multiwfn2vesta molden-check ABACUS_Multiwfn.molden --abacus
+  multiwfn2vesta cube-vesta density.cub cube_products --isosurface 0.01
   multiwfn2vesta aim-run input.molden aim_out
   multiwfn2vesta aim-pdb paths.pdb aim_atoms_only.vesta --cps-pdb CPs.pdb
   multiwfn2vesta aim-igmh overlay.vesta products --label-bcp-sites
@@ -176,6 +181,37 @@ def interactive_aim_igmh() -> int:
     return aim_igmh_vesta.main(argv)
 
 
+def interactive_cube_vesta() -> int:
+    print("\nCube -> VESTA isosurface")
+    surface_cube = _prompt("surface cube", required=True)
+    output_dir = _prompt("output directory", default=_default_output_dir(surface_cube, "cube_vesta_products"))
+    argv: List[str] = [surface_cube, output_dir]
+
+    texture_cube = _prompt("texture/color cube (empty to skip)")
+    if texture_cube:
+        argv.extend(["--texture-cube", texture_cube])
+
+    isosurface = _prompt("isosurface value", default=str(cube_vesta.DEFAULT_ISOSURFACE))
+    argv.extend(["--isosurface", isosurface])
+
+    tex_range = _prompt("physical texture range, e.g. -0.04 0.04 (empty for default percentages)")
+    if tex_range:
+        parts = tex_range.split()
+        if len(parts) == 2:
+            argv.extend(["--tex-physical", parts[0], parts[1]])
+        else:
+            print("Texture range needs exactly two numbers.")
+            return 2
+
+    structure = _prompt("structure phase (auto/none/molecule/crystal)", default="auto")
+    argv.extend(["--structure", structure])
+
+    if _yes_no("copy cube files beside VESTA", default=True) is False:
+        argv.append("--no-copy-cubes")
+
+    return cube_vesta.main(argv)
+
+
 def interactive_main() -> int:
     print("multiwfn2vesta interactive launcher\n")
     print("0) Discover Multiwfn/VESTA executables")
@@ -183,6 +219,7 @@ def interactive_main() -> int:
     print("2) AIM PDB -> atoms-only VESTA")
     print("3) AIM+IGMH overlay -> styled VESTA / optional three views")
     print("4) Check Molden file for Multiwfn/ABACUS use")
+    print("5) Cube -> VESTA isosurface")
     print("q) Quit")
     choice = _prompt("choice", default="3").lower()
     if choice in {"0", "discover", "where", "env"}:
@@ -200,6 +237,8 @@ def interactive_main() -> int:
         if _yes_no("ABACUS pseudopotential Molden", default=True):
             argv.append("--abacus")
         return molden_check.main(argv)
+    if choice in {"5", "cube-vesta", "cube"}:
+        return interactive_cube_vesta()
     if choice in {"q", "quit", "exit"}:
         return 0
     print(f"Unknown choice: {choice}")
@@ -212,6 +251,8 @@ def run_command(command: str, args: Sequence[str]) -> int:
         return 0
     if command == "molden-check":
         return molden_check.main(args)
+    if command == "cube-vesta":
+        return cube_vesta.main(args)
     if command == "aim-run":
         return multiwfn_aim.main(args)
     if command == "aim-pdb":

@@ -15,6 +15,7 @@ class TestUnifiedCli(unittest.TestCase):
         text = output.getvalue()
         self.assertIn("discover", text)
         self.assertIn("molden-check", text)
+        self.assertIn("cube-vesta", text)
         self.assertIn("aim-run", text)
         self.assertIn("aim-pdb", text)
         self.assertIn("aim-igmh", text)
@@ -42,6 +43,13 @@ class TestUnifiedCli(unittest.TestCase):
 
         self.assertEqual(code, 0)
         mocked.assert_called_once_with(["input.molden", "--abacus"])
+
+    def test_dispatches_cube_vesta_command(self):
+        with patch("multiwfn2vesta.cli.cube_vesta.main", return_value=0) as mocked:
+            code = cli.main(["cube-vesta", "density.cub", "products", "--isosurface", "0.01"])
+
+        self.assertEqual(code, 0)
+        mocked.assert_called_once_with(["density.cub", "products", "--isosurface", "0.01"])
 
     def test_dispatches_aim_igmh_command(self):
         with patch("multiwfn2vesta.cli.aim_igmh_vesta.main", return_value=0) as mocked:
@@ -134,6 +142,42 @@ class TestUnifiedCli(unittest.TestCase):
 
         self.assertEqual(code, 0)
         mocked.assert_called_once_with(["ABACUS_Multiwfn.molden", "--abacus"])
+
+    def test_interactive_cube_vesta_builds_expected_args(self):
+        answers = iter(
+            [
+                "5",
+                "surface.cub",
+                "cube_products",
+                "texture.cub",
+                "1.0",
+                "-0.04 0.04",
+                "molecule",
+                "n",
+            ]
+        )
+        with patch("builtins.input", lambda _prompt: next(answers)):
+            with patch("sys.stdout", io.StringIO()):
+                with patch("multiwfn2vesta.cli.cube_vesta.main", return_value=0) as mocked:
+                    code = cli.main([])
+
+        self.assertEqual(code, 0)
+        mocked.assert_called_once_with(
+            [
+                "surface.cub",
+                "cube_products",
+                "--texture-cube",
+                "texture.cub",
+                "--isosurface",
+                "1.0",
+                "--tex-physical",
+                "-0.04",
+                "0.04",
+                "--structure",
+                "molecule",
+                "--no-copy-cubes",
+            ]
+        )
 
 
 if __name__ == "__main__":

@@ -23,6 +23,7 @@ multiwfn2vesta
 ```bash
 multiwfn2vesta discover
 multiwfn2vesta molden-check --help
+multiwfn2vesta cube-vesta --help
 multiwfn2vesta aim-run --help
 multiwfn2vesta aim-pdb --help
 multiwfn2vesta aim-igmh --help
@@ -33,6 +34,8 @@ multiwfn2vesta aim-igmh --help
 - `discover`: 报告 Multiwfn 和 VESTA 可执行文件候选，以及当前会选择的路径
 - `molden-check`: 在调用 Multiwfn 前检查 Molden 文件是否含有必要段；ABACUS
   模式会要求 `[Cell]` 和 `[Nval]`
+- `cube-vesta`: 从 ABACUS/Multiwfn scalar cube 直接生成 `.vesta`，可选
+  texture/color cube，默认关闭 section plane
 - `aim-run`: 从 `.molden`、`.fch`、`.wfn` 等波函数文件调用 Multiwfn AIM，
   再把生成的 `paths.pdb`/`CPs.pdb` 转成 atoms-only `.vesta`
 - `aim-pdb`: Multiwfn `paths.pdb`/`CPs.pdb` 转 atoms-only `.vesta`
@@ -77,6 +80,44 @@ VESTA 查找顺序：
 
 `aim-run` 本身只启动 Multiwfn，不启动 VESTA；VESTA 只在
 `aim-igmh --render-three-views` 这种显式渲染命令里被调用。
+
+## Cube 文件到 VESTA
+
+ABACUS 的 `out_chg`、`out_pot`、`out_elf`、`out_pchg`、`out_wfc_*`，
+以及 Multiwfn 导出的 density、ELF、IRI/RDG、ESP 等 cube，可以先走
+通用 cube 入口：
+
+```bash
+multiwfn2vesta cube-vesta \
+  density.cub \
+  cube_products \
+  --isosurface 0.01
+```
+
+如果有一个表面 cube 和一个兼容的染色/texture cube：
+
+```bash
+multiwfn2vesta cube-vesta \
+  IRI2_surface.cub \
+  cube_products \
+  --texture-cube IRI1_color.cub \
+  --isosurface 1.0 \
+  --tex-physical -0.04 0.04
+```
+
+默认行为：
+
+- 生成 `<output_dir>/<stem>_cube.vesta`
+- 复制 surface/texture cube 到输出目录，避免 VESTA 渲染时找不到相对依赖
+- 写 `<stem>_cube_vesta_recipe.md`
+- 用 `IMPORT_DENSITY 1` 放表面 cube，用 `IMPORT_TEXTURE` 放染色 cube
+- 用 `SECTS 0 0` 关闭 section plane
+- 从 cube header 生成一个结构 phase；`--structure auto` 会在 origin 为零且
+  原子落在 cube cell 内时用 `CRYSTAL`，否则用 `MOLECULE`
+
+注意：`TEX3P` 在 VESTA 里按百分比/归一化状态处理，不是物理标量范围。
+传 `--tex-physical -0.04 0.04` 时，程序会根据整张 texture cube 的最小/最大值
+换算成百分比写入；它还不是严格的“只采样等值面上的 texture 值”的高级算法。
 
 ## 波函数文件到 AIM VESTA
 

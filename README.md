@@ -24,6 +24,8 @@ point.
   VESTA.
 - Check Molden files before Multiwfn workflows, including ABACUS-specific
   `[Cell]` and `[Nval]` requirements.
+- Create VESTA `.vesta` files directly from ABACUS or Multiwfn scalar cube
+  files, with optional texture/color cube support.
 - Run Multiwfn AIM topology analysis from a wavefunction file such as
   `.molden`, `.fch`, `.fchk`, `.wfn`, or `.wfx`.
 - Convert Multiwfn `paths.pdb` and `CPs.pdb` to an atoms-only `.vesta` file
@@ -75,6 +77,29 @@ VESTA discovery checks:
    `VESTA_EXECUTABLE`.
 3. Workspace-local VESTA tools.
 4. Shell `PATH`.
+
+## Cube to VESTA
+
+For direct ABACUS cubes such as charge density, potential, ELF, partial charge,
+or real-space wavefunction cubes, and for Multiwfn-generated scalar cubes:
+
+```bash
+multiwfn2vesta cube-vesta density.cub cube_products --isosurface 0.01
+```
+
+For a surface cube colored by a compatible texture cube:
+
+```bash
+multiwfn2vesta cube-vesta IRI2_surface.cub cube_products \
+  --texture-cube IRI1_color.cub \
+  --isosurface 1.0 \
+  --tex-physical -0.04 0.04
+```
+
+The command writes a `.vesta` file, copies cube dependencies beside it by
+default, and writes a markdown recipe.  `SECTS 0 0` is the default to avoid
+VESTA section planes.  `TEX3P` is written as VESTA percentage/normalized
+values, not direct physical scalar limits.
 
 ## Wavefunction to AIM VESTA
 
@@ -186,6 +211,7 @@ Current focused no-GUI checks:
 ```bash
 PYTHONPATH=src python3 -m unittest \
   tests.test_molden_check \
+  tests.test_cube_vesta \
   tests.test_cli \
   tests.test_aim_igmh_vesta \
   tests.test_vesta_aim_overlay_style \
@@ -205,6 +231,16 @@ The Ag(111)+benzene Molden check reported 60 atoms, 566 MO blocks, three
 `[Nval]` entries (`Ag=19`, `C=4`, `H=1`), three numeric `[Cell]` rows, and
 `Result: OK`.
 
+Smoke-tested H2O-HF cube-to-VESTA run:
+
+```text
+/mnt/g/work/multiwfn2vesta/smoke/cube_vesta_cli_smoke_20260610/
+```
+
+It generated `h2o_hf_iri_cube.vesta`, copied `h2o_hf_IRI2_surface.cub` and
+`h2o_hf_IRI1_color.cub`, set `IMPORT_DENSITY`/`IMPORT_TEXTURE`, disabled
+sections with `SECTS 0 0`, and wrote `TEX3P` as a percentage range.
+
 Smoke-tested Multiwfn noGUI AIM run:
 
 ```text
@@ -218,6 +254,7 @@ and `aim_atoms_only.vesta` without launching VESTA.
 
 - `docs/usage.md`: fuller user guide.
 - `docs/skills/multiwfn2vesta_cli_skill.md`: CLI operating notes.
+- `docs/skills/cube_vesta_skill.md`: ABACUS/Multiwfn cube to VESTA workflow.
 - `docs/skills/aim_paths_to_vesta_skill.md`: AIM topology to VESTA workflow.
 - `docs/skills/aim_igmh_vesta_skill.md`: reusable AIM+IGMH overlay workflow.
 - `docs/research/multiwfn_abacus_vesta_analysis_matrix.md`: roadmap for

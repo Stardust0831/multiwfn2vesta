@@ -5,9 +5,9 @@ Updated: 2026-06-10
 ## Doing
 
 - Turn the 2026-06-10 Multiwfn/ABACUS/VESTA research into maintainable
-  features: generic cube-to-VESTA styling, latest ABACUS Molden wrapper with
-  `[Nval]` validation, RDG/IRI/IGMH command streams, and ABACUS/Multiwfn atom
-  scalar parsers.
+  features: latest ABACUS Molden wrapper with `[Nval]` validation,
+  surface-sampled cube texture scaling, RDG/IRI/IGMH command streams, and
+  ABACUS/Multiwfn atom scalar parsers.
 - Keep non-empty `LBLAT` generation out of maintained code until a GUI-saved
   VESTA diff proves the record syntax; the verified native route now uses
   `LABEL 1` plus site labels.
@@ -23,6 +23,24 @@ Updated: 2026-06-10
 
 ## Done
 
+- Checked branch/remote state for the user's README cleanup follow-up:
+  `git fetch --prune` and `git ls-remote --heads origin` show only `main`,
+  with `origin/HEAD -> origin/main`; there is no extra branch left to merge
+  back.
+- Confirmed repository-local Git identity remains `Stardust0831
+  <13862180016@163.com>`.
+- Validated the README/CLI/cube-to-VESTA changes before commit with 73
+  no-GUI regression tests, `py_compile`, and `git diff --check`.
+- Fixed the pre-commit review blocker where same-basename surface and texture
+  cubes from different directories could overwrite each other in the generated
+  VESTA dependency directory.
+- Added `multiwfn2vesta cube-vesta`, the first generic ABACUS/Multiwfn cube
+  to VESTA workflow.  It writes `IMPORT_DENSITY`, optional `IMPORT_TEXTURE`,
+  `SECTS 0 0`, `ISURF`, percentage `TEX3P`, a cube-derived structure phase,
+  copied cube dependencies, and a markdown recipe without launching VESTA.
+- Real H2O-HF cube smoke passed under
+  `/mnt/g/work/multiwfn2vesta/smoke/cube_vesta_cli_smoke_20260610/`; output
+  includes `h2o_hf_iri_cube.vesta`, copied surface/texture cubes, and a recipe.
 - Added `multiwfn2vesta molden-check`, a no-GUI Molden sanity checker.
   Generic mode checks `[Atoms]`, `[GTO]`, and `[MO]`; ABACUS mode also
   requires `[Cell]` and `[Nval]` before Multiwfn wavefunction workflows.

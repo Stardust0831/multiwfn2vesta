@@ -397,3 +397,45 @@ Limitations recorded:
   `/mnt/g/work/multiwfn2vesta/smoke/abacus_server_artifacts_20260606/ag111_benzene/ag111_benzene_lcao_cont3_nval.molden`.
   Reported values: 60 atoms, 566 MO blocks, 3 `[Nval]` entries, 3 numeric
   `[Cell]` rows, `[Nval]` detail `Ag=19, C=4, H=1`, and `Result: OK`.
+
+## 2026-06-10: Generic cube to VESTA CLI
+
+- Implemented the first generic cube-to-VESTA workflow from the
+  Multiwfn/ABACUS/VESTA analysis matrix: `multiwfn2vesta cube-vesta`.
+- The workflow reads a scalar cube header, writes a `.vesta` file with
+  `IMPORT_DENSITY 1`, optional `IMPORT_TEXTURE`, `SURFS 0 1 1`,
+  `SECTS 0 0`, `ISURF`, and `TEX3P`, and writes a markdown recipe.
+- It copies cube dependencies beside the generated `.vesta` by default, checks
+  cube data count, rejects incompatible texture grids by default, and rejects
+  zero-span texture values when `--tex-physical` needs percentage conversion.
+- It creates a structure phase from the cube atom records.  `--structure auto`
+  chooses `CRYSTAL` for origin-zero cubes whose atoms fall inside the cube
+  cell, otherwise `MOLECULE`.
+- Real H2O-HF smoke:
+  `/mnt/g/work/multiwfn2vesta/smoke/cube_vesta_cli_smoke_20260610/`.
+  The output contains `h2o_hf_iri_cube.vesta`,
+  `h2o_hf_iri_cube_vesta_recipe.md`, `h2o_hf_IRI2_surface.cub`, and
+  `h2o_hf_IRI1_color.cub`.  The `.vesta` file uses `IMPORT_DENSITY`,
+  `IMPORT_TEXTURE`, `SECTS 0 0`, `ISURF 1.0`, and percentage `TEX3P`.
+
+## 2026-06-10: README and branch cleanup follow-up
+
+- User requested another README refresh and branch cleanup because the branch
+  state looked confusing.
+- Checked the repository after `git fetch --prune` and
+  `git ls-remote --heads origin`: the project has local `main`, `origin/main`,
+  and `origin/HEAD -> origin/main`; the GitHub remote currently exposes only
+  `refs/heads/main`.
+- Confirmed repository-local commit identity is still
+  `Stardust0831 <13862180016@163.com>`.
+- README now documents the maintained single-branch status, unified CLI,
+  executable discovery, Molden checker, generic cube-to-VESTA workflow,
+  Multiwfn AIM runner, AIM PDB conversion, AIM+IGMH overlay workflow,
+  rendering caveat, validation commands, smoke paths, and documentation map.
+- Pre-commit validation passed: 73 no-GUI unit tests, `py_compile` for
+  `cube_vesta.py` and `cli.py`, and `git diff --check`.
+- A read-only pre-commit sub-agent review found one blocker: surface and
+  texture cubes with the same basename but different directories could be
+  copied into the output directory under one name.  Fixed this by reserving
+  dependency filenames during copy and renaming only colliding later files,
+  for example `foo_texture.cub`.

@@ -37,6 +37,24 @@ calculation get_wf + out_wfc_norm ...      # wavefunction norm cubes
 calculation get_wf + out_wfc_re_im ...     # real/imaginary wavefunction cubes
 ```
 
+Prepare these cubes for VESTA with the maintained no-GUI generator:
+
+```bash
+multiwfn2vesta cube-vesta density.cub cube_products --isosurface 0.01
+```
+
+For a surface cube plus a compatible texture cube:
+
+```bash
+multiwfn2vesta cube-vesta surface.cub cube_products \
+  --texture-cube texture.cub \
+  --isosurface 0.01 \
+  --tex-physical -0.05 0.05
+```
+
+Keep `SECTS 0 0` as the default.  Treat `TEX3P` as VESTA percentage state,
+not as direct physical scalar values.
+
 For Molden products:
 
 ```text
@@ -74,6 +92,8 @@ multiwfn2vesta molden-check ABACUS_Multiwfn.molden --abacus
 
 - Research matrix:
   `docs/research/multiwfn_abacus_vesta_analysis_matrix.md`
+- Cube to VESTA:
+  `docs/skills/cube_vesta_skill.md`
 - AIM:
   `docs/skills/aim_paths_to_vesta_skill.md`
 - AIM+IGMH:
