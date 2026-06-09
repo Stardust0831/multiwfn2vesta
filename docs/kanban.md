@@ -4,20 +4,15 @@ Updated: 2026-06-09
 
 ## Doing
 
-- Test and refine the maintained three-view export entry point based on
-  `SCENE` patching.  Rendering remains disabled by default until a
-  non-focus-stealing VESTA route is available.
+- Finish the full Ag(111)+benzene IGMH+AIM BCP visibility fix under the user's
+  latest three-view constraint: one source `.vesta`, opened once by VESTA,
+  then front/right/top images exported by command-line `-rotate_*` and
+  `-flush`.  Persistent front/right/top `.vesta` files made by patching
+  `SCENE` are compatibility/diagnostic material, not the main workflow.
 - Find or build a real non-focus renderer.  Windows minimized/hidden/WSH
   launch routes and the current Linux wrapper are not yet usable.
-- Keep the current Ag(111)+benzene IGMH+AIM overlay state inspectable without
-  forcing VESTA rendering.  Latest preferred files are under
-  `smoke/ag111_benzene_igmh_aim_periodic_cell_20260607/three_views_single_xe_yellow_bcp_visible/`;
-  they use original structure colors, one yellow Xe pseudo-element for AIM
-  path samples, Rn pseudo-elements for BCPs, no AIM bonds, and `COMPS 0`.
-- Decide the minimal full-overlay BCP visibility fix only after the user asks
-  for style changes.  The current diagnostic conclusion is that VESTA can
-  render BCP sites; full-overlay invisibility is a size/overlap/occlusion
-  problem, not missing `CP000*_N` records.
+- Continue improving non-disruptive rendering only after the maintained
+  focus-stealing Windows route is documented as explicit/opt-in.
 
 ## Done
 
@@ -35,9 +30,12 @@ Updated: 2026-06-09
   not a no-disruption renderer.
 - Fixed the post-render compass arrowhead geometry so arrowheads no longer
   appear reversed.
-- Added `scripts/vesta_three_views.py`, which starts from one `.vesta`, writes
-  front/right/top `SCENE` variants, copies relative cube files, sets `COMPS 0`
-  by default, and only renders when an explicit command template is supplied.
+- Reworked `scripts/vesta_three_views.py` so default `cli-rotate` mode starts
+  from one `.vesta`, prepares at most one render input for `COMPS 0` and
+  relative cube colocation, opens that input once in VESTA, and exports
+  front/right/top PNGs by command-line `-rotate_*`, `-flush`, and
+  `-export_img`.  The old `SCENE`-copy path is retained only as
+  `--mode scene-copies`.
 - Recorded AIM overlay style guidance: use one pseudo-element for path sample
   points and tune path/BCP radii before drawing AIM bonds.
 - Added `multiwfn2vesta.vesta_aim_overlay_style` for post-processing
@@ -56,6 +54,17 @@ Updated: 2026-06-09
   `Rn+RBCP*`, `Xe+CP*_N`, `C+CP*_N`, and `He+CP*_N` all rendered visible
   points.  The full-overlay BCP issue is therefore not explained by the
   `CP000*_N` label pattern or the tested element symbols.
+- Added `--split-bcp-phase` to `multiwfn2vesta.vesta_aim_overlay_style`.  It
+  keeps all AIM path samples, clears AIM-phase bonds, moves BCPs into a final
+  dedicated phase, and is idempotent for already-split files.
+- Real-rendered the final Ag(111)+benzene IGMH+AIM split-BCP three views under
+  `smoke/ag111_benzene_igmh_aim_periodic_cell_20260607/three_views_cli_rotate_split_bcp_final_20260609/`.
+  The output contains one `*_render_input.vesta`, the relative cube files, and
+  three PNGs; it does not contain three view-specific `.vesta` files.
+- Verified the final PNGs are valid `6096 x 3052` images and BCPs are visible
+  in all views by orange-pixel counts: front `478`, right `363`, top `138`.
+  The top view uses `--extra-rotate top x -8` as a temporary camera tilt before
+  export, then undoes it; no BCP/path coordinates are moved.
 
 ## Next
 
@@ -66,8 +75,5 @@ Updated: 2026-06-09
 - If continuing Linux VESTA, add missing GUI libraries inside the workspace
   rather than modifying system packages.
 - If the user asks for fresh PNGs, either run an explicitly accepted
-  focus-stealing VESTA export or continue the Linux/local-library non-focus
-  route first.
-- For full-overlay BCP invisibility, investigate path-point overlap, phase
-  draw order, depth/scale, and `SITET`/`ATOMT` style-table interaction before
-  changing the BCP label naming scheme.
+  focus-stealing VESTA CLI export or continue the Linux/local-library
+  non-focus route first.

@@ -60,8 +60,10 @@ Limitations recorded:
 ## 2026-06-08: Maintained three-view generator
 
 - Added `scripts/vesta_three_views.py`.
-- The script starts from one `.vesta` file and writes front/right/top view
-  variants by replacing the global `SCENE` block.
+- Initial implementation started from one `.vesta` file and wrote
+  front/right/top view variants by replacing the global `SCENE` block.  This
+  was superseded on 2026-06-09 by the default `cli-rotate` workflow that opens
+  one render input once and uses VESTA `-rotate_*` commands to export PNGs.
 - It copies relative `IMPORT_DENSITY` and `IMPORT_TEXTURE` cube files into the
   output directory so generated view files remain self-contained for VESTA
   export.
@@ -171,3 +173,36 @@ Limitations recorded:
   investigating path-point overlap at identical coordinates, phase draw order,
   depth/scale, and `SITET`/`ATOMT` style-table interactions before changing
   BCP label naming.
+
+## 2026-06-09: VESTA CLI three-view export and full-overlay BCP visibility
+
+- User corrected the maintained three-view requirement: final export should
+  load one `.vesta` once, then use command-line rotations and image exports.
+  Do not treat three persistent front/right/top `.vesta` files produced by
+  `SCENE` patching as the main workflow.
+- Checked VESTA manual chapter 17 and local project evidence.  The relevant
+  VESTA CLI commands are `-rotate_x`, `-rotate_y`, `-rotate_z`, `-flush`, and
+  `-export_img`.
+- Reworked `scripts/vesta_three_views.py`.  Default `cli-rotate` mode prepares
+  at most one `*_render_input.vesta` for `COMPS 0` and relative cube
+  colocation, opens that input once in VESTA, then exports front/right/top PNGs
+  by command-line rotations in one command stream.  The old `SCENE` copy path
+  remains as `--mode scene-copies` only.
+- Added `--initial-view` so a saved source can declare what its current camera
+  already represents, and `--extra-rotate VIEW AXIS DEGREES` for temporary
+  per-view camera tilts.  Temporary rotations are undone after the PNG export
+  and are not coordinate changes.
+- Removed the BCP coordinate-offset interface from
+  `multiwfn2vesta.vesta_aim_overlay_style`.  The user clarified that the BCP
+  issue is view/projection, not wrong coordinates.  Split BCP phases now keep
+  all AIM path points and all BCP coordinates unchanged.
+- Real-rendered the final Ag(111)+benzene IGMH+AIM split-BCP three views with
+  `--initial-view top --extra-rotate top x -8 --scale 2` under:
+  `smoke/ag111_benzene_igmh_aim_periodic_cell_20260607/three_views_cli_rotate_split_bcp_final_20260609/`.
+  The output contains one render input, `dg_inter.cub`, `sl2r.cub`, and three
+  PNGs; it does not contain three view-specific `.vesta` files.
+- Final PNG validation: all images are `6096 x 3052`; orange BCP pixel counts
+  are front `478`, right `363`, top `138`.  Strict top projection hid the BCPs,
+  while the temporary top `x -8` camera tilt made them visible without moving
+  any BCP/path coordinates.  No workspace-scoped `VESTA.exe` process remained
+  afterward.

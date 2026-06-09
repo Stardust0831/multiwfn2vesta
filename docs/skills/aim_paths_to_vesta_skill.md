@@ -53,8 +53,11 @@ without generating dense automatic bonds between path points.
   coordinates and draw over them.  Reduce path point radius, increase BCP
   radius, and use a distinct BCP color before adding VESTA bonds.
 - In saved multi-phase overlays, if BCPs still disappear and the user wants to
-  keep all path sample points, do not delete overlapping path points.  Instead
-  map paths and BCPs to different pseudo-elements.  The maintained helper is:
+  keep all path sample points, do not delete overlapping path points and do not
+  move BCP coordinates to solve a viewing problem.  Instead map paths and BCPs
+  to different pseudo-elements, optionally split BCPs into a final phase, then
+  solve remaining visibility issues with the camera/view.  The maintained
+  helper is:
 
   ```bash
   python -m multiwfn2vesta.vesta_aim_overlay_style \
@@ -65,12 +68,13 @@ without generating dense automatic bonds between path points.
     --path-radius 0.055 \
     --bcp-radius 0.180 \
     --path-rgb 255 230 0 \
-    --bcp-rgb 255 80 0
+    --bcp-rgb 255 80 0 \
+    --split-bcp-phase
   ```
 
   This keeps every `P...._....` path sample site, keeps BCP labels such as
-  `CP0001_N`, clears AIM-phase `SBOND`, and leaves real structure bonds
-  enabled by default.
+  `CP0001_N`, clears AIM-phase `SBOND`, leaves real structure bonds enabled by
+  default, and leaves coordinates unchanged.
 - To isolate whether VESTA can display BCPs at all, render a BCP-only
   single-phase diagnostic before changing the full overlay style.  The
   2026-06-09 Ag(111)+benzene diagnostic rendered three orange `CP000*_N`
@@ -152,6 +156,11 @@ without generating dense automatic bonds between path points.
   prioritize checks in this order: identical-coordinate path samples over BCPs,
   phase draw order, depth/camera scale, then whether VESTA rewrote or ignored
   `SITET`/`ATOMT` rows in the saved multi-phase file.
+- For periodic IGMH+AIM overlays, a strict top/surface-normal projection can
+  hide BCPs even when the sites are present and styled.  Treat that as a camera
+  problem.  Use the VESTA CLI three-view exporter and, if needed, a temporary
+  per-view camera tilt such as `--extra-rotate top x -8`; do not shift AIM path
+  or BCP coordinates for the final figure.
 
 ## Real smoke result
 
@@ -214,6 +223,24 @@ Observed:
 - Pixel counting found colored BCP pixels in every single-variant render.
 - Do not treat `CP000*_N` naming as the primary cause unless a future
   multi-phase-specific diff proves otherwise.
+
+Ag(111)+benzene full IGMH+AIM split-BCP three-view render:
+
+```text
+smoke/ag111_benzene_igmh_aim_periodic_cell_20260607/three_views_cli_rotate_split_bcp_final_20260609/
+```
+
+Observed:
+
+- VESTA opened one render input once and exported front/right/top PNGs through
+  CLI `-rotate_*`, `-flush`, and `-export_img`.
+- The output directory has one `*_render_input.vesta`, `dg_inter.cub`,
+  `sl2r.cub`, and three PNGs.  It does not have three view-specific `.vesta`
+  files.
+- All PNGs are `6096 x 3052`.
+- Orange BCP pixel counts: front `478`, right `363`, top `138`.
+- Strict top projection hid BCPs; `--extra-rotate top x -8` made BCPs visible
+  by camera tilt only.  AIM path points and BCP coordinates were not moved.
 
 ## Failure notes
 

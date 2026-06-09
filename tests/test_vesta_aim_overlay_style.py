@@ -26,6 +26,15 @@ STRUC
    2  N         CP0001_N     1.0000   0.426201   0.426125   0.514607    1a     1
                             0.000000   0.000000   0.000000  0.00
   0 0 0 0 0 0 0
+THERI 1
+   1   P0001_0001 -0.000000
+   2     CP0001_N -0.000000
+  0 0 0
+SHAPE
+  0       0       0       0   0.000000  0   192   192   192   192
+BOUND
+     0        1         0        1         0        1
+  0   0   0   0  0
 SBOND
   1    Xe    Xe    0.00000    0.02200  0  1  1  0  1  0.220  2.000 255 230   0
   0 0 0 0
@@ -61,7 +70,8 @@ class TestVestaAimOverlayStyle(unittest.TestCase):
         self.assertIn("CP0001_N  0.1800 255  80   0 255  80   0 204", patched)
         self.assertIn("  4         Rn  0.1800 255  80   0 255  80   0 204", patched)
         self.assertIn("BONDS   1", patched)
-        self.assertEqual(patched.count("P0001_0001"), 2)
+        self.assertEqual(patched.count("  Xe        P0001_0001"), 1)
+        self.assertIn("P0001_0001 -0.000000", patched)
 
     def test_patch_clears_aim_sbond_without_touching_base_sbond(self):
         patched = patch_aim_overlay_style_text(SAMPLE)
@@ -69,6 +79,32 @@ class TestVestaAimOverlayStyle(unittest.TestCase):
         self.assertNotIn("0.02200", patched)
         self.assertEqual(patched.count("SBOND"), 2)
         self.assertGreaterEqual(patched.count("  0 0 0 0"), 2)
+
+    def test_split_bcp_phase_keeps_paths_and_moves_bcp_to_final_phase(self):
+        patched = patch_aim_overlay_style_text(
+            SAMPLE,
+            path_element="Xe",
+            bcp_element="Rn",
+            path_radius=0.020,
+            bcp_radius=0.350,
+            split_bcp_phase=True,
+        )
+
+        self.assertEqual(patched.count("CRYSTAL"), 3)
+        self.assertEqual(patched.count("  Xe        P0001_0001"), 1)
+        self.assertEqual(patched.count("  Rn        CP0001_N"), 1)
+        self.assertLess(patched.index("  Xe        P0001_0001"), patched.index("  Rn        CP0001_N"))
+        self.assertIn("AIM BCP final overlay phase", patched)
+        self.assertIn("CP0001_N  0.3500 255  80   0 255  80   0 204", patched)
+        self.assertNotIn("P0001_0001  0.3500", patched)
+
+    def test_split_bcp_phase_is_idempotent_for_already_split_file(self):
+        once = patch_aim_overlay_style_text(SAMPLE, split_bcp_phase=True)
+        twice = patch_aim_overlay_style_text(once, split_bcp_phase=True)
+
+        self.assertEqual(twice.count("CRYSTAL"), 3)
+        self.assertEqual(twice.count("  Xe        P0001_0001"), 1)
+        self.assertEqual(twice.count("  Rn        CP0001_N"), 1)
 
 
 if __name__ == "__main__":

@@ -3,8 +3,8 @@
 This module is intended for VESTA files produced by importing an AIM
 atoms-only phase over a real structure/cube phase.  It keeps AIM path sample
 points as explicit sites, avoids AIM bonds by default, and can assign BCPs to
-a distinct pseudo-element so they remain visible even when they coincide with
-path sample points.
+a distinct pseudo-element.  Optionally BCP sites can be moved into a final
+dedicated phase so VESTA draws them after the path-point phase.
 """
 
 from __future__ import annotations
@@ -22,6 +22,27 @@ DEFAULT_BCP_RGB = (255, 80, 0)
 
 PHASE_HEADERS = {"CRYSTAL", "MOLECULE"}
 TAIL_HEADERS = {"ATOMT", "SCENE", "HBOND", "STYLE"}
+SECTION_HEADERS = {
+    "STRUC",
+    "THERI",
+    "SHAPE",
+    "BOUND",
+    "SBOND",
+    "SITET",
+    "VECTR",
+    "VECTT",
+    "SPLAN",
+    "LBLAT",
+    "LBLSP",
+    "DLATM",
+    "DLBND",
+    "DLPLY",
+    "PLN2D",
+    "ATOMT",
+    "SCENE",
+    "HBOND",
+    "STYLE",
+}
 
 
 def _line_ending(reference: str, default: str) -> str:
@@ -85,6 +106,14 @@ def _format_atomt_line(
     )
 
 
+def _format_theri_line(index: int, label: str, value: str, newline: str) -> str:
+    return f"{index:4d} {label:>12s} {value}{newline}"
+
+
+def _blank_displacement_line(newline: str) -> str:
+    return f"                            0.000000   0.000000   0.000000  0.00{newline}"
+
+
 def _phase_starts(lines: List[str]) -> List[int]:
     return [idx for idx, line in enumerate(lines) if line.strip() in PHASE_HEADERS]
 
@@ -102,6 +131,17 @@ def _phase_contains_aim_labels(lines: List[str], start: int, end: int) -> bool:
         if len(fields) >= 3 and (_is_path_label(fields[2]) or fields[2].startswith("CP")):
             return True
     return False
+
+
+def _phase_contains_path_and_bcp(lines: List[str], start: int, end: int) -> bool:
+    has_path = False
+    has_bcp = False
+    for line in lines[start:end]:
+        fields = line.split()
+        if len(fields) >= 3:
+            has_path = has_path or _is_path_label(fields[2])
+            has_bcp = has_bcp or _is_bcp_label(fields[2])
+    return has_path and has_bcp
 
 
 def _aim_phase_ranges(lines: List[str]) -> List[Tuple[int, int]]:
@@ -245,6 +285,232 @@ def _patch_global_bonds(lines: List[str], enabled: bool) -> List[str]:
     return out
 
 
+def _find_section(lines: List[str], start: int, end: int, section: str) -> int:
+    for idx in range(start, end):
+        if lines[idx].strip().split()[0:1] == [section]:
+            return idx
+    return -1
+
+
+def _find_sentinel(lines: List[str], start: int, end: int, prefix: str) -> int:
+    for idx in range(start, end):
+        if lines[idx].strip().startswith(prefix):
+            return idx
+    return -1
+
+
+def _is_section_or_sentinel(line: str) -> bool:
+    stripped = line.strip()
+    if not stripped:
+        return False
+    first = stripped.split()[0]
+    return first in SECTION_HEADERS or stripped.startswith("0 0 0")
+
+
+def _replace_title_line(phase_header: List[str], title: str, default_newline: str) -> List[str]:
+    out = list(phase_header)
+    for idx, line in enumerate(out[:-1]):
+        if line.strip() == "TITLE":
+            title_idx = idx + 1
+            while title_idx < len(out) and not out[title_idx].strip():
+                title_idx += 1
+            if title_idx < len(out):
+                out[title_idx] = title + _line_ending(out[title_idx], default_newline)
+            break
+    return out
+
+
+def _split_bcp_phase_once(
+    lines: List[str],
+    start: int,
+    end: int,
+    *,
+    bcp_element: str,
+    bcp_radius: float,
+    bcp_rgb: Tuple[int, int, int],
+    default_newline: str,
+) -> List[str]:
+    struc = _find_section(lines, start, end, "STRUC")
+    theri = _find_section(lines, start, end, "THERI")
+    shape = _find_section(lines, start, end, "SHAPE")
+    sbond = _find_section(lines, start, end, "SBOND")
+    sitet = _find_section(lines, start, end, "SITET")
+    if min(struc, theri, shape, sbond, sitet) < 0:
+        return lines
+
+    struc_end = _find_sentinel(lines, struc + 1, end, "0 0 0 0 0 0 0")
+    theri_end = _find_sentinel(lines, theri + 1, end, "0 0 0")
+    sitet_end = _find_sentinel(lines, sitet + 1, end, "0 0 0 0 0 0")
+    if min(struc_end, theri_end, sitet_end) < 0:
+        return lines
+
+    kept_struc: List[Tuple[str, str]] = []
+    bcp_struc: List[Tuple[str, str]] = []
+    idx = struc + 1
+    while idx < struc_end:
+        line = lines[idx]
+        fields = line.split()
+        if len(fields) >= 9 and (_is_path_label(fields[2]) or _is_bcp_label(fields[2])):
+            newline = _line_ending(line, default_newline)
+            disp = _blank_displacement_line(newline)
+            next_idx = idx + 1
+            if next_idx < struc_end and not _is_section_or_sentinel(lines[next_idx]):
+                disp = lines[next_idx]
+                next_idx += 1
+            label = fields[2]
+            suffix = "    1a     1" if fields[-1] != "-" else "    1        -"
+            record = (
+                fields[1],
+                label,
+                float(fields[3]),
+                float(fields[4]),
+                float(fields[5]),
+                float(fields[6]),
+                suffix,
+                newline,
+                disp,
+            )
+            if _is_bcp_label(label):
+                bcp_struc.append(record)
+            else:
+                kept_struc.append(record)
+            idx = next_idx
+        else:
+            kept_struc.append(("__RAW__", line, 0.0, 0.0, 0.0, 0.0, "", _line_ending(line, default_newline), ""))
+            idx += 1
+
+    if not bcp_struc:
+        return lines
+
+    kept_labels: List[str] = [record[1] for record in kept_struc if record[0] != "__RAW__"]
+    bcp_labels: List[str] = [record[1] for record in bcp_struc]
+    kept_index = {label: idx + 1 for idx, label in enumerate(kept_labels)}
+    bcp_index = {label: idx + 1 for idx, label in enumerate(bcp_labels)}
+
+    def render_struc(records: List[Tuple[str, str, float, float, float, float, str, str, str]], bcp: bool) -> List[str]:
+        rendered: List[str] = []
+        for record in records:
+            element, label, occupancy, x, y, z, suffix, newline, disp = record
+            if element == "__RAW__":
+                rendered.append(label)
+                continue
+            index = bcp_index[label] if bcp else kept_index[label]
+            rendered.append(
+                _format_struc_line(
+                    index,
+                    bcp_element if bcp else element,
+                    label,
+                    occupancy,
+                    x,
+                    y,
+                    z,
+                    suffix,
+                    newline,
+                )
+            )
+            rendered.append(disp)
+        return rendered
+
+    def render_theri(labels: List[str], mapping: dict[str, int]) -> List[str]:
+        values: dict[str, Tuple[str, str]] = {}
+        for line in lines[theri + 1 : theri_end]:
+            fields = line.split()
+            if len(fields) >= 3:
+                values[fields[1]] = (fields[2], _line_ending(line, default_newline))
+        rendered: List[str] = []
+        for label in labels:
+            value, newline = values.get(label, ("-0.000000", default_newline))
+            rendered.append(_format_theri_line(mapping[label], label, value, newline))
+        return rendered
+
+    def render_sitet(labels: List[str], mapping: dict[str, int], bcp: bool) -> List[str]:
+        styles: dict[str, Tuple[float, Tuple[int, int, int], str]] = {}
+        for line in lines[sitet + 1 : sitet_end]:
+            fields = line.split()
+            if len(fields) >= 6:
+                try:
+                    styles[fields[1]] = (
+                        float(fields[2]),
+                        (int(fields[3]), int(fields[4]), int(fields[5])),
+                        _line_ending(line, default_newline),
+                    )
+                except ValueError:
+                    pass
+        rendered: List[str] = []
+        for label in labels:
+            radius, rgb, newline = styles.get(label, (bcp_radius, bcp_rgb, default_newline))
+            if bcp:
+                radius, rgb = bcp_radius, bcp_rgb
+            rendered.append(_format_sitet_line(mapping[label], label, radius, rgb, newline))
+        return rendered
+
+    phase_header = lines[start : struc + 1]
+    bcp_header = _replace_title_line(
+        phase_header,
+        "AIM BCP final overlay phase",
+        default_newline,
+    )
+    struc_sentinel = lines[struc_end]
+    theri_header = lines[theri]
+    theri_sentinel = lines[theri_end]
+    sitet_header = lines[sitet]
+    sitet_sentinel = lines[sitet_end]
+
+    original_phase = (
+        phase_header
+        + render_struc(kept_struc, False)
+        + [struc_sentinel]
+        + [theri_header]
+        + render_theri(kept_labels, kept_index)
+        + [theri_sentinel]
+        + lines[shape:sbond]
+        + [f"SBOND{_line_ending(lines[sbond], default_newline)}", f"  0 0 0 0{default_newline}"]
+        + [sitet_header]
+        + render_sitet(kept_labels, kept_index, False)
+        + [sitet_sentinel]
+        + lines[sitet_end + 1 : end]
+    )
+    bcp_phase = (
+        bcp_header
+        + render_struc(bcp_struc, True)
+        + [struc_sentinel]
+        + [theri_header]
+        + render_theri(bcp_labels, bcp_index)
+        + [theri_sentinel]
+        + lines[shape:sbond]
+        + [f"SBOND{_line_ending(lines[sbond], default_newline)}", f"  0 0 0 0{default_newline}"]
+        + [sitet_header]
+        + render_sitet(bcp_labels, bcp_index, True)
+        + [sitet_sentinel]
+        + lines[sitet_end + 1 : end]
+    )
+    return lines[:start] + original_phase + bcp_phase + lines[end:]
+
+
+def _split_bcp_phases(
+    lines: List[str],
+    *,
+    bcp_element: str,
+    bcp_radius: float,
+    bcp_rgb: Tuple[int, int, int],
+    default_newline: str,
+) -> List[str]:
+    ranges = _aim_phase_ranges(lines)
+    for start, end in reversed(ranges):
+        if not _phase_contains_path_and_bcp(lines, start, end):
+            continue
+        lines = _split_bcp_phase_once(
+            lines,
+            start,
+            end,
+            bcp_element=bcp_element,
+            bcp_radius=bcp_radius,
+            bcp_rgb=bcp_rgb,
+            default_newline=default_newline,
+        )
+    return lines
+
+
 def patch_aim_overlay_style_text(
     text: str,
     *,
@@ -256,6 +522,7 @@ def patch_aim_overlay_style_text(
     bcp_rgb: Tuple[int, int, int] = DEFAULT_BCP_RGB,
     clear_aim_sbond: bool = True,
     keep_structure_bonds: bool = True,
+    split_bcp_phase: bool = False,
 ) -> str:
     """Return VESTA text with AIM path and BCP display styles patched.
 
@@ -284,6 +551,15 @@ def patch_aim_overlay_style_text(
         )
         if clear_aim_sbond:
             lines = _replace_sbond_with_empty(lines, start, end, default_newline)
+
+    if split_bcp_phase:
+        lines = _split_bcp_phases(
+            lines,
+            bcp_element=bcp_element,
+            bcp_radius=bcp_radius,
+            bcp_rgb=bcp_rgb,
+            default_newline=default_newline,
+        )
 
     lines = _patch_global_atomt(
         lines,
@@ -324,6 +600,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser.add_argument("--bcp-rgb", nargs=3, type=int, default=DEFAULT_BCP_RGB)
     parser.add_argument("--keep-aim-sbond", action="store_true", help="Do not clear SBOND in AIM phases")
     parser.add_argument("--structure-bonds-off", action="store_true", help="Set global BONDS off")
+    parser.add_argument(
+        "--split-bcp-phase",
+        action="store_true",
+        help="Move BCP sites into a final dedicated phase while keeping all path samples",
+    )
     args = parser.parse_args(argv)
 
     patch_aim_overlay_style_file(
@@ -337,6 +618,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         bcp_rgb=_rgb_tuple(args.bcp_rgb),
         clear_aim_sbond=not args.keep_aim_sbond,
         keep_structure_bonds=not args.structure_bonds_off,
+        split_bcp_phase=args.split_bcp_phase,
     )
     return 0
 

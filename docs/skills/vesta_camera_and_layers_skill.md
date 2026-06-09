@@ -78,13 +78,16 @@ samples.
 
 Use this when users need reproducible front/right/top images.
 
-Suggested behavior:
+Maintained behavior:
 
-1. Create temporary render copies of the input `.vesta`.
-2. For each view, write a view-specific `SCENE` matrix.
-3. Apply zoom/padding by adjusting the zoom-like scalar in `SCENE`.
-4. Export with VESTA CLI.
-5. Keep the original `.vesta` unchanged.
+1. Start from one input `.vesta`.
+2. Prepare at most one `*_render_input.vesta` to make `COMPS 0` and relative
+   cube-file colocation explicit.
+3. Open that input once in VESTA.
+4. Export front/right/top PNGs by applying VESTA command-line `-rotate_*`,
+   `-flush`, and `-export_img` operations in one command stream.
+5. Keep the original `.vesta` unchanged.  Do not create persistent
+   front/right/top `.vesta` files as the main workflow.
 
 Initial named views:
 
@@ -92,30 +95,27 @@ Initial named views:
 - `right`
 - `top`
 
-Allow `--camera-source tuned.vesta` so the user can tune pan/zoom once and let
-the exporter reuse that baseline.
+Use `--initial-view` when the saved source already opens in a known view.  Use
+`--extra-rotate VIEW AXIS DEGREES` for a temporary per-view camera tilt; the
+script undoes that rotation after export, so it is not a coordinate change.
 
 Maintained script:
 
 ```bash
-python3 scripts/vesta_three_views.py input.vesta three_views_out --comps off
-```
-
-This writes `*_front.vesta`, `*_right.vesta`, and `*_top.vesta` from the same
-input file, replaces only `SCENE` for the view angle, and copies relative cube
-files referenced by `IMPORT_DENSITY` or `IMPORT_TEXTURE` into the output
-directory.  It does not render by default.
-
-Rendering must be explicit:
-
-```bash
 python3 scripts/vesta_three_views.py input.vesta three_views_out \
-  --render-command 'python3 scripts/render_vesta_nofocus.py {input} {output}' \
-  --add-compass
+  --initial-view top \
+  --extra-rotate top x -8 \
+  --comps off \
+  --scale 2
 ```
 
-Only use a render command when focus stealing is acceptable or a non-activating
-renderer is available.
+This writes PNGs directly.  It may write one `*_render_input.vesta` beside the
+PNGs when `COMPS` or relative cube placement must be adjusted for rendering.
+It does not write separate view-specific `.vesta` files unless the explicit
+compatibility mode `--mode scene-copies` is requested.
+
+Use `--mode scene-copies` only as a diagnostic or fallback for environments
+where VESTA's native `-rotate_*` commands cannot be used.
 
 For multi-phase overlays, suppress VESTA's native compass before rendering:
 
@@ -167,6 +167,18 @@ timeout 40s /mnt/c/WINDOWS/system32/cmd.exe /c "$VESTA" \
   -flush -close
 ```
 
+For a single VESTA session with rotations:
+
+```bash
+VESTA.exe -open input.vesta \
+  -export_img scale=2 front.png -flush \
+  -rotate_y -90 -flush \
+  -export_img scale=2 right.png -flush \
+  -rotate_y 90 -flush -rotate_x -90 -flush \
+  -export_img scale=2 top.png -flush \
+  -close
+```
+
 VESTA can time out or return a nonzero code after producing output. Always
 check that the target `.vesta` or `.png` exists.
 
@@ -197,8 +209,11 @@ Before relying on a generated image sequence:
 - For oversized structures, verify boundary fit and CP visibility visually.
 - For three-view presets, validate on a non-planar molecule to catch sign
   convention mistakes.
-- For multi-phase overlays, confirm generated render copies have `COMPS 0` and
-  final PNGs have only one lower-left compass.
+- For multi-phase overlays, confirm the generated render input has `COMPS 0`
+  and final PNGs have only one lower-left compass.
+- If a strict top/surface-normal projection hides interface BCPs, prefer a
+  temporary camera tilt such as `--extra-rotate top x -8`; do not move AIM/BCP
+  coordinates to fix a view/projection problem.
 
 ## Known risks
 
@@ -206,12 +221,42 @@ Before relying on a generated image sequence:
   samples.
 - `STYLE` is shared, so global `BONDS`, `ATOMS`, and model flags can affect all
   phases.
-- `SCENE` matrix row/column convention still needs calibration for generated
-  right/top views.
+- Native VESTA `-rotate_*` sign conventions still need calibration per source
+  camera.  Use `--initial-view` and a small smoke render before a long batch.
 - The final `SCENE` scalar is zoom-like in local reasoning, but its direction
   and numeric scale must be measured with exported PNGs.
 - Alpha-like `SITET`/`ATOMT` columns may not fully hide sites in every render
   mode; `remove` mode is safer for first implementation.
+
+## Real smoke result
+
+Ag(111)+benzene IGMH+AIM split-BCP overlay:
+
+```text
+smoke/ag111_benzene_igmh_aim_periodic_cell_20260607/three_views_cli_rotate_split_bcp_final_20260609/
+```
+
+Command pattern:
+
+```bash
+python3 project/scripts/vesta_three_views.py \
+  smoke/ag111_benzene_igmh_aim_periodic_cell_20260607/products/ag111_benzene_igmh_aim_paths_single_xe_yellow_bcp_splitphase_periodic_overlay.vesta \
+  smoke/ag111_benzene_igmh_aim_periodic_cell_20260607/three_views_cli_rotate_split_bcp_final_20260609 \
+  --stem ag111_benzene_igmh_aim_paths_single_xe_yellow_bcp_splitphase_periodic_overlay \
+  --initial-view top \
+  --extra-rotate top x -8 \
+  --scale 2 \
+  --clean-before
+```
+
+Observed:
+
+- One render input `.vesta`, two cube files, and three PNGs were produced.
+  No front/right/top `.vesta` files were produced.
+- All PNGs are `6096 x 3052`.
+- Orange BCP pixel counts: front `478`, right `363`, top `138`.
+- The strict top projection hid the BCPs; the temporary `top x -8` camera tilt
+  made them visible without changing coordinates.
 
 ## Next experiments
 
