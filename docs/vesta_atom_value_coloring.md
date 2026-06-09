@@ -30,6 +30,28 @@ multiple figures.
 Use `--non-strict` to color only supplied sites and leave other `SITET` rows
 unchanged.  Strict mode is the default and requires one value per `STRUC` site.
 
+## ABACUS Mulliken shortcut
+
+For ABACUS LCAO calculations with `out_mul 1`, use the maintained shortcut
+instead of manually extracting a value table:
+
+```bash
+multiwfn2vesta abacus-mulliken-color \
+  input.vesta mulliken.txt output_colored.vesta \
+  --property charge \
+  --vmin -1 --vmax 1
+```
+
+Available properties are `charge`, `magnetism`, `magnetism-x`,
+`magnetism-y`, `magnetism-z`, and `magnetism-norm`.  The command reads all
+ionic steps in `mulliken.txt`, uses the last one by default, maps values by
+one-based atom index, and then calls the same `SITET` RGB patching logic
+documented here.  Strict mode also requires the selected VESTA `STRUC` site
+indices to match the Mulliken atom indices exactly, so a wrong structure file
+or section fails before writing output.  Use `--non-strict` only for deliberate
+subset coloring.  Use `--write-values selected.csv` to save the extracted
+per-atom values for inspection or reuse.
+
 ## Value table formats
 
 Ordered values, one row per site in `STRUC` order:

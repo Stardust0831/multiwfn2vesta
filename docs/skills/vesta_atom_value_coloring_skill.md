@@ -26,6 +26,23 @@ PYTHONPATH=src python -m multiwfn2vesta.vesta_atom_coloring \
 
 Use `--non-strict` only when intentionally coloring a subset of sites.
 
+ABACUS Mulliken shortcut:
+
+```bash
+cd /mnt/g/work/multiwfn2vesta/project
+multiwfn2vesta abacus-mulliken-color \
+  input.vesta mulliken.txt output_colored.vesta \
+  --property charge \
+  --vmin -1 --vmax 1
+```
+
+Use `--property magnetism` for `nspin=2` atomic spin populations and
+`--property magnetism-x|magnetism-y|magnetism-z|magnetism-norm` for `nspin=4`.
+The command uses the last ABACUS ionic step unless `--step N` is supplied and
+maps values by one-based atom index.  Strict mode verifies exact VESTA
+`STRUC`/Mulliken index agreement; use `--non-strict` only for an intentional
+subset.
+
 ## Value tables
 
 Ordered values:

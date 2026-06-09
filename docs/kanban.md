@@ -6,7 +6,7 @@ Updated: 2026-06-10
 
 - Turn the 2026-06-10 Multiwfn/ABACUS/VESTA research into maintainable
   features: latest ABACUS Molden wrapper with `[Nval]` validation,
-  RDG/IRI/IGMH command streams, and ABACUS/Multiwfn atom scalar parsers.
+  RDG/IRI/IGMH command streams, and Multiwfn atom scalar parsers.
 - Keep non-empty `LBLAT` generation out of maintained code until a GUI-saved
   VESTA diff proves the record syntax; the verified native route now uses
   `LABEL 1` plus site labels.
@@ -22,6 +22,33 @@ Updated: 2026-06-10
 
 ## Done
 
+- Added `multiwfn2vesta abacus-mulliken-color`, the first maintained
+  ABACUS atom-scalar parser/glue workflow.  It parses ABACUS `out_mul 1`
+  `mulliken.txt`, selects the last ionic step by default, supports exact
+  `--step`, and maps `charge`, `magnetism`, `magnetism-x/y/z`, or
+  `magnetism-norm` to VESTA `SITET` colors by one-based atom index.
+- Confirmed ABACUS latest `origin/develop` Mulliken output shape from
+  documentation, source, and test references: blocks begin with
+  `--- Ionic Step N ---`, atom records use `Atom N is LABEL`, scalar totals
+  use `total charge on atom N`, and spinful output adds
+  `total magnetism on atom N`.  Multi-k output uses the same file structure
+  after summing k-point contributions.
+- Added tests for ABACUS Mulliken `nspin=1`, `nspin=2`, `nspin=4`, legacy
+  documentation format, ionic-step selection, VESTA atom color patching, and
+  selected-values CSV export.
+- Validated the ABACUS Mulliken coloring workflow with focused parser/CLI
+  tests, `py_compile`, and a real CLI smoke under
+  `/mnt/g/work/multiwfn2vesta/smoke/abacus_mulliken_color_smoke_20260610/`.
+  The smoke colored Fe1 red and Fe2 blue from final-step magnetism
+  `+4/-4` and wrote `values.csv`.
+- Final pre-commit no-GUI regression for the README/Mulliken update passed:
+  87 unit tests across Molden checking, ABACUS Mulliken parsing/coloring,
+  cube-to-VESTA, unified CLI, AIM+IGMH, executable discovery, Multiwfn AIM,
+  IRI cube handling, AIM VESTA conversion, and generic atom coloring.
+- Read-only pre-commit review found and main thread fixed a strict-mode
+  blocker: ABACUS Mulliken coloring now verifies that selected VESTA `STRUC`
+  site indices exactly match Mulliken atom indices before patching colors, so
+  a wrong `.vesta` file or section cannot silently color only a subset.
 - Refreshed README for the current single-branch state and maintained CLI:
   after `git fetch --prune`, only local `main` and remote `origin/main` are
   present, with repository-local identity

@@ -1,5 +1,47 @@
 # Worklog
 
+## 2026-06-10: ABACUS Mulliken atom coloring
+
+- Added `multiwfn2vesta.abacus_mulliken` and unified CLI command
+  `multiwfn2vesta abacus-mulliken-color`.
+- The parser handles current ABACUS `mulliken.txt` blocks headed by
+  `--- Ionic Step N ---`, atom headers `Atom N is LABEL`, `total charge on
+  atom N`, and optional `total magnetism on atom N`.  It also accepts the
+  older documentation style using `STEP:` and `Total Charge on atom:`.
+- Supported properties are `charge`, `magnetism`, `magnetism-x`,
+  `magnetism-y`, `magnetism-z`, and `magnetism-norm`.  The command selects
+  the last ionic step by default, accepts `--step N`, maps values to VESTA
+  sites by one-based atom index, and can write a selected-values CSV with
+  `--write-values`.
+- Checked ABACUS latest `origin/develop` evidence from
+  `docs/advanced/elec_properties/Mulliken.md`,
+  `source/source_io/module_mulliken/output_mulliken.cpp`, and reference
+  `mulliken.txt.ref` files for `nspin=1/2/4`.  Multi-k output has the same
+  file fields after k-point contributions are summed.
+- Added focused tests for `nspin=1`, `nspin=2`, `nspin=4`, legacy format
+  compatibility, ionic-step selection, VESTA `SITET` coloring, and CSV export.
+- Focused parser/CLI tests passed, and `py_compile` passed for
+  `abacus_mulliken.py` and `cli.py`.
+- Ran a real CLI smoke under
+  `/mnt/g/work/multiwfn2vesta/smoke/abacus_mulliken_color_smoke_20260610/`:
+  `abacus-mulliken-color` used the final ionic step, colored Fe1 red and Fe2
+  blue from magnetism `+4/-4`, and wrote `values.csv` with the selected
+  values.
+- Final pre-commit no-GUI regression passed with 87 tests covering the
+  maintained Molden, ABACUS Mulliken, cube-to-VESTA, unified CLI, AIM+IGMH,
+  executable discovery, Multiwfn AIM, IRI cube, AIM VESTA, and atom-coloring
+  modules.
+- Read-only pre-commit review found one blocker: strict ABACUS Mulliken
+  coloring could ignore surplus Mulliken atom indices because the generic
+  atom-coloring backend intentionally allows partial mapping keys.  Fixed this
+  in the ABACUS-specific entry by checking selected VESTA `STRUC` site indices
+  against Mulliken atom indices before writing the output, and added a
+  surplus-atom regression test.
+- Re-ran the real CLI smoke after the strict-index fix.  The strict recheck
+  wrote `colored_magnetism_strict_recheck.vesta` and
+  `values_strict_recheck.csv` under the same smoke directory and reported
+  `colored 2 atoms from Mulliken step 2`.
+
 ## 2026-06-10: README refresh, branch check, and signed cube preset
 
 - Rechecked branch state for the README cleanup request.  After

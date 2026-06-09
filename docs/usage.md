@@ -24,6 +24,7 @@ multiwfn2vesta
 multiwfn2vesta discover
 multiwfn2vesta molden-check --help
 multiwfn2vesta cube-vesta --help
+multiwfn2vesta abacus-mulliken-color --help
 multiwfn2vesta aim-run --help
 multiwfn2vesta aim-pdb --help
 multiwfn2vesta aim-igmh --help
@@ -36,6 +37,8 @@ multiwfn2vesta aim-igmh --help
   模式会要求 `[Cell]` 和 `[Nval]`
 - `cube-vesta`: 从 ABACUS/Multiwfn scalar cube 直接生成 `.vesta`，可选
   texture/color cube，默认关闭 section plane
+- `abacus-mulliken-color`: 读取 ABACUS `out_mul 1` 生成的 `mulliken.txt`，
+  按原子 Mulliken 电荷或磁矩给 VESTA `SITET` 原子颜色赋值
 - `aim-run`: 从 `.molden`、`.fch`、`.wfn` 等波函数文件调用 Multiwfn AIM，
   再把生成的 `paths.pdb`/`CPs.pdb` 转成 atoms-only `.vesta`
 - `aim-pdb`: Multiwfn `paths.pdb`/`CPs.pdb` 转 atoms-only `.vesta`
@@ -151,6 +154,51 @@ multiwfn2vesta cube-vesta \
 `abs(surface - isosurface)` 在一个窄带内筛选 texture 值来换算；如果窄带内没有
 非退化范围，会用离等值面最近的一批格点作为 fallback。recipe markdown 会记录
 实际采用的参考范围和采样点数。
+
+## ABACUS Mulliken 原子着色
+
+ABACUS LCAO 计算设置：
+
+```text
+out_mul 1
+```
+
+会在输出目录写 `mulliken.txt`。这个文件按 ionic step 和原子顺序给出每个
+原子的 Mulliken population；当前 latest ABACUS `origin/develop` 格式中，
+每个 step 以 `--- Ionic Step N ---` 开头，每个原子块含有
+`Atom N is LABEL`、`total charge on atom N`，自旋体系还含有
+`total magnetism on atom N`。
+
+把最后一个 ionic step 的 Mulliken 电荷映射到 VESTA 原子颜色：
+
+```bash
+multiwfn2vesta abacus-mulliken-color \
+  structure.vesta \
+  mulliken.txt \
+  structure_mulliken_charge.vesta \
+  --property charge \
+  --vmin -1 --vmax 1
+```
+
+对 `nspin=2` 的自旋极化输出，可按原子磁矩着色：
+
+```bash
+multiwfn2vesta abacus-mulliken-color \
+  structure.vesta \
+  mulliken.txt \
+  structure_mulliken_mag.vesta \
+  --property magnetism \
+  --vmin -4 --vmax 4 \
+  --write-values mulliken_values.csv
+```
+
+对 `nspin=4` 非共线输出，可选择 `magnetism-x`、`magnetism-y`、
+`magnetism-z` 或 `magnetism-norm`。默认读取最后一个 ionic step；用
+`--step N` 可指定某一步。映射默认按一基原子序号，而不是按元素名，因此
+多个 Fe、Si、H 等重复标签不会产生歧义。底层仍是修改 VESTA `SITET` RGB，
+不会让 VESTA 自动知道原始标量值或生成 colorbar。默认严格模式会要求所选
+VESTA `STRUC` site index 与 Mulliken atom index 完全一致；只有明确想给
+子集着色时才使用 `--non-strict`。
 
 ## 波函数文件到 AIM VESTA
 

@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Sequence, Tuple
 import sys
 
-from . import aim_igmh_vesta, aim_vesta, cube_vesta, molden_check, multiwfn_aim
+from . import abacus_mulliken, aim_igmh_vesta, aim_vesta, cube_vesta, molden_check, multiwfn_aim
 from .executables import discovery_report
 
 
@@ -14,6 +14,7 @@ COMMANDS: Dict[str, Tuple[str, str]] = {
     "discover": ("Find Multiwfn and VESTA executables", "executables"),
     "molden-check": ("Check Molden sections before Multiwfn workflows", "molden_check"),
     "cube-vesta": ("Create a VESTA file from cube data", "cube_vesta"),
+    "abacus-mulliken-color": ("Color VESTA atoms from ABACUS mulliken.txt", "abacus_mulliken"),
     "aim-run": ("Run Multiwfn AIM on a wavefunction file, then convert PDB to VESTA", "multiwfn_aim"),
     "aim-pdb": ("Convert Multiwfn paths.pdb/CPs.pdb to atoms-only VESTA", "aim_vesta"),
     "aim-igmh": ("Style/render a saved AIM+IGMH VESTA overlay", "aim_igmh_vesta"),
@@ -26,6 +27,8 @@ ALIASES = {
     "check-molden": "molden-check",
     "abacus-molden-check": "molden-check",
     "cube": "cube-vesta",
+    "mulliken-color": "abacus-mulliken-color",
+    "atom-color": "abacus-mulliken-color",
     "multiwfn-aim": "aim-run",
     "aim-vesta": "aim-pdb",
     "igmh": "aim-igmh",
@@ -49,6 +52,8 @@ Commands:
              Check Molden sections before Multiwfn workflows.
   cube-vesta
              Create a VESTA isosurface file from one cube and optional texture cube.
+  abacus-mulliken-color
+             Color VESTA atoms from ABACUS mulliken.txt charge/magnetism.
   aim-run    Run Multiwfn AIM on a wavefunction file, then convert to VESTA.
   aim-pdb    Convert Multiwfn paths.pdb/CPs.pdb to atoms-only VESTA.
   aim-igmh   Style a saved AIM+IGMH VESTA overlay, optionally render views.
@@ -61,6 +66,7 @@ Examples:
   multiwfn2vesta discover
   multiwfn2vesta molden-check ABACUS_Multiwfn.molden --abacus
   multiwfn2vesta cube-vesta density.cub cube_products --isosurface 0.01
+  multiwfn2vesta abacus-mulliken-color input.vesta mulliken.txt colored.vesta
   multiwfn2vesta aim-run input.molden aim_out
   multiwfn2vesta aim-pdb paths.pdb aim_atoms_only.vesta --cps-pdb CPs.pdb
   multiwfn2vesta aim-igmh overlay.vesta products --label-bcp-sites
@@ -212,6 +218,44 @@ def interactive_cube_vesta() -> int:
     return cube_vesta.main(argv)
 
 
+def interactive_abacus_mulliken_color() -> int:
+    print("\nABACUS Mulliken -> VESTA atom colors")
+    input_vesta = _prompt("input .vesta", required=True)
+    mulliken_txt = _prompt("ABACUS mulliken.txt", required=True)
+    output_vesta = _prompt("output .vesta", default=str(Path(input_vesta).with_name("mulliken_colored.vesta")))
+    argv: List[str] = [input_vesta, mulliken_txt, output_vesta]
+
+    prop = _prompt("property (charge/magnetism/magnetism-x/y/z/magnetism-norm)", default="charge")
+    argv.extend(["--property", prop])
+
+    step = _prompt("ionic step number (empty for last)")
+    if step:
+        argv.extend(["--step", step])
+
+    scale = _prompt("fixed color range vmin vmax (empty for auto symmetric)")
+    if scale:
+        parts = scale.split()
+        if len(parts) != 2:
+            print("Color range needs exactly two numbers.")
+            return 2
+        argv.extend(["--vmin", parts[0], "--vmax", parts[1]])
+
+    center = _prompt("color center", default="0.0")
+    argv.extend(["--center", center])
+
+    section_index = _prompt("VESTA structure section index", default="0")
+    argv.extend(["--section-index", section_index])
+
+    values_csv = _prompt("write selected values CSV (empty to skip)")
+    if values_csv:
+        argv.extend(["--write-values", values_csv])
+
+    if _yes_no("allow partial atom values", default=False):
+        argv.append("--non-strict")
+
+    return abacus_mulliken.main(argv)
+
+
 def interactive_main() -> int:
     print("multiwfn2vesta interactive launcher\n")
     print("0) Discover Multiwfn/VESTA executables")
@@ -220,6 +264,7 @@ def interactive_main() -> int:
     print("3) AIM+IGMH overlay -> styled VESTA / optional three views")
     print("4) Check Molden file for Multiwfn/ABACUS use")
     print("5) Cube -> VESTA isosurface")
+    print("6) ABACUS Mulliken -> VESTA atom colors")
     print("q) Quit")
     choice = _prompt("choice", default="3").lower()
     if choice in {"0", "discover", "where", "env"}:
@@ -239,6 +284,8 @@ def interactive_main() -> int:
         return molden_check.main(argv)
     if choice in {"5", "cube-vesta", "cube"}:
         return interactive_cube_vesta()
+    if choice in {"6", "abacus-mulliken-color", "mulliken-color", "atom-color"}:
+        return interactive_abacus_mulliken_color()
     if choice in {"q", "quit", "exit"}:
         return 0
     print(f"Unknown choice: {choice}")
@@ -253,6 +300,8 @@ def run_command(command: str, args: Sequence[str]) -> int:
         return molden_check.main(args)
     if command == "cube-vesta":
         return cube_vesta.main(args)
+    if command == "abacus-mulliken-color":
+        return abacus_mulliken.main(args)
     if command == "aim-run":
         return multiwfn_aim.main(args)
     if command == "aim-pdb":

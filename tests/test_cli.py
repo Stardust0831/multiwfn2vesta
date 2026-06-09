@@ -16,6 +16,7 @@ class TestUnifiedCli(unittest.TestCase):
         self.assertIn("discover", text)
         self.assertIn("molden-check", text)
         self.assertIn("cube-vesta", text)
+        self.assertIn("abacus-mulliken-color", text)
         self.assertIn("aim-run", text)
         self.assertIn("aim-pdb", text)
         self.assertIn("aim-igmh", text)
@@ -50,6 +51,13 @@ class TestUnifiedCli(unittest.TestCase):
 
         self.assertEqual(code, 0)
         mocked.assert_called_once_with(["density.cub", "products", "--isosurface", "0.01"])
+
+    def test_dispatches_abacus_mulliken_color_command(self):
+        with patch("multiwfn2vesta.cli.abacus_mulliken.main", return_value=0) as mocked:
+            code = cli.main(["abacus-mulliken-color", "input.vesta", "mulliken.txt", "colored.vesta"])
+
+        self.assertEqual(code, 0)
+        mocked.assert_called_once_with(["input.vesta", "mulliken.txt", "colored.vesta"])
 
     def test_dispatches_aim_igmh_command(self):
         with patch("multiwfn2vesta.cli.aim_igmh_vesta.main", return_value=0) as mocked:
@@ -176,6 +184,50 @@ class TestUnifiedCli(unittest.TestCase):
                 "--structure",
                 "molecule",
                 "--no-copy-cubes",
+            ]
+        )
+
+    def test_interactive_abacus_mulliken_color_builds_expected_args(self):
+        answers = iter(
+            [
+                "6",
+                "input.vesta",
+                "mulliken.txt",
+                "colored.vesta",
+                "magnetism",
+                "2",
+                "-4 4",
+                "0.0",
+                "0",
+                "values.csv",
+                "n",
+            ]
+        )
+        with patch("builtins.input", lambda _prompt: next(answers)):
+            with patch("sys.stdout", io.StringIO()):
+                with patch("multiwfn2vesta.cli.abacus_mulliken.main", return_value=0) as mocked:
+                    code = cli.main([])
+
+        self.assertEqual(code, 0)
+        mocked.assert_called_once_with(
+            [
+                "input.vesta",
+                "mulliken.txt",
+                "colored.vesta",
+                "--property",
+                "magnetism",
+                "--step",
+                "2",
+                "--vmin",
+                "-4",
+                "--vmax",
+                "4",
+                "--center",
+                "0.0",
+                "--section-index",
+                "0",
+                "--write-values",
+                "values.csv",
             ]
         )
 

@@ -38,6 +38,10 @@ ABACUS evidence:
   spinor wavefunctions and raises on non-single-k `KPT`.
 - ABACUS documentation exposes direct cube outputs: `out_chg`, `out_pot`,
   `out_pchg`, `out_wfc_norm`, `out_wfc_re_im`, and `out_elf`.
+- ABACUS latest `origin/develop` Mulliken output writes `mulliken.txt` blocks
+  headed by `--- Ionic Step N ---`; each atom block records
+  `Atom N is LABEL`, `total charge on atom N`, and for spinful calculations
+  `total magnetism on atom N`.
 
 Local smoke evidence:
 
@@ -57,7 +61,7 @@ Local smoke evidence:
 | ABACUS partial charge cube | `calculation get_pchg`, `out_pchg` state mask | Band/state density isosurfaces, STM-like images | Good VESTA route |
 | ABACUS real-space wavefunction cube | `calculation get_wf`, `out_wfc_norm` or `out_wfc_re_im` | Band wavefunction magnitude or real/imaginary isosurfaces | Good VESTA route; signed positive/negative `cube-vesta` preset is implemented |
 | ABACUS ELF cube | `out_elf` | ELF isosurfaces without Multiwfn | Good direct route |
-| ABACUS Mulliken | `out_mul 1`, produces `mulliken.txt` | Per-atom scalar coloring in VESTA | Needs parser/glue |
+| ABACUS Mulliken | `out_mul 1`, produces `mulliken.txt` | Per-atom scalar coloring in VESTA | Implemented as `multiwfn2vesta abacus-mulliken-color` |
 | ABACUS density matrices | `out_dmk` or `out_dmr` | Possible future population/bond/order tooling, not directly VESTA | Lower priority |
 
 Important constraint: ABACUS cube-only routes are not a replacement for a full
@@ -87,7 +91,7 @@ occupations, and density derivatives from the wavefunction representation.
 | Molecular surface mapped properties | Full wavefunction or cube pair | Feasible through Molden; ABACUS can provide density/potential cubes | `surf.cub`, `mapfunc.cub`, `density.cub`, `avglocion.cub`, `surfanalysis.pdb` | Surface cube plus texture; extrema as pseudo-sites | Extend VESTA texture and point overlay code |
 | ALIE / LEA / LEAE | Full wavefunction, occupied/virtual orbitals | Feasible only if ABACUS Molden orbitals/energies are adequate; virtual levels in metals risky | `avglocion.cub`, `userfunc.cub`, `surfanalysis.pdb` | Colored density surface plus extrema points | Prototype on molecules/insulators first |
 | vdW/repulsion/dispersion potential | Structure and/or wavefunction depending option | Feasible, often structure driven | `vdW.cub`, `repul.cub`, `disp.cub`, `density.cub` | Potential surfaces/slices, density surface context | Add low-risk cube preset |
-| Atom scalar coloring | Per-atom values from Multiwfn or ABACUS `mulliken.txt` | Strong for ABACUS `out_mul`; also charges/Fukui from Multiwfn | CSV/table, `mulliken.txt` | Patch `SITET` RGB values | Parser for ABACUS Mulliken is next useful small feature |
+| Atom scalar coloring | Per-atom values from Multiwfn or ABACUS `mulliken.txt` | Strong for ABACUS `out_mul`; also charges/Fukui from Multiwfn | CSV/table, `mulliken.txt` | Patch `SITET` RGB values | ABACUS Mulliken parser implemented; add Multiwfn atom table parsers next |
 
 ### P2: Specialized, Useful Later
 
@@ -146,8 +150,8 @@ Known limitations:
    `interfaces/Multiwfn_interface/molden.py` and validate `[Nval]` in input
    Molden headers before running Multiwfn wavefunction analyses.
 3. Generalize current IRI color-cube logic to NCI/RDG/ESP mapped surfaces.
-4. Add parsers that convert ABACUS `mulliken.txt` and Multiwfn atom tables into
-   the existing VESTA atom scalar coloring CSV format.
+4. Add more atom-scalar parsers.  ABACUS `mulliken.txt` now feeds VESTA atom
+   coloring directly; Multiwfn atom tables remain future work.
 5. Add command-stream wrappers for Multiwfn orbital cube, density/ELF/LOL cube,
    IRI/RDG, and IGMH fragment workflows, following the existing `aim-run`
    logging pattern.
@@ -165,6 +169,7 @@ Implemented or partly implemented:
 - `multiwfn2vesta aim-igmh`
 - IRI color cube scalar remapping helpers
 - VESTA atom scalar RGB patching
+- ABACUS `mulliken.txt` charge/magnetism atom coloring
 - VESTA camera/layer/three-view utilities
 
 Main gaps:
@@ -173,7 +178,7 @@ Main gaps:
   including basic signed positive/negative isosurface output; remaining work
   is richer analysis-specific presets and optional render hooks.
 - No direct ABACUS Molden converter wrapper yet.
-- No ABACUS `mulliken.txt` parser yet.
+- No Multiwfn atom table parser yet.
 - No maintained Multiwfn command streams for orbital/density/ELF/RDG/IRI cube
   generation outside AIM.
 - Dual-cube surface texture workflows are still reverse-engineered from smoke

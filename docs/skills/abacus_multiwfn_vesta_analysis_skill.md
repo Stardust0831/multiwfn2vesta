@@ -79,6 +79,27 @@ multiwfn2vesta cube-vesta surface.cub cube_products \
 Keep `SECTS 0 0` as the default.  Treat `TEX3P` as VESTA percentage state,
 not as direct physical scalar values.
 
+For ABACUS Mulliken atom values:
+
+```text
+out_mul 1
+```
+
+Then color a VESTA structure by Mulliken charge or magnetism:
+
+```bash
+multiwfn2vesta abacus-mulliken-color structure.vesta mulliken.txt colored.vesta \
+  --property charge \
+  --vmin -1 --vmax 1
+```
+
+The parser follows current ABACUS `mulliken.txt` records:
+`--- Ionic Step N ---`, `Atom N is LABEL`, `total charge on atom N`, and
+optional `total magnetism on atom N`.  It uses the last ionic step by default
+and maps values to VESTA sites by one-based atom index.  Keep strict mode on
+unless deliberately coloring a subset; strict mode verifies that selected
+VESTA `STRUC` site indices exactly match Mulliken atom indices.
+
 For Molden products:
 
 ```text

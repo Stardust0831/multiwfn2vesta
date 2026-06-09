@@ -29,6 +29,8 @@ point.
 - Create VESTA `.vesta` files directly from ABACUS or Multiwfn scalar cube
   files, with optional texture/color cube support, surface-band texture
   scaling, and signed positive/negative isosurface presets.
+- Color VESTA atom/site styles from ABACUS `mulliken.txt` charge or
+  magnetism values produced by `out_mul 1`.
 - Run Multiwfn AIM topology analysis from a wavefunction file such as
   `.molden`, `.fch`, `.fchk`, `.wfn`, or `.wfx`.
 - Convert Multiwfn `paths.pdb` and `CPs.pdb` to an atoms-only `.vesta` file
@@ -127,6 +129,42 @@ The command writes a `.vesta` file, copies cube dependencies beside it by
 default, and writes a markdown recipe.  `SECTS 0 0` is the default to avoid
 VESTA section planes.  `TEX3P` is written as VESTA percentage/normalized
 values, not direct physical scalar limits.
+
+## ABACUS Mulliken Atom Coloring
+
+For ABACUS LCAO calculations with `out_mul 1`, ABACUS writes `mulliken.txt`
+in the output directory.  Color atoms in an existing `.vesta` by the final
+ionic step Mulliken charge:
+
+```bash
+multiwfn2vesta abacus-mulliken-color \
+  structure.vesta \
+  mulliken.txt \
+  structure_mulliken_charge.vesta \
+  --property charge \
+  --vmin -1 --vmax 1
+```
+
+For spin-polarized output, color by atomic magnetism:
+
+```bash
+multiwfn2vesta abacus-mulliken-color \
+  structure.vesta \
+  mulliken.txt \
+  structure_mulliken_mag.vesta \
+  --property magnetism \
+  --vmin -4 --vmax 4 \
+  --write-values mulliken_values.csv
+```
+
+For noncollinear `nspin=4`, use `--property magnetism-x`,
+`magnetism-y`, `magnetism-z`, or `magnetism-norm`.  The parser reads all
+`--- Ionic Step N ---` blocks and uses the last step by default; pass
+`--step N` to choose a specific ionic step.  Values are mapped to VESTA sites
+by one-based atom index, which avoids ambiguity when multiple atoms share the
+same element label.  Strict mode is the default and requires the selected
+VESTA `STRUC` site indices to match the Mulliken atom indices exactly; use
+`--non-strict` only when intentionally coloring a subset.
 
 ## Wavefunction to AIM VESTA
 
@@ -233,11 +271,12 @@ views by VESTA CLI rotations, rather than writing persistent front/right/top
 
 ## Validation
 
-Current focused no-GUI checks:
+Current focused no-GUI checks pass as an 87-test no-GUI regression set:
 
 ```bash
 PYTHONPATH=src python3 -m unittest \
   tests.test_molden_check \
+  tests.test_abacus_mulliken \
   tests.test_cube_vesta \
   tests.test_cli \
   tests.test_aim_igmh_vesta \
@@ -248,6 +287,16 @@ PYTHONPATH=src python3 -m unittest \
   tests.test_aim_vesta \
   tests.test_vesta_atom_coloring
 ```
+
+Smoke-tested ABACUS Mulliken atom coloring:
+
+```text
+/mnt/g/work/multiwfn2vesta/smoke/abacus_mulliken_color_smoke_20260610/
+```
+
+The smoke used `abacus-mulliken-color` on a two-atom Fe example, selected the
+final ionic step, colored Fe1/Fe2 from magnetism `+4/-4`, and wrote
+`values.csv` for inspection.
 
 Smoke-tested ABACUS Molden check:
 
