@@ -32,6 +32,9 @@ point.
 - Create VESTA `.vesta` files directly from ABACUS or Multiwfn scalar cube
   files, with optional texture/color cube support, surface-band texture
   scaling, and signed positive/negative isosurface presets.
+- Apply analysis-oriented cube presets for common ABACUS/Multiwfn products
+  such as density, orbitals/wavefunctions, ELF/LOL, IRI/RDG/NCI, and ESP/MEP
+  mapped surfaces.
 - Color VESTA atom/site styles from ABACUS `mulliken.txt` charge or
   magnetism values produced by `out_mul 1`.
 - Run Multiwfn AIM topology analysis from a wavefunction file such as
@@ -68,6 +71,7 @@ multiwfn2vesta --help
 multiwfn2vesta discover
 multiwfn2vesta abacus-molden abacus_calc ABACUS_Multiwfn.molden
 multiwfn2vesta molden-check ABACUS_Multiwfn.molden --abacus
+multiwfn2vesta cube-preset --list-presets
 ```
 
 Multiwfn discovery checks, in order:
@@ -133,6 +137,26 @@ The command writes a `.vesta` file, copies cube dependencies beside it by
 default, and writes a markdown recipe.  `SECTS 0 0` is the default to avoid
 VESTA section planes.  `TEX3P` is written as VESTA percentage/normalized
 values, not direct physical scalar limits.
+
+For common analysis products, `cube-preset` applies maintained defaults on
+top of the same `cube-vesta` backend:
+
+```bash
+multiwfn2vesta cube-preset orbital orbital.cub cube_products
+multiwfn2vesta cube-preset elf ELF.cub cube_products
+multiwfn2vesta cube-preset rdg IRI2_surface.cub cube_products \
+  --texture-cube IRI1_color.cub
+multiwfn2vesta cube-preset esp density.cub cube_products \
+  --texture-cube esp.cub \
+  --tex-physical -0.05 0.05
+```
+
+Available presets can be listed with `multiwfn2vesta cube-preset
+--list-presets`.  Current presets cover density-like scalar cubes, signed
+orbital/wavefunction/density-difference cubes, ELF/LOL cubes, IRI/RDG/NCI
+mapped surfaces, and ESP/MEP mapped density surfaces.  The recipe records the
+requested preset, canonical preset, effective isosurface, texture scaling
+source, and explicit texture percentage overrides when they are used.
 
 ## ABACUS Calculation to Molden
 
@@ -325,13 +349,14 @@ views by VESTA CLI rotations, rather than writing persistent front/right/top
 
 ## Validation
 
-Current focused no-GUI checks pass as a 97-test no-GUI regression set:
+Current focused no-GUI checks pass as a 108-test no-GUI regression set:
 
 ```bash
 PYTHONPATH=src python3 -m unittest \
   tests.test_molden_check \
   tests.test_abacus_molden \
   tests.test_abacus_mulliken \
+  tests.test_cube_preset \
   tests.test_cube_vesta \
   tests.test_cli \
   tests.test_aim_igmh_vesta \
@@ -384,6 +409,16 @@ Smoke-tested H2O-HF cube-to-VESTA run:
 It generated `h2o_hf_iri_cube.vesta`, copied `h2o_hf_IRI2_surface.cub` and
 `h2o_hf_IRI1_color.cub`, set `IMPORT_DENSITY`/`IMPORT_TEXTURE`, disabled
 sections with `SECTS 0 0`, and wrote `TEX3P` as a percentage range.
+
+Smoke-tested cube analysis presets:
+
+```text
+/mnt/g/work/multiwfn2vesta/smoke/cube_preset_smoke_20260610/
+```
+
+The smoke generated a signed orbital-style `.vesta` from the `orbital` alias
+and an IRI/RDG texture-mapped `.vesta` from the `rdg` alias, both without
+launching VESTA.
 
 Smoke-tested Multiwfn noGUI AIM run:
 

@@ -1,5 +1,49 @@
 # Worklog
 
+## 2026-06-10: Cube analysis presets
+
+- Added `multiwfn2vesta.cube_preset`, a thin analysis-oriented preset layer
+  over the existing `cube_vesta.run_workflow` backend.  It deliberately keeps
+  all VESTA writing in `cube-vesta`.
+- Presets implemented:
+  `density`/`rho`/`charge-density`/`scalar`,
+  `signed`/`orbital`/`mo`/`wavefunction`/`abacus-wfc`/
+  `density-difference`/`dual-descriptor`,
+  `elf`/`abacus-elf`,
+  `lol`,
+  `iri`/`rdg`/`nci`/`weak-interaction`,
+  and `esp`/`mep`/`electrostatic-potential`/`density-esp`.
+- IRI/RDG/NCI defaults require `--texture-cube`, use `--isosurface 1.0`,
+  physical texture range `-0.04` to `0.04`, and `surface-band` texture
+  scaling.  ESP/MEP defaults require a texture cube and intentionally leave
+  the physical texture range for the user to set when figures need to be
+  comparable.
+- Integrated the command into the unified CLI, interactive chooser, aliases
+  `preset` and `analysis-cube`, and console script
+  `multiwfn2vesta-cube-preset`.
+- Updated README, usage docs, cube workflow skill notes, CLI skill notes,
+  ABACUS/Multiwfn planning notes, and the analysis matrix.  The docs now
+  distinguish implemented display presets from future Multiwfn command
+  streams that would generate the underlying cubes.
+- Synthetic no-GUI smoke directory:
+  `/mnt/g/work/multiwfn2vesta/smoke/cube_preset_smoke_20260610/`.
+  It generated `orbital_products/orbital_signed_cube.vesta` from the
+  `orbital` alias and `iri_products/iri2_iri_cube.vesta` from the `rdg`
+  alias with a texture cube.  `SUMMARY.md` records the exact commands and
+  output paths.
+- Focused validation passed: 28 tests across `tests.test_cube_preset` and
+  `tests.test_cli`, `py_compile` for `cube_preset.py` and `cli.py`,
+  `multiwfn2vesta --help`, and `multiwfn2vesta cube-preset --list-presets`.
+- Full no-GUI regression passed with 108 tests across Molden checking, ABACUS
+  Molden/Mulliken, cube preset, cube-to-VESTA, unified CLI, AIM+IGMH,
+  executable discovery, Multiwfn AIM, IRI cube handling, AIM VESTA conversion,
+  and VESTA atom coloring.
+- Read-only pre-commit review findings were addressed before commit: the new
+  implementation/test files are explicitly included, package metadata now
+  requires Python `>=3.7`, and `--tex-percent` writes
+  `effective_tex_range_source: explicit-percent` plus an explicit note that
+  physical texture scaling was not applied.
+
 ## 2026-06-10: ABACUS Molden wrapper and README branch cleanup
 
 - Added `multiwfn2vesta.abacus_molden` plus unified CLI command

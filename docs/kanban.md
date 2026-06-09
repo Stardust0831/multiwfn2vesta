@@ -22,6 +22,27 @@ Updated: 2026-06-10
 
 ## Done
 
+- Added `multiwfn2vesta cube-preset`, a thin analysis-preset layer over the
+  maintained `cube-vesta` backend.  Current presets cover density-like scalar
+  cubes, signed orbital/wavefunction/density-difference cubes, ELF/LOL cubes,
+  IRI/RDG/NCI mapped surfaces, and ESP/MEP mapped density surfaces.
+- Integrated `cube-preset` into the unified CLI, interactive menu, aliases
+  `preset` and `analysis-cube`, and console script
+  `multiwfn2vesta-cube-preset`.
+- Synced README, usage docs, cube workflow skill notes, CLI skill notes,
+  ABACUS/Multiwfn planning notes, the analysis matrix, root/project kanban,
+  and worklogs with the cube preset workflow.
+- Smoke-tested the preset wrapper under
+  `/mnt/g/work/multiwfn2vesta/smoke/cube_preset_smoke_20260610/`, generating
+  a signed orbital-style `.vesta` from the `orbital` alias and an IRI/RDG
+  texture-mapped `.vesta` from the `rdg` alias without launching VESTA.
+- Validated the cube preset layer with 28 focused unit tests, `py_compile`,
+  CLI help/list checks, `git diff --check`, and a 108-test no-GUI regression
+  before commit.
+- Addressed read-only pre-commit review findings before commit: explicitly
+  staged the new implementation/test files, updated package Python metadata
+  from `>=3.6` to `>=3.7`, and made `--tex-percent` recipe output record
+  explicit percentage scaling instead of implying physical texture scaling.
 - Added `multiwfn2vesta abacus-molden`, a maintained wrapper around the
   latest ABACUS `interfaces/Multiwfn_interface/molden.py`.  It exports the
   converter from `origin/develop`, records source path/commit/SHA256, runs

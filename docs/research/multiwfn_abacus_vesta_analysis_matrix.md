@@ -59,8 +59,8 @@ Local smoke evidence:
 | ABACUS charge cube | `out_chg 1`; current files include `chgs*.cube`; older docs mention `SPIN*_CHG.cube` | VESTA density isosurfaces/slices; Multiwfn grid post-processing only | Direct VESTA route |
 | ABACUS potential cube | `out_pot 1` for local potential `pots*.cube`, `out_pot 2` for electrostatic `pot_es.cube`, `out_pot 3` for initial potential too | VESTA potential maps/slices/isosurfaces; surface context | Direct VESTA route |
 | ABACUS partial charge cube | `calculation get_pchg`, `out_pchg` state mask | Band/state density isosurfaces, STM-like images | Good VESTA route |
-| ABACUS real-space wavefunction cube | `calculation get_wf`, `out_wfc_norm` or `out_wfc_re_im` | Band wavefunction magnitude or real/imaginary isosurfaces | Good VESTA route; signed positive/negative `cube-vesta` preset is implemented |
-| ABACUS ELF cube | `out_elf` | ELF isosurfaces without Multiwfn | Good direct route |
+| ABACUS real-space wavefunction cube | `calculation get_wf`, `out_wfc_norm` or `out_wfc_re_im` | Band wavefunction magnitude or real/imaginary isosurfaces | Good VESTA route; `cube-preset orbital` uses signed positive/negative surfaces |
+| ABACUS ELF cube | `out_elf` | ELF isosurfaces without Multiwfn | Good direct route; `cube-preset elf` is implemented |
 | ABACUS Mulliken | `out_mul 1`, produces `mulliken.txt` | Per-atom scalar coloring in VESTA | Implemented as `multiwfn2vesta abacus-mulliken-color` |
 | ABACUS density matrices | `out_dmk` or `out_dmr` | Possible future population/bond/order tooling, not directly VESTA | Lower priority |
 
@@ -75,10 +75,10 @@ occupations, and density derivatives from the wavefunction representation.
 
 | Analysis | Multiwfn input | ABACUS feasibility | Multiwfn output | VESTA representation | Project action |
 | --- | --- | --- | --- | --- | --- |
-| Generic cube visualizer | Any `.cub` from Multiwfn or ABACUS | Strong: `out_chg`, `out_pot`, `out_pchg`, `out_wfc_*`, `out_elf` | Cube | Density/texture import, isosurface, section off by default | Implemented as `multiwfn2vesta cube-vesta`; improve texture sampling later |
-| Molecular orbitals and band wavefunctions | Full wavefunction Molden/FCH/WFN, or ABACUS real-space `get_wf` cubes | Strong for Gamma LCAO Molden; direct cube route for selected bands | `orb*.cub`, `MOvalue.cub`, `orbdens.cub`, or ABACUS `wfi*.cube` | Positive/negative isosurfaces; magnitude as single surface | Generic signed `cube-vesta` preset implemented; add Multiwfn orbital command stream next |
-| Electron density, spin density, Laplacian, kinetic density | Full wavefunction, or ABACUS density cubes for density only | Strong for density cube; Molden route for derivatives | `density.cub`, `spindensity.cub`, `laplacian.cub`, `K(r).cub`, `G(r).cub` | Single/positive-negative isosurfaces or slices | Generic scalar cube preset implemented; add analysis-specific defaults later |
-| ELF/LOL | Full wavefunction; ABACUS direct `out_elf` for ELF | Strong for ELF direct; Molden route for Multiwfn ELF/LOL | `ELF.cub`, `LOL.cub`, ABACUS `elf*.cube` | Isosurfaces around localized regions | Add ELF preset and ABACUS direct input route |
+| Generic cube visualizer | Any `.cub` from Multiwfn or ABACUS | Strong: `out_chg`, `out_pot`, `out_pchg`, `out_wfc_*`, `out_elf` | Cube | Density/texture import, isosurface, section off by default | Implemented as `multiwfn2vesta cube-vesta`; `cube-preset` adds common analysis defaults |
+| Molecular orbitals and band wavefunctions | Full wavefunction Molden/FCH/WFN, or ABACUS real-space `get_wf` cubes | Strong for Gamma LCAO Molden; direct cube route for selected bands | `orb*.cub`, `MOvalue.cub`, `orbdens.cub`, or ABACUS `wfi*.cube` | Positive/negative isosurfaces; magnitude as single surface | `cube-preset orbital` implemented; add Multiwfn orbital command stream next |
+| Electron density, spin density, Laplacian, kinetic density | Full wavefunction, or ABACUS density cubes for density only | Strong for density cube; Molden route for derivatives | `density.cub`, `spindensity.cub`, `laplacian.cub`, `K(r).cub`, `G(r).cub` | Single/positive-negative isosurfaces or slices | `cube-preset density` and signed overrides implemented; add command streams later |
+| ELF/LOL | Full wavefunction; ABACUS direct `out_elf` for ELF | Strong for ELF direct; Molden route for Multiwfn ELF/LOL | `ELF.cub`, `LOL.cub`, ABACUS `elf*.cube` | Isosurfaces around localized regions | `cube-preset elf` and `cube-preset lol` implemented |
 | AIM/QTAIM topology | Full wavefunction Molden/FCH/WFN/WFX | Feasible for Gamma LCAO Molden with `[Nval]`; validated on Ag(111)+benzene | `CPs.pdb`, `paths.pdb`, `CPprop.txt`, `mol.pdb` | Atoms-only pseudo-sites, no AIM bonds, optional labels | Already partly implemented; add ABACUS-aware recipes |
 | IGMH + AIM overlay | Full wavefunction and fragment definitions | Feasible for Gamma LCAO Molden; validated on Ag(111)+benzene | `dg_inter.cub`, `sl2r.cub`, AIM PDBs | Multi-phase VESTA density/texture plus AIM pseudo-sites | Already implemented for saved overlays; automate Multiwfn command streams next |
 
@@ -86,8 +86,8 @@ occupations, and density derivatives from the wavefunction representation.
 
 | Analysis | Multiwfn input | ABACUS feasibility | Multiwfn output | VESTA representation | Project action |
 | --- | --- | --- | --- | --- | --- |
-| IRI/NCI/RDG | Full wavefunction, or promolecular approximation from structure | Molden route feasible; promolecular route can avoid wavefunction | `IRI.cub`, `RDG.cub`, `sl2r.cub`, `func1.cub`, `func2.cub` | Isosurface plus texture cube; section planes off | Existing IRI cube code; generalize to NCI/RDG |
-| ESP/MEP on density surface | Full wavefunction or ABACUS `out_pot` plus density cube | Strong direct cube route; Molden route for Multiwfn ESP | `density.cub`, `totesp.cub`, `pot_es.cube`, `pots*.cube` | Density isosurface colored by potential texture | Add dual-cube surface mapping presets |
+| IRI/NCI/RDG | Full wavefunction, or promolecular approximation from structure | Molden route feasible; promolecular route can avoid wavefunction | `IRI.cub`, `RDG.cub`, `sl2r.cub`, `func1.cub`, `func2.cub` | Isosurface plus texture cube; section planes off | `cube-preset iri` with `rdg`/`nci` aliases implemented; add real-system templates |
+| ESP/MEP on density surface | Full wavefunction or ABACUS `out_pot` plus density cube | Strong direct cube route; Molden route for Multiwfn ESP | `density.cub`, `totesp.cub`, `pot_es.cube`, `pots*.cube` | Density isosurface colored by potential texture | `cube-preset esp` implemented; add real ABACUS/Multiwfn smoke templates |
 | Molecular surface mapped properties | Full wavefunction or cube pair | Feasible through Molden; ABACUS can provide density/potential cubes | `surf.cub`, `mapfunc.cub`, `density.cub`, `avglocion.cub`, `surfanalysis.pdb` | Surface cube plus texture; extrema as pseudo-sites | Extend VESTA texture and point overlay code |
 | ALIE / LEA / LEAE | Full wavefunction, occupied/virtual orbitals | Feasible only if ABACUS Molden orbitals/energies are adequate; virtual levels in metals risky | `avglocion.cub`, `userfunc.cub`, `surfanalysis.pdb` | Colored density surface plus extrema points | Prototype on molecules/insulators first |
 | vdW/repulsion/dispersion potential | Structure and/or wavefunction depending option | Feasible, often structure driven | `vdW.cub`, `repul.cub`, `disp.cub`, `density.cub` | Potential surfaces/slices, density surface context | Add low-risk cube preset |
@@ -154,9 +154,9 @@ Known limitations:
 
 ## Recommended Development Roadmap
 
-1. Improve the generic `cube-vesta` CLI beyond the current first version:
-   add optional render hooks and richer analysis-specific presets on top of
-   the implemented single/signed isosurface modes.
+1. Extend the generic `cube-vesta`/`cube-preset` CLI with more real-system
+   templates and optional render hooks.  Core analysis display presets now
+   exist; the remaining work is coverage and automation around them.
 2. Extend the implemented `abacus-molden` wrapper with more real-calculation
    smoke coverage and optional copy-to-scratch handling for converter
    side-products.
@@ -176,6 +176,8 @@ Implemented or partly implemented:
 
 - `multiwfn2vesta discover`
 - `multiwfn2vesta abacus-molden`
+- `multiwfn2vesta cube-vesta`
+- `multiwfn2vesta cube-preset`
 - `multiwfn2vesta aim-run`
 - `multiwfn2vesta aim-pdb`
 - `multiwfn2vesta aim-igmh`
@@ -186,13 +188,15 @@ Implemented or partly implemented:
 
 Main gaps:
 
-- Generic cube-to-VESTA CLI now exists as `multiwfn2vesta cube-vesta`,
-  including basic signed positive/negative isosurface output; remaining work
-  is richer analysis-specific presets and optional render hooks.
+- Generic cube-to-VESTA CLI now exists as `multiwfn2vesta cube-vesta`, and
+  common analysis defaults now exist as `multiwfn2vesta cube-preset`;
+  remaining work is real-system smoke/template coverage and optional render
+  hooks.
 - ABACUS Molden wrapper now exists; remaining work is real-system smoke
   coverage and tighter integration with downstream Multiwfn command streams.
 - No Multiwfn atom table parser yet.
 - No maintained Multiwfn command streams for orbital/density/ELF/RDG/IRI cube
   generation outside AIM.
-- Dual-cube surface texture workflows are still reverse-engineered from smoke
-  tests and need a cleaner template API.
+- Dual-cube surface texture workflows now have a preset entry point for
+  IRI/RDG/NCI and ESP/MEP, but still need more real smoke cases and cleaner
+  Multiwfn command-stream templates.

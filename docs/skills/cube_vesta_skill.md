@@ -38,10 +38,28 @@ multiwfn2vesta cube-vesta surface.cub cube_products \
   --tex-range-source surface-band
 ```
 
+Analysis preset wrapper:
+
+```bash
+multiwfn2vesta cube-preset --list-presets
+multiwfn2vesta cube-preset orbital orbital.cub cube_products
+multiwfn2vesta cube-preset elf ELF.cub cube_products
+multiwfn2vesta cube-preset rdg IRI2_surface.cub cube_products \
+  --texture-cube IRI1_color.cub
+multiwfn2vesta cube-preset esp density.cub cube_products \
+  --texture-cube esp.cub \
+  --tex-physical -0.05 0.05
+```
+
+`cube-preset` is a thin layer over `cube-vesta`; it selects maintained
+defaults but does not duplicate VESTA-writing logic.
+
 ## Outputs
 
 - `<output_dir>/<stem>_cube.vesta`
 - `<output_dir>/<stem>_cube_vesta_recipe.md`
+- for `cube-preset`, the same recipe gains a `Cube Preset` block recording
+  requested/canonical preset names and effective defaults
 - copied cube dependencies unless `--no-copy-cubes` is used
 - if surface and texture cubes share a basename but come from different
   directories, the later dependency is renamed, for example
@@ -84,12 +102,28 @@ multiwfn2vesta cube-vesta surface.cub cube_products \
   is zero and atoms fall inside the cube cell.  Otherwise it creates a
   `MOLECULE` phase with coordinates shifted by the cube origin.
 
+## Analysis Presets
+
+- `density` aliases: `rho`, `charge-density`, `scalar`; single surface,
+  default isosurface `0.01`.
+- `signed` aliases: `orbital`, `mo`, `wavefunction`, `abacus-wfc`,
+  `density-difference`, `dual-descriptor`; positive/negative surfaces,
+  default magnitude `0.02`.
+- `elf` alias: `abacus-elf`; single surface, default isosurface `0.80`.
+- `lol`; single surface, default isosurface `0.50`.
+- `iri` aliases: `rdg`, `nci`, `weak-interaction`; requires
+  `--texture-cube`, defaults to `--isosurface 1.0`,
+  `--tex-physical -0.04 0.04`, and surface-band texture scaling.
+- `esp` aliases: `mep`, `electrostatic-potential`, `density-esp`; requires
+  `--texture-cube`, defaults to density isosurface `0.001`; pass
+  `--tex-physical` for comparable figures.
+
 ## Current Limits
 
 - No VESTA rendering is launched by this command.
-- Signed positive/negative isosurfaces are implemented as a generic VESTA
-  preset, but analysis-specific Multiwfn command streams for producing orbital,
-  density-difference, Fukui, or dual-descriptor cubes are still separate future
+- Analysis-specific display presets now exist for common cube products, but
+  Multiwfn command streams for producing orbital, density-difference, Fukui,
+  dual-descriptor, ELF/LOL, IRI/RDG, or ESP cubes are still separate future
   work.
 - Surface-band sampling uses grid-point values, not interpolation exactly on
   the triangulated VESTA isosurface.
@@ -99,11 +133,12 @@ multiwfn2vesta cube-vesta surface.cub cube_products \
 ## Validation
 
 ```bash
-PYTHONPATH=src python3 -m unittest tests.test_cube_vesta -v
+PYTHONPATH=src python3 -m unittest tests.test_cube_preset tests.test_cube_vesta -v
 ```
 
 Real smoke:
 
 ```text
 /mnt/g/work/multiwfn2vesta/smoke/cube_vesta_cli_smoke_20260610/
+/mnt/g/work/multiwfn2vesta/smoke/cube_preset_smoke_20260610/
 ```

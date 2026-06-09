@@ -30,6 +30,7 @@ Scriptable subcommands:
 ```bash
 multiwfn2vesta discover
 multiwfn2vesta abacus-molden --help
+multiwfn2vesta cube-preset --help
 multiwfn2vesta aim-run --help
 multiwfn2vesta aim-pdb --help
 multiwfn2vesta aim-igmh --help
@@ -40,6 +41,9 @@ Aliases:
 - `multiwfn2vesta where` and `multiwfn2vesta env` are aliases for `discover`.
 - `multiwfn2vesta molden ...` and `multiwfn2vesta abacus-multiwfn-molden ...`
   are aliases for `abacus-molden`.
+- `multiwfn2vesta cube ...` is an alias for `cube-vesta`.
+- `multiwfn2vesta preset ...` and `multiwfn2vesta analysis-cube ...` are
+  aliases for `cube-preset`.
 - `multiwfn2vesta multiwfn-aim ...` is the same as `aim-run`.
 - `multiwfn2vesta aim-vesta ...` is the same as `aim-pdb`.
 - `multiwfn2vesta igmh ...` is the same as `aim-igmh`.
@@ -88,6 +92,21 @@ The command exports the ABACUS converter from
 The selected Python must be able to import `numpy`, `scipy`, and
 `matplotlib`; use `--python /path/to/python` if the default `python3`
 environment is not suitable.
+
+### Cube analysis preset to VESTA
+
+```bash
+multiwfn2vesta cube-preset --list-presets
+multiwfn2vesta cube-preset orbital orbital.cub cube_products
+multiwfn2vesta cube-preset rdg IRI2_surface.cub cube_products \
+  --texture-cube IRI1_color.cub
+```
+
+Use this when the file is a common ABACUS/Multiwfn cube product and the
+default style is enough to start.  Presets cover density-like scalar cubes,
+signed orbital/wavefunction/density-difference cubes, ELF/LOL, IRI/RDG/NCI
+mapped surfaces, and ESP/MEP mapped density surfaces.  All VESTA writing still
+goes through the maintained `cube-vesta` backend.
 
 ### Wavefunction to Multiwfn AIM to VESTA
 
@@ -153,10 +172,11 @@ No-GUI checks:
 ```bash
 bin/multiwfn2vesta --help
 bin/multiwfn2vesta discover
+bin/multiwfn2vesta cube-preset --list-presets
 bin/multiwfn2vesta aim-run --help
 bin/multiwfn2vesta aim-igmh --help
 printf 'q\n' | bin/multiwfn2vesta
-PYTHONPATH=src python3 -m unittest tests.test_cli tests.test_executables tests.test_multiwfn_aim
+PYTHONPATH=src python3 -m unittest tests.test_cli tests.test_cube_preset tests.test_executables tests.test_multiwfn_aim
 ```
 
 Real H2O Multiwfn noGUI smoke:

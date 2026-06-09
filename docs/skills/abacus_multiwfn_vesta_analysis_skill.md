@@ -43,6 +43,20 @@ Prepare these cubes for VESTA with the maintained no-GUI generator:
 multiwfn2vesta cube-vesta density.cub cube_products --isosurface 0.01
 ```
 
+For common products, use the preset wrapper to get analysis-specific defaults
+without manually spelling every `cube-vesta` option:
+
+```bash
+multiwfn2vesta cube-preset density density.cub cube_products
+multiwfn2vesta cube-preset orbital wfc_real.cub cube_products
+multiwfn2vesta cube-preset elf ELF.cub cube_products
+multiwfn2vesta cube-preset rdg IRI2_surface.cub cube_products \
+  --texture-cube IRI1_color.cub
+multiwfn2vesta cube-preset esp density.cub cube_products \
+  --texture-cube esp.cub \
+  --tex-physical -0.05 0.05
+```
+
 For signed ABACUS/Multiwfn scalar cubes such as real wavefunction amplitudes,
 real orbital cubes, density differences, Fukui functions, or dual
 descriptors:

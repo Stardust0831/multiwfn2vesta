@@ -25,6 +25,7 @@ multiwfn2vesta discover
 multiwfn2vesta abacus-molden --help
 multiwfn2vesta molden-check --help
 multiwfn2vesta cube-vesta --help
+multiwfn2vesta cube-preset --help
 multiwfn2vesta abacus-mulliken-color --help
 multiwfn2vesta aim-run --help
 multiwfn2vesta aim-pdb --help
@@ -41,6 +42,8 @@ multiwfn2vesta aim-igmh --help
   模式会要求 `[Cell]` 和 `[Nval]`
 - `cube-vesta`: 从 ABACUS/Multiwfn scalar cube 直接生成 `.vesta`，可选
   texture/color cube，默认关闭 section plane
+- `cube-preset`: 在 `cube-vesta` 后端上套用常见分析默认值，例如 density、
+  orbital/signed、ELF/LOL、IRI/RDG/NCI、ESP/MEP
 - `abacus-mulliken-color`: 读取 ABACUS `out_mul 1` 生成的 `mulliken.txt`，
   按原子 Mulliken 电荷或磁矩给 VESTA `SITET` 原子颜色赋值
 - `aim-run`: 从 `.molden`、`.fch`、`.wfn` 等波函数文件调用 Multiwfn AIM，
@@ -158,6 +161,35 @@ multiwfn2vesta cube-vesta \
 `abs(surface - isosurface)` 在一个窄带内筛选 texture 值来换算；如果窄带内没有
 非退化范围，会用离等值面最近的一批格点作为 fallback。recipe markdown 会记录
 实际采用的参考范围和采样点数。
+
+如果只是想处理常见分析产物，推荐优先使用预设入口：
+
+```bash
+multiwfn2vesta cube-preset --list-presets
+multiwfn2vesta cube-preset density density.cub cube_products
+multiwfn2vesta cube-preset orbital orbital.cub cube_products
+multiwfn2vesta cube-preset elf ELF.cub cube_products
+multiwfn2vesta cube-preset rdg IRI2_surface.cub cube_products \
+  --texture-cube IRI1_color.cub
+multiwfn2vesta cube-preset esp density.cub cube_products \
+  --texture-cube esp.cub \
+  --tex-physical -0.05 0.05
+```
+
+`cube-preset` 只负责选择默认值，实际写 `.vesta` 的逻辑仍走
+`cube-vesta`。当前预设：
+
+- `density`：单等值面，默认 `--isosurface 0.01`
+- `signed`：正/负等值面，别名包括 `orbital`、`wavefunction`、
+  `density-difference` 和 `dual-descriptor`
+- `elf` / `lol`：局域化函数等值面
+- `iri`：别名 `rdg`、`nci`，需要 `--texture-cube`，默认
+  `--tex-physical -0.04 0.04` 和 `--tex-range-source surface-band`
+- `esp`：别名 `mep`，需要 `--texture-cube`，建议为可比较图显式给
+  `--tex-physical`
+
+生成的 recipe 会追加 `Cube Preset` 段，记录请求的预设名、规范预设名、
+有效等值面、surface mode、texture 缩放来源和用户覆盖参数。
 
 ## ABACUS Mulliken 原子着色
 

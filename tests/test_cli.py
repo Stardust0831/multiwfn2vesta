@@ -17,6 +17,7 @@ class TestUnifiedCli(unittest.TestCase):
         self.assertIn("abacus-molden", text)
         self.assertIn("molden-check", text)
         self.assertIn("cube-vesta", text)
+        self.assertIn("cube-preset", text)
         self.assertIn("abacus-mulliken-color", text)
         self.assertIn("aim-run", text)
         self.assertIn("aim-pdb", text)
@@ -60,6 +61,13 @@ class TestUnifiedCli(unittest.TestCase):
         self.assertEqual(code, 0)
         mocked.assert_called_once_with(["density.cub", "products", "--isosurface", "0.01"])
 
+    def test_dispatches_cube_preset_command(self):
+        with patch("multiwfn2vesta.cli.cube_preset.main", return_value=0) as mocked:
+            code = cli.main(["cube-preset", "orbital", "orb.cub", "products"])
+
+        self.assertEqual(code, 0)
+        mocked.assert_called_once_with(["orbital", "orb.cub", "products"])
+
     def test_dispatches_abacus_mulliken_color_command(self):
         with patch("multiwfn2vesta.cli.abacus_mulliken.main", return_value=0) as mocked:
             code = cli.main(["abacus-mulliken-color", "input.vesta", "mulliken.txt", "colored.vesta"])
@@ -80,6 +88,13 @@ class TestUnifiedCli(unittest.TestCase):
 
         self.assertEqual(code, 0)
         mocked.assert_called_once_with(["input.vesta", "out"])
+
+    def test_dispatches_cube_preset_alias(self):
+        with patch("multiwfn2vesta.cli.cube_preset.main", return_value=0) as mocked:
+            code = cli.main(["preset", "density", "density.cub", "out"])
+
+        self.assertEqual(code, 0)
+        mocked.assert_called_once_with(["density", "density.cub", "out"])
 
     def test_unknown_command_returns_error(self):
         with patch("sys.stderr", io.StringIO()), patch("sys.stdout", io.StringIO()):
@@ -162,7 +177,7 @@ class TestUnifiedCli(unittest.TestCase):
     def test_interactive_abacus_molden_builds_expected_args(self):
         answers = iter(
             [
-                "7",
+                "8",
                 "calc",
                 "out.molden",
                 "/src/abacus",
@@ -199,6 +214,44 @@ class TestUnifiedCli(unittest.TestCase):
                 "true",
                 "--timeout",
                 "120",
+            ]
+        )
+
+    def test_interactive_cube_preset_builds_expected_args(self):
+        answers = iter(
+            [
+                "6",
+                "iri",
+                "iri2.cub",
+                "preset_products",
+                "iri1.cub",
+                "0.8",
+                "-0.03 0.03",
+                "molecule",
+                "n",
+            ]
+        )
+        with patch("builtins.input", lambda _prompt: next(answers)):
+            with patch("sys.stdout", io.StringIO()):
+                with patch("multiwfn2vesta.cli.cube_preset.main", return_value=0) as mocked:
+                    code = cli.main([])
+
+        self.assertEqual(code, 0)
+        mocked.assert_called_once_with(
+            [
+                "iri",
+                "iri2.cub",
+                "preset_products",
+                "--texture-cube",
+                "iri1.cub",
+                "--isosurface",
+                "0.8",
+                "--tex-physical",
+                "-0.03",
+                "0.03",
+                "--structure",
+                "molecule",
+                "--no-copy-cubes",
             ]
         )
 
@@ -241,7 +294,7 @@ class TestUnifiedCli(unittest.TestCase):
     def test_interactive_abacus_mulliken_color_builds_expected_args(self):
         answers = iter(
             [
-                "6",
+                "7",
                 "input.vesta",
                 "mulliken.txt",
                 "colored.vesta",
