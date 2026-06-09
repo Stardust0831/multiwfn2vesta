@@ -71,6 +71,14 @@ without generating dense automatic bonds between path points.
   This keeps every `P...._....` path sample site, keeps BCP labels such as
   `CP0001_N`, clears AIM-phase `SBOND`, and leaves real structure bonds
   enabled by default.
+- To isolate whether VESTA can display BCPs at all, render a BCP-only
+  single-phase diagnostic before changing the full overlay style.  The
+  2026-06-09 Ag(111)+benzene diagnostic rendered three orange `CP000*_N`
+  points successfully.  A zoom-only copy, changing only the final `SCENE`
+  scalar from `0.800` to `2.400`, made the same points clearly visible without
+  changing BCP radius or color.  Treat a successful BCP-only render as evidence
+  that any full-overlay invisibility is caused by overlap, occlusion, or scale,
+  not absent BCP records.
 
 ## Steps
 
@@ -130,6 +138,10 @@ without generating dense automatic bonds between path points.
   can use large VDW radii (`H` around `0.4600` in the H2O smoke case), which
   hides BCPs even when coordinates are correct.  Use a small-atom base layer or
   hide conventional bonds/large atom spheres for AIM-focused figures.
+- For periodic or large-cell overlays, whole-cell camera framing can make
+  Multiwfn-like BCP radii appear nearly invisible.  Before changing style,
+  make a zoom-only render copy by editing only the final `SCENE` scalar and
+  confirm the points are really present.
 
 ## Real smoke result
 
@@ -160,6 +172,22 @@ Observed:
   `SITET` styling.
 - `h2o_mol_small_plus_aim_aligned_postatomt.png` shows BCPs after using a
   small-atom base molecule and post-processing merged `ATOMT`.
+
+Ag(111)+benzene BCP-only display diagnostic:
+
+```text
+smoke/ag111_benzene_igmh_aim_periodic_cell_20260607/bcp_points_only_render_20260609/
+smoke/ag111_benzene_igmh_aim_periodic_cell_20260607/bcp_points_only_zoom_render_20260609/
+```
+
+Observed:
+
+- BCP-only front/right/top VESTA exports are valid `3048 x 1500` RGB PNGs.
+- The front whole-cell view shows three small orange BCP points.
+- The zoom-only front view changes only `SCENE` `0.800 -> 2.400` and shows the
+  same three BCP points clearly.
+- The full overlay's BCP invisibility is therefore a visibility problem, not a
+  missing-record problem.
 
 ## Failure notes
 

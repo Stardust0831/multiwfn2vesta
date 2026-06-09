@@ -122,5 +122,29 @@ Limitations recorded:
   `smoke/ag111_benzene_igmh_aim_periodic_cell_20260607/three_views_single_xe_yellow_bcp_visible/`.
   Validation found 588 `Xe` path points, 3 `Rn` BCP sites, BCP `SITET` radius
   `0.1800` with RGB `255 80 0`, and `COMPS 0` in all three views.
-- PNG rendering was not run because the available VESTA automation route still
-  steals focus.
+- PNG rendering was not run at that point because the available VESTA
+  automation route still steals focus; a later explicit user request triggered
+  the real-render diagnostic recorded below.
+
+## 2026-06-09: Real BCP display diagnostic render
+
+- User explicitly requested real VESTA rendering to confirm BCP point display,
+  accepting the known focus-stealing risk for this diagnostic.
+- Rendered a BCP-over-structure front view:
+  `smoke/ag111_benzene_igmh_aim_periodic_cell_20260607/bcp_display_diagnostic_20260609/ag111_benzene_igmh_aim_bcp_periodic_overlay_front.png`.
+- Rendered strict BCP-only front/right/top views from the single-phase
+  periodic BCP diagnostic under:
+  `smoke/ag111_benzene_igmh_aim_periodic_cell_20260607/bcp_points_only_render_20260609/`.
+  The PNGs are valid `3048 x 1500` RGB images.
+- Rendered an additional zoom-only BCP diagnostic:
+  `smoke/ag111_benzene_igmh_aim_periodic_cell_20260607/bcp_points_only_zoom_render_20260609/ag111_benzene_aim_interface_bcp_only_periodic_front_zoom2p4.png`.
+  The `.vesta` copy changes only the final `SCENE` zoom-like scalar from
+  `0.800` to `2.400`; BCP coordinates, `SITET` radius `0.0700`, and orange
+  RGB style are unchanged.
+- Visual inspection: the BCP-only front render shows three small orange BCP
+  points, and the zoom diagnostic shows the same three points clearly.
+  Conclusion: VESTA can render BCP sites from `CP000*_N` records.  The
+  full-overlay invisibility is therefore a size, overlap, or occlusion issue,
+  not absent BCP data.
+- No workspace-scoped VESTA, Multiwfn, ABACUS, or MPI process remained after
+  the diagnostic render.

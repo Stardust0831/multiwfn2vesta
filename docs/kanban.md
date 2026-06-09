@@ -14,6 +14,10 @@ Updated: 2026-06-09
   `smoke/ag111_benzene_igmh_aim_periodic_cell_20260607/three_views_single_xe_yellow_bcp_visible/`;
   they use original structure colors, one yellow Xe pseudo-element for AIM
   path samples, Rn pseudo-elements for BCPs, no AIM bonds, and `COMPS 0`.
+- Decide the minimal full-overlay BCP visibility fix only after the user asks
+  for style changes.  The current diagnostic conclusion is that VESTA can
+  render BCP sites; full-overlay invisibility is a size/overlap/occlusion
+  problem, not missing `CP000*_N` records.
 
 ## Done
 
@@ -41,6 +45,12 @@ Updated: 2026-06-09
   to a single pseudo-element such as `Xe`, maps BCPs to a distinct
   pseudo-element such as `Rn`, clears AIM `SBOND`, and preserves global
   structure bonds by default.
+- Real-rendered BCP visibility diagnostics with VESTA after explicit user
+  request.  BCP-only front/right/top PNGs were generated under
+  `smoke/ag111_benzene_igmh_aim_periodic_cell_20260607/bcp_points_only_render_20260609/`,
+  and a zoomed front diagnostic was generated under
+  `smoke/ag111_benzene_igmh_aim_periodic_cell_20260607/bcp_points_only_zoom_render_20260609/`.
+  Visual inspection confirms three orange BCP points are displayed.
 
 ## Next
 

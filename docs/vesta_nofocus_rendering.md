@@ -72,3 +72,27 @@ Additional failed experiments:
   PNG.
 - PowerShell `Start-Process -WindowStyle Hidden` timed out without creating a
   PNG.
+
+## 2026-06-09 BCP display diagnostic
+
+The user explicitly requested real rendering to confirm BCP display, so the
+known focus-stealing wrapper was used as a controlled one-shot route.
+
+Example command:
+
+```bash
+python3 project/scripts/render_vesta_nofocus.py \
+  smoke/ag111_benzene_igmh_aim_periodic_cell_20260607/bcp_points_only_render_20260609/ag111_benzene_aim_interface_bcp_only_periodic_front.vesta \
+  smoke/ag111_benzene_igmh_aim_periodic_cell_20260607/bcp_points_only_render_20260609/ag111_benzene_aim_interface_bcp_only_periodic_front.png \
+  --scale 2 --clean-before --timeout 240
+```
+
+Result:
+
+- BCP-only front/right/top PNGs were written successfully under
+  `smoke/ag111_benzene_igmh_aim_periodic_cell_20260607/bcp_points_only_render_20260609/`.
+- A zoom-only diagnostic PNG was written under
+  `smoke/ag111_benzene_igmh_aim_periodic_cell_20260607/bcp_points_only_zoom_render_20260609/`.
+- The rendered images confirm BCP sites can be displayed by VESTA; the full
+  overlay issue is visibility/overlap/occlusion, not absent records.
+- No workspace-scoped VESTA process remained after the render.
