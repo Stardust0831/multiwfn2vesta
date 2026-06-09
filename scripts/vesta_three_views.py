@@ -307,6 +307,7 @@ def main() -> int:
     parser.add_argument("--add-compass", action="store_true", help="Add one compass after rendering")
     parser.add_argument("--clean-before", action="store_true")
     parser.add_argument("--clean-after", action="store_true", default=True)
+    parser.add_argument("--no-clean-after", action="store_false", dest="clean_after")
     parser.add_argument(
         "--extra-rotate",
         action="append",

@@ -242,3 +242,36 @@ Limitations recorded:
   while the temporary top `x -8` camera tilt made them visible without moving
   any BCP/path coordinates.  No workspace-scoped `VESTA.exe` process remained
   afterward.
+
+## 2026-06-10: Reusable AIM+IGMH VESTA CLI
+
+- User asked to close the Ag(111)+benzene AIM+IGMH plotting experience into
+  reusable Python code with CLI options.
+- Added `multiwfn2vesta.aim_igmh_vesta`, a high-level wrapper that starts from
+  a saved structure/IGMH cube + AIM overlay `.vesta`, applies the maintained
+  AIM path/BCP style, copies relative cube dependencies, writes a markdown
+  recipe manifest, and optionally calls the one-source/one-session three-view
+  renderer.
+- Default high-level style now matches the current Ag interface recipe:
+  yellow `Xe` AIM path samples with radius `0.0600`, orange `Rn` BCPs with
+  radius `0.1800`, AIM `SBOND` cleared, real structure bonds retained, BCPs
+  split into the final phase, and no coordinate movement or path-point
+  deletion.
+- Rendering remains explicit via `--render-three-views` because VESTA Windows
+  automation still steals focus.  The render command delegates to
+  `scripts/vesta_three_views.py` in `cli-rotate` mode, so it opens one
+  `.vesta` once and exports images through CLI rotations rather than making
+  three persistent view-specific `.vesta` files.
+- Added a console entry point `multiwfn2vesta-aim-igmh` in both
+  `pyproject.toml` and `setup.py`, while keeping `python -m
+  multiwfn2vesta.aim_igmh_vesta` as the direct tested route.
+- Added unit tests in `tests/test_aim_igmh_vesta.py` for cube reference
+  discovery, default style output, cube copying, manifest content, render
+  command planning, and compass/`COMPS` mapping.  These tests do not launch
+  VESTA.
+- Added skill documentation:
+  `docs/skills/aim_igmh_vesta_skill.md`.
+- Ran a real Ag dry smoke without VESTA rendering:
+  `smoke/ag111_benzene_igmh_aim_periodic_cell_20260607/reusable_cli_smoke_20260610/`.
+  The directory contains the styled `.vesta`, recipe markdown, `dg_inter.cub`,
+  and `sl2r.cub`.

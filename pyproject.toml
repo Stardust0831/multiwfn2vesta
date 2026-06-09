@@ -7,5 +7,8 @@ name = "multiwfn-vesta-interface"
 version = "0.1.0"
 description = "Interface for Multiwfn calculations and VESTA visualization"
 authors = [{name = "Stardust0831", email = "13862180016@163.com"}]
-dependencies = []  
-requires-python = ">=3.6"  
+dependencies = []
+requires-python = ">=3.6"
+
+[project.scripts]
+multiwfn2vesta-aim-igmh = "multiwfn2vesta.aim_igmh_vesta:main"

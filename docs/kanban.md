@@ -19,6 +19,21 @@ Updated: 2026-06-10
 
 ## Done
 
+- Closed the Ag(111)+benzene AIM+IGMH drawing experience into a reusable
+  Python/CLI workflow: `multiwfn2vesta.aim_igmh_vesta`.  It patches AIM
+  path/BCP styles with the maintained yellow `Xe` path and orange `Rn` BCP
+  defaults, preserves coordinates and structure bonds, splits BCPs into the
+  final phase by default, copies relative IGMH cube files beside the product,
+  writes a markdown manifest, and calls the one-source/one-session VESTA
+  three-view exporter only when explicitly requested.
+- Added focused no-GUI tests for the reusable AIM+IGMH workflow in
+  `tests/test_aim_igmh_vesta.py`.
+- Added skill documentation for the closed-loop reusable workflow:
+  `docs/skills/aim_igmh_vesta_skill.md`.
+- Ran a non-rendered Ag(111)+benzene dry smoke under
+  `/mnt/g/work/multiwfn2vesta/smoke/ag111_benzene_igmh_aim_periodic_cell_20260607/reusable_cli_smoke_20260610/`.
+  The output contains a styled `.vesta`, a recipe markdown file, and copied
+  `dg_inter.cub`/`sl2r.cub`.
 - Updated maintained AIM overlay styling so `Xe` bond-path sample spheres use
   radius `0.0600` Angstrom by default.
 - Generated a non-rendered Ag(111)+benzene smoke check file with yellow `Xe`

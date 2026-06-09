@@ -10,6 +10,7 @@ setup(
     entry_points={
         'console_scripts': [
             'multiwfn-vesta=multiwfn_vesta.main:main',
+            'multiwfn2vesta-aim-igmh=multiwfn2vesta.aim_igmh_vesta:main',
         ],
     },
 )
