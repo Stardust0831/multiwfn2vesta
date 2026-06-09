@@ -4,11 +4,6 @@ Updated: 2026-06-10
 
 ## Doing
 
-- Refresh README and simplify branch state.  Current plan: document the
-  maintained `multiwfn2vesta` CLI on the README, keep commit identity as
-  repository-local `Stardust0831`, then merge the verified
-  `vesta-nofocus-render` branch back into `main` and push both branch state and
-  docs.
 - Keep non-empty `LBLAT` generation out of maintained code until a GUI-saved
   VESTA diff proves the record syntax; the verified native route now uses
   `LABEL 1` plus site labels.
@@ -24,6 +19,15 @@ Updated: 2026-06-10
 
 ## Done
 
+- Updated the README so the repository front page now documents the maintained
+  `multiwfn2vesta` CLI, executable discovery, wavefunction-to-AIM runner,
+  AIM PDB conversion, AIM+IGMH overlay workflow, rendering caveats, validation,
+  and documentation map.
+- Consolidated the branch state: `main` was fast-forwarded to the verified
+  `vesta-nofocus-render` work at commit `2c19cd8`, pushed to GitHub, and the
+  merged `vesta-nofocus-render` branch was deleted locally and remotely.
+- Confirmed commit identity is repository-local `Stardust0831
+  <13862180016@163.com>`.
 - Added Multiwfn/VESTA executable discovery to the maintained CLI.
   `multiwfn2vesta discover` reports selected and candidate paths from
   environment variables, workspace tools, and `PATH`.

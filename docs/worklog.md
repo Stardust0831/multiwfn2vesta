@@ -337,3 +337,18 @@ Limitations recorded:
   `paths.pdb` (124 lines), `CPs.pdb` (6 lines), `mol.pdb` (5 lines),
   `CPprop.txt`, logs, and `aim_atoms_only.vesta` (579 lines).  VESTA was not
   launched during this smoke.
+
+## 2026-06-10: README refresh and branch consolidation
+
+- User asked to update the README, simplify the branch situation, and use
+  `Stardust0831` identity for commits.
+- Confirmed repository-local Git identity:
+  `Stardust0831 <13862180016@163.com>`.
+- Rewrote `README.md` to describe the maintained CLI: quick start,
+  `multiwfn2vesta discover`, `aim-run`, `aim-pdb`, `aim-igmh`, explicit VESTA
+  rendering caveat, validation command, smoke output, and documentation map.
+- Pushed README update on the verified maintenance branch at commit `2c19cd8`.
+- Fast-forwarded `main` from `8605928` to `2c19cd8`, so `main` now contains
+  the maintained CLI, AIM runner, VESTA utilities, tests, docs, and README.
+- Deleted the merged `vesta-nofocus-render` branch locally and remotely.
+  Remote `origin` now tracks only `main`, with `origin/HEAD -> origin/main`.
