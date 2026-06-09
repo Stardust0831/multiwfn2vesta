@@ -48,7 +48,8 @@ without generating dense automatic bonds between path points.
   `He/Ne/Ar/Kr/Xe/Rn` path elements make the style table harder to reason
   about and can produce inconsistent rendering if VESTA drops or reorders
   `ATOMT` rows.  A single rare element such as `Xe`, with yellow path points
-  and larger orange BCPs, is easier to maintain.
+  and larger orange BCPs, is easier to maintain.  Current maintained overlay
+  default for the yellow `Xe` path sample spheres is radius `0.0600` Angstrom.
 - If BCPs are invisible, first check whether path sample points occupy the same
   coordinates and draw over them.  Reduce path point radius, increase BCP
   radius, and use a distinct BCP color before adding VESTA bonds.
@@ -65,7 +66,7 @@ without generating dense automatic bonds between path points.
     output_overlay.vesta \
     --path-element Xe \
     --bcp-element Rn \
-    --path-radius 0.055 \
+    --path-radius 0.060 \
     --bcp-radius 0.180 \
     --path-rgb 255 230 0 \
     --bcp-rgb 255 80 0 \
@@ -89,6 +90,12 @@ without generating dense automatic bonds between path points.
   `Rn+CP*_N`, `Rn+RBCP*`, `Xe+CP*_N`, `C+CP*_N`, and `He+CP*_N`.  Therefore
   the `CP000*_N` label pattern and these tested element symbols are not enough
   to explain BCP invisibility.
+- For BCP index labels, use VESTA's documented atom/site label route rather
+  than arbitrary text objects.  Rename BCP site labels to concise strings such
+  as `BCP1`, `BCP2`, or `B001`, then enable atom labels as "Names of sites" in
+  VESTA.  Do not generate non-empty `LBLAT` records until a GUI-save diff has
+  confirmed the exact syntax.  For publication figures, post-render PNG/SVG
+  text annotation is the more controllable fallback.
 
 ## Steps
 

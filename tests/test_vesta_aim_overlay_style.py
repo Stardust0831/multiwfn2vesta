@@ -58,7 +58,6 @@ class TestVestaAimOverlayStyle(unittest.TestCase):
             SAMPLE,
             path_element="Xe",
             bcp_element="Rn",
-            path_radius=0.055,
             bcp_radius=0.180,
             path_rgb=(255, 230, 0),
             bcp_rgb=(255, 80, 0),
@@ -66,8 +65,9 @@ class TestVestaAimOverlayStyle(unittest.TestCase):
 
         self.assertIn("  Xe        P0001_0001", patched)
         self.assertIn("  Rn        CP0001_N", patched)
-        self.assertIn("P0001_0001  0.0550 255 230   0 255 230   0 204", patched)
+        self.assertIn("P0001_0001  0.0600 255 230   0 255 230   0 204", patched)
         self.assertIn("CP0001_N  0.1800 255  80   0 255  80   0 204", patched)
+        self.assertIn("  3         Xe  0.0600 255 230   0 255 230   0 204", patched)
         self.assertIn("  4         Rn  0.1800 255  80   0 255  80   0 204", patched)
         self.assertIn("BONDS   1", patched)
         self.assertEqual(patched.count("  Xe        P0001_0001"), 1)

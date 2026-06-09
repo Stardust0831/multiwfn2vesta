@@ -1,5 +1,29 @@
 # Worklog
 
+## 2026-06-10: AIM path radius and BCP label research
+
+- Updated `multiwfn2vesta.vesta_aim_overlay_style` so AIM bond-path sample
+  points mapped to `Xe` use a maintained default radius of `0.0600` Angstrom.
+  The BCP default remains `0.1800` Angstrom unless explicitly overridden.
+- Updated focused tests so an old `0.0550` path style is patched to the new
+  default `0.0600` in both `SITET` and `ATOMT`.
+- Researched VESTA label support.  VESTA's documented atom-label mechanism can
+  display either element names or site names near atoms, with a z-axis offset
+  in Angstrom, and the Objects tab exposes per-site label visibility.  Public
+  documentation did not reveal a stable arbitrary 3D text-object directive for
+  `.vesta` files.
+- Added `docs/vesta_bcp_labeling.md` and updated the AIM skill.  Recommended
+  near-term BCP numbering is either to rename BCP site labels such as
+  `CP0001_N` to concise `BCP1`/`BCP2` and enable VESTA atom/site labels, or to
+  render with VESTA and add publication labels in a PNG/SVG post-processing
+  step.  Direct non-empty `LBLAT` generation remains unimplemented until a
+  GUI-save diff confirms the record syntax.
+- Generated a non-rendered Ag(111)+benzene check file outside the tracked
+  project tree:
+  `/mnt/g/work/multiwfn2vesta/smoke/ag111_benzene_igmh_aim_periodic_cell_20260607/products/ag111_benzene_igmh_aim_paths_single_xe_yellow_bcp_splitphase_path006_periodic_overlay.vesta`.
+  It contains no old `0.0550` yellow-Xe path style, has one `Xe` `ATOMT`
+  radius `0.0600`, and keeps three `Rn` BCP records.
+
 ## 2026-06-05: VESTA atom scalar coloring
 
 - Added `multiwfn2vesta.vesta_atom_coloring`.
