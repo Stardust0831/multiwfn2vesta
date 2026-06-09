@@ -4,6 +4,11 @@ Updated: 2026-06-10
 
 ## Doing
 
+- Refresh README and simplify branch state.  Current plan: document the
+  maintained `multiwfn2vesta` CLI on the README, keep commit identity as
+  repository-local `Stardust0831`, then merge the verified
+  `vesta-nofocus-render` branch back into `main` and push both branch state and
+  docs.
 - Keep non-empty `LBLAT` generation out of maintained code until a GUI-saved
   VESTA diff proves the record syntax; the verified native route now uses
   `LABEL 1` plus site labels.
