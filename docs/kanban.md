@@ -5,8 +5,10 @@ Updated: 2026-06-10
 ## Doing
 
 - Turn the 2026-06-10 Multiwfn/ABACUS/VESTA research into the next
-  maintainable features: RDG/IRI/IGMH command streams, real-system
-  `abacus-molden` smoke coverage, and Multiwfn atom scalar parsers.
+  maintainable features: IGMH command streams, real-system `abacus-molden`
+  smoke coverage, Multiwfn atom scalar parsers, and more real IRI/RDG
+  templates.  The first maintained IRI/RDG runner now exists as
+  `multiwfn2vesta iri-run`.
 - Keep non-empty `LBLAT` generation out of maintained code until a GUI-saved
   VESTA diff proves the record syntax; the verified native route now uses
   `LABEL 1` plus site labels.
@@ -22,6 +24,35 @@ Updated: 2026-06-10
 
 ## Done
 
+- Added `multiwfn2vesta iri-run`, a maintained Multiwfn IRI/RDG command-stream
+  wrapper.  It discovers Multiwfn, writes the exact command stream and logs,
+  runs in `multiwfn_iri_raw/`, preserves raw `func1.cub`/`func2.cub`, writes
+  processed `<stem>_IRI1.cub` and `<stem>_IRI2.cub`, and calls
+  `cube-preset iri` to write a mapped-surface `.vesta` unless `--no-vesta`
+  is supplied.
+- Integrated `iri-run` into the unified CLI, aliases `multiwfn-iri` and
+  `rdg-run`, the interactive menu, and console script
+  `multiwfn2vesta-iri-run`.
+- Hardened `iri-run` failure handling after read-only pre-commit review:
+  missing Multiwfn/input paths return a stable CLI error, Multiwfn nonzero
+  exits report an `ERROR:` with log paths, and timeouts/launch failures write
+  partial logs instead of traceback.
+- Smoke-tested real H2O noGUI IRI/RDG under
+  `/mnt/g/work/multiwfn2vesta/smoke/multiwfn_iri_run_smoke_20260610/`.
+  The run generated raw `func1.cub`/`func2.cub`, processed `h2o_IRI1.cub` and
+  `h2o_IRI2.cub`, and wrote `h2o_iri_cube.vesta` plus recipe without
+  launching VESTA.
+- Synced README, usage docs, IRI/cube/CLI skill notes, ABACUS/Multiwfn
+  planning notes, research matrix, and root/project work records with the
+  maintained IRI/RDG runner.
+- Focused validation passed: 36 tests across `tests.test_multiwfn_iri`,
+  `tests.test_cli`, and `tests.test_iri_cube`, plus `py_compile` for
+  `multiwfn_iri.py` and `cli.py`.
+- Full no-GUI regression passed: 118 tests across Molden checking, ABACUS
+  Molden/Mulliken, cube preset, Multiwfn IRI, cube-to-VESTA, unified CLI,
+  AIM+IGMH, executable discovery, Multiwfn AIM, IRI cube handling, AIM VESTA
+  conversion, and VESTA atom coloring.  `multiwfn2vesta iri-run --help`,
+  top-level `multiwfn2vesta --help`, and `git diff --check` also passed.
 - Added `multiwfn2vesta cube-preset`, a thin analysis-preset layer over the
   maintained `cube-vesta` backend.  Current presets cover density-like scalar
   cubes, signed orbital/wavefunction/density-difference cubes, ELF/LOL cubes,

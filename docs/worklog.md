@@ -1,5 +1,52 @@
 # Worklog
 
+## 2026-06-10: Multiwfn IRI/RDG runner and README branch check
+
+- User requested another README update, branch simplification if needed, and
+  commits using repository-local identity `Stardust0831`.
+- Rechecked project branch state: local `main` tracks `origin/main`,
+  `origin/HEAD` points to `origin/main`, `git ls-remote --heads origin`
+  returns only `refs/heads/main`, and repository-local identity is
+  `Stardust0831 <13862180016@163.com>`.  There is no feature branch to merge
+  back.
+- Added `multiwfn2vesta.multiwfn_iri` and unified CLI command
+  `multiwfn2vesta iri-run`, with aliases `multiwfn-iri` and `rdg-run`, an
+  interactive menu entry, and console script `multiwfn2vesta-iri-run`.
+- The command discovers Multiwfn, writes `multiwfn_iri_input.txt`, stdout and
+  stderr logs, runs Multiwfn in `multiwfn_iri_raw/`, preserves raw
+  `func1.cub`/`func2.cub`, writes processed `<stem>_IRI1.cub` and
+  `<stem>_IRI2.cub`, copies `output.txt` when present, and calls
+  `cube-preset iri` to write a mapped-surface `.vesta` unless `--no-vesta` is
+  used.
+- Hardened failure handling after read-only pre-commit review: missing
+  Multiwfn/input paths return a stable CLI error, Multiwfn nonzero exits set
+  an `ERROR:` message with log paths, and timeout/launch failures write
+  partial logs instead of traceback.
+- Ran a real H2O noGUI smoke under
+  `/mnt/g/work/multiwfn2vesta/smoke/multiwfn_iri_run_smoke_20260610/`.
+  It selected
+  `/mnt/g/work/multiwfn2vesta/tools/Multiwfn_2026.6.2_bin_Linux_noGUI/Multiwfn_noGUI`,
+  returned `0`, generated raw `func1.cub`/`func2.cub`, processed
+  `h2o_IRI1.cub`/`h2o_IRI2.cub`, and wrote `h2o_iri_cube.vesta` plus recipe
+  without launching VESTA.
+- Smoke recipe notes: surface grid `24 x 46 x 32`, surface data range
+  `0.37856` to `11.3977`, texture data range `-0.04` to `0.524624`,
+  `tex_percent_range` `0.0` to `0.14361986693619327`,
+  `tex_reference_source: surface-nearest`, and
+  `surface_nearest_fallback: true`.
+- Updated README, usage docs, IRI/cube/CLI skill notes,
+  ABACUS/Multiwfn planning notes, and the analysis matrix so IRI/RDG is no
+  longer documented as only a future command stream.
+- Focused validation passed: 36 tests across `tests.test_multiwfn_iri`,
+  `tests.test_cli`, and `tests.test_iri_cube`; `py_compile` passed for
+  `multiwfn_iri.py` and `cli.py`.
+- Final no-GUI validation passed before commit: 118 tests across Molden
+  checking, ABACUS Molden/Mulliken, cube preset, Multiwfn IRI, cube-to-VESTA,
+  unified CLI, AIM+IGMH, executable discovery, Multiwfn AIM, IRI cube
+  handling, AIM VESTA conversion, and VESTA atom coloring.  `bin/multiwfn2vesta
+  iri-run --help`, top-level `bin/multiwfn2vesta --help`, and
+  `git diff --check` also passed.
+
 ## 2026-06-10: Cube analysis presets
 
 - Added `multiwfn2vesta.cube_preset`, a thin analysis-oriented preset layer

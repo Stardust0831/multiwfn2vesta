@@ -156,6 +156,19 @@ multiwfn2vesta molden-check ABACUS_Multiwfn.molden --abacus
 
 `[Nval]` must be present for pseudopotential systems.
 
+For IRI/RDG from a full wavefunction, use the maintained command stream
+wrapper:
+
+```bash
+multiwfn2vesta iri-run ABACUS_Multiwfn.molden iri_products \
+  --timeout 300
+```
+
+This keeps raw Multiwfn `func1.cub`/`func2.cub`, writes processed
+`<stem>_IRI1.cub`/`<stem>_IRI2.cub`, and then calls `cube-preset iri` for the
+VESTA mapped surface.  Use `--commands-file` for non-default weak-interaction
+menu choices.
+
 ## Priority Rules
 
 - P0: generic cube VESTA, orbital cubes, density-derived cubes, ELF/LOL, AIM,

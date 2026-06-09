@@ -50,6 +50,9 @@ Local smoke evidence:
 - Multiwfn IGMH from ABACUS Molden produced `dg_inter.cub` and `sl2r.cub`.
 - Multiwfn AIM from ABACUS Molden produced AIM CP/path PDBs and VESTA overlay
   products under `smoke/ag111_benzene_igmh_aim_periodic_cell_20260607/`.
+- Multiwfn noGUI IRI/RDG from H2O FCHK produced raw `func1.cub`/`func2.cub`,
+  processed `h2o_IRI1.cub`/`h2o_IRI2.cub`, and `h2o_iri_cube.vesta` under
+  `smoke/multiwfn_iri_run_smoke_20260610/`.
 
 ## ABACUS Input Routes
 
@@ -86,7 +89,7 @@ occupations, and density derivatives from the wavefunction representation.
 
 | Analysis | Multiwfn input | ABACUS feasibility | Multiwfn output | VESTA representation | Project action |
 | --- | --- | --- | --- | --- | --- |
-| IRI/NCI/RDG | Full wavefunction, or promolecular approximation from structure | Molden route feasible; promolecular route can avoid wavefunction | `IRI.cub`, `RDG.cub`, `sl2r.cub`, `func1.cub`, `func2.cub` | Isosurface plus texture cube; section planes off | `cube-preset iri` with `rdg`/`nci` aliases implemented; add real-system templates |
+| IRI/NCI/RDG | Full wavefunction, or promolecular approximation from structure | Molden route feasible; promolecular route can avoid wavefunction | `IRI.cub`, `RDG.cub`, `sl2r.cub`, `func1.cub`, `func2.cub` | Isosurface plus texture cube; section planes off | `multiwfn2vesta iri-run` implemented for the basic IRI/RDG command stream; `cube-preset iri` remains the VESTA writer; add real-system templates |
 | ESP/MEP on density surface | Full wavefunction or ABACUS `out_pot` plus density cube | Strong direct cube route; Molden route for Multiwfn ESP | `density.cub`, `totesp.cub`, `pot_es.cube`, `pots*.cube` | Density isosurface colored by potential texture | `cube-preset esp` implemented; add real ABACUS/Multiwfn smoke templates |
 | Molecular surface mapped properties | Full wavefunction or cube pair | Feasible through Molden; ABACUS can provide density/potential cubes | `surf.cub`, `mapfunc.cub`, `density.cub`, `avglocion.cub`, `surfanalysis.pdb` | Surface cube plus texture; extrema as pseudo-sites | Extend VESTA texture and point overlay code |
 | ALIE / LEA / LEAE | Full wavefunction, occupied/virtual orbitals | Feasible only if ABACUS Molden orbitals/energies are adequate; virtual levels in metals risky | `avglocion.cub`, `userfunc.cub`, `surfanalysis.pdb` | Colored density surface plus extrema points | Prototype on molecules/insulators first |
@@ -160,12 +163,14 @@ Known limitations:
 2. Extend the implemented `abacus-molden` wrapper with more real-calculation
    smoke coverage and optional copy-to-scratch handling for converter
    side-products.
-3. Generalize current IRI color-cube logic to NCI/RDG/ESP mapped surfaces.
+3. Extend the implemented `iri-run` command stream to more real IRI/RDG/NCI
+   templates and downstream chaining; keep ESP mapped surfaces on
+   `cube-preset esp` until a maintained Multiwfn ESP command stream exists.
 4. Add more atom-scalar parsers.  ABACUS `mulliken.txt` now feeds VESTA atom
    coloring directly; Multiwfn atom tables remain future work.
-5. Add command-stream wrappers for Multiwfn orbital cube, density/ELF/LOL cube,
-   IRI/RDG, and IGMH fragment workflows, following the existing `aim-run`
-   logging pattern.
+5. Add command-stream wrappers for Multiwfn orbital cube,
+   density/ELF/LOL cube, ESP, and IGMH fragment workflows, following the
+   existing `aim-run` and `iri-run` logging pattern.
 6. Keep headless/no-focus VESTA rendering as a separate backend concern.
    Visualization products should remain useful as `.vesta` even when rendering
    is skipped.
@@ -178,10 +183,12 @@ Implemented or partly implemented:
 - `multiwfn2vesta abacus-molden`
 - `multiwfn2vesta cube-vesta`
 - `multiwfn2vesta cube-preset`
+- `multiwfn2vesta iri-run`
 - `multiwfn2vesta aim-run`
 - `multiwfn2vesta aim-pdb`
 - `multiwfn2vesta aim-igmh`
-- IRI color cube scalar remapping helpers
+- IRI color cube scalar remapping helpers and the maintained Multiwfn
+  IRI/RDG runner
 - VESTA atom scalar RGB patching
 - ABACUS `mulliken.txt` charge/magnetism atom coloring
 - VESTA camera/layer/three-view utilities
@@ -195,8 +202,9 @@ Main gaps:
 - ABACUS Molden wrapper now exists; remaining work is real-system smoke
   coverage and tighter integration with downstream Multiwfn command streams.
 - No Multiwfn atom table parser yet.
-- No maintained Multiwfn command streams for orbital/density/ELF/RDG/IRI cube
-  generation outside AIM.
+- No maintained Multiwfn command streams yet for orbital, density, ELF/LOL,
+  or ESP cube generation.  IRI/RDG has the first maintained command stream as
+  `multiwfn2vesta iri-run`, currently validated on H2O.
 - Dual-cube surface texture workflows now have a preset entry point for
   IRI/RDG/NCI and ESP/MEP, but still need more real smoke cases and cleaner
-  Multiwfn command-stream templates.
+  end-to-end templates.

@@ -26,6 +26,7 @@ multiwfn2vesta abacus-molden --help
 multiwfn2vesta molden-check --help
 multiwfn2vesta cube-vesta --help
 multiwfn2vesta cube-preset --help
+multiwfn2vesta iri-run --help
 multiwfn2vesta abacus-mulliken-color --help
 multiwfn2vesta aim-run --help
 multiwfn2vesta aim-pdb --help
@@ -44,6 +45,9 @@ multiwfn2vesta aim-igmh --help
   texture/color cube，默认关闭 section plane
 - `cube-preset`: 在 `cube-vesta` 后端上套用常见分析默认值，例如 density、
   orbital/signed、ELF/LOL、IRI/RDG/NCI、ESP/MEP
+- `iri-run`: 从 Multiwfn 可读波函数文件调用 IRI/RDG 弱相互作用菜单，
+  生成 `func1.cub`/`func2.cub`，处理成 VESTA 可用的 `IRI1`/`IRI2` cube，
+  再通过 `cube-preset iri` 写 mapped-surface `.vesta`
 - `abacus-mulliken-color`: 读取 ABACUS `out_mul 1` 生成的 `mulliken.txt`，
   按原子 Mulliken 电荷或磁矩给 VESTA `SITET` 原子颜色赋值
 - `aim-run`: 从 `.molden`、`.fch`、`.wfn` 等波函数文件调用 Multiwfn AIM，
@@ -88,7 +92,7 @@ VESTA 查找顺序：
 3. 工作区内 VESTA：`tools/VESTA-win64/VESTA.exe` 和 Linux VESTA
 4. shell 的 `PATH`
 
-`aim-run` 本身只启动 Multiwfn，不启动 VESTA；VESTA 只在
+`aim-run` 和 `iri-run` 本身只启动 Multiwfn，不启动 VESTA；VESTA 只在
 `aim-igmh --render-three-views` 这种显式渲染命令里被调用。
 
 ## Cube 文件到 VESTA
@@ -190,6 +194,50 @@ multiwfn2vesta cube-preset esp density.cub cube_products \
 
 生成的 recipe 会追加 `Cube Preset` 段，记录请求的预设名、规范预设名、
 有效等值面、surface mode、texture 缩放来源和用户覆盖参数。
+
+## 波函数文件到 IRI/RDG VESTA
+
+如果起点是 Molden/FCHK/WFN/WFX 等 Multiwfn 可读波函数文件，可以直接调用
+Multiwfn 的弱相互作用 IRI/RDG 菜单，并把输出接到 VESTA：
+
+```bash
+multiwfn2vesta iri-run \
+  input.molden \
+  iri_products \
+  --timeout 300
+```
+
+默认流程：
+
+- 自动发现 Multiwfn；也可用 `--multiwfn /path/to/Multiwfn_noGUI` 显式指定
+- 写 `multiwfn_iri_input.txt`，记录实际喂给 Multiwfn 的命令流
+- 在 `multiwfn_iri_raw/` 保存 Multiwfn 原始 `func1.cub`、`func2.cub` 和
+  `output.txt`
+- 把 `func1.cub` 处理成 `<stem>_IRI1.cub`，作为 sign(lambda2)rho 类染色 cube
+- 把 `func2.cub` 复制成 `<stem>_IRI2.cub`，作为 IRI/RDG 等值面 cube
+- 默认调用 `cube-preset iri` 生成 `<stem>_iri_cube.vesta` 和 recipe
+
+常用参数：
+
+```bash
+multiwfn2vesta iri-run input.fch iri_products \
+  --multiwfn /mnt/g/work/multiwfn2vesta/tools/Multiwfn_2026.6.2_bin_Linux_noGUI/Multiwfn_noGUI \
+  --nthreads 6 \
+  --stem h2o \
+  --surface-band 0.25
+```
+
+如果只需要处理后的 cube 文件，不写 VESTA：
+
+```bash
+multiwfn2vesta iri-run input.fch iri_products --no-vesta
+```
+
+如果要替换默认 Multiwfn 菜单流，准备一行一个响应的文本文件，然后传
+`--commands-file commands.txt`。`iri-run` 启动 Multiwfn 时会同步设置
+`Multiwfnpath`、`MULTIWFNPATH` 和 `MultiwfnPATH`。Multiwfn 非零退出、
+超时、或返回 0 但缺 `func1.cub`/`func2.cub` 时，CLI 会保留 stdout/stderr
+日志并返回非零码。
 
 ## ABACUS Mulliken 原子着色
 

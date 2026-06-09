@@ -31,6 +31,7 @@ Scriptable subcommands:
 multiwfn2vesta discover
 multiwfn2vesta abacus-molden --help
 multiwfn2vesta cube-preset --help
+multiwfn2vesta iri-run --help
 multiwfn2vesta aim-run --help
 multiwfn2vesta aim-pdb --help
 multiwfn2vesta aim-igmh --help
@@ -44,6 +45,8 @@ Aliases:
 - `multiwfn2vesta cube ...` is an alias for `cube-vesta`.
 - `multiwfn2vesta preset ...` and `multiwfn2vesta analysis-cube ...` are
   aliases for `cube-preset`.
+- `multiwfn2vesta multiwfn-iri ...` and `multiwfn2vesta rdg-run ...` are
+  aliases for `iri-run`.
 - `multiwfn2vesta multiwfn-aim ...` is the same as `aim-run`.
 - `multiwfn2vesta aim-vesta ...` is the same as `aim-pdb`.
 - `multiwfn2vesta igmh ...` is the same as `aim-igmh`.
@@ -107,6 +110,35 @@ default style is enough to start.  Presets cover density-like scalar cubes,
 signed orbital/wavefunction/density-difference cubes, ELF/LOL, IRI/RDG/NCI
 mapped surfaces, and ESP/MEP mapped density surfaces.  All VESTA writing still
 goes through the maintained `cube-vesta` backend.
+
+### Wavefunction to Multiwfn IRI/RDG to VESTA
+
+```bash
+multiwfn2vesta iri-run \
+  input.molden \
+  iri_products \
+  --timeout 300
+```
+
+Inputs can be any wavefunction file Multiwfn accepts, such as `.molden`,
+`.fch`, `.fchk`, `.wfn`, or `.wfx`.  The command writes the exact Multiwfn
+input stream and stdout/stderr logs, preserves raw `func1.cub`/`func2.cub`
+under `multiwfn_iri_raw/`, processes them into `<stem>_IRI1.cub` and
+`<stem>_IRI2.cub`, then calls `cube-preset iri` to create a mapped-surface
+`.vesta` unless `--no-vesta` is supplied.
+
+Explicit executable override:
+
+```bash
+multiwfn2vesta iri-run input.fch iri_products \
+  --multiwfn /path/to/Multiwfn_noGUI \
+  --nthreads 6 \
+  --surface-band 0.25
+```
+
+Use `--commands-file commands.txt` to replace the default weak-interaction
+menu stream.  The runner sets `Multiwfnpath`, `MULTIWFNPATH`, and
+`MultiwfnPATH` to the selected executable directory for the subprocess.
 
 ### Wavefunction to Multiwfn AIM to VESTA
 
@@ -173,10 +205,11 @@ No-GUI checks:
 bin/multiwfn2vesta --help
 bin/multiwfn2vesta discover
 bin/multiwfn2vesta cube-preset --list-presets
+bin/multiwfn2vesta iri-run --help
 bin/multiwfn2vesta aim-run --help
 bin/multiwfn2vesta aim-igmh --help
 printf 'q\n' | bin/multiwfn2vesta
-PYTHONPATH=src python3 -m unittest tests.test_cli tests.test_cube_preset tests.test_executables tests.test_multiwfn_aim
+PYTHONPATH=src python3 -m unittest tests.test_cli tests.test_cube_preset tests.test_executables tests.test_multiwfn_aim tests.test_multiwfn_iri
 ```
 
 Real H2O Multiwfn noGUI smoke:
@@ -191,6 +224,21 @@ bin/multiwfn2vesta aim-run \
 Observed output: `paths.pdb`, `CPs.pdb`, `CPprop.txt`, `mol.pdb`,
 `multiwfn_aim_input.txt`, `multiwfn.stdout.txt`, `multiwfn.stderr.txt`, and
 `aim_atoms_only.vesta`.
+
+Real H2O Multiwfn noGUI IRI/RDG smoke:
+
+```bash
+bin/multiwfn2vesta iri-run \
+  /mnt/g/work/multiwfn2vesta/smoke/20260605_iri_aim_h2o/H2O.fch \
+  /mnt/g/work/multiwfn2vesta/smoke/multiwfn_iri_run_smoke_20260610/h2o_run1/products \
+  --timeout 240 \
+  --stem h2o \
+  --surface-band 0.25
+```
+
+Observed output: raw `func1.cub`/`func2.cub`, processed `h2o_IRI1.cub` and
+`h2o_IRI2.cub`, `h2o_iri_cube.vesta`, and
+`h2o_iri_cube_vesta_recipe.md`.  VESTA was not launched.
 
 Dry smoke for the current Ag(111)+benzene overlay:
 

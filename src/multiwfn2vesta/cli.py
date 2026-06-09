@@ -6,7 +6,17 @@ from pathlib import Path
 from typing import Dict, List, Optional, Sequence, Tuple
 import sys
 
-from . import abacus_molden, abacus_mulliken, aim_igmh_vesta, aim_vesta, cube_preset, cube_vesta, molden_check, multiwfn_aim
+from . import (
+    abacus_molden,
+    abacus_mulliken,
+    aim_igmh_vesta,
+    aim_vesta,
+    cube_preset,
+    cube_vesta,
+    molden_check,
+    multiwfn_aim,
+    multiwfn_iri,
+)
 from .executables import discovery_report
 
 
@@ -16,6 +26,7 @@ COMMANDS: Dict[str, Tuple[str, str]] = {
     "molden-check": ("Check Molden sections before Multiwfn workflows", "molden_check"),
     "cube-vesta": ("Create a VESTA file from cube data", "cube_vesta"),
     "cube-preset": ("Create a VESTA file from cube data using an analysis preset", "cube_preset"),
+    "iri-run": ("Run Multiwfn IRI/RDG cube generation, then prepare VESTA", "multiwfn_iri"),
     "abacus-mulliken-color": ("Color VESTA atoms from ABACUS mulliken.txt", "abacus_mulliken"),
     "aim-run": ("Run Multiwfn AIM on a wavefunction file, then convert PDB to VESTA", "multiwfn_aim"),
     "aim-pdb": ("Convert Multiwfn paths.pdb/CPs.pdb to atoms-only VESTA", "aim_vesta"),
@@ -33,6 +44,8 @@ ALIASES = {
     "cube": "cube-vesta",
     "preset": "cube-preset",
     "analysis-cube": "cube-preset",
+    "multiwfn-iri": "iri-run",
+    "rdg-run": "iri-run",
     "mulliken-color": "abacus-mulliken-color",
     "atom-color": "abacus-mulliken-color",
     "multiwfn-aim": "aim-run",
@@ -62,6 +75,7 @@ Commands:
              Create a VESTA isosurface file from one cube and optional texture cube.
   cube-preset
              Apply an analysis preset before creating a VESTA cube file.
+  iri-run    Run Multiwfn IRI/RDG cube generation and prepare a VESTA mapped surface.
   abacus-mulliken-color
              Color VESTA atoms from ABACUS mulliken.txt charge/magnetism.
   aim-run    Run Multiwfn AIM on a wavefunction file, then convert to VESTA.
@@ -75,6 +89,8 @@ Aliases:
   cube       Alias for cube-vesta.
   preset, analysis-cube
              Aliases for cube-preset.
+  multiwfn-iri, rdg-run
+             Aliases for iri-run.
   aim-vesta  Alias for aim-pdb.
   igmh       Alias for aim-igmh.
 
@@ -84,6 +100,7 @@ Examples:
   multiwfn2vesta molden-check ABACUS_Multiwfn.molden --abacus
   multiwfn2vesta cube-vesta density.cub cube_products --isosurface 0.01
   multiwfn2vesta cube-preset orbital orbital.cub cube_products
+  multiwfn2vesta iri-run input.molden iri_products --timeout 300
   multiwfn2vesta abacus-mulliken-color input.vesta mulliken.txt colored.vesta
   multiwfn2vesta aim-run input.molden aim_out
   multiwfn2vesta aim-pdb paths.pdb aim_atoms_only.vesta --cps-pdb CPs.pdb
@@ -309,6 +326,48 @@ def interactive_cube_preset() -> int:
     return cube_preset.main(argv)
 
 
+def interactive_iri_run() -> int:
+    print("\nWavefunction -> Multiwfn IRI/RDG cubes -> VESTA")
+    wavefunction = _prompt("wavefunction file (.molden/.fch/.wfn/etc.)", required=True)
+    output_dir = _prompt("output directory", default=_default_output_dir(wavefunction, "multiwfn_iri"))
+    argv: List[str] = [wavefunction, output_dir]
+
+    multiwfn = _prompt("Multiwfn executable or directory (empty for auto-discovery)")
+    if multiwfn:
+        argv.extend(["--multiwfn", multiwfn])
+
+    nthreads = _prompt("Multiwfn -nt threads (empty for default)")
+    if nthreads:
+        argv.extend(["--nthreads", nthreads])
+
+    timeout = _prompt("timeout seconds (empty for no timeout)")
+    if timeout:
+        argv.extend(["--timeout", timeout])
+
+    stem = _prompt("output stem (empty for wavefunction stem)")
+    if stem:
+        argv.extend(["--stem", stem])
+
+    if _yes_no("skip VESTA generation", default=False):
+        argv.append("--no-vesta")
+    else:
+        preset = _prompt("VESTA cube preset", default="iri")
+        argv.extend(["--preset", preset])
+        isosurface = _prompt("override isosurface value (empty for preset default)")
+        if isosurface:
+            argv.extend(["--isosurface", isosurface])
+        tex_range = _prompt("override physical texture range, e.g. -0.04 0.04 (empty for preset default)")
+        if tex_range:
+            parts = tex_range.split()
+            if len(parts) == 2:
+                argv.extend(["--tex-physical", parts[0], parts[1]])
+            else:
+                print("Texture range needs exactly two numbers.")
+                return 2
+
+    return multiwfn_iri.main(argv)
+
+
 def interactive_abacus_mulliken_color() -> int:
     print("\nABACUS Mulliken -> VESTA atom colors")
     input_vesta = _prompt("input .vesta", required=True)
@@ -356,8 +415,9 @@ def interactive_main() -> int:
     print("4) Check Molden file for Multiwfn/ABACUS use")
     print("5) Cube -> VESTA isosurface")
     print("6) Cube analysis preset -> VESTA isosurface")
-    print("7) ABACUS Mulliken -> VESTA atom colors")
-    print("8) ABACUS calculation -> Multiwfn Molden")
+    print("7) Wavefunction -> Multiwfn IRI/RDG cubes -> VESTA")
+    print("8) ABACUS Mulliken -> VESTA atom colors")
+    print("9) ABACUS calculation -> Multiwfn Molden")
     print("q) Quit")
     choice = _prompt("choice", default="3").lower()
     if choice in {"0", "discover", "where", "env"}:
@@ -379,9 +439,11 @@ def interactive_main() -> int:
         return interactive_cube_vesta()
     if choice in {"6", "cube-preset", "preset", "analysis-cube"}:
         return interactive_cube_preset()
-    if choice in {"7", "abacus-mulliken-color", "mulliken-color", "atom-color"}:
+    if choice in {"7", "iri-run", "multiwfn-iri", "rdg-run"}:
+        return interactive_iri_run()
+    if choice in {"8", "abacus-mulliken-color", "mulliken-color", "atom-color"}:
         return interactive_abacus_mulliken_color()
-    if choice in {"8", "abacus-molden", "molden", "abacus-multiwfn-molden"}:
+    if choice in {"9", "abacus-molden", "molden", "abacus-multiwfn-molden"}:
         return interactive_abacus_molden()
     if choice in {"q", "quit", "exit"}:
         return 0
@@ -401,6 +463,8 @@ def run_command(command: str, args: Sequence[str]) -> int:
         return cube_vesta.main(args)
     if command == "cube-preset":
         return cube_preset.main(args)
+    if command == "iri-run":
+        return multiwfn_iri.main(args)
     if command == "abacus-mulliken-color":
         return abacus_mulliken.main(args)
     if command == "aim-run":

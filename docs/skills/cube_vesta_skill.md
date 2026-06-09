@@ -123,8 +123,9 @@ defaults but does not duplicate VESTA-writing logic.
 - No VESTA rendering is launched by this command.
 - Analysis-specific display presets now exist for common cube products, but
   Multiwfn command streams for producing orbital, density-difference, Fukui,
-  dual-descriptor, ELF/LOL, IRI/RDG, or ESP cubes are still separate future
-  work.
+  dual-descriptor, ELF/LOL, or ESP cubes are still separate future work.
+  IRI/RDG has a maintained wavefunction runner as `multiwfn2vesta iri-run`;
+  this cube workflow remains the lower-level VESTA writer it calls.
 - Surface-band sampling uses grid-point values, not interpolation exactly on
   the triangulated VESTA isosurface.
 - AIM/BCP pseudo-site overlays remain in the AIM/AIM+IGMH workflows, not this

@@ -2,8 +2,9 @@
 
 `multiwfn2vesta` is a workspace-local Python interface for running selected
 Multiwfn workflows and preparing VESTA visualization files.  The currently
-maintained path focuses on AIM topology data, VESTA atoms-only overlays, and
-AIM+IGMH multi-phase VESTA figures.
+maintained path covers ABACUS Molden handoff, cube-to-VESTA files, Multiwfn
+AIM and IRI/RDG command streams, atoms-only topology overlays, and AIM+IGMH
+multi-phase VESTA figures.
 
 The project is still experimental, but the CLI below is the maintained entry
 point.
@@ -13,8 +14,9 @@ point.
 - Maintained branch: `main`.
 - GitHub remote: `origin` points to `Github:Stardust0831/multiwfn2vesta.git`,
   with `origin/HEAD -> origin/main`.
-- Current local/remote branch check after `git fetch --prune`: only `main`
-  and `origin/main` are present.
+- Current local/remote branch check on 2026-06-10: local `main` tracks
+  `origin/main`; `git ls-remote --heads origin` returns only
+  `refs/heads/main`.
 - Previous experiment branches have been merged into `main` and removed from
   the remote when no longer needed.
 - Repository-local commit identity is
@@ -35,6 +37,9 @@ point.
 - Apply analysis-oriented cube presets for common ABACUS/Multiwfn products
   such as density, orbitals/wavefunctions, ELF/LOL, IRI/RDG/NCI, and ESP/MEP
   mapped surfaces.
+- Run Multiwfn IRI/RDG cube generation from a wavefunction file, process
+  `func1.cub`/`func2.cub` into VESTA-ready `IRI1`/`IRI2` cubes, and write a
+  mapped-surface `.vesta` through `cube-preset iri`.
 - Color VESTA atom/site styles from ABACUS `mulliken.txt` charge or
   magnetism values produced by `out_mul 1`.
 - Run Multiwfn AIM topology analysis from a wavefunction file such as
@@ -72,6 +77,7 @@ multiwfn2vesta discover
 multiwfn2vesta abacus-molden abacus_calc ABACUS_Multiwfn.molden
 multiwfn2vesta molden-check ABACUS_Multiwfn.molden --abacus
 multiwfn2vesta cube-preset --list-presets
+multiwfn2vesta iri-run input.molden iri_products --timeout 300
 ```
 
 Multiwfn discovery checks, in order:
@@ -157,6 +163,35 @@ orbital/wavefunction/density-difference cubes, ELF/LOL cubes, IRI/RDG/NCI
 mapped surfaces, and ESP/MEP mapped density surfaces.  The recipe records the
 requested preset, canonical preset, effective isosurface, texture scaling
 source, and explicit texture percentage overrides when they are used.
+
+## Wavefunction to IRI/RDG VESTA
+
+For wavefunction inputs accepted by Multiwfn, `iri-run` drives the weak
+interaction IRI/RDG path, captures the raw Multiwfn outputs, and then reuses
+the maintained cube preset writer:
+
+```bash
+multiwfn2vesta iri-run input.molden iri_products --timeout 300
+```
+
+Default outputs in `iri_products/`:
+
+- `multiwfn_iri_input.txt`
+- `multiwfn_iri.stdout.txt`
+- `multiwfn_iri.stderr.txt`
+- `multiwfn_iri_raw/func1.cub`
+- `multiwfn_iri_raw/func2.cub`
+- `<stem>_IRI1.cub`: processed color/texture cube
+- `<stem>_IRI2.cub`: surface cube
+- `<stem>_multiwfn_iri_output.txt` when Multiwfn writes `output.txt`
+- `<stem>_iri_cube.vesta`
+- `<stem>_iri_cube_vesta_recipe.md`
+
+The default Multiwfn command stream is recorded in
+`multiwfn_iri_input.txt`.  Use `--commands-file` to replace it for a different
+weak-interaction menu path.  `iri-run` discovers Multiwfn the same way as
+`aim-run`, sets `Multiwfnpath`/`MULTIWFNPATH`/`MultiwfnPATH`, and does not
+launch VESTA.  Pass `--no-vesta` if only the processed cubes are needed.
 
 ## ABACUS Calculation to Molden
 
@@ -349,7 +384,7 @@ views by VESTA CLI rotations, rather than writing persistent front/right/top
 
 ## Validation
 
-Current focused no-GUI checks pass as a 108-test no-GUI regression set:
+Current focused no-GUI checks pass as a 118-test no-GUI regression set:
 
 ```bash
 PYTHONPATH=src python3 -m unittest \
@@ -357,6 +392,7 @@ PYTHONPATH=src python3 -m unittest \
   tests.test_abacus_molden \
   tests.test_abacus_mulliken \
   tests.test_cube_preset \
+  tests.test_multiwfn_iri \
   tests.test_cube_vesta \
   tests.test_cli \
   tests.test_aim_igmh_vesta \
@@ -420,6 +456,16 @@ The smoke generated a signed orbital-style `.vesta` from the `orbital` alias
 and an IRI/RDG texture-mapped `.vesta` from the `rdg` alias, both without
 launching VESTA.
 
+Smoke-tested Multiwfn noGUI IRI/RDG run:
+
+```text
+/mnt/g/work/multiwfn2vesta/smoke/multiwfn_iri_run_smoke_20260610/
+```
+
+This H2O run used the workspace Linux noGUI Multiwfn, produced raw
+`func1.cub`/`func2.cub`, processed `h2o_IRI1.cub`/`h2o_IRI2.cub`, and wrote
+`h2o_iri_cube.vesta` plus a recipe without launching VESTA.
+
 Smoke-tested Multiwfn noGUI AIM run:
 
 ```text
@@ -434,6 +480,8 @@ and `aim_atoms_only.vesta` without launching VESTA.
 - `docs/usage.md`: fuller user guide.
 - `docs/skills/multiwfn2vesta_cli_skill.md`: CLI operating notes.
 - `docs/skills/cube_vesta_skill.md`: ABACUS/Multiwfn cube to VESTA workflow.
+- `docs/skills/iri_vesta_cube_skill.md`: Multiwfn IRI/RDG cube generation and
+  VESTA mapped-surface notes.
 - `docs/skills/aim_paths_to_vesta_skill.md`: AIM topology to VESTA workflow.
 - `docs/skills/aim_igmh_vesta_skill.md`: reusable AIM+IGMH overlay workflow.
 - `docs/research/multiwfn_abacus_vesta_analysis_matrix.md`: roadmap for
