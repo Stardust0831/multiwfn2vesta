@@ -4,9 +4,9 @@ Updated: 2026-06-10
 
 ## Doing
 
-- Turn the 2026-06-10 Multiwfn/ABACUS/VESTA research into maintainable
-  features: latest ABACUS Molden wrapper with `[Nval]` validation,
-  RDG/IRI/IGMH command streams, and Multiwfn atom scalar parsers.
+- Turn the 2026-06-10 Multiwfn/ABACUS/VESTA research into the next
+  maintainable features: RDG/IRI/IGMH command streams, real-system
+  `abacus-molden` smoke coverage, and Multiwfn atom scalar parsers.
 - Keep non-empty `LBLAT` generation out of maintained code until a GUI-saved
   VESTA diff proves the record syntax; the verified native route now uses
   `LABEL 1` plus site labels.
@@ -22,6 +22,26 @@ Updated: 2026-06-10
 
 ## Done
 
+- Added `multiwfn2vesta abacus-molden`, a maintained wrapper around the
+  latest ABACUS `interfaces/Multiwfn_interface/molden.py`.  It exports the
+  converter from `origin/develop`, records source path/commit/SHA256, runs
+  with an absolute `-o`, writes stdout/stderr logs and a markdown recipe, and
+  validates successful output with `molden-check --abacus`.
+- Hardened `abacus-molden` for real CLI use: the wrapper now preflights
+  `numpy`, `scipy`, and `matplotlib` in the selected Python environment,
+  supports `--python`, records missing-dependency errors in logs/recipe, treats
+  missing output Molden files as failure even with `--no-check`, and writes
+  partial logs/recipe on timeout instead of traceback.
+- Validated the ABACUS Molden wrapper and README/CLI refresh with a 97-test
+  no-GUI regression, `py_compile`, `git diff --check`, CLI help checks, and a
+  git-export smoke under
+  `/mnt/g/work/multiwfn2vesta/smoke/abacus_molden_wrapper_smoke_20260610/`.
+- Read-only pre-commit review checked the current diff; all findings were
+  addressed before commit: dependency preflight, timeout handling, smoke
+  evidence, test-count update, and CLI alias help consistency.
+- Confirmed the branch layout for this README cleanup: project branch `main`
+  tracks `origin/main`, repository-local identity is `Stardust0831
+  <13862180016@163.com>`, and no extra feature branch is present locally.
 - Added `multiwfn2vesta abacus-mulliken-color`, the first maintained
   ABACUS atom-scalar parser/glue workflow.  It parses ABACUS `out_mul 1`
   `mulliken.txt`, selects the last ionic step by default, supports exact

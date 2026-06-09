@@ -1,5 +1,47 @@
 # Worklog
 
+## 2026-06-10: ABACUS Molden wrapper and README branch cleanup
+
+- Added `multiwfn2vesta.abacus_molden` plus unified CLI command
+  `multiwfn2vesta abacus-molden`.
+- The wrapper exports ABACUS `interfaces/Multiwfn_interface/molden.py` from
+  the selected git ref, defaulting to local ABACUS checkout
+  `/mnt/g/work/multiwfn2vesta/downloads/abacus_latest_molden/abacus-develop`
+  at `origin/develop`.
+- Latest local ABACUS `origin/develop` evidence used for the smoke:
+  commit `707f09266842c3340a0d5f7a21d3224306aafd58`, commit date
+  `2026-06-09T10:41:56+08:00`, source path
+  `interfaces/Multiwfn_interface/molden.py`.
+- The command writes `<stem>_abacus_molden.py`,
+  `<stem>_abacus_molden.stdout.txt`, `<stem>_abacus_molden.stderr.txt`, and
+  `<stem>_abacus_molden_recipe.md`, then runs `molden-check --abacus` unless
+  `--no-check` is supplied.
+- Hardened the wrapper after read-only pre-commit review: it preflights
+  `numpy`, `scipy`, and `matplotlib` in the selected Python environment,
+  accepts `--python`, logs missing dependencies to stderr/recipe, treats a
+  missing output Molden as failure even with `--no-check`, and writes partial
+  stdout/stderr plus recipe on timeout instead of traceback.
+- Updated README, usage docs, CLI skill notes, ABACUS/Multiwfn analysis skill
+  notes, and the analysis matrix.  The docs now state that ABACUS
+  `molden.py` needs `numpy`, `scipy`, and `matplotlib`, and that `--python`
+  should point to the environment that has them.
+- Added `multiwfn2vesta-abacus-molden` console-script entry points in
+  `pyproject.toml` and `setup.py`, plus unified CLI aliases `molden` and
+  `abacus-multiwfn-molden`.
+- Ran a git-export smoke under
+  `/mnt/g/work/multiwfn2vesta/smoke/abacus_molden_wrapper_smoke_20260610/`.
+  It exported `ABACUS_Multiwfn_abacus_molden.py` from ABACUS
+  `origin/develop`, recorded SHA256
+  `3c24c3260285b55f2eeac8421776bd07eb9ee0a22879507bc34a8bfa17563208`, and
+  did not run a real ABACUS conversion.
+- Final validation passed: 97 no-GUI unit tests, `py_compile` for
+  `abacus_molden.py` and `cli.py`, `git diff --check`, `multiwfn2vesta
+  --help`, and `multiwfn2vesta abacus-molden --help`.
+- Branch state for this README cleanup remained simple: project `main` tracks
+  `origin/main`, repository-local identity is
+  `Stardust0831 <13862180016@163.com>`, and no extra local branch was present
+  before the final push.
+
 ## 2026-06-10: ABACUS Mulliken atom coloring
 
 - Added `multiwfn2vesta.abacus_mulliken` and unified CLI command

@@ -24,6 +24,9 @@ point.
 
 - Discover workspace, environment, and `PATH` executables for Multiwfn and
   VESTA.
+- Generate ABACUS LCAO Molden files by exporting the latest ABACUS
+  `interfaces/Multiwfn_interface/molden.py`, recording the source commit, and
+  validating the result for Multiwfn use.
 - Check Molden files before Multiwfn workflows, including ABACUS-specific
   `[Cell]` and `[Nval]` requirements.
 - Create VESTA `.vesta` files directly from ABACUS or Multiwfn scalar cube
@@ -63,6 +66,7 @@ multiwfn2vesta --help
 
 ```bash
 multiwfn2vesta discover
+multiwfn2vesta abacus-molden abacus_calc ABACUS_Multiwfn.molden
 multiwfn2vesta molden-check ABACUS_Multiwfn.molden --abacus
 ```
 
@@ -129,6 +133,56 @@ The command writes a `.vesta` file, copies cube dependencies beside it by
 default, and writes a markdown recipe.  `SECTS 0 0` is the default to avoid
 VESTA section planes.  `TEX3P` is written as VESTA percentage/normalized
 values, not direct physical scalar limits.
+
+## ABACUS Calculation to Molden
+
+For ABACUS LCAO calculations intended for Multiwfn wavefunction workflows,
+generate and validate a Molden file with:
+
+```bash
+multiwfn2vesta abacus-molden \
+  /path/to/abacus_calc \
+  /path/to/ABACUS_Multiwfn.molden
+```
+
+The wrapper exports `interfaces/Multiwfn_interface/molden.py` from the selected
+ABACUS git ref, runs it with an absolute `-o`, writes stdout/stderr logs and a
+recipe markdown file, and then runs the same validation as
+`molden-check --abacus`.
+
+The upstream ABACUS converter imports `numpy`, `scipy`, and `matplotlib`.
+`abacus-molden` checks these modules before launching the converter.  If your
+default `python3` does not have them, pass `--python /path/to/python` pointing
+at an environment that does.  `--no-dependency-check` only skips this preflight;
+it does not remove the converter's real dependency on those packages.
+
+Defaults:
+
+- ABACUS repo: `/mnt/g/work/multiwfn2vesta/downloads/abacus_latest_molden/abacus-develop`
+- Git ref: `origin/develop`
+- Source path: `interfaces/Multiwfn_interface/molden.py`
+- `--with-cell true`
+- `--with-Nval true`
+- `--with-pseudo false`
+
+Useful refresh/run pattern:
+
+```bash
+multiwfn2vesta abacus-molden abacus_calc ABACUS_Multiwfn.molden \
+  --fetch \
+  --git-ref origin/develop \
+  --python /path/to/python-with-numpy-scipy-matplotlib \
+  --ngto 7 \
+  --rel-r 2 \
+  --with-Nval true
+```
+
+The ABACUS converter currently requires LCAO output, `INPUT`, `KPT`, `STRU`,
+the corresponding `OUT.<suffix>` directory, pseudopotentials, orbital files,
+and `out_wfc_lcao 1`.  It supports `nspin=1/2` and single Gamma/one-k-point
+workflows; `nspin=4`/SOC and multi-k are not supported by the converter.
+ABACUS' NAO-to-GTO conversion may write `.gto` and `.gto.png` files beside the
+orbital files, so run it where `orbital_dir` is writable.
 
 ## ABACUS Mulliken Atom Coloring
 
@@ -271,11 +325,12 @@ views by VESTA CLI rotations, rather than writing persistent front/right/top
 
 ## Validation
 
-Current focused no-GUI checks pass as an 87-test no-GUI regression set:
+Current focused no-GUI checks pass as a 97-test no-GUI regression set:
 
 ```bash
 PYTHONPATH=src python3 -m unittest \
   tests.test_molden_check \
+  tests.test_abacus_molden \
   tests.test_abacus_mulliken \
   tests.test_cube_vesta \
   tests.test_cli \
@@ -287,6 +342,16 @@ PYTHONPATH=src python3 -m unittest \
   tests.test_aim_vesta \
   tests.test_vesta_atom_coloring
 ```
+
+Smoke-tested ABACUS Molden wrapper git export:
+
+```text
+/mnt/g/work/multiwfn2vesta/smoke/abacus_molden_wrapper_smoke_20260610/
+```
+
+This smoke exports the current ABACUS `origin/develop` converter script into
+the smoke directory and records the source path, commit, and SHA256 without
+running a full ABACUS conversion.
 
 Smoke-tested ABACUS Mulliken atom coloring:
 

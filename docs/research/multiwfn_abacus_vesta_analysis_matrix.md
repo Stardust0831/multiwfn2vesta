@@ -117,13 +117,24 @@ out_wfc_lcao 1
 ```
 
 The converter requires `STRU`, `INPUT`, `KPT`, the corresponding `OUT.*`
-directory, UPF pseudopotentials, and orbital files.  For current develop:
+directory, UPF pseudopotentials, and orbital files.  Use the maintained
+project wrapper:
 
 ```bash
-python interfaces/Multiwfn_interface/molden.py \
-  -f /path/to/abacus/calc \
-  -o ABACUS_Multiwfn.molden
+multiwfn2vesta abacus-molden \
+  /path/to/abacus/calc \
+  /path/to/ABACUS_Multiwfn.molden
 ```
+
+The wrapper exports `interfaces/Multiwfn_interface/molden.py` from the
+selected ABACUS git ref, records source path/commit/SHA256, runs the converter
+with an absolute `-o`, writes stdout/stderr logs and a recipe, and validates
+the output with `molden-check --abacus`.
+
+The ABACUS converter is a Python script that imports `numpy`, `scipy`, and
+`matplotlib`.  The maintained wrapper checks those imports before launching
+the converter; use `--python /path/to/python` when the default Python
+environment is not the scientific environment used for ABACUS post-processing.
 
 Default behavior now writes `[Cell]` and `[Nval]`.  Keep `[Nval]` enabled for
 pseudopotential systems.  Without `[Nval]`, Multiwfn may interpret valence
@@ -146,9 +157,9 @@ Known limitations:
 1. Improve the generic `cube-vesta` CLI beyond the current first version:
    add optional render hooks and richer analysis-specific presets on top of
    the implemented single/signed isosurface modes.
-2. Add ABACUS-oriented discovery/docs for the latest
-   `interfaces/Multiwfn_interface/molden.py` and validate `[Nval]` in input
-   Molden headers before running Multiwfn wavefunction analyses.
+2. Extend the implemented `abacus-molden` wrapper with more real-calculation
+   smoke coverage and optional copy-to-scratch handling for converter
+   side-products.
 3. Generalize current IRI color-cube logic to NCI/RDG/ESP mapped surfaces.
 4. Add more atom-scalar parsers.  ABACUS `mulliken.txt` now feeds VESTA atom
    coloring directly; Multiwfn atom tables remain future work.
@@ -164,6 +175,7 @@ Known limitations:
 Implemented or partly implemented:
 
 - `multiwfn2vesta discover`
+- `multiwfn2vesta abacus-molden`
 - `multiwfn2vesta aim-run`
 - `multiwfn2vesta aim-pdb`
 - `multiwfn2vesta aim-igmh`
@@ -177,7 +189,8 @@ Main gaps:
 - Generic cube-to-VESTA CLI now exists as `multiwfn2vesta cube-vesta`,
   including basic signed positive/negative isosurface output; remaining work
   is richer analysis-specific presets and optional render hooks.
-- No direct ABACUS Molden converter wrapper yet.
+- ABACUS Molden wrapper now exists; remaining work is real-system smoke
+  coverage and tighter integration with downstream Multiwfn command streams.
 - No Multiwfn atom table parser yet.
 - No maintained Multiwfn command streams for orbital/density/ELF/RDG/IRI cube
   generation outside AIM.

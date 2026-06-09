@@ -14,6 +14,7 @@ class TestUnifiedCli(unittest.TestCase):
         self.assertEqual(code, 0)
         text = output.getvalue()
         self.assertIn("discover", text)
+        self.assertIn("abacus-molden", text)
         self.assertIn("molden-check", text)
         self.assertIn("cube-vesta", text)
         self.assertIn("abacus-mulliken-color", text)
@@ -37,6 +38,13 @@ class TestUnifiedCli(unittest.TestCase):
 
         self.assertEqual(code, 0)
         mocked.assert_called_once_with(["input.molden", "out", "--timeout", "30"])
+
+    def test_dispatches_abacus_molden_command(self):
+        with patch("multiwfn2vesta.cli.abacus_molden.main", return_value=0) as mocked:
+            code = cli.main(["abacus-molden", "calc", "ABACUS_Multiwfn.molden"])
+
+        self.assertEqual(code, 0)
+        mocked.assert_called_once_with(["calc", "ABACUS_Multiwfn.molden"])
 
     def test_dispatches_molden_check_command(self):
         with patch("multiwfn2vesta.cli.molden_check.main", return_value=0) as mocked:
@@ -150,6 +158,49 @@ class TestUnifiedCli(unittest.TestCase):
 
         self.assertEqual(code, 0)
         mocked.assert_called_once_with(["ABACUS_Multiwfn.molden", "--abacus"])
+
+    def test_interactive_abacus_molden_builds_expected_args(self):
+        answers = iter(
+            [
+                "7",
+                "calc",
+                "out.molden",
+                "/src/abacus",
+                "origin/develop",
+                "y",
+                "8",
+                "1.5,2",
+                "y",
+                "y",
+                "120",
+                "n",
+            ]
+        )
+        with patch("builtins.input", lambda _prompt: next(answers)):
+            with patch("sys.stdout", io.StringIO()):
+                with patch("multiwfn2vesta.cli.abacus_molden.main", return_value=0) as mocked:
+                    code = cli.main([])
+
+        self.assertEqual(code, 0)
+        mocked.assert_called_once_with(
+            [
+                "calc",
+                "out.molden",
+                "--abacus-repo",
+                "/src/abacus",
+                "--git-ref",
+                "origin/develop",
+                "--fetch",
+                "--ngto",
+                "8",
+                "--rel-r",
+                "1.5,2",
+                "--with-pseudo",
+                "true",
+                "--timeout",
+                "120",
+            ]
+        )
 
     def test_interactive_cube_vesta_builds_expected_args(self):
         answers = iter(

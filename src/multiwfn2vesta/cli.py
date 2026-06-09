@@ -6,12 +6,13 @@ from pathlib import Path
 from typing import Dict, List, Optional, Sequence, Tuple
 import sys
 
-from . import abacus_mulliken, aim_igmh_vesta, aim_vesta, cube_vesta, molden_check, multiwfn_aim
+from . import abacus_molden, abacus_mulliken, aim_igmh_vesta, aim_vesta, cube_vesta, molden_check, multiwfn_aim
 from .executables import discovery_report
 
 
 COMMANDS: Dict[str, Tuple[str, str]] = {
     "discover": ("Find Multiwfn and VESTA executables", "executables"),
+    "abacus-molden": ("Generate and validate ABACUS Molden files", "abacus_molden"),
     "molden-check": ("Check Molden sections before Multiwfn workflows", "molden_check"),
     "cube-vesta": ("Create a VESTA file from cube data", "cube_vesta"),
     "abacus-mulliken-color": ("Color VESTA atoms from ABACUS mulliken.txt", "abacus_mulliken"),
@@ -24,6 +25,8 @@ COMMANDS: Dict[str, Tuple[str, str]] = {
 ALIASES = {
     "where": "discover",
     "env": "discover",
+    "molden": "abacus-molden",
+    "abacus-multiwfn-molden": "abacus-molden",
     "check-molden": "molden-check",
     "abacus-molden-check": "molden-check",
     "cube": "cube-vesta",
@@ -48,6 +51,8 @@ Usage:
 
 Commands:
   discover   Find Multiwfn and VESTA executables from env/PATH/workspace.
+  abacus-molden
+             Generate ABACUS LCAO Molden with latest ABACUS Multiwfn interface.
   molden-check
              Check Molden sections before Multiwfn workflows.
   cube-vesta
@@ -59,11 +64,15 @@ Commands:
   aim-igmh   Style a saved AIM+IGMH VESTA overlay, optionally render views.
 
 Aliases:
+  where, env  Aliases for discover.
+  molden, abacus-multiwfn-molden
+             Aliases for abacus-molden.
   aim-vesta  Alias for aim-pdb.
   igmh       Alias for aim-igmh.
 
 Examples:
   multiwfn2vesta discover
+  multiwfn2vesta abacus-molden abacus_calc ABACUS_Multiwfn.molden
   multiwfn2vesta molden-check ABACUS_Multiwfn.molden --abacus
   multiwfn2vesta cube-vesta density.cub cube_products --isosurface 0.01
   multiwfn2vesta abacus-mulliken-color input.vesta mulliken.txt colored.vesta
@@ -158,6 +167,44 @@ def interactive_aim_run() -> int:
         argv.extend(["--cube-frame-from-cube", cube])
 
     return multiwfn_aim.main(argv)
+
+
+def interactive_abacus_molden() -> int:
+    print("\nABACUS calculation -> Multiwfn Molden")
+    calc_dir = _prompt("ABACUS calculation directory", required=True)
+    output_molden = _prompt("output Molden file", default=str(Path(calc_dir).resolve() / "ABACUS_Multiwfn.molden"))
+    argv: List[str] = [calc_dir, output_molden]
+
+    repo = _prompt("ABACUS git checkout (empty for workspace default)")
+    if repo:
+        argv.extend(["--abacus-repo", repo])
+
+    git_ref = _prompt("ABACUS git ref", default="origin/develop")
+    argv.extend(["--git-ref", git_ref])
+
+    if _yes_no("git fetch origin develop before exporting molden.py", default=False):
+        argv.append("--fetch")
+
+    ngto = _prompt("number of fitted GTOs", default="7")
+    argv.extend(["--ngto", ngto])
+
+    rel_r = _prompt("relative cutoff radius", default="2")
+    argv.extend(["--rel-r", rel_r])
+
+    if not _yes_no("write [Nval]", default=True):
+        argv.extend(["--with-Nval", "false"])
+
+    if _yes_no("write [Pseudo]", default=False):
+        argv.extend(["--with-pseudo", "true"])
+
+    timeout = _prompt("timeout seconds (empty for no timeout)")
+    if timeout:
+        argv.extend(["--timeout", timeout])
+
+    if _yes_no("skip molden-check --abacus", default=False):
+        argv.append("--no-check")
+
+    return abacus_molden.main(argv)
 
 
 def interactive_aim_igmh() -> int:
@@ -265,6 +312,7 @@ def interactive_main() -> int:
     print("4) Check Molden file for Multiwfn/ABACUS use")
     print("5) Cube -> VESTA isosurface")
     print("6) ABACUS Mulliken -> VESTA atom colors")
+    print("7) ABACUS calculation -> Multiwfn Molden")
     print("q) Quit")
     choice = _prompt("choice", default="3").lower()
     if choice in {"0", "discover", "where", "env"}:
@@ -286,6 +334,8 @@ def interactive_main() -> int:
         return interactive_cube_vesta()
     if choice in {"6", "abacus-mulliken-color", "mulliken-color", "atom-color"}:
         return interactive_abacus_mulliken_color()
+    if choice in {"7", "abacus-molden", "molden", "abacus-multiwfn-molden"}:
+        return interactive_abacus_molden()
     if choice in {"q", "quit", "exit"}:
         return 0
     print(f"Unknown choice: {choice}")
@@ -296,6 +346,8 @@ def run_command(command: str, args: Sequence[str]) -> int:
     if command == "discover":
         print(discovery_report(), end="")
         return 0
+    if command == "abacus-molden":
+        return abacus_molden.main(args)
     if command == "molden-check":
         return molden_check.main(args)
     if command == "cube-vesta":

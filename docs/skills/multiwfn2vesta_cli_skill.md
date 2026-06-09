@@ -29,6 +29,7 @@ Scriptable subcommands:
 
 ```bash
 multiwfn2vesta discover
+multiwfn2vesta abacus-molden --help
 multiwfn2vesta aim-run --help
 multiwfn2vesta aim-pdb --help
 multiwfn2vesta aim-igmh --help
@@ -37,6 +38,8 @@ multiwfn2vesta aim-igmh --help
 Aliases:
 
 - `multiwfn2vesta where` and `multiwfn2vesta env` are aliases for `discover`.
+- `multiwfn2vesta molden ...` and `multiwfn2vesta abacus-multiwfn-molden ...`
+  are aliases for `abacus-molden`.
 - `multiwfn2vesta multiwfn-aim ...` is the same as `aim-run`.
 - `multiwfn2vesta aim-vesta ...` is the same as `aim-pdb`.
 - `multiwfn2vesta igmh ...` is the same as `aim-igmh`.
@@ -70,6 +73,21 @@ VESTA environment variables accepted:
 - `VestaPATH`
 - `Vestapath`
 - `VESTA_EXECUTABLE`
+
+### ABACUS calculation to Molden
+
+```bash
+multiwfn2vesta abacus-molden \
+  abacus_calc \
+  ABACUS_Multiwfn.molden
+```
+
+The command exports the ABACUS converter from
+`interfaces/Multiwfn_interface/molden.py`, writes logs/recipe metadata, keeps
+`[Nval]` enabled by default, and runs `molden-check --abacus` on the output.
+The selected Python must be able to import `numpy`, `scipy`, and
+`matplotlib`; use `--python /path/to/python` if the default `python3`
+environment is not suitable.
 
 ### Wavefunction to Multiwfn AIM to VESTA
 

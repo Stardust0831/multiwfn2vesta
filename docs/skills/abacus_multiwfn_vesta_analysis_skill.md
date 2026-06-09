@@ -111,12 +111,30 @@ out_wfc_lcao 1
 Then run the latest converter:
 
 ```bash
-python interfaces/Multiwfn_interface/molden.py \
-  -f /path/to/abacus/calc \
-  -o ABACUS_Multiwfn.molden
+multiwfn2vesta abacus-molden \
+  /path/to/abacus/calc \
+  /path/to/ABACUS_Multiwfn.molden
 ```
 
-Verify the Molden header before starting Multiwfn:
+The wrapper exports `interfaces/Multiwfn_interface/molden.py` from the ABACUS
+git ref, records the source path/commit/SHA256, runs the converter with an
+absolute `-o`, writes stdout/stderr logs, and runs `molden-check --abacus`.
+Use `--fetch --git-ref origin/develop` when refreshing the local ABACUS
+checkout before conversion.
+
+The upstream converter imports `numpy`, `scipy`, and `matplotlib`.
+`abacus-molden` runs a dependency preflight with the selected Python before
+starting the conversion.  Use `--python /path/to/python` to point at an
+environment that has these modules; `--no-dependency-check` skips only the
+preflight, not the converter's dependency.
+
+The underlying ABACUS converter currently expects literal `INPUT`, `KPT`, and
+`STRU` files plus `OUT.<suffix>`, pseudopotentials, and orbital files.  It
+uses boolean values such as `--with-Nval true`; keep `[Nval]` enabled for
+pseudopotential systems.  It may write `.gto` and `.gto.png` side products
+beside files in `orbital_dir`, so make that directory writable.
+
+If a Molden file already exists, verify the header before starting Multiwfn:
 
 ```bash
 multiwfn2vesta molden-check ABACUS_Multiwfn.molden --abacus

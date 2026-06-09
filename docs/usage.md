@@ -22,6 +22,7 @@ multiwfn2vesta
 
 ```bash
 multiwfn2vesta discover
+multiwfn2vesta abacus-molden --help
 multiwfn2vesta molden-check --help
 multiwfn2vesta cube-vesta --help
 multiwfn2vesta abacus-mulliken-color --help
@@ -33,6 +34,9 @@ multiwfn2vesta aim-igmh --help
 已维护的子命令：
 
 - `discover`: 报告 Multiwfn 和 VESTA 可执行文件候选，以及当前会选择的路径
+- `abacus-molden`: 从 ABACUS LCAO 计算目录调用最新
+  `interfaces/Multiwfn_interface/molden.py`，生成并验证给 Multiwfn 用的
+  Molden 文件
 - `molden-check`: 在调用 Multiwfn 前检查 Molden 文件是否含有必要段；ABACUS
   模式会要求 `[Cell]` 和 `[Nval]`
 - `cube-vesta`: 从 ABACUS/Multiwfn scalar cube 直接生成 `.vesta`，可选
@@ -199,6 +203,62 @@ multiwfn2vesta abacus-mulliken-color \
 不会让 VESTA 自动知道原始标量值或生成 colorbar。默认严格模式会要求所选
 VESTA `STRUC` site index 与 Mulliken atom index 完全一致；只有明确想给
 子集着色时才使用 `--non-strict`。
+
+## ABACUS 计算到 Multiwfn Molden
+
+ABACUS LCAO 波函数分析的上游入口是：
+
+```bash
+multiwfn2vesta abacus-molden \
+  /path/to/abacus_calc \
+  /path/to/ABACUS_Multiwfn.molden
+```
+
+这个命令默认从
+`/mnt/g/work/multiwfn2vesta/downloads/abacus_latest_molden/abacus-develop`
+的 `origin/develop` 导出
+`interfaces/Multiwfn_interface/molden.py`，把脚本副本放在输出 Molden 同目录，
+再运行 ABACUS converter。运行结束后会写：
+
+- `<stem>_abacus_molden.py`: 实际使用的 ABACUS converter 副本
+- `<stem>_abacus_molden.stdout.txt`
+- `<stem>_abacus_molden.stderr.txt`
+- `<stem>_abacus_molden_recipe.md`: 记录 ABACUS repo、git ref、commit、
+  source path、SHA256、命令行和 Molden 检查结果
+- 输出 Molden 文件本身
+
+ABACUS upstream converter 需要运行它的 Python 环境里有 `numpy`、`scipy` 和
+`matplotlib`。`abacus-molden` 默认会先检查这三个模块；如果当前
+`python3` 环境不满足，用 `--python /path/to/python` 指向对应环境。
+`--no-dependency-check` 只跳过预检查，不会移除 upstream converter 的真实依赖。
+
+常用参数：
+
+```bash
+multiwfn2vesta abacus-molden abacus_calc ABACUS_Multiwfn.molden \
+  --fetch \
+  --git-ref origin/develop \
+  --python /path/to/python-with-numpy-scipy-matplotlib \
+  --ngto 7 \
+  --rel-r 2 \
+  --with-cell true \
+  --with-Nval true \
+  --with-pseudo false
+```
+
+ABACUS 当前 latest `develop` 的 converter 要求计算目录里有字面文件
+`INPUT`、`KPT`、`STRU` 和对应的 `OUT.<suffix>`。推荐 ABACUS 设置：
+
+```text
+basis_type lcao
+gamma_only 1
+out_wfc_lcao 1
+```
+
+当前 converter 只支持 `nspin=1/2` 和 Gamma/单 k 点；不支持 `nspin=4`/SOC
+和多 k。`--with-Nval true` 是默认值，也是赝势体系给 Multiwfn 使用时应保留
+的设置。ABACUS 的 NAO2GTO 过程可能会在 `orbital_dir` 旁边写 `.gto` 和
+`.gto.png` 副产物，因此该目录需要可写。
 
 ## 波函数文件到 AIM VESTA
 
