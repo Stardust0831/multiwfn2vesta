@@ -4,11 +4,13 @@ from __future__ import annotations
 
 import argparse
 import datetime as _datetime
+import heapq
 import math
 import shutil
 from dataclasses import dataclass
+from itertools import zip_longest
 from pathlib import Path
-from typing import Dict, List, NamedTuple, Optional, Sequence, Tuple
+from typing import Dict, Iterator, List, NamedTuple, Optional, Sequence, Tuple
 
 
 BOHR_TO_ANGSTROM = 0.529177210903
@@ -158,6 +160,15 @@ class CubeVestaResult(NamedTuple):
     vesta_path: Path
     manifest_path: Optional[Path]
     copied_cubes: List[Tuple[Path, Path]]
+
+
+class TextureReferenceRange(NamedTuple):
+    source: str
+    data_min: float
+    data_max: float
+    sample_count: int
+    surface_band: Optional[float]
+    nearest_fallback: bool
 
 
 @dataclass
@@ -315,6 +326,22 @@ def _read_cube_summary(path: Path, *, cube_units: str = "auto", strict: bool = T
     )
 
 
+def _iter_cube_data_values(path: Path) -> Iterator[float]:
+    path = Path(path)
+    with path.open(encoding="utf-8", errors="replace") as handle:
+        handle.readline()
+        handle.readline()
+        origin_line = handle.readline().split()
+        if len(origin_line) < 4:
+            raise ValueError(f"Cannot parse cube origin line in {path}")
+        natoms = abs(int(origin_line[0]))
+        for _ in range(3 + natoms):
+            handle.readline()
+        for line in handle:
+            for field in line.split():
+                yield _parse_float(field)
+
+
 def _symbol(atomic_number: int) -> str:
     if 0 < atomic_number < len(PERIODIC_SYMBOLS):
         return PERIODIC_SYMBOLS[atomic_number]
@@ -388,6 +415,74 @@ def _percent_range_for_minmax(
     if span == 0:
         raise ValueError("Cannot compute VESTA percentage range from zero-span texture values")
     return (target_lower - value_min) / span, (target_upper - value_min) / span
+
+
+def _default_surface_band(summary: CubeSummary, isosurface: float) -> float:
+    if summary.data_min is None or summary.data_max is None:
+        return max(abs(isosurface) * 0.02, 1.0e-8)
+    span = summary.data_max - summary.data_min
+    return max(abs(isosurface) * 0.02, abs(span) * 0.005, 1.0e-8)
+
+
+def _surface_sampled_texture_reference_range(
+    surface_summary: CubeSummary,
+    texture_summary: CubeSummary,
+    *,
+    isosurface: float,
+    surface_band: Optional[float] = None,
+    nearest_count: int = 1024,
+) -> TextureReferenceRange:
+    if nearest_count <= 0:
+        raise ValueError("surface nearest fallback count must be positive")
+    band = _default_surface_band(surface_summary, isosurface) if surface_band is None else float(surface_band)
+    if band < 0:
+        raise ValueError("surface band must be non-negative")
+
+    sentinel = object()
+    sampled_count = 0
+    sampled_min: Optional[float] = None
+    sampled_max: Optional[float] = None
+    nearest_heap: List[Tuple[float, int, float]] = []
+    total = 0
+
+    for index, (surface_value, texture_value) in enumerate(
+        zip_longest(_iter_cube_data_values(surface_summary.path), _iter_cube_data_values(texture_summary.path), fillvalue=sentinel)
+    ):
+        if surface_value is sentinel or texture_value is sentinel:
+            raise ValueError("Surface and texture cube data lengths differ during surface sampling")
+        surface_float = float(surface_value)
+        texture_float = float(texture_value)
+        total += 1
+        distance = abs(surface_float - isosurface)
+        if distance <= band:
+            sampled_count += 1
+            sampled_min = texture_float if sampled_min is None else min(sampled_min, texture_float)
+            sampled_max = texture_float if sampled_max is None else max(sampled_max, texture_float)
+        if len(nearest_heap) < nearest_count:
+            heapq.heappush(nearest_heap, (-distance, index, texture_float))
+        elif distance < -nearest_heap[0][0]:
+            heapq.heapreplace(nearest_heap, (-distance, index, texture_float))
+
+    if total != surface_summary.expected_count or total != texture_summary.expected_count:
+        raise ValueError(
+            "Cube data point count mismatch during surface sampling: got %d, expected %d/%d"
+            % (total, surface_summary.expected_count, texture_summary.expected_count)
+        )
+
+    if sampled_count > 0 and sampled_min is not None and sampled_max is not None and sampled_min != sampled_max:
+        return TextureReferenceRange("surface-band", sampled_min, sampled_max, sampled_count, band, False)
+
+    if not nearest_heap:
+        raise ValueError("No texture values are available for surface-sampled texture scaling")
+    nearest_values = [item[2] for item in nearest_heap]
+    return TextureReferenceRange(
+        "surface-nearest",
+        min(nearest_values),
+        max(nearest_values),
+        len(nearest_values),
+        band,
+        True,
+    )
 
 
 def _format_cell_line(summary: CubeSummary) -> str:
@@ -730,23 +825,49 @@ def _copy_cube(
 def _texture_percent_range(
     texture_summary: Optional[CubeSummary],
     *,
+    surface_summary: Optional[CubeSummary] = None,
+    isosurface: float = DEFAULT_ISOSURFACE,
     tex_percent: Optional[Tuple[float, float]],
     tex_physical: Optional[Tuple[float, float]],
-) -> Tuple[float, float]:
+    tex_range_source: str = "full-cube",
+    surface_band: Optional[float] = None,
+    surface_nearest: int = 1024,
+) -> Tuple[Tuple[float, float], Optional[TextureReferenceRange]]:
     if tex_percent is not None and tex_physical is not None:
         raise ValueError("Use either tex_percent or tex_physical, not both")
     if tex_percent is not None:
-        return tex_percent
+        return tex_percent, None
     if tex_physical is not None:
         if texture_summary is None or texture_summary.data_min is None or texture_summary.data_max is None:
             raise ValueError("A texture cube is required to convert physical texture values to VESTA percentages")
+        if tex_range_source == "surface-band":
+            if surface_summary is None:
+                raise ValueError("A surface cube is required for surface-sampled texture scaling")
+            reference = _surface_sampled_texture_reference_range(
+                surface_summary,
+                texture_summary,
+                isosurface=isosurface,
+                surface_band=surface_band,
+                nearest_count=surface_nearest,
+            )
+        elif tex_range_source == "full-cube":
+            reference = TextureReferenceRange(
+                "full-cube",
+                texture_summary.data_min,
+                texture_summary.data_max,
+                texture_summary.data_count,
+                None,
+                False,
+            )
+        else:
+            raise ValueError(f"Unknown texture range source: {tex_range_source}")
         return _percent_range_for_minmax(
-            texture_summary.data_min,
-            texture_summary.data_max,
+            reference.data_min,
+            reference.data_max,
             target_lower=tex_physical[0],
             target_upper=tex_physical[1],
-        )
-    return DEFAULT_TEX_PERCENT_RANGE
+        ), reference
+    return DEFAULT_TEX_PERCENT_RANGE, None
 
 
 def _manifest_text(
@@ -759,6 +880,7 @@ def _manifest_text(
     isosurface: float,
     tex_percent_range: Tuple[float, float],
     tex_physical: Optional[Tuple[float, float]],
+    tex_reference_range: Optional[TextureReferenceRange],
     structure_mode: str,
     sections: str,
     generated_at: Optional[str] = None,
@@ -797,9 +919,21 @@ def _manifest_text(
         )
         if tex_physical is not None:
             lines.append(
-                "- tex_physical_range: `%s` to `%s` converted from full texture cube min/max"
+                "- tex_physical_range: `%s` to `%s` converted from selected texture reference range"
                 % (tex_physical[0], tex_physical[1])
             )
+        if tex_reference_range is not None:
+            lines.extend(
+                [
+                    f"- tex_reference_source: `{tex_reference_range.source}`",
+                    f"- tex_reference_range: `{tex_reference_range.data_min}` to `{tex_reference_range.data_max}`",
+                    f"- tex_reference_sample_count: `{tex_reference_range.sample_count}`",
+                ]
+            )
+            if tex_reference_range.surface_band is not None:
+                lines.append(f"- surface_band: `{tex_reference_range.surface_band}`")
+            if tex_reference_range.nearest_fallback:
+                lines.append("- surface_nearest_fallback: `true`")
     lines.extend(
         [
             "",
@@ -836,6 +970,9 @@ def run_workflow(
     isosurface: float = DEFAULT_ISOSURFACE,
     tex_percent: Optional[Tuple[float, float]] = None,
     tex_physical: Optional[Tuple[float, float]] = None,
+    tex_range_source: str = "full-cube",
+    surface_band: Optional[float] = None,
+    surface_nearest: int = 1024,
     cube_units: str = "auto",
     structure: str = "auto",
     boundary: Tuple[float, float, float, float, float, float] = (0.0, 1.0, 0.0, 1.0, 0.0, 1.0),
@@ -868,7 +1005,16 @@ def run_workflow(
                 % (isosurface, surface_summary.data_min, surface_summary.data_max)
             )
 
-    tex_range = _texture_percent_range(texture_summary, tex_percent=tex_percent, tex_physical=tex_physical)
+    tex_range, tex_reference_range = _texture_percent_range(
+        texture_summary,
+        surface_summary=surface_summary,
+        isosurface=isosurface,
+        tex_percent=tex_percent,
+        tex_physical=tex_physical,
+        tex_range_source=tex_range_source,
+        surface_band=surface_band,
+        surface_nearest=surface_nearest,
+    )
     copied: List[Tuple[Path, Path]] = []
     used_cube_names: Dict[str, Path] = {}
     density_path_text, density_copy = _copy_cube(
@@ -920,6 +1066,7 @@ def run_workflow(
                 isosurface=isosurface,
                 tex_percent_range=tex_range,
                 tex_physical=tex_physical,
+                tex_reference_range=tex_reference_range,
                 structure_mode=structure_mode,
                 sections=sections,
             ),
@@ -961,6 +1108,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser.add_argument("--isosurface", type=float, default=DEFAULT_ISOSURFACE)
     parser.add_argument("--tex-percent", nargs=2, type=float, metavar=("MIN", "MAX"))
     parser.add_argument("--tex-physical", nargs=2, type=float, metavar=("MIN", "MAX"))
+    parser.add_argument("--tex-range-source", choices=["full-cube", "surface-band"], default="full-cube")
+    parser.add_argument("--surface-band", type=float, help="Surface scalar half-width for surface-band texture scaling")
+    parser.add_argument("--surface-nearest", type=int, default=1024, help="Nearest grid-point fallback count")
     parser.add_argument("--cube-units", choices=["auto", "bohr", "angstrom"], default="auto")
     parser.add_argument("--structure", choices=["auto", "none", "molecule", "crystal"], default="auto")
     parser.add_argument("--boundary", nargs=6, type=float, metavar=("XMIN", "XMAX", "YMIN", "YMAX", "ZMIN", "ZMAX"))
@@ -983,6 +1133,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         isosurface=args.isosurface,
         tex_percent=_float_pair(args.tex_percent),
         tex_physical=_float_pair(args.tex_physical),
+        tex_range_source=args.tex_range_source,
+        surface_band=args.surface_band,
+        surface_nearest=args.surface_nearest,
         cube_units=args.cube_units,
         structure=args.structure,
         boundary=_float_six(args.boundary),

@@ -105,6 +105,19 @@ multiwfn2vesta cube-vesta \
   --tex-physical -0.04 0.04
 ```
 
+如果颜色只应该按实际等值面附近的 texture 值缩放，而不是按整张 texture cube
+的最大最小值缩放，可以显式开启 surface-band 参考范围：
+
+```bash
+multiwfn2vesta cube-vesta \
+  IRI2_surface.cub \
+  cube_products \
+  --texture-cube IRI1_color.cub \
+  --isosurface 1.0 \
+  --tex-physical -0.04 0.04 \
+  --tex-range-source surface-band
+```
+
 默认行为：
 
 - 生成 `<output_dir>/<stem>_cube.vesta`
@@ -117,7 +130,10 @@ multiwfn2vesta cube-vesta \
 
 注意：`TEX3P` 在 VESTA 里按百分比/归一化状态处理，不是物理标量范围。
 传 `--tex-physical -0.04 0.04` 时，程序会根据整张 texture cube 的最小/最大值
-换算成百分比写入；它还不是严格的“只采样等值面上的 texture 值”的高级算法。
+换算成百分比写入。传 `--tex-range-source surface-band` 时，程序会按
+`abs(surface - isosurface)` 在一个窄带内筛选 texture 值来换算；如果窄带内没有
+非退化范围，会用离等值面最近的一批格点作为 fallback。recipe markdown 会记录
+实际采用的参考范围和采样点数。
 
 ## 波函数文件到 AIM VESTA
 

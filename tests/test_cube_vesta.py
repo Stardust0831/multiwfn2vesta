@@ -124,6 +124,59 @@ class TestCubeVesta(unittest.TestCase):
             self.assertTrue((root / "products" / "surface.cub").exists())
             self.assertTrue((root / "products" / "texture.cub").exists())
 
+    def test_surface_band_texture_scaling_uses_near_isosurface_values(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            surface = self.write_tmp(root, "surface.cub", MOLECULE_CUBE)
+            texture = self.write_tmp(root, "texture.cub", TEXTURE_CUBE)
+
+            result = run_workflow(
+                surface,
+                root / "products",
+                texture_cube=texture,
+                isosurface=0.2,
+                tex_physical=(-0.05, 0.05),
+                tex_range_source="surface-band",
+                surface_band=0.11,
+                stem="surface_band",
+            )
+
+            text = result.vesta_path.read_text(encoding="utf-8")
+            manifest = result.manifest_path.read_text(encoding="utf-8")
+
+            self.assertIn("TEX3P\n  1  0.00000E+00  1.00000E+00", text)
+            self.assertIn("tex_reference_source: `surface-band`", manifest)
+            self.assertIn("tex_reference_range: `-0.05` to `0.05`", manifest)
+            self.assertIn("tex_reference_sample_count: `3`", manifest)
+            self.assertIn("surface_band: `0.11`", manifest)
+
+    def test_surface_band_texture_scaling_falls_back_to_nearest_values(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            surface = self.write_tmp(root, "surface.cub", MOLECULE_CUBE)
+            texture = self.write_tmp(root, "texture.cub", TEXTURE_CUBE)
+
+            result = run_workflow(
+                surface,
+                root / "products",
+                texture_cube=texture,
+                isosurface=0.2,
+                tex_physical=(-0.05, 0.05),
+                tex_range_source="surface-band",
+                surface_band=0.0,
+                surface_nearest=4,
+                stem="nearest",
+            )
+
+            text = result.vesta_path.read_text(encoding="utf-8")
+            manifest = result.manifest_path.read_text(encoding="utf-8")
+
+            self.assertIn("TEX3P\n  1  3.33333E-01  1.00000E+00", text)
+            self.assertIn("tex_reference_source: `surface-nearest`", manifest)
+            self.assertIn("tex_reference_range: `-0.1` to `0.05`", manifest)
+            self.assertIn("tex_reference_sample_count: `4`", manifest)
+            self.assertIn("surface_nearest_fallback: `true`", manifest)
+
     def test_same_basename_surface_and_texture_cubes_do_not_overwrite_each_other(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

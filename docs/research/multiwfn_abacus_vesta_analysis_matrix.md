@@ -140,8 +140,7 @@ Known limitations:
 ## Recommended Development Roadmap
 
 1. Improve the generic `cube-vesta` CLI beyond the current first version:
-   add surface-sampled texture statistics, signed positive/negative surface
-   presets, and optional render hooks.
+   add signed positive/negative surface presets and optional render hooks.
 2. Add ABACUS-oriented discovery/docs for the latest
    `interfaces/Multiwfn_interface/molden.py` and validate `[Nval]` in input
    Molden headers before running Multiwfn wavefunction analyses.
@@ -170,7 +169,7 @@ Implemented or partly implemented:
 Main gaps:
 
 - Generic cube-to-VESTA CLI now exists as `multiwfn2vesta cube-vesta`;
-  remaining work is richer presets and surface-sampled texture scaling.
+  remaining work is richer presets and signed positive/negative surfaces.
 - No direct ABACUS Molden converter wrapper yet.
 - No ABACUS `mulliken.txt` parser yet.
 - No maintained Multiwfn command streams for orbital/density/ELF/RDG/IRI cube

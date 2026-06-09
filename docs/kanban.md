@@ -6,8 +6,8 @@ Updated: 2026-06-10
 
 - Turn the 2026-06-10 Multiwfn/ABACUS/VESTA research into maintainable
   features: latest ABACUS Molden wrapper with `[Nval]` validation,
-  surface-sampled cube texture scaling, RDG/IRI/IGMH command streams, and
-  ABACUS/Multiwfn atom scalar parsers.
+  signed cube presets, RDG/IRI/IGMH command streams, and ABACUS/Multiwfn atom
+  scalar parsers.
 - Keep non-empty `LBLAT` generation out of maintained code until a GUI-saved
   VESTA diff proves the record syntax; the verified native route now uses
   `LABEL 1` plus site labels.
@@ -41,6 +41,16 @@ Updated: 2026-06-10
 - Real H2O-HF cube smoke passed under
   `/mnt/g/work/multiwfn2vesta/smoke/cube_vesta_cli_smoke_20260610/`; output
   includes `h2o_hf_iri_cube.vesta`, copied surface/texture cubes, and a recipe.
+- Added surface-band texture scaling to `multiwfn2vesta cube-vesta`.
+  `--tex-range-source surface-band` converts `--tex-physical` limits using
+  texture values from grid points near the requested isosurface, records the
+  reference range/sample count in the recipe, and falls back to nearest grid
+  points when the band is empty or degenerate.
+- Validated surface-band texture scaling with 75 no-GUI regression tests and a
+  real H2O-HF IRI smoke under
+  `/mnt/g/work/multiwfn2vesta/smoke/cube_vesta_surface_band_smoke_20260610/`.
+  The recipe records `tex_reference_source: surface-band`, reference range
+  `-0.04` to `-0.0331239`, and 29 sampled grid points.
 - Added `multiwfn2vesta molden-check`, a no-GUI Molden sanity checker.
   Generic mode checks `[Atoms]`, `[GTO]`, and `[MO]`; ABACUS mode also
   requires `[Cell]` and `[Nval]` before Multiwfn wavefunction workflows.

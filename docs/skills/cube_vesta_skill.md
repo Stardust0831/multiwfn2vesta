@@ -20,6 +20,16 @@ multiwfn2vesta cube-vesta surface.cub cube_products \
   --tex-physical -0.05 0.05
 ```
 
+Surface-sampled texture scaling:
+
+```bash
+multiwfn2vesta cube-vesta surface.cub cube_products \
+  --texture-cube texture.cub \
+  --isosurface 0.01 \
+  --tex-physical -0.05 0.05 \
+  --tex-range-source surface-band
+```
+
 ## Outputs
 
 - `<output_dir>/<stem>_cube.vesta`
@@ -39,8 +49,13 @@ multiwfn2vesta cube-vesta surface.cub cube_products \
 - `TEX3P` stores VESTA percentage/normalized values, not physical scalar
   limits.
 - `--tex-physical MIN MAX` converts physical limits to percentages using the
-  full texture cube min/max.  This is a first implementation, not a strict
-  surface-sampled texture range.
+  selected texture reference range.
+- `--tex-range-source full-cube` uses the full texture cube min/max.
+- `--tex-range-source surface-band` uses texture values from grid points whose
+  surface-cube values are close to the requested `--isosurface`.  Use
+  `--surface-band` to set the half-width manually; otherwise a conservative
+  automatic band is used.  If the band has no non-degenerate texture range,
+  `--surface-nearest` nearest grid points are used as a fallback.
 
 ## Cube and Structure Rules
 
@@ -59,8 +74,8 @@ multiwfn2vesta cube-vesta surface.cub cube_products \
 
 - No VESTA rendering is launched by this command.
 - Positive/negative signed isosurface presets are not implemented yet.
-- Surface-sampled texture statistics are not implemented yet; texture
-  percentage conversion uses the full texture cube range.
+- Surface-band sampling uses grid-point values, not interpolation exactly on
+  the triangulated VESTA isosurface.
 - AIM/BCP pseudo-site overlays remain in the AIM/AIM+IGMH workflows, not this
   generic cube generator.
 

@@ -439,3 +439,32 @@ Limitations recorded:
   copied into the output directory under one name.  Fixed this by reserving
   dependency filenames during copy and renaming only colliding later files,
   for example `foo_texture.cub`.
+
+## 2026-06-10: Surface-band texture scaling for cube-vesta
+
+- Continued the long-running Multiwfn/ABACUS/VESTA roadmap by improving the
+  generic cube-to-VESTA workflow for mapped surfaces such as IRI, RDG, ESP,
+  and IGMH.
+- Added `--tex-range-source full-cube|surface-band` to `multiwfn2vesta
+  cube-vesta`.  The default remains `full-cube` for compatibility.
+- In `surface-band` mode, `--tex-physical MIN MAX` is converted to VESTA
+  `TEX3P` percentages using texture values at grid points whose surface-cube
+  values are close to the requested `--isosurface`.  `--surface-band` can set
+  the half-width manually; otherwise a conservative automatic band is used.
+- If the surface band has no non-degenerate texture range, the workflow falls
+  back to the `--surface-nearest` nearest grid points and records this in the
+  recipe.
+- The generated recipe now records `tex_reference_source`,
+  `tex_reference_range`, `tex_reference_sample_count`, optional
+  `surface_band`, and whether nearest-grid fallback was used.
+- Validation passed: focused `tests.test_cube_vesta` with 11 tests, full
+  no-GUI regression with 75 tests, `py_compile`, and `git diff --check`.
+- Real H2O-HF surface-band smoke:
+  `/mnt/g/work/multiwfn2vesta/smoke/cube_vesta_surface_band_smoke_20260610/`.
+  It generated `h2o_hf_iri_surface_band_cube.vesta`, copied
+  `h2o_hf_IRI2_surface.cub` and `h2o_hf_IRI1_color.cub`, and wrote
+  `h2o_hf_iri_surface_band_cube_vesta_recipe.md`.
+- The H2O-HF recipe records `tex_reference_source: surface-band`,
+  `tex_reference_range: -0.04 to -0.0331239`,
+  `tex_reference_sample_count: 29`, and automatic
+  `surface_band: 0.059750500000000005`.

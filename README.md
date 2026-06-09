@@ -96,6 +96,17 @@ multiwfn2vesta cube-vesta IRI2_surface.cub cube_products \
   --tex-physical -0.04 0.04
 ```
 
+For IRI/RDG/ESP style mapped surfaces, the color range can be derived from
+texture values near the requested surface instead of the whole texture cube:
+
+```bash
+multiwfn2vesta cube-vesta IRI2_surface.cub cube_products \
+  --texture-cube IRI1_color.cub \
+  --isosurface 1.0 \
+  --tex-physical -0.04 0.04 \
+  --tex-range-source surface-band
+```
+
 The command writes a `.vesta` file, copies cube dependencies beside it by
 default, and writes a markdown recipe.  `SECTS 0 0` is the default to avoid
 VESTA section planes.  `TEX3P` is written as VESTA percentage/normalized

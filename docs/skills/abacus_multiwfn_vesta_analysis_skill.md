@@ -52,6 +52,17 @@ multiwfn2vesta cube-vesta surface.cub cube_products \
   --tex-physical -0.05 0.05
 ```
 
+For mapped surfaces whose color scale should reflect the actual displayed
+surface rather than the full texture cube:
+
+```bash
+multiwfn2vesta cube-vesta surface.cub cube_products \
+  --texture-cube texture.cub \
+  --isosurface 0.01 \
+  --tex-physical -0.05 0.05 \
+  --tex-range-source surface-band
+```
+
 Keep `SECTS 0 0` as the default.  Treat `TEX3P` as VESTA percentage state,
 not as direct physical scalar values.
 
