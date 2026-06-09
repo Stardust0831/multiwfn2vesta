@@ -34,7 +34,7 @@
 | `SHAPE` | `sj/C.vesta:53-54` | 一行 10 个数：4 个整数、一个浮点、一个整数、4 个 RGB/alpha 类整数。 | 全局形状或边界盒/对象外观设置。末 4 个 `192` 像颜色或透明度。 | unknown | 原样保存；可仅做 token 数量检查。 |
 | `BOUND` | `sj/C.vesta:55-57` | 第一行 6 个数：`0 1 0 1 0 1`；第二行 5 个整数零。 | 晶胞显示范围或复制范围，三轴 min/max。第二行可能为边界/裁剪选项。 | inferred | 可结构化为 axis ranges；第二行保留为未知 options。 |
 | `SBOND` | `sj/C.vesta:58-60` | 一条规则：id、元素1、元素2、最小/最大距离、若干标志、半径/宽度、RGB；最后 `0 0 0 0`。 | 自动成键规则。样例 C-C 距离 `0.00000` 到 `1.89002`，颜色灰色。 | inferred | 作为哨兵列表解析；高层可编辑元素对、距离范围、半径/颜色，其余 flags 原样保存。 |
-| `SITET` | `sj/C.vesta:61-64` | 每个 site 一行：序号、标签、半径、两组三元 RGB、alpha/样式整数；最后 `0 0 0 0 0 0`。 | 特定 site 的原子球显示半径、颜色和材质/透明度。第三方 writer 将末列注释为 `show_label`，但也说明需配合 `LBLAT`；本项目尚未验证非空标签语法。 | inferred | 与 `STRUC` label 关联；保留未知尾字段。不要单独依赖末列开启标签。 |
+| `SITET` | `sj/C.vesta:61-64` | 每个 site 一行：序号、标签、半径、两组三元 RGB、alpha/样式整数；最后 `0 0 0 0 0 0`。 | 特定 site 的原子球显示半径、颜色和材质/透明度。2026-06-10 BCP 标签 smoke 中，BCP 行末列设为 `1` 且配合 `LABEL 1` 可显示 `BCP1` 等 site 标签。 | inferred | 与 `STRUC` label 关联；保留未知尾字段。若要显示少数 site 标签，可同步 `STRUC`/`THERI`/`SITET` 标签并把目标 `SITET` 末列设为 `1`。 |
 | `VECTR` | `sj/C.vesta:65-66` | 单行 `0 0 0 0 0` 哨兵。 | 矢量对象列表为空。 | inferred | 哨兵列表；支持未来多行矢量记录。 |
 | `VECTT` | `sj/C.vesta:67-68` | 单行 `0 0 0 0 0` 哨兵。 | 矢量文本/样式列表为空。 | inferred | 哨兵列表；暂不结构化空列表以外内容。 |
 | `SPLAN` | `sj/C.vesta:69-70` | 单行 `0 0 0 0`。 | 晶面/slab/section plane 列表为空。 | inferred | 哨兵列表；未来按 plane records 扩展。 |
@@ -73,7 +73,7 @@
 | `HKLPP` | `sj/C.vesta:127-128` | body 一行：`192 1 1.000 255 0 255`。 | Miller index/hkl plane 绘制参数，含 alpha/模式/比例/RGB。 | inferred | 可解析颜色；未知字段保留。 |
 | `UCOLP` | `sj/C.vesta:129-130` | body 一行：`0 1 1.000 0 0 0`。 | unit cell color/线框显示参数。末 3 个为 RGB 黑色。 | inferred | 可解析颜色；保留前 3 字段。 |
 | `COMPS 1` | `sj/C.vesta:131` | header 1 个整数。 | component/composition 面板或压缩样式开关。 | unknown | 原样保存 header args。 |
-| `LABEL 1    12  1.000 0` | `sj/C.vesta:132` | header 4 个数：整数、字号样整数、比例浮点、整数。 | 全局标签显示样式候选：启用、字号、缩放、模式/偏移等。它不是任意文本内容字段。 | inferred | 可作为 style flag 读取；不要丢失间距。具体 GUI 对应项需差分验证。 |
+| `LABEL 1    12  1.000 0` | `sj/C.vesta:132` | header 4 个数：整数、字号样整数、比例浮点、整数。 | 全局 atom/site 标签显示样式。2026-06-10 BCP smoke 确认第一字段为标签类型：`1` 显示 site 名，`0` 显示元素名；第二字段控制字号样大小，第三字段影响 z 方向偏移/距离。它不是任意文本内容字段。 | inferred | 可作为 style flag 读取；不要丢失间距。写 BCP 编号时使用 `LABEL 1`，并避免生成未知非空 `LBLAT`。 |
 | `PROJT 0  0.962` | `sj/C.vesta:133` | header 整数 + 浮点。 | 投影/相机模式与投影参数；`0` 可能为正交/透视模式，`0.962` 为缩放或视角参数。 | inferred | 原样保存；高层命名为 projection args。 |
 | `BKGRC` | `sj/C.vesta:134-135` | body 一行 3 个整数：`255 255 255`。 | 背景 RGB 颜色，样例为白色。 | confirmed | 可结构化为 RGB。 |
 | `DPTHQ 1 -0.5000  3.5000` | `sj/C.vesta:136` | header 整数 + 两个浮点。 | depth cue/depth clipping 设置，含启用状态和近/远范围。 | inferred | 保留 header 数值；可按 `enabled`, `min`, `max` 暴露但标注推测。 |
@@ -110,13 +110,13 @@
 - `SHAPE`: 十个字段的含义，尤其是末尾四个 `192` 是否为 RGBA。
 - `BOUND`: 第二行五个整数的含义。
 - `SBOND`: 距离后多个 flag 的语义，以及半径/宽度两个浮点的准确区别。
-- `SITET` 与 `ATOMT`: 两组 RGB、alpha 和最后 flag 的准确渲染含义，尤其是 `SITET` 末列是否为 label visibility。
+- `SITET` 与 `ATOMT`: 两组 RGB、alpha 和最后 flag 的完整渲染含义。`SITET` 末列配合 `LABEL 1` 可显示目标 site 标签，但它是否还控制其他 GUI 状态仍需更多样本。
 - `LBLAT`: atom/site labels 的非空记录形态。VESTA 支持显示元素名或 site 名，但 `.vesta` 写法仍需 GUI 保存差分。
 - `LBLSP`, `DLATM`, `DLBND`, `DLPLY`, `PLN2D`: `-1` 或 `0 0 0 0` 之外的非空记录形态。
 - `DISPF`, `MODEL`, `SURFS`, `SECTS`, `FORMS`, `ATOMS`: 显示 bit/flag 的映射。
 - `FORMP`, `ATOMP`, `BONDP`, `POLYP`, `ISURF`, `TEX3P`, `SECTP`, `CONTR`, `HKLPP`, `UCOLP`:
   样式参数字段顺序和单位。
-- `COMPS`, `LABEL`, `PROJT`, `DPTHQ`: header 参数的具体 GUI 对应项。
+- `COMPS`, `PROJT`, `DPTHQ`: header 参数的具体 GUI 对应项。`LABEL` 已确认 `0/1` 区分元素名/site 名，但其末字段仍需 GUI 差分。
 - `LIGHT0` 到 `LIGHT3`: 三组 RGBA 是否分别为 ambient/diffuse/specular，以及 header 缺省值的含义。
 - `SECCL`, `TEXCL`: header 计数与非空列表记录格式。
 - `ATOMM`, `BONDM`, `POLYM`, `SURFM`, `FORMM`, `HKLPM`: 第二行浮点是否为 shininess、specular power 或透明/材质强度。

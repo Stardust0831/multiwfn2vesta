@@ -92,10 +92,28 @@ without generating dense automatic bonds between path points.
   to explain BCP invisibility.
 - For BCP index labels, use VESTA's documented atom/site label route rather
   than arbitrary text objects.  Rename BCP site labels to concise strings such
-  as `BCP1`, `BCP2`, or `B001`, then enable atom labels as "Names of sites" in
-  VESTA.  Do not generate non-empty `LBLAT` records until a GUI-save diff has
-  confirmed the exact syntax.  For publication figures, post-render PNG/SVG
-  text annotation is the more controllable fallback.
+  as `BCP1`, `BCP2`, or `B001`, then enable atom labels as "Names of sites".
+  In `.vesta` output this means `LABEL 1 ...`; `LABEL 0 ...` displays element
+  names instead.  Set the BCP `SITET` tail flag to `1`.  Do not generate
+  non-empty `LBLAT` records until a GUI-save diff has confirmed the exact
+  syntax.  Native VESTA label placement is not per-site adjustable and can
+  overlap for nearby BCPs, so publication figures should still prefer
+  post-render PNG/SVG text annotation.
+
+  ```bash
+  python -m multiwfn2vesta.vesta_aim_overlay_style \
+    input_overlay.vesta \
+    output_labeled_overlay.vesta \
+    --path-element Xe \
+    --bcp-element Rn \
+    --path-radius 0.060 \
+    --bcp-radius 0.180 \
+    --split-bcp-phase \
+    --label-bcp-sites \
+    --label-mode 1 \
+    --label-font-size 18 \
+    --label-offset 0.650
+  ```
 
 ## Steps
 

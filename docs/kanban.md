@@ -4,8 +4,9 @@ Updated: 2026-06-10
 
 ## Doing
 
-- Review the 2026-06-10 BCP label research result against a GUI-saved VESTA
-  label example before implementing native `.vesta` label generation.
+- Keep non-empty `LBLAT` generation out of maintained code until a GUI-saved
+  VESTA diff proves the record syntax; the verified native route now uses
+  `LABEL 1` plus site labels.
 - Finish the full Ag(111)+benzene IGMH+AIM BCP visibility fix under the user's
   latest three-view constraint: one source `.vesta`, opened once by VESTA,
   then front/right/top images exported by command-line `-rotate_*` and
@@ -29,6 +30,14 @@ Updated: 2026-06-10
   current recommendation: use site labels plus VESTA label visibility for
   simple labels, or use post-render image annotation for robust publication
   numbering until non-empty `LBLAT` syntax is reverse-engineered.
+- Implemented `--label-bcp-sites` in `multiwfn2vesta.vesta_aim_overlay_style`.
+  It preserves coordinates, rewrites BCP labels across `STRUC`, `THERI`, and
+  `SITET`, sets the BCP `SITET` label flag to `1`, and uses `LABEL 1` for
+  site-name labels.
+- Real-rendered BCP text diagnostics under
+  `smoke/ag111_benzene_igmh_aim_periodic_cell_20260607/bcp_text_label_experiment_20260610/`.
+  `LABEL 1` displays `BCP1`/`BCP2`/`BCP3`; `LABEL 0` displays `Rn`.  Native
+  labels work but can overlap for nearby BCPs.
 - IRI color cube processing notes and skill were added in earlier work.
 - AIM path/CP VESTA conversion and style patching were added in earlier work.
 - Added experimental minimized Windows VESTA renderer:

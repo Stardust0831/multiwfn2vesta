@@ -106,6 +106,43 @@ class TestVestaAimOverlayStyle(unittest.TestCase):
         self.assertEqual(twice.count("  Xe        P0001_0001"), 1)
         self.assertEqual(twice.count("  Rn        CP0001_N"), 1)
 
+    def test_label_bcp_sites_uses_short_site_labels(self):
+        patched = patch_aim_overlay_style_text(
+            SAMPLE,
+            bcp_element="Rn",
+            split_bcp_phase=True,
+            label_bcp_sites=True,
+            label_font_size=18,
+            label_offset=0.650,
+        )
+
+        self.assertIn("  Rn        BCP1", patched)
+        self.assertIn("   1         BCP1 -0.000000", patched)
+        self.assertIn("   1         BCP1  0.1800 255  80   0 255  80   0 204  1", patched)
+        self.assertIn("LABEL 1    18  0.650 0", patched)
+        self.assertNotIn("  Rn        CP0001_N", patched)
+        self.assertNotIn("CP0001_N  0.1800", patched)
+
+    def test_label_bcp_sites_remains_style_patchable(self):
+        once = patch_aim_overlay_style_text(SAMPLE, bcp_element="Rn", label_bcp_sites=True)
+        twice = patch_aim_overlay_style_text(once, bcp_element="Rn", label_bcp_sites=True)
+
+        self.assertEqual(twice.count("  Rn        BCP1"), 1)
+        self.assertIn("BCP1  0.1800 255  80   0 255  80   0 204", twice)
+
+    def test_label_bcp_sites_inserts_label_style_inside_style_block(self):
+        sample_without_label = SAMPLE.replace("STYLE\nBONDS   1\n", "STYLE\nBONDS   1\nBKGRC\n 255 255 255\n")
+        patched = patch_aim_overlay_style_text(
+            sample_without_label,
+            bcp_element="Rn",
+            label_bcp_sites=True,
+            label_mode=1,
+            label_font_size=24,
+        )
+
+        self.assertIn("BONDS   1\nLABEL 1    24  1.000 0\nBKGRC", patched)
+        self.assertTrue(patched.rstrip().endswith("255 255 255"))
+
 
 if __name__ == "__main__":
     unittest.main()

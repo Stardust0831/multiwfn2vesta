@@ -23,6 +23,9 @@ VESTA figures without reintroducing AIM bonds or moving BCP coordinates.
 - Local VESTA files mostly contain empty label blocks:
   `LBLAT` followed by `-1` and `LBLSP` followed by `-1`.  No local generated
   file currently gives a trusted non-empty `LBLAT` example.
+- A 2026-06-10 smoke render confirmed the practical mode switch: `LABEL 1`
+  displays site labels such as `BCP1`, while `LABEL 0` displays element names
+  such as `Rn`.
 
 ## Sources
 
@@ -40,8 +43,8 @@ VESTA figures without reintroducing AIM bonds or moving BCP coordinates.
 1. Keep BCPs as real pseudo-sites in the final BCP overlay phase.
 2. For simple native VESTA labels, write concise site labels such as `BCP1`,
    `BCP2`, and `BCP3` into the BCP `STRUC`, `THERI`, and `SITET` records, then
-   enable atom labels as "Names of sites" in VESTA.  This uses VESTA's
-   documented label model.
+   use `LABEL 1 ...` to enable "Names of sites" display.  Set the BCP `SITET`
+   tail flag to `1` for those sites.
 3. For publication-style numbering, prefer a post-render annotation step on
    the exported PNG/SVG.  It can place text in screen space, avoid occlusion,
    and does not depend on undocumented `.vesta` label block syntax.
@@ -58,3 +61,8 @@ VESTA figures without reintroducing AIM bonds or moving BCP coordinates.
 - If PNG post-processing is used, the labels should be driven by the same BCP
   site list used to generate the `.vesta`, but final placement should be view
   specific because VESTA projections can hide or overlap labels.
+- Smoke output:
+  `/mnt/g/work/multiwfn2vesta/smoke/ag111_benzene_igmh_aim_periodic_cell_20260607/bcp_text_label_experiment_20260610/`.
+  `bcp_only_labelmode1.png` shows `BCP1`/`BCP2`/`BCP3`; the matching
+  `labelmode0` PNG shows `Rn`.  The full overlay front render also shows BCP
+  text, but the labels overlap where BCPs are close together.

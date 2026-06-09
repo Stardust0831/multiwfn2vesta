@@ -58,7 +58,9 @@ def _is_path_label(label: str) -> bool:
 
 
 def _is_bcp_label(label: str) -> bool:
-    return label.startswith("CP") and label.endswith("_N")
+    return (label.startswith("CP") and label.endswith("_N")) or (
+        label.startswith("BCP") and label[3:].isdigit()
+    )
 
 
 def _format_struc_line(
@@ -84,11 +86,12 @@ def _format_sitet_line(
     radius: float,
     rgb: Tuple[int, int, int],
     newline: str,
+    show_label: int = 0,
 ) -> str:
     r, g, b = rgb
     return (
         f"{index:4d} {label:>12s}  {radius:6.4f}"
-        f" {r:3d} {g:3d} {b:3d} {r:3d} {g:3d} {b:3d} 204  0{newline}"
+        f" {r:3d} {g:3d} {b:3d} {r:3d} {g:3d} {b:3d} 204  {show_label:d}{newline}"
     )
 
 
@@ -110,6 +113,10 @@ def _format_theri_line(index: int, label: str, value: str, newline: str) -> str:
     return f"{index:4d} {label:>12s} {value}{newline}"
 
 
+def _format_label_line(mode: int, font_size: float, offset: float, mark: int, newline: str) -> str:
+    return f"LABEL {mode:d} {font_size:5g} {offset:6.3f} {mark:d}{newline}"
+
+
 def _blank_displacement_line(newline: str) -> str:
     return f"                            0.000000   0.000000   0.000000  0.00{newline}"
 
@@ -128,7 +135,7 @@ def _global_tail_start(lines: List[str], phase_start: int) -> int:
 def _phase_contains_aim_labels(lines: List[str], start: int, end: int) -> bool:
     for line in lines[start:end]:
         fields = line.split()
-        if len(fields) >= 3 and (_is_path_label(fields[2]) or fields[2].startswith("CP")):
+        if len(fields) >= 3 and (_is_path_label(fields[2]) or _is_bcp_label(fields[2])):
             return True
     return False
 
@@ -282,6 +289,94 @@ def _patch_global_bonds(lines: List[str], enabled: bool) -> List[str]:
         if line.strip().startswith("BONDS"):
             newline = _line_ending(line, "\n")
             out[idx] = f"BONDS   {value}{newline}"
+    return out
+
+
+def _patch_global_label_style(
+    lines: List[str],
+    *,
+    mode: int,
+    font_size: float,
+    offset: float,
+    mark: int,
+    default_newline: str,
+) -> List[str]:
+    out = list(lines)
+    changed = False
+    for idx, line in enumerate(out):
+        fields = line.split()
+        if fields[:1] == ["LABEL"] and len(fields) >= 5:
+            out[idx] = _format_label_line(mode, font_size, offset, mark, _line_ending(line, default_newline))
+            changed = True
+    if not changed:
+        insert_at = len(out)
+        in_style = False
+        for idx, line in enumerate(out):
+            stripped = line.strip()
+            if stripped == "STYLE":
+                in_style = True
+            elif in_style and stripped.split()[0:1] in (["PROJT"], ["BKGRC"], ["DPTHQ"], ["LIGHT0"], ["LIGHT1"]):
+                insert_at = idx
+                break
+        out.insert(insert_at, _format_label_line(mode, font_size, offset, mark, default_newline))
+    return out
+
+
+def _patch_bcp_site_labels(
+    lines: List[str],
+    *,
+    prefix: str,
+    default_newline: str,
+) -> List[str]:
+    out = list(lines)
+    counter = 1
+    for start, end in _aim_phase_ranges(out):
+        label_map: dict[str, str] = {}
+        for idx in range(start, end):
+            fields = out[idx].split()
+            if len(fields) < 9 or not _is_bcp_label(fields[2]):
+                continue
+            old_label = fields[2]
+            new_label = f"{prefix}{counter}"
+            counter += 1
+            label_map[old_label] = new_label
+            suffix = "    1a     1" if fields[-1] != "-" else "    1        -"
+            out[idx] = _format_struc_line(
+                int(fields[0]),
+                fields[1],
+                new_label,
+                float(fields[3]),
+                float(fields[4]),
+                float(fields[5]),
+                float(fields[6]),
+                suffix,
+                _line_ending(out[idx], default_newline),
+            )
+
+        if not label_map:
+            continue
+
+        for idx in range(start, end):
+            fields = out[idx].split()
+            if len(fields) >= 11 and fields[1] in label_map:
+                try:
+                    out[idx] = _format_sitet_line(
+                        int(fields[0]),
+                        label_map[fields[1]],
+                        float(fields[2]),
+                        (int(fields[3]), int(fields[4]), int(fields[5])),
+                        _line_ending(out[idx], default_newline),
+                        show_label=1,
+                    )
+                except ValueError:
+                    pass
+            elif len(fields) >= 3 and fields[1] in label_map:
+                out[idx] = _format_theri_line(
+                    int(fields[0]),
+                    label_map[fields[1]],
+                    fields[2],
+                    _line_ending(out[idx], default_newline),
+                )
     return out
 
 
@@ -523,11 +618,21 @@ def patch_aim_overlay_style_text(
     clear_aim_sbond: bool = True,
     keep_structure_bonds: bool = True,
     split_bcp_phase: bool = False,
+    label_bcp_sites: bool = False,
+    bcp_label_prefix: str = "BCP",
+    label_mode: int = 1,
+    label_font_size: float = 12,
+    label_offset: float = 1.000,
+    label_mark: int = 0,
 ) -> str:
     """Return VESTA text with AIM path and BCP display styles patched.
 
     Path samples are never removed.  If a BCP sits exactly on top of a path
     point, the BCP is made distinguishable by its own element type and style.
+    If ``label_bcp_sites`` is true, BCP site names are rewritten to concise
+    labels such as ``BCP1`` and their per-site label flag is enabled.  VESTA's
+    documented native label model can then display site names; no arbitrary
+    text or non-empty ``LBLAT`` records are generated here.
     """
 
     default_newline = "\r\n" if "\r\n" in text else "\n"
@@ -558,6 +663,21 @@ def patch_aim_overlay_style_text(
             bcp_element=bcp_element,
             bcp_radius=bcp_radius,
             bcp_rgb=bcp_rgb,
+            default_newline=default_newline,
+        )
+
+    if label_bcp_sites:
+        lines = _patch_bcp_site_labels(
+            lines,
+            prefix=bcp_label_prefix,
+            default_newline=default_newline,
+        )
+        lines = _patch_global_label_style(
+            lines,
+            mode=label_mode,
+            font_size=label_font_size,
+            offset=label_offset,
+            mark=label_mark,
             default_newline=default_newline,
         )
 
@@ -605,6 +725,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         action="store_true",
         help="Move BCP sites into a final dedicated phase while keeping all path samples",
     )
+    parser.add_argument(
+        "--label-bcp-sites",
+        action="store_true",
+        help="Rename BCP site labels to concise names and enable their native VESTA label flags",
+    )
+    parser.add_argument("--bcp-label-prefix", default="BCP")
+    parser.add_argument("--label-mode", type=int, default=1)
+    parser.add_argument("--label-font-size", type=float, default=12)
+    parser.add_argument("--label-offset", type=float, default=1.000)
+    parser.add_argument("--label-mark", type=int, default=0)
     args = parser.parse_args(argv)
 
     patch_aim_overlay_style_file(
@@ -619,6 +749,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         clear_aim_sbond=not args.keep_aim_sbond,
         keep_structure_bonds=not args.structure_bonds_off,
         split_bcp_phase=args.split_bcp_phase,
+        label_bcp_sites=args.label_bcp_sites,
+        bcp_label_prefix=args.bcp_label_prefix,
+        label_mode=args.label_mode,
+        label_font_size=args.label_font_size,
+        label_offset=args.label_offset,
+        label_mark=args.label_mark,
     )
     return 0
 

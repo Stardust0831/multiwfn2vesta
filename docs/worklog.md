@@ -18,6 +18,18 @@
   render with VESTA and add publication labels in a PNG/SVG post-processing
   step.  Direct non-empty `LBLAT` generation remains unimplemented until a
   GUI-save diff confirms the record syntax.
+- Added `--label-bcp-sites` to `multiwfn2vesta.vesta_aim_overlay_style`.
+  It rewrites BCP labels consistently across `STRUC`, `THERI`, and `SITET`,
+  sets the BCP `SITET` label flag to `1`, and patches/inserts a global
+  `LABEL` style line.  `LABEL 1` is the verified site-name mode; `LABEL 0`
+  displays element names.
+- Rendered BCP label smoke outputs under
+  `/mnt/g/work/multiwfn2vesta/smoke/ag111_benzene_igmh_aim_periodic_cell_20260607/bcp_text_label_experiment_20260610/`.
+  `bcp_only/bcp_only_labelmode1.png` shows `BCP1`/`BCP2`/`BCP3`, while
+  `bcp_only/bcp_only_labelmode0.png` shows `Rn`.  The full-overlay front
+  render confirms native text appears in the real Ag(111)+benzene overlay,
+  but close BCP labels overlap, so post-render annotation remains the
+  publication-quality path.
 - Generated a non-rendered Ag(111)+benzene check file outside the tracked
   project tree:
   `/mnt/g/work/multiwfn2vesta/smoke/ag111_benzene_igmh_aim_periodic_cell_20260607/products/ag111_benzene_igmh_aim_paths_single_xe_yellow_bcp_splitphase_path006_periodic_overlay.vesta`.
