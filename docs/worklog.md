@@ -148,3 +148,26 @@ Limitations recorded:
   not absent BCP data.
 - No workspace-scoped VESTA, Multiwfn, ABACUS, or MPI process remained after
   the diagnostic render.
+
+## 2026-06-09: BCP atom naming diagnostic
+
+- User asked whether BCP invisibility might be caused by atom naming or element
+  symbols, and requested additional BCP-only tests.
+- Generated BCP-only naming controls under
+  `smoke/ag111_benzene_igmh_aim_periodic_cell_20260607/bcp_name_diagnostic_20260609/`.
+  The controls include one combined matrix and single-variant files for:
+  `N+CP000*_N`, `N+BCP*`, `Rn+CP*_N`, `Rn+RBCP*`, `Xe+CP*_N`,
+  `C+CP*_N`, and `He+CP*_N`.
+- Rendered the matrix and all single variants with VESTA.  Every PNG is a
+  valid `3048 x 1500` RGB image.
+- Visual inspection: the combined matrix shows all tested groups of BCP
+  points, and the single `N+CP000*_N` file shows the three original-style BCP
+  labels.
+- Pixel validation with PIL found colored BCP pixels in every single-variant
+  image: `78` high-saturation colored pixels per PNG.  This confirms that
+  `CP000*_N` labels and the tested element symbols do not by themselves stop
+  VESTA from drawing BCP-only sites.
+- Current conclusion for the full Ag(111)+benzene IGMH+AIM overlay: keep
+  investigating path-point overlap at identical coordinates, phase draw order,
+  depth/scale, and `SITET`/`ATOMT` style-table interactions before changing
+  BCP label naming.

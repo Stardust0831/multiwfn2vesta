@@ -96,3 +96,23 @@ Result:
 - The rendered images confirm BCP sites can be displayed by VESTA; the full
   overlay issue is visibility/overlap/occlusion, not absent records.
 - No workspace-scoped VESTA process remained after the render.
+
+## 2026-06-09 BCP naming diagnostic
+
+The same controlled one-shot wrapper was used for BCP-only atom naming
+controls.
+
+Rendered files:
+
+```text
+smoke/ag111_benzene_igmh_aim_periodic_cell_20260607/bcp_name_diagnostic_20260609/bcp_name_matrix_top.png
+smoke/ag111_benzene_igmh_aim_periodic_cell_20260607/bcp_name_diagnostic_20260609/single_*.png
+```
+
+Result:
+
+- All PNGs were written successfully as valid `3048 x 1500` RGB images.
+- `N+CP000*_N`, `N+BCP*`, `Rn+CP*_N`, `Rn+RBCP*`, `Xe+CP*_N`,
+  `C+CP*_N`, and `He+CP*_N` all rendered visible BCP-only points.
+- Pixel counting found colored BCP pixels in every single-variant render.
+- No workspace-scoped VESTA process remained after rendering.

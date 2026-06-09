@@ -79,6 +79,12 @@ without generating dense automatic bonds between path points.
   changing BCP radius or color.  Treat a successful BCP-only render as evidence
   that any full-overlay invisibility is caused by overlap, occlusion, or scale,
   not absent BCP records.
+- If atom naming is suspected, test it with BCP-only controls before changing
+  the maintained overlay naming scheme.  The 2026-06-09 Ag(111)+benzene
+  controls rendered visible BCP points for `N+CP000*_N`, `N+BCP*`,
+  `Rn+CP*_N`, `Rn+RBCP*`, `Xe+CP*_N`, `C+CP*_N`, and `He+CP*_N`.  Therefore
+  the `CP000*_N` label pattern and these tested element symbols are not enough
+  to explain BCP invisibility.
 
 ## Steps
 
@@ -142,6 +148,10 @@ without generating dense automatic bonds between path points.
   Multiwfn-like BCP radii appear nearly invisible.  Before changing style,
   make a zoom-only render copy by editing only the final `SCENE` scalar and
   confirm the points are really present.
+- When BCP-only naming controls pass but the full overlay still hides BCPs,
+  prioritize checks in this order: identical-coordinate path samples over BCPs,
+  phase draw order, depth/camera scale, then whether VESTA rewrote or ignored
+  `SITET`/`ATOMT` rows in the saved multi-phase file.
 
 ## Real smoke result
 
@@ -188,6 +198,22 @@ Observed:
   same three BCP points clearly.
 - The full overlay's BCP invisibility is therefore a visibility problem, not a
   missing-record problem.
+
+Ag(111)+benzene BCP naming diagnostic:
+
+```text
+smoke/ag111_benzene_igmh_aim_periodic_cell_20260607/bcp_name_diagnostic_20260609/
+```
+
+Observed:
+
+- VESTA rendered the combined naming matrix and each single-variant BCP-only
+  control.
+- Tested naming combinations: `N+CP000*_N`, `N+BCP*`, `Rn+CP*_N`,
+  `Rn+RBCP*`, `Xe+CP*_N`, `C+CP*_N`, and `He+CP*_N`.
+- Pixel counting found colored BCP pixels in every single-variant render.
+- Do not treat `CP000*_N` naming as the primary cause unless a future
+  multi-phase-specific diff proves otherwise.
 
 ## Failure notes
 

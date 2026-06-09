@@ -51,6 +51,11 @@ Updated: 2026-06-09
   and a zoomed front diagnostic was generated under
   `smoke/ag111_benzene_igmh_aim_periodic_cell_20260607/bcp_points_only_zoom_render_20260609/`.
   Visual inspection confirms three orange BCP points are displayed.
+- Tested whether BCP visibility depends on VESTA atom naming or element
+  symbols.  BCP-only controls using `N+CP000*_N`, `N+BCP*`, `Rn+CP*_N`,
+  `Rn+RBCP*`, `Xe+CP*_N`, `C+CP*_N`, and `He+CP*_N` all rendered visible
+  points.  The full-overlay BCP issue is therefore not explained by the
+  `CP000*_N` label pattern or the tested element symbols.
 
 ## Next
 
@@ -63,3 +68,6 @@ Updated: 2026-06-09
 - If the user asks for fresh PNGs, either run an explicitly accepted
   focus-stealing VESTA export or continue the Linux/local-library non-focus
   route first.
+- For full-overlay BCP invisibility, investigate path-point overlap, phase
+  draw order, depth/scale, and `SITET`/`ATOMT` style-table interaction before
+  changing the BCP label naming scheme.
