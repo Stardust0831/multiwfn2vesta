@@ -30,8 +30,17 @@ Updated: 2026-06-10 09:44 CST
   writing `colored_after_review.vesta` and `values_after_review.csv`.
 - [x] Full validation passed: 178-test no-GUI regression and
   `git diff --check`.
-- [ ] Commit and push to GitHub `main` as
-  `Stardust0831`.
+- [x] Committed and pushed to GitHub `main` as
+  `7b305ea5762b3e8444b53338aecec190cc331a7f`
+  (`Add Multiwfn atom table coloring`) with repository-local identity
+  `Stardust0831 <13862180016@163.com>`.
+- [x] Post-push verification after `git fetch --prune origin`: project
+  `HEAD`, `origin/main`, and `origin/HEAD` all point at `7b305ea`; the remote
+  exposes only `refs/heads/main`; repository-local identity remains
+  `Stardust0831 <13862180016@163.com>`.
+- [x] Prepared this closure record for the final docs-only push.  The closure
+  commit hash and final branch check are reported in the assistant response to
+  avoid an infinite chain of "record the record" commits.
 
 ## Current Request: 2026-06-10 README Branch Consolidation Refresh
 

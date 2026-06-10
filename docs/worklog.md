@@ -46,6 +46,13 @@
   wrote normalized `values_after_review.csv`.
 - Final pre-commit validation passed: 178-test no-GUI regression and
   `git diff --check`.
+- Feature implementation commit was pushed to GitHub `main` as
+  `7b305ea5762b3e8444b53338aecec190cc331a7f`
+  (`Add Multiwfn atom table coloring`).
+- Post-push verification after `git fetch --prune origin`: project `HEAD`,
+  `origin/main`, and `origin/HEAD` all pointed at `7b305ea`; remote heads
+  exposed only `refs/heads/main`; repository-local identity remained
+  `Stardust0831 <13862180016@163.com>`.
 
 ## 2026-06-10: README branch consolidation refresh
 
