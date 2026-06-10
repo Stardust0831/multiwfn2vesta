@@ -1,8 +1,8 @@
 # Project Kanban
 
-Updated: 2026-06-10 22:28 CST
+Updated: 2026-06-10 22:35 CST
 
-## Current Request: 2026-06-10 README Refresh And Branch Consolidation
+## Current Request: 2026-06-10 README Refresh And Branch Consolidation At Becke Tip
 
 - [x] Record user request before editing: update README, inspect the
   unusual-looking branch state, merge/converge back to one maintained branch
@@ -14,7 +14,7 @@ Updated: 2026-06-10 22:28 CST
 - [x] Recheck branch and identity state without destructive operations:
   after `git fetch --prune origin`, local `main`, `origin/main`, and
   `origin/HEAD` are aligned at
-  `ef8d498bc4931bb7a03f828d43000da3c8efafc5`; `git ls-remote --heads
+  `27065d0bf4b5f4096044065cd76a4eaa52735704`; `git ls-remote --heads
   origin` exposes only `refs/heads/main`; repository-local identity is
   `Stardust0831 <13862180016@163.com>`.
 - [x] Decide whether a branch merge is needed: no merge is needed because no
@@ -22,9 +22,6 @@ Updated: 2026-06-10 22:28 CST
   maintained `main`.
 - [x] Refresh README and project docs with the current branch audit,
   one-branch policy, working checkout path, and untracked probe-file handling.
-- [x] Run read-only subagent review for the README/docs branch-consolidation
-  closeout: no High blocker; Medium reminders are to keep `domain.cub` /
-  `domain.pdb` out of staging and verify the root docs mirror after rsync.
 - [x] Sync root docs mirror, validate, review, commit, push, and verify
   `main` remains aligned with `origin/main`; keep `domain.cub` and
   `domain.pdb` untracked.  Validation passed before commit: root docs

@@ -1,5 +1,23 @@
 # Worklog
 
+## 2026-06-10: README branch consolidation refresh at Becke tip
+
+- User requested a README refresh, branch-state audit, possible merge-back to
+  one branch, and git identity `Stardust0831`.
+- Confirmed the maintained GitHub checkout is
+  `/mnt/g/work/multiwfn2vesta/project`; the workspace-level
+  `/mnt/g/work/multiwfn2vesta/.git` remains an empty metadata stub and is not
+  used for project commits.
+- Rechecked repository state after `git fetch --prune origin`: local `main`,
+  `origin/main`, and `origin/HEAD` are aligned at
+  `27065d0bf4b5f4096044065cd76a4eaa52735704` (`Add Becke weight cube
+  preset`), and `git ls-remote --heads origin` exposes only
+  `refs/heads/main`.
+- Repository-local identity is `Stardust0831 <13862180016@163.com>`.
+- No branch merge is needed in this pass because no extra local branch or
+  remote feature branch exists; the closeout remains on maintained `main`.
+- Local untracked probes `domain.cub` and `domain.pdb` remain uncommitted.
+
 ## 2026-06-10: Becke atomic and overlap weight cube preset
 
 - Continued the long-running Multiwfn/ABACUS/VESTA analysis objective by

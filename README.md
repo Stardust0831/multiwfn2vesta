@@ -21,10 +21,10 @@ point.
 - Working checkout: `/mnt/g/work/multiwfn2vesta/project`.  The workspace-level
   `/mnt/g/work/multiwfn2vesta/.git` is an empty metadata stub and is not used
   for project commits.
-- Branch audit on 2026-06-10 22:08 CST found local `main`, `origin/main`, and
+- Branch audit on 2026-06-10 22:35 CST found local `main`, `origin/main`, and
   `origin/HEAD` aligned at
-  `ef8d498bc4931bb7a03f828d43000da3c8efafc5`
-  (`Add EDR grid cube presets`) before this README/status closeout.
+  `27065d0bf4b5f4096044065cd76a4eaa52735704`
+  (`Add Becke weight cube preset`) before this README/status closeout.
 - `git ls-remote --heads origin` currently returns only `refs/heads/main`; no
   merge-back was needed in this pass because there is no extra local or remote
   feature branch to consolidate.
