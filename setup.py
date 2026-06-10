@@ -21,6 +21,8 @@ setup(
             'multiwfn2vesta-igmh-run=multiwfn2vesta.multiwfn_igmh:main',
             'multiwfn2vesta-igm-run=multiwfn2vesta.multiwfn_igmh:main_igm',
             'multiwfn2vesta-migm-run=multiwfn2vesta.multiwfn_igmh:main_migm',
+            'multiwfn2vesta-aigm-run=multiwfn2vesta.multiwfn_aigm:main',
+            'multiwfn2vesta-amigm-run=multiwfn2vesta.multiwfn_aigm:main_amigm',
             'multiwfn2vesta-grid-run=multiwfn2vesta.multiwfn_grid:main',
             'multiwfn2vesta-fukui-run=multiwfn2vesta.multiwfn_fukui:main',
             'multiwfn2vesta-stm-run=multiwfn2vesta.multiwfn_stm:main',

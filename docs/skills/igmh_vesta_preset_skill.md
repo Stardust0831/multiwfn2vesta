@@ -4,7 +4,9 @@ Use this when Multiwfn has already generated IGM, IGMH, or aIGM cube files
 and the task is to make a VESTA mapped-surface file without manually choosing
 the display defaults.  If the starting point is a wavefunction file and
 fragment definitions, prefer `multiwfn2vesta igmh-run`, `igm-run`, or
-`migm-run`, which call Multiwfn and then use this preset layer.
+`migm-run`, which call Multiwfn and then use this preset layer.  If the
+starting point is an MD/AIMD trajectory for averaged IGM, prefer
+`multiwfn2vesta aigm-run` or `amigm-run`.
 
 ## Inputs
 
@@ -18,9 +20,11 @@ The preset layer expects compatible cube pairs already produced by Multiwfn:
 For ABACUS workflows, first produce a Multiwfn-readable Molden file with
 `multiwfn2vesta abacus-molden`, then run IGM/IGMH through
 `multiwfn2vesta igmh-run`, `igm-run`, or `migm-run`, or use this preset
-directly when the cube files already exist.  `igm-run` and `migm-run` fix the
-method from the command name and reject an extra `--method`; use
-`igmh-run --method igm|migm|igmh` when a generic method-selecting command is
+directly when the cube files already exist.  Use `aigm-run`/`amigm-run` for
+Multiwfn trajectory-average aIGM/amIGM generation.  `igm-run`, `migm-run`,
+and `amigm-run` fix the method from the command name and reject an extra
+`--method`; use `igmh-run --method igm|migm|igmh` or
+`aigm-run --method aigm|amigm` when a generic method-selecting command is
 needed.
 
 ## Commands
@@ -56,6 +60,23 @@ multiwfn2vesta cube-preset aigm avgdg_inter.cub products \
 
 multiwfn2vesta cube-preset aigm-tfi avgdg_inter.cub products \
   --texture-cube thermflu.cub
+```
+
+From an MD/AIMD trajectory:
+
+```bash
+multiwfn2vesta aigm-run trajectory.xyz aigm_products \
+  --fragment 1-48 \
+  --fragment 49-60 \
+  --frame-range 1 200 \
+  --grid-mode spacing \
+  --grid-spacing 0.25
+
+multiwfn2vesta amigm-run trajectory.xyz amigm_products \
+  --fragment 1-48 \
+  --fragment c \
+  --export-tfi \
+  --tfi-vesta
 ```
 
 The output `.vesta` imports the surface cube through `IMPORT_DENSITY`, imports
@@ -111,9 +132,10 @@ titles `h2o_dg_inter (igm)` and `h2o_dg_inter (migm)`.
 
 ## Limitations
 
-- The maintained runner automates standard Multiwfn IGM, mIGM, and IGMH
-  two-or-more-fragment paths.  aIGM/amIGM command-stream automation remains a
-  separate future increment.
+- The maintained wavefunction runner automates standard Multiwfn IGM, mIGM,
+  and IGMH two-or-more-fragment paths.  The maintained trajectory runner
+  automates aIGM/amIGM, exporting `avgdg_inter.cub` and `avgsl2r.cub` by
+  default plus optional `avgRDG.cub`, `thermflu.cub`, and scatter data.
 - AIM path/BCP overlays are handled by `multiwfn2vesta aim-igmh` after VESTA
   has a saved multi-phase overlay.
 - For publication images, inspect the generated VESTA file and adjust

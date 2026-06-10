@@ -37,6 +37,8 @@ multiwfn2vesta iri-run --help
 multiwfn2vesta igmh-run --help
 multiwfn2vesta igm-run --help
 multiwfn2vesta migm-run --help
+multiwfn2vesta aigm-run --help
+multiwfn2vesta amigm-run --help
 multiwfn2vesta grid-run --help
 multiwfn2vesta fukui-run --help
 multiwfn2vesta stm-run --help
@@ -67,6 +69,12 @@ Aliases:
   `multiwfn2vesta multiwfn-igm-run ...` are aliases for `igm-run`.
 - `multiwfn2vesta multiwfn-migm ...` and
   `multiwfn2vesta multiwfn-migm-run ...` are aliases for `migm-run`.
+- `multiwfn2vesta multiwfn-aigm ...`,
+  `multiwfn2vesta multiwfn-aigm-run ...`, and
+  `multiwfn2vesta averaged-igm-run ...` are aliases for `aigm-run`.
+- `multiwfn2vesta multiwfn-amigm ...`,
+  `multiwfn2vesta multiwfn-amigm-run ...`, and
+  `multiwfn2vesta averaged-migm-run ...` are aliases for `amigm-run`.
 - `multiwfn2vesta multiwfn-grid ...`,
   `multiwfn2vesta scalar-cube-run ...`, and
   `multiwfn2vesta function-cube ...` are aliases for `grid-run`.
@@ -91,6 +99,8 @@ Aliases:
   invoked as `multiwfn2vesta cube-preset igmh ...`, while automated
   Multiwfn fragment runs are `multiwfn2vesta igmh-run ...`,
   `multiwfn2vesta igm-run ...`, and `multiwfn2vesta migm-run ...`.
+  Trajectory-average runs are `multiwfn2vesta aigm-run ...` and
+  `multiwfn2vesta amigm-run ...`.
 
 ## Maintained workflows
 
@@ -315,6 +325,39 @@ For periodic ABACUS Molden files with `[Cell]`, do not use `--grid-mode
 points`.  Multiwfn's PBC grid option `4` reads a spacing value in that case,
 so the runner rejects `points` before launch.  Use `--grid-mode spacing
 --grid-spacing VALUE` or `--grid-mode pbc-cell`.
+
+### Trajectory to Multiwfn aIGM/amIGM to VESTA
+
+```bash
+multiwfn2vesta aigm-run \
+  trajectory.xyz \
+  aigm_products \
+  --fragment 1-48 \
+  --fragment 49-60 \
+  --frame-range 1 200 \
+  --periodic \
+  --grid-mode spacing \
+  --grid-spacing 0.25 \
+  --timeout 1200
+
+multiwfn2vesta amigm-run \
+  trajectory.xyz \
+  amigm_products \
+  --fragment 1-48 \
+  --fragment c \
+  --export-tfi \
+  --tfi-vesta
+```
+
+This route is for Multiwfn trajectory-average weak-interaction analysis, not
+ordinary single-wavefunction IGMH.  It writes `avgdg_inter.cub` and
+`avgsl2r.cub`, then calls `cube-preset aigm` unless `--no-vesta` is supplied.
+Use `--export-rdg`, `--export-tfi`, and `--export-scatter` for optional
+`avgRDG.cub`, `thermflu.cub`, and scatter `output.txt`.
+
+For periodic trajectory inputs, use `--periodic` with `spacing` or
+`pbc-cell`.  The runner rejects `points` for detected periodic trajectories
+because Multiwfn's PBC grid option `4` reads a spacing value, not `NX,NY,NZ`.
 
 ### Wavefunction to Multiwfn scalar grid cube
 

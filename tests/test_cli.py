@@ -24,6 +24,8 @@ class TestUnifiedCli(unittest.TestCase):
         self.assertIn("igmh-run", text)
         self.assertIn("igm-run", text)
         self.assertIn("migm-run", text)
+        self.assertIn("aigm-run", text)
+        self.assertIn("amigm-run", text)
         self.assertIn("grid-run", text)
         self.assertIn("fukui-run", text)
         self.assertIn("stm-run", text)
@@ -162,6 +164,20 @@ class TestUnifiedCli(unittest.TestCase):
 
         self.assertEqual(code, 0)
         mocked.assert_called_once_with(["input.molden", "products", "--fragment", "1", "--fragment", "2"])
+
+    def test_dispatches_aigm_run_command(self):
+        with patch("multiwfn2vesta.cli.multiwfn_aigm.main", return_value=0) as mocked:
+            code = cli.main(["aigm-run", "traj.xyz", "products", "--fragment", "1", "--fragment", "2"])
+
+        self.assertEqual(code, 0)
+        mocked.assert_called_once_with(["traj.xyz", "products", "--fragment", "1", "--fragment", "2"])
+
+    def test_dispatches_amigm_alias_with_method_injection(self):
+        with patch("multiwfn2vesta.cli.multiwfn_aigm.main_amigm", return_value=0) as mocked:
+            code = cli.main(["multiwfn-amigm", "traj.xyz", "products", "--fragment", "1", "--fragment", "2"])
+
+        self.assertEqual(code, 0)
+        mocked.assert_called_once_with(["traj.xyz", "products", "--fragment", "1", "--fragment", "2"])
 
     def test_dispatches_grid_run_command(self):
         with patch("multiwfn2vesta.cli.multiwfn_grid.main", return_value=0) as mocked:
@@ -711,6 +727,80 @@ class TestUnifiedCli(unittest.TestCase):
                 "--structure",
                 "molecule",
                 "--no-copy-cubes",
+            ]
+        )
+
+    def test_interactive_aigm_run_builds_expected_args(self):
+        answers = iter(
+            [
+                "18",
+                "traj.xyz",
+                "aigm_products",
+                "amigm",
+                "1-48",
+                "c",
+                "",
+                "1 200",
+                "/opt/Multiwfn",
+                "6",
+                "600",
+                "case",
+                "y",
+                "spacing",
+                "0.25",
+                "y",
+                "y",
+                "y",
+                "y",
+                "n",
+                "aigm",
+                "0.008",
+                "-0.05 0.05",
+            ]
+        )
+        with patch("builtins.input", lambda _prompt: next(answers)):
+            with patch("sys.stdout", io.StringIO()):
+                with patch("multiwfn2vesta.cli.multiwfn_aigm.main", return_value=0) as mocked:
+                    code = cli.main([])
+
+        self.assertEqual(code, 0)
+        mocked.assert_called_once_with(
+            [
+                "traj.xyz",
+                "aigm_products",
+                "--method",
+                "amigm",
+                "--fragment",
+                "1-48",
+                "--fragment",
+                "c",
+                "--frame-range",
+                "1",
+                "200",
+                "--multiwfn",
+                "/opt/Multiwfn",
+                "--nthreads",
+                "6",
+                "--timeout",
+                "600",
+                "--stem",
+                "case",
+                "--periodic",
+                "--grid-mode",
+                "spacing",
+                "--grid-spacing",
+                "0.25",
+                "--export-rdg",
+                "--export-tfi",
+                "--tfi-vesta",
+                "--export-scatter",
+                "--preset",
+                "aigm",
+                "--isosurface",
+                "0.008",
+                "--tex-physical",
+                "-0.05",
+                "0.05",
             ]
         )
 

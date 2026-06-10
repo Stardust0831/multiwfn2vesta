@@ -5,8 +5,9 @@ Multiwfn workflows and preparing VESTA visualization files.  The currently
 maintained path covers ABACUS Molden handoff, cube-to-VESTA files, Multiwfn
 real-space grid, charged-state Fukui/dual-descriptor maps, STM/LDOS,
 cube-domain extraction, basin cube display, AIM, IRI/RDG, and IGM/IGMH
-command streams, atoms-only topology overlays, surface extrema overlays, and
-AIM+IGMH multi-phase VESTA figures.
+command streams, aIGM/amIGM trajectory-average weak-interaction maps,
+atoms-only topology overlays, surface extrema overlays, and AIM+IGMH
+multi-phase VESTA figures.
 
 The project is still experimental, but the CLI below is the maintained entry
 point.
@@ -17,22 +18,21 @@ point.
   GitHub remote.
 - GitHub remote: `origin` points to `Github:Stardust0831/multiwfn2vesta.git`,
   with `origin/HEAD -> origin/main`.
-- Branch audit on 2026-06-10 18:17 CST, after the `fukui-run` branch-status
+- Branch audit on 2026-06-10 18:47 CST, before the aIGM/amIGM runner
   closeout, found local `main`, `origin/main`, and `origin/HEAD` aligned at
-  `f8e1a4815d2f32b8562f74824e7e0253c6dc6b8e`
-  (`Close Fukui runner branch status`).
+  `0fd0517e35c4ae308b276417ee253a81138e7840`
+  (`Refresh README branch closeout status`).
 - `git ls-remote --heads origin` currently returns only `refs/heads/main`; no
   merge-back was needed in this pass because there is no extra local or remote
   feature branch to consolidate.
-- The latest feature commit in this audited branch state is
-  `43e00d2218699574d3644c51dc0bd1249f60d0da`
-  (`Add Multiwfn Fukui runner`); README/status closeout commits are kept on
-  the same `main` branch.
+- This closeout keeps the aIGM/amIGM runner increment on the same maintained
+  `main` branch as the README/status updates.
 - The apparently unusual branch history is a normal linear `main` history
   containing feature commits and documentation closure commits, not active
   competing branches.
 - Recent maintained feature work includes charged-state `fukui-run`
-  orchestration, cube/grid domain extraction, basin cube VESTA presets,
+  orchestration, aIGM/amIGM trajectory-average weak-interaction generation,
+  cube/grid domain extraction, basin cube VESTA presets,
   IGM/mIGM/IGMH command-stream automation, IGMH/aIGM VESTA cube presets,
   surface extrema overlays for
   `surfanalysis.pdb`, surface-map/grid expansion, generic Multiwfn atom table
@@ -104,6 +104,11 @@ then delete the temporary branch.
   and fragment definitions, export `dg_inter.cub` plus `sl2r.cub`, preserve
   optional `dg_intra.cub`/`dg.cub`, and write a mapped-surface `.vesta`
   through `cube-preset igm`/`igmh`.
+- Run Multiwfn aIGM or amIGM trajectory-average fragment analysis from a
+  Multiwfn-readable trajectory such as XYZ, export `avgdg_inter.cub` plus
+  `avgsl2r.cub`, optionally preserve `avgRDG.cub`, `thermflu.cub`, and
+  scatter data, and write a mapped-surface `.vesta` through `cube-preset
+  aigm`/`aigm-tfi`.
 - Run Multiwfn main function `5` real-space grid generation from a
   wavefunction file, export density, orbital/MO, Laplacian, K(r)/G(r)
   kinetic-energy-density cubes, ELF, LOL, ESP/MEP, ALIE, RDG/IRI-like,
@@ -182,6 +187,10 @@ multiwfn2vesta igmh-run input.molden igmh_products \
   --grid-mode spacing --grid-spacing 0.25
 multiwfn2vesta igm-run input.molden igm_products \
   --fragment 1-48 --fragment 49-60 \
+  --grid-mode spacing --grid-spacing 0.25
+multiwfn2vesta aigm-run trajectory.xyz aigm_products \
+  --fragment 1-48 --fragment 49-60 \
+  --frame-range 1 200 \
   --grid-mode spacing --grid-spacing 0.25
 multiwfn2vesta grid-run input.molden grid_products --function density
 multiwfn2vesta grid-run input.molden esp_map \
@@ -757,6 +766,60 @@ ABACUS periodic Molden files.
 `multiwfn2vesta igmh` intentionally remains the AIM+IGMH overlay styler;
 use `igmh-run`, `igm-run`, or `migm-run` for the Multiwfn fragment run.
 
+## Trajectory to aIGM/amIGM VESTA
+
+For Multiwfn-readable trajectories, typically XYZ trajectories from MD or
+AIMD, `aigm-run` drives the weak-interaction menu `20`, selects aIGM option
+`12` or amIGM option `-12`, records fragment definitions and the frame range,
+then exports averaged cubes:
+
+```bash
+multiwfn2vesta aigm-run trajectory.xyz aigm_products \
+  --fragment 1-48 \
+  --fragment 49-60 \
+  --frame-range 1 200 \
+  --periodic \
+  --grid-mode spacing \
+  --grid-spacing 0.25 \
+  --timeout 1200
+
+multiwfn2vesta amigm-run trajectory.xyz amigm_products \
+  --fragment 1-48 \
+  --fragment c \
+  --export-tfi \
+  --tfi-vesta
+```
+
+Default outputs in `aigm_products/`, with `aigm` replaced by `amigm` for that
+method:
+
+- `multiwfn_aigm_input.txt`
+- `multiwfn_aigm.stdout.txt`
+- `multiwfn_aigm.stderr.txt`
+- `multiwfn_aigm_raw/avgdg_inter.cub`
+- `multiwfn_aigm_raw/avgsl2r.cub`
+- `<stem>_avgdg_inter.cub`
+- `<stem>_avgsl2r.cub`
+- `<stem>_avgRDG.cub` when `--export-rdg` is used
+- `<stem>_thermflu.cub` when `--export-tfi` is used
+- `<stem>_multiwfn_aigm_output.txt` when `--export-scatter` is used
+- `<stem>_<method>_cube.vesta`
+- `<stem>_<method>_cube_vesta_recipe.md`
+- optional `<stem>_<method>_tfi_cube.vesta` when `--tfi-vesta` is used
+
+The maintained VESTA view uses `avgdg_inter.cub` as the isosurface and
+`avgsl2r.cub` as the texture cube through `cube-preset aigm`.  TFI coloring is
+opt-in because Multiwfn only writes `thermflu.cub` when requested.  This is a
+trajectory-average workflow, not a single-wavefunction ABACUS Molden workflow;
+use `igmh-run`, `igm-run`, or `migm-run` for ordinary wavefunction fragment
+analysis.
+
+For periodic trajectories, pass `--periodic --grid-mode spacing
+--grid-spacing VALUE` or `--grid-mode pbc-cell`.  The runner also lightly
+detects common `Lattice=`, `pbc=`, and `CRYST1` markers and rejects
+`--grid-mode points` for periodic input, because Multiwfn's PBC grid option
+`4` reads a spacing value rather than `NX,NY,NZ`.
+
 ## ABACUS Calculation to Molden
 
 For ABACUS LCAO calculations intended for Multiwfn wavefunction workflows,
@@ -1120,6 +1183,8 @@ and `aim_atoms_only.vesta` without launching VESTA.
 - `docs/skills/igmh_vesta_preset_skill.md`: Multiwfn IGM/IGMH/aIGM cube
   preset notes.
 - `docs/skills/multiwfn_igmh_run_skill.md`: Multiwfn IGM/mIGM/IGMH command-stream
+  runner notes.
+- `docs/skills/multiwfn_aigm_run_skill.md`: Multiwfn aIGM/amIGM trajectory-average
   runner notes.
 - `docs/skills/multiwfn_fukui_run_skill.md`: shared-grid
   Fukui/dual-descriptor runner notes.

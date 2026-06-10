@@ -32,6 +32,8 @@ multiwfn2vesta iri-run --help
 multiwfn2vesta igmh-run --help
 multiwfn2vesta igm-run --help
 multiwfn2vesta migm-run --help
+multiwfn2vesta aigm-run --help
+multiwfn2vesta amigm-run --help
 multiwfn2vesta grid-run --help
 multiwfn2vesta fukui-run --help
 multiwfn2vesta stm-run --help
@@ -66,6 +68,10 @@ multiwfn2vesta aim-igmh --help
 - `igmh-run` / `igm-run` / `migm-run`: 从 Multiwfn 可读波函数文件和片段定义调用 IGMH、IGM 或 mIGM 菜单，
   导出 `dg_inter.cub`/`sl2r.cub`，保留可选 `dg_intra.cub`/`dg.cub`，
   再通过 `cube-preset igmh` 或 `cube-preset igm` 写 mapped-surface `.vesta`
+- `aigm-run` / `amigm-run`: 从 Multiwfn 可读轨迹文件和片段定义调用 aIGM
+  或 amIGM 轨迹平均菜单，导出 `avgdg_inter.cub`/`avgsl2r.cub`，可选
+  `avgRDG.cub`、`thermflu.cub`、`output.txt`，再通过 `cube-preset aigm`
+  或 `cube-preset aigm-tfi` 写 mapped-surface `.vesta`
 - `grid-run`: 从 Multiwfn 可读波函数文件调用主菜单 `5` 的 real-space
   function grid，导出 density、MO/orbital、Laplacian、K(r)/G(r)、ELF、LOL、
   ESP/MEP、ALIE、RDG/IRI-like、promolecular RDG/sign(lambda2)rho 等单 cube，
@@ -126,7 +132,7 @@ VESTA 查找顺序：
 3. 工作区内 VESTA：`tools/VESTA-win64/VESTA.exe` 和 Linux VESTA
 4. shell 的 `PATH`
 
-`aim-run`、`iri-run`、`igmh-run`、`grid-run`、`fukui-run`、`stm-run` 和 `domain-run` 本身只启动 Multiwfn，不启动 VESTA；
+`aim-run`、`iri-run`、`igmh-run`、`aigm-run`、`amigm-run`、`grid-run`、`fukui-run`、`stm-run` 和 `domain-run` 本身只启动 Multiwfn，不启动 VESTA；
 VESTA 只在 `aim-igmh --render-three-views` 这种显式渲染命令里被调用。
 
 ## Cube 文件到 VESTA
@@ -815,6 +821,57 @@ multiwfn2vesta igmh-run input.fch igmh_products \
 `dg_inter.cub`/`sl2r.cub` 时，CLI 会保留 stdout/stderr 日志并返回非零码。
 顶层 `multiwfn2vesta igmh` 仍是 AIM+IGMH overlay 的历史别名；脚本化跑
 Multiwfn IGM/IGMH 请用 `igmh-run`、`igm-run` 或 `migm-run`。
+
+## 轨迹到 aIGM/amIGM VESTA
+
+aIGM/amIGM 是 Multiwfn 弱相互作用菜单里的轨迹平均分析，适合 MD/AIMD
+这类多帧结构，而不是单帧 ABACUS Molden 波函数分析。默认命令流进入主菜单
+`20`，选择 `12` 或 `-12`，输入片段、帧范围和网格，然后用 post-processing
+选项 `3` 导出 `avgdg_inter.cub` 和 `avgsl2r.cub`。
+
+```bash
+multiwfn2vesta aigm-run trajectory.xyz aigm_products \
+  --fragment 1-48 \
+  --fragment 49-60 \
+  --frame-range 1 200 \
+  --periodic \
+  --grid-mode spacing \
+  --grid-spacing 0.25 \
+  --timeout 1200
+
+multiwfn2vesta amigm-run trajectory.xyz amigm_products \
+  --fragment 1-48 \
+  --fragment c \
+  --export-tfi \
+  --tfi-vesta
+```
+
+默认流程：
+
+- 自动发现 Multiwfn；也可用 `--multiwfn /path/to/Multiwfn_noGUI` 显式指定
+- 写 `multiwfn_<method>_input.txt`，记录实际喂给 Multiwfn 的命令流
+- 在 `multiwfn_<method>_raw/` 保存原始 `avgdg_inter.cub` 和 `avgsl2r.cub`
+- 复制为 `<stem>_avgdg_inter.cub` 和 `<stem>_avgsl2r.cub`
+- 默认调用 `cube-preset aigm` 写 `<stem>_<method>_cube.vesta`
+- `--export-rdg` 额外导出 `<stem>_avgRDG.cub`
+- `--export-tfi` 额外导出 `<stem>_thermflu.cub`
+- `--tfi-vesta` 在已有 `--export-tfi` 时额外调用 `cube-preset aigm-tfi`
+- `--export-scatter` 额外导出 `<stem>_multiwfn_<method>_output.txt`
+
+`aigm-run` 是通用入口，可用 `--method aigm|amigm` 显式选择方法；
+`amigm-run` 固定为 amIGM 并拒绝额外 `--method`，避免命令名和实际菜单流不一致。
+片段参数直接使用 Multiwfn 片段提示可接受的字符串，例如 `1-48`、`1,4,9`、
+`49-60` 或补集 `c`。帧序号从 1 开始；不传 `--frame-range` 时，程序向
+Multiwfn 发送空行，让 Multiwfn 读取全部帧。
+
+周期性轨迹应使用 `--periodic --grid-mode spacing --grid-spacing VALUE`
+或 `--grid-mode pbc-cell`。程序会轻量识别 `Lattice=`、`pbc=`、`CRYST1`
+这类常见周期标记，并在周期轨迹下拒绝 `--grid-mode points`，因为 Multiwfn
+PBC 网格菜单的选项 `4` 读取的是 spacing，而不是 `NX,NY,NZ`。
+
+这个 runner 只负责调用 Multiwfn 并生成 VESTA 文件，不启动 VESTA 图形界面。
+Multiwfn 非零退出、超时、或返回 0 但缺 `avgdg_inter.cub`/`avgsl2r.cub` 时，
+CLI 会保留 stdout/stderr 日志并返回非零码。
 
 ## ABACUS Mulliken 原子着色
 

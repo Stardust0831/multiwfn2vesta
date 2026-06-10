@@ -1,5 +1,69 @@
 # Worklog
 
+## 2026-06-10: aIGM/amIGM trajectory-average runner
+
+- Continued the long-running Multiwfn/ABACUS/VESTA analysis-expansion goal by
+  turning the pending aIGM/amIGM feasibility note into a maintained runner.
+- Re-read local Multiwfn `visweak.f90`.  Source evidence shows aIGM/amIGM are
+  trajectory-average weak-interaction menu entries (`12` and `-12`), not
+  ordinary single-wavefunction IGMH variants.  Post-processing option `3`
+  exports `avgdg_inter.cub` and `avgsl2r.cub`; option `4` exports
+  `avgRDG.cub`; option `5` exports `thermflu.cub`; option `2` exports
+  scatter `output.txt`.
+- Added `multiwfn2vesta aigm-run` and `multiwfn2vesta amigm-run`, backed by
+  `src/multiwfn2vesta/multiwfn_aigm.py`.  The default stream enters Multiwfn
+  main function `20`, selects aIGM/amIGM, sends two or more fragments, sends
+  either an explicit frame range or an empty response for all frames, selects
+  the grid, exports averaged cubes, and then calls `cube-preset aigm` unless
+  `--no-vesta` is used.
+- Optional flags preserve additional Multiwfn products:
+  `--export-rdg` for `avgRDG.cub`, `--export-tfi` for `thermflu.cub`,
+  `--export-scatter` for `output.txt`, and `--tfi-vesta` for an extra
+  `cube-preset aigm-tfi` VESTA file.
+- Source cross-check note: post-processing menu option `5` calls
+  `calcexport_TFI` and writes `thermflu.cub`; the hidden option `6` branch in
+  the same subroutine writes `TFI-aIGM.cub`/`TFI-amIGM.cub`, but the maintained
+  runner deliberately does not use that hidden menu branch.
+- Read-only review found a real periodic-grid risk: Multiwfn's PBC setgrid
+  option `4` reads a spacing value rather than `NX,NY,NZ`.  Added
+  `--periodic`/`--nonperiodic`, lightweight `Lattice=`/`pbc=`/`CRYST1`
+  trajectory detection, and a guard that rejects `--grid-mode points` for
+  periodic aIGM/amIGM input.  Periodic trajectories should use
+  `--grid-mode spacing --grid-spacing VALUE` or `--grid-mode pbc-cell`.
+- Integrated the runner into the unified CLI, interactive chooser item `18`,
+  aliases `multiwfn-aigm`, `multiwfn-aigm-run`, `averaged-igm-run`,
+  `multiwfn-amigm`, `multiwfn-amigm-run`, and `averaged-migm-run`, plus
+  package console scripts.
+- Added focused tests in `tests/test_multiwfn_aigm.py` plus CLI coverage for
+  help text, direct dispatch, alias dispatch, and interactive argument
+  building.  The documented boundary is explicit: ABACUS Molden workflows
+  still use `igmh-run`/`igm-run`/`migm-run`; aIGM/amIGM is for trajectories.
+- Validation passed: `py_compile`, 83 focused aIGM/CLI/preset tests,
+  `bin/multiwfn2vesta --help`, `aigm-run --help`, `amigm-run --help`,
+  `cube-preset --list-presets`, `git diff --check`, and the full 258-test
+  no-GUI regression.  Read-only review findings were addressed before
+  commit; local `domain.cub` and `domain.pdb` remain unstaged probe files.
+
+## 2026-06-10: README branch status refresh at aIGM/amIGM closeout
+
+- User asked to update README again, noted that the branch state still looked
+  unusual, suggested merging back to one branch if useful, and requested Git
+  identity `Stardust0831`.
+- Rechecked repository state without destructive operations: local `main`,
+  `origin/main`, and `origin/HEAD` are aligned at
+  `0fd0517e35c4ae308b276417ee253a81138e7840`
+  (`Refresh README branch closeout status`) before the aIGM/amIGM runner
+  closeout.
+- Rechecked remote heads: `git ls-remote --heads origin` exposes only
+  `refs/heads/main`, so no branch merge-back is needed in this pass.
+- Confirmed repository-local identity remains
+  `Stardust0831 <13862180016@163.com>`.
+- Refreshed README Repository Status so the branch audit records the current
+  closeout tip and the fact that the aIGM/amIGM runner increment is kept on
+  the same maintained `main` branch.
+- Synced `project/docs/` to the root `docs/` mirror after final documentation
+  edits and verified the mirror with `rsync -ani --checksum docs/ ../docs/`.
+
 ## 2026-06-10: README branch status refresh at Fukui closeout tip
 
 - User asked to update README again, noted that the branch state still looked

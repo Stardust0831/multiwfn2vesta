@@ -1,28 +1,45 @@
 # Project Kanban
 
-Updated: 2026-06-10 18:17 CST
+Updated: 2026-06-10 18:54 CST
 
-## Current Continuation: 2026-06-10 README Refresh and Branch Consolidation
+## Active Goal Continuation: 2026-06-10 Multiwfn Analysis Expansion
+
+- [x] Record continuation request: keep researching and implementing useful
+  Multiwfn wavefunction analyses that can become VESTA products, especially
+  ABACUS-compatible wavefunction/cube workflows.
+- [x] Resume the pending aIGM/amIGM feasibility task from local Multiwfn
+  source evidence and current IGM/IGMH runner implementation.
+- [x] Implement a maintained runner or document the source-level blocker,
+  then update tests, README/usage/skills/worklog, and root docs mirror.
+- [x] Validate, run review, commit, and push a stable `main` increment if the
+  result is maintainable.
+
+## Current Request: 2026-06-10 README Refresh, One-Branch Closeout, And aIGM/amIGM Runner
 
 - [x] Record user request: update README, inspect unusual branch state, converge work back to one branch, and use `Stardust0831` git identity.
-- [x] Inspect current branch/remotes and local git identity without destructive operations: local `main`, `origin/main`, and `origin/HEAD` are aligned at `f8e1a48`; the remote exposes only `refs/heads/main`; repository-local identity is `Stardust0831 <13862180016@163.com>`.
-- [x] Update README to reflect the current CLI/workflows and project status.
-- [x] Sync documentation mirror if needed and keep kanban/worklog current.
-- [x] Validate docs/tests as appropriate, review diff, commit, and push to single `main`: `bin/multiwfn2vesta --help`, `git diff --check`, branch/remote checks, and read-only subagent review passed; commit/push are performed on `main` with `Stardust0831`.
+- [x] Inspect current branch/remotes and local git identity without destructive operations: local `main`, `origin/main`, and `origin/HEAD` are aligned at `0fd0517`; the remote exposes only `refs/heads/main`; repository-local identity is `Stardust0831 <13862180016@163.com>`.
+- [x] Update README to reflect the current CLI/workflows, aIGM/amIGM runner scope, and single-branch status.
+- [x] Sync documentation mirror after final doc edits and keep kanban/worklog current.
+- [x] Validate docs/tests, review diff, commit, and push to single `main` with `Stardust0831`; final commit hash and post-push branch check are reported in the assistant response.
 
 ## Current Continuation: 2026-06-10 aIGM/amIGM Runner Feasibility
 
 - [x] Record the continued long-running objective: keep expanding useful
   Multiwfn wavefunction analyses that can become VESTA products, especially
   ABACUS-compatible Molden workflows.
-- [ ] Re-read the existing IGM/mIGM/IGMH runner and local Multiwfn weak
+- [x] Re-read the existing IGM/mIGM/IGMH runner and local Multiwfn weak
   interaction source before deciding whether aIGM/amIGM prompt streams are
   stable enough for a maintained CLI.
-- [ ] If stable, implement the smallest aIGM/amIGM runner increment by
-  reusing the existing IGMH runner and `cube-preset aigm`; if not stable,
-  document the blocker with source evidence.
-- [ ] Add focused tests/docs/skill updates and sync project/root docs.
-- [ ] Validate, review if needed, then commit and push on `main` if stable.
+- [x] Implement the smallest aIGM/amIGM runner increment as a trajectory
+  workflow that reuses `cube-preset aigm`; source evidence shows Multiwfn
+  exports `avgdg_inter.cub`, `avgsl2r.cub`, optional `avgRDG.cub`, and
+  optional `thermflu.cub`.
+- [x] Address read-only review PBC grid risk: the runner now accepts
+  `--periodic`/`--nonperiodic`, detects common trajectory cell markers, and
+  rejects `--grid-mode points` for periodic input because Multiwfn reads PBC
+  option `4` as spacing rather than `NX,NY,NZ`.
+- [x] Add focused tests/docs/skill updates and sync project/root docs.
+- [x] Validate, review if needed, then commit and push on `main` if stable; final commit hash and post-push branch check are reported in the assistant response.
 
 ## Current Request: 2026-06-10 README Refresh, One-Branch Closeout, And Fukui Runner
 

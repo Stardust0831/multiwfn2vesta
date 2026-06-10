@@ -128,6 +128,7 @@ occupations, and density derivatives from the wavefunction representation.
 | ELF/LOL | Full wavefunction; ABACUS direct `out_elf` for ELF | Strong for ELF direct; Molden route for Multiwfn ELF/LOL | `ELF.cub`, `LOL.cub`, ABACUS `elf*.cube` | Isosurfaces around localized regions | `grid-run` now covers Multiwfn ELF/LOL; `cube-preset elf/lol` remains the VESTA writer |
 | AIM/QTAIM topology | Full wavefunction Molden/FCH/WFN/WFX | Feasible for Gamma LCAO Molden with `[Nval]`; validated on Ag(111)+benzene | `CPs.pdb`, `paths.pdb`, `CPprop.txt`, `mol.pdb` | Atoms-only pseudo-sites, no AIM bonds, optional labels | Already partly implemented; add ABACUS-aware recipes |
 | IGM/IGMH + AIM overlay | Full wavefunction and fragment definitions | Feasible for Gamma LCAO Molden; validated on Ag(111)+benzene | `dg_inter.cub`, `sl2r.cub`, AIM PDBs | Multi-phase VESTA density/texture plus AIM pseudo-sites | `igmh-run`/`igm-run`/`migm-run` now automate standard Multiwfn fragment streams and call `cube-preset igmh`/`igm`; saved AIM+IGMH overlay styling is implemented |
+| aIGM/amIGM trajectory average | Multiwfn-readable trajectory plus fragment definitions | Indirect: ABACUS can provide AIMD trajectories, not a single Molden route | `avgdg_inter.cub`, `avgsl2r.cub`, optional `avgRDG.cub`, `thermflu.cub` | Averaged delta-g surface colored by averaged sign(lambda2)rho or TFI | `aigm-run`/`amigm-run` now automate the trajectory-average stream and call `cube-preset aigm`/`aigm-tfi` |
 
 ### P1: High Value, Needs More Glue
 
@@ -228,9 +229,10 @@ Known limitations:
    `multiwfn2vesta cube-arith`; `fukui-run` now composes shared-grid density
    generation with that arithmetic layer; and `--surface-cube` bridges
    ESP/ALIE/vdW/sign(lambda2)rho grid outputs into mapped-surface VESTA files.
-6. Extend weak-interaction command streams beyond standard IGM/mIGM/IGMH if
-   needed: aIGM/amIGM and more real ABACUS slab smokes should be added only
-   after their prompt streams are stable.
+6. Extend weak-interaction command streams beyond standard IGM/mIGM/IGMH where
+   needed.  aIGM/amIGM now have a maintained trajectory-average runner; the
+   remaining work is real trajectory smoke coverage and more ABACUS slab
+   templates.
 7. Extend the maintained STM/LDOS runner with more ABACUS slab smokes and
    bias/Fermi presets.  The first implementation now automates Multiwfn main
    function `300`, subfunction `4`, exports `STM.cub`, and writes VESTA through
@@ -262,6 +264,8 @@ Implemented or partly implemented:
 - `multiwfn2vesta igmh-run`
 - `multiwfn2vesta igm-run`
 - `multiwfn2vesta migm-run`
+- `multiwfn2vesta aigm-run`
+- `multiwfn2vesta amigm-run`
 - `multiwfn2vesta grid-run`
 - `multiwfn2vesta fukui-run`
 - `multiwfn2vesta stm-run`
@@ -293,18 +297,18 @@ Main gaps:
   tables; remaining work is direct parsers for specialized raw Multiwfn menu
   transcripts.
 - Maintained Multiwfn command streams now exist for AIM, IRI/RDG,
-  IGM/mIGM/IGMH, plus main-function-5 grid cubes as `multiwfn2vesta grid-run`,
+  IGM/mIGM/IGMH, aIGM/amIGM trajectory averages, plus main-function-5 grid cubes as `multiwfn2vesta grid-run`,
   including repeated isolated batch orbital/orbital-density export through
   `--orbitals`.  `fukui-run` composes those density-grid runs with
-  `cube-arith` for shared-grid Fukui/dual maps.  Remaining gaps are
-  aIGM/amIGM command streams, molecular-surface extrema overlays, and more
-  real-system templates.
+  `cube-arith` for shared-grid Fukui/dual maps.  Remaining gaps are broader
+  real-system templates and less UI-dependent render hooks.
 - Dual-cube surface texture workflows now have a preset entry point for
   IRI/RDG/NCI, IGM/IGMH/aIGM, ESP/MEP, ALIE/LEA/LEAE, generic surface maps,
   and vdW maps.  Standard IGM, mIGM, and IGMH now have end-to-end fragment
   runners; `grid-run --surface-cube` covers the common case where one newly
-  generated grid cube colors an existing surface; aIGM/amIGM still need their
-  own maintained prompt streams.
+  generated grid cube colors an existing surface; aIGM/amIGM now have their
+  own maintained trajectory-average prompt streams and still need real MD/AIMD
+  smoke coverage.
 - Fukui/dual-descriptor visualization now has both the cube-arithmetic bottom
   layer and the `fukui-run` shared-grid charged-state orchestration layer; it
   still needs real chemistry smoke cases and guidance for charged periodic

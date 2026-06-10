@@ -15,6 +15,7 @@ from . import (
     cube_preset,
     cube_vesta,
     molden_check,
+    multiwfn_aigm,
     multiwfn_atom_table,
     multiwfn_aim,
     multiwfn_grid,
@@ -40,6 +41,8 @@ COMMANDS: Dict[str, Tuple[str, str]] = {
     "igmh-run": ("Run Multiwfn IGMH cube generation, then prepare VESTA", "multiwfn_igmh"),
     "igm-run": ("Run Multiwfn IGM cube generation, then prepare VESTA", "multiwfn_igmh"),
     "migm-run": ("Run Multiwfn mIGM cube generation, then prepare VESTA", "multiwfn_igmh"),
+    "aigm-run": ("Run Multiwfn aIGM trajectory-average cubes, then prepare VESTA", "multiwfn_aigm"),
+    "amigm-run": ("Run Multiwfn amIGM trajectory-average cubes, then prepare VESTA", "multiwfn_aigm"),
     "grid-run": ("Run Multiwfn real-space function cube generation, then prepare VESTA", "multiwfn_grid"),
     "fukui-run": ("Run charged-state Multiwfn density cubes, then build Fukui/dual maps", "multiwfn_fukui"),
     "stm-run": ("Run Multiwfn constant-current STM/LDOS cube generation, then prepare VESTA", "multiwfn_stm"),
@@ -75,6 +78,12 @@ ALIASES = {
     "multiwfn-igm-run": "igm-run",
     "multiwfn-migm": "migm-run",
     "multiwfn-migm-run": "migm-run",
+    "multiwfn-aigm": "aigm-run",
+    "multiwfn-aigm-run": "aigm-run",
+    "averaged-igm-run": "aigm-run",
+    "multiwfn-amigm": "amigm-run",
+    "multiwfn-amigm-run": "amigm-run",
+    "averaged-migm-run": "amigm-run",
     "multiwfn-grid": "grid-run",
     "scalar-cube-run": "grid-run",
     "function-cube": "grid-run",
@@ -126,6 +135,8 @@ Commands:
   igmh-run   Run Multiwfn IGMH cube generation and prepare a VESTA mapped surface.
   igm-run    Run Multiwfn IGM cube generation and prepare a VESTA mapped surface.
   migm-run   Run Multiwfn mIGM cube generation and prepare a VESTA mapped surface.
+  aigm-run   Run Multiwfn aIGM trajectory-average cubes and prepare VESTA.
+  amigm-run  Run Multiwfn amIGM trajectory-average cubes and prepare VESTA.
   grid-run   Run Multiwfn real-space function cube generation and prepare VESTA.
   fukui-run  Run charged-state density cubes and prepare Fukui/dual descriptor VESTA.
   stm-run    Run Multiwfn constant-current STM/LDOS cube generation and prepare VESTA.
@@ -158,6 +169,10 @@ Aliases:
              Aliases for igm-run.
   multiwfn-migm, multiwfn-migm-run
              Aliases for migm-run.
+  multiwfn-aigm, multiwfn-aigm-run, averaged-igm-run
+             Aliases for aigm-run.
+  multiwfn-amigm, multiwfn-amigm-run, averaged-migm-run
+             Aliases for amigm-run.
   multiwfn-grid, scalar-cube-run, function-cube
              Aliases for grid-run.
   multiwfn-fukui, multiwfn-fukui-run, dual-descriptor-run
@@ -183,6 +198,7 @@ Examples:
   multiwfn2vesta iri-run input.molden iri_products --timeout 300
   multiwfn2vesta igmh-run input.molden igmh_products --fragment 1-48 --fragment 49-60
   multiwfn2vesta igm-run input.molden igm_products --fragment 1-48 --fragment 49-60
+  multiwfn2vesta aigm-run trajectory.xyz aigm_products --fragment 1-48 --fragment 49-60 --frame-range 1 200
   multiwfn2vesta grid-run input.molden grid_products --function density
   multiwfn2vesta fukui-run fukui_products --neutral neutral.molden --anion anion.molden --cation cation.molden
   multiwfn2vesta stm-run input.molden stm_products --grid-points 80 80 40
@@ -608,6 +624,98 @@ def interactive_igmh_run() -> int:
     return multiwfn_igmh.main(argv)
 
 
+def interactive_aigm_run() -> int:
+    print("\nTrajectory -> Multiwfn aIGM/amIGM cubes -> VESTA")
+    trajectory = _prompt("trajectory file, typically XYZ trajectory", required=True)
+    output_dir = _prompt("output directory", default=_default_output_dir(trajectory, "multiwfn_aigm"))
+    argv: List[str] = [trajectory, output_dir]
+
+    method = _prompt("method (aigm/amigm)", default="aigm").lower()
+    if method not in {"aigm", "amigm"}:
+        print("Method must be aigm or amigm.")
+        return 2
+    argv.extend(["--method", method])
+
+    while True:
+        fragment = _prompt("fragment atom indices, e.g. 1-48 or c (empty when done)", required=False)
+        if not fragment:
+            break
+        argv.extend(["--fragment", fragment])
+
+    frame_range = _prompt("frame range START END (empty for all frames)")
+    if frame_range:
+        parts = frame_range.split()
+        if len(parts) != 2:
+            print("Frame range needs exactly two integers.")
+            return 2
+        argv.extend(["--frame-range", parts[0], parts[1]])
+
+    multiwfn = _prompt("Multiwfn executable or directory (empty for auto-discovery)")
+    if multiwfn:
+        argv.extend(["--multiwfn", multiwfn])
+
+    nthreads = _prompt("Multiwfn -nt threads (empty for default)")
+    if nthreads:
+        argv.extend(["--nthreads", nthreads])
+
+    timeout = _prompt("timeout seconds (empty for no timeout)")
+    if timeout:
+        argv.extend(["--timeout", timeout])
+
+    stem = _prompt("output stem (empty for trajectory stem)")
+    if stem:
+        argv.extend(["--stem", stem])
+
+    if _yes_no("treat trajectory as periodic/PBC", default=False):
+        argv.append("--periodic")
+    elif _yes_no("force non-periodic even if cell markers are present", default=False):
+        argv.append("--nonperiodic")
+
+    grid_mode = _prompt("grid mode (low/medium/high/points/spacing/cube/pbc-cell)", default="points")
+    argv.extend(["--grid-mode", grid_mode])
+    if grid_mode == "points":
+        grid_points = _prompt("grid points NX NY NZ", default="40 40 40")
+        parts = grid_points.split()
+        if len(parts) != 3:
+            print("Grid points need exactly three integers.")
+            return 2
+        argv.extend(["--grid-points", parts[0], parts[1], parts[2]])
+    elif grid_mode == "spacing":
+        spacing = _prompt("grid spacing in Bohr", required=True)
+        argv.extend(["--grid-spacing", spacing])
+    elif grid_mode == "cube":
+        reference_cube = _prompt("reference cube for grid", required=True)
+        argv.extend(["--grid-cube", reference_cube])
+
+    if _yes_no("also export averaged RDG cube", default=False):
+        argv.append("--export-rdg")
+    if _yes_no("also export TFI cube", default=False):
+        argv.append("--export-tfi")
+        if _yes_no("also write TFI-colored VESTA file", default=False):
+            argv.append("--tfi-vesta")
+    if _yes_no("also export scatter output.txt", default=False):
+        argv.append("--export-scatter")
+
+    if _yes_no("skip VESTA generation", default=False):
+        argv.append("--no-vesta")
+    else:
+        preset = _prompt("VESTA cube preset", default="aigm")
+        argv.extend(["--preset", preset])
+        isosurface = _prompt("override isosurface value (empty for preset default)")
+        if isosurface:
+            argv.extend(["--isosurface", isosurface])
+        tex_range = _prompt("override physical texture range, e.g. -0.05 0.05 (empty for preset default)")
+        if tex_range:
+            parts = tex_range.split()
+            if len(parts) == 2:
+                argv.extend(["--tex-physical", parts[0], parts[1]])
+            else:
+                print("Texture range needs exactly two numbers.")
+                return 2
+
+    return multiwfn_aigm.main(argv)
+
+
 def interactive_grid_run() -> int:
     print("\nWavefunction -> Multiwfn real-space function cube -> VESTA")
     wavefunction = _prompt("wavefunction file (.molden/.fch/.wfn/etc.)", required=True)
@@ -968,6 +1076,7 @@ def interactive_main() -> int:
     print("15) Wavefunction -> Multiwfn STM/LDOS cube -> VESTA")
     print("16) Cube -> Multiwfn domain analysis -> VESTA")
     print("17) Charged-state wavefunctions -> Fukui/dual descriptor VESTA")
+    print("18) Trajectory -> Multiwfn aIGM/amIGM cubes -> VESTA")
     print("q) Quit")
     choice = _prompt("choice", default="3").lower()
     if choice in {"0", "discover", "where", "env"}:
@@ -995,6 +1104,8 @@ def interactive_main() -> int:
         return interactive_iri_run()
     if choice in {"14", "igmh-run", "multiwfn-igmh", "multiwfn-igmh-run", "igm-run", "migm-run"}:
         return interactive_igmh_run()
+    if choice in {"18", "aigm-run", "multiwfn-aigm", "multiwfn-aigm-run", "amigm-run", "multiwfn-amigm", "multiwfn-amigm-run"}:
+        return interactive_aigm_run()
     if choice in {"15", "stm-run", "multiwfn-stm", "multiwfn-stm-run", "ldos-run"}:
         return interactive_stm_run()
     if choice in {"16", "domain-run", "multiwfn-domain", "multiwfn-domain-run", "cube-domain"}:
@@ -1041,6 +1152,10 @@ def run_command(command: str, args: Sequence[str]) -> int:
         return multiwfn_igmh.main_igm(args)
     if command == "migm-run":
         return multiwfn_igmh.main_migm(args)
+    if command == "aigm-run":
+        return multiwfn_aigm.main(args)
+    if command == "amigm-run":
+        return multiwfn_aigm.main_amigm(args)
     if command == "grid-run":
         return multiwfn_grid.main(args)
     if command == "fukui-run":

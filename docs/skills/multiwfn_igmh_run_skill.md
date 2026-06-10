@@ -201,8 +201,9 @@ record method-specific titles, not the shared canonical preset name.
 
 ## Boundaries
 
-- This runner automates standard IGM, mIGM, and IGMH.  aIGM/amIGM command
-  streams remain separate future increments.
+- This runner automates standard single-wavefunction IGM, mIGM, and IGMH.
+  For trajectory-average aIGM/amIGM, use `multiwfn2vesta aigm-run` or
+  `multiwfn2vesta amigm-run`.
 - AIM path/BCP overlays are handled after the cube layer by
   `multiwfn2vesta aim-igmh`.
 - If VESTA rendering is needed, keep it as an explicit later step because the
