@@ -43,6 +43,13 @@ Analysis preset wrapper:
 ```bash
 multiwfn2vesta cube-preset --list-presets
 multiwfn2vesta cube-preset orbital orbital.cub cube_products
+multiwfn2vesta cube-preset orbital-density orbdens.cub cube_products
+multiwfn2vesta cube-preset spin-density spindensity.cub cube_products
+multiwfn2vesta cube-preset laplacian laplacian.cub cube_products
+multiwfn2vesta cube-preset hamiltonian-ked 'K(r).cub' cube_products
+multiwfn2vesta cube-preset lagrangian-ked 'G(r).cub' cube_products
+multiwfn2vesta cube-preset rdg-scalar RDG.cub cube_products
+multiwfn2vesta cube-preset promolecular-rdg RDGprodens.cub cube_products
 multiwfn2vesta cube-preset potential pot_es.cube cube_products
 multiwfn2vesta cube-preset partial-charge pchg.cube cube_products
 multiwfn2vesta cube-preset wavefunction-norm wfc_norm.cube cube_products
@@ -179,6 +186,24 @@ passes it back through `cube-preset`.
 - `signed` aliases: `orbital`, `mo`, `wavefunction`, `abacus-wfc`,
   `density-difference`, `dual-descriptor`; positive/negative surfaces,
   default magnitude `0.02`.
+- `orbital-density` aliases: `orbdens`, `mo-density`; single positive
+  surface for Multiwfn `orbdens.cub`, default isosurface `0.005`.
+- `spin-density` aliases: `spin`, `spindensity`, `magnetization-density`;
+  positive/negative surfaces for Multiwfn `spindensity.cub`, default
+  magnitude `0.02`.
+- `laplacian` aliases: `lap`, `laplacian-rho`; positive/negative surfaces
+  for Multiwfn `laplacian.cub`, default magnitude `0.05`; tune per system.
+- `hamiltonian-ked` aliases: `k-r`, `k(r)`, `kinetic-k`; positive/negative
+  surfaces for Multiwfn `K(r).cub`, default magnitude `0.01`.
+- `lagrangian-ked` aliases: `g-r`, `g(r)`, `kinetic-g`; single positive
+  surface for Multiwfn `G(r).cub`, default isosurface `0.01`.
+- `rdg-scalar` aliases: `rdg-cube`, `scalar-rdg`,
+  `reduced-density-gradient`; single positive surface for standalone Multiwfn
+  `RDG.cub`, default isosurface `0.5`.  Use `iri` with `--texture-cube` for
+  RDG/NCI surfaces colored by sign(lambda2)rho.
+- `promolecular-rdg` aliases: `rdg-pro`, `prodens-rdg`,
+  `promolecular-rdg-scalar`; single positive surface for Multiwfn
+  `RDGprodens.cub`, default isosurface `0.4`.
 - `potential` aliases: `abacus-potential`, `out-pot`, `local-potential`,
   `pot-es`; signed direct potential cube isosurfaces, default magnitude
   `0.05`.  Use `esp` instead for density-surface potential coloring.

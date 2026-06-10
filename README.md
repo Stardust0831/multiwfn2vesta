@@ -18,24 +18,26 @@ point.
   GitHub remote.
 - GitHub remote: `origin` points to `Github:Stardust0831/multiwfn2vesta.git`,
   with `origin/HEAD -> origin/main`.
-- Branch audit on 2026-06-10 19:09 CST, before committing the ABACUS direct
-  cube preset continuation, found local `main`, `origin/main`, and
+- Branch audit on 2026-06-10 19:19 CST, before committing the grid-function
+  display preset continuation, found local `main`, `origin/main`, and
   `origin/HEAD` aligned at
-  `809e2611aa51cd9a37fd5966b6d4e2e4673f9e44`
-  (`Add Multiwfn aIGM runner`).  The final hash for this continuation is
+  `9b14495b9e2bc08a3ddf5ba94347f03e81cb65be`
+  (`Add ABACUS direct cube presets`).  The final hash for this continuation is
   reported by the assistant after push.
 - `git ls-remote --heads origin` currently returns only `refs/heads/main`; no
   merge-back was needed in this pass because there is no extra local or remote
   feature branch to consolidate.
-- This continuation keeps the ABACUS direct cube preset increment on the same
-  maintained `main` branch as the README/status updates.
+- This continuation keeps the grid-function display preset increment on the
+  same maintained `main` branch as the README/status updates.
 - The apparently unusual branch history is a normal linear `main` history
   containing feature commits and documentation closure commits, not active
   competing branches.
-- Recent maintained feature work includes ABACUS direct cube presets for
-  potential, partial-charge, and wavefunction-norm cubes, charged-state
-  `fukui-run` orchestration, aIGM/amIGM trajectory-average weak-interaction
-  generation, cube/grid domain extraction, basin cube VESTA presets,
+- Recent maintained feature work includes dedicated VESTA presets for
+  Multiwfn spin-density, orbital-density, Laplacian, K(r), G(r), standalone
+  RDG, and promolecular RDG cubes, ABACUS direct cube presets for potential,
+  partial-charge, and wavefunction-norm cubes, charged-state `fukui-run`
+  orchestration, aIGM/amIGM trajectory-average weak-interaction generation,
+  cube/grid domain extraction, basin cube VESTA presets,
   IGM/mIGM/IGMH command-stream automation, IGMH/aIGM VESTA cube presets,
   surface extrema overlays for
   `surfanalysis.pdb`, surface-map/grid expansion, generic Multiwfn atom table
@@ -88,10 +90,11 @@ then delete the temporary branch.
   files, with optional texture/color cube support, surface-band texture
   scaling, and signed positive/negative isosurface presets.
 - Apply analysis-oriented cube presets for common ABACUS/Multiwfn products
-  such as density, orbitals/wavefunctions, ABACUS direct potential, partial
-  charge, wavefunction norm cubes, ELF/LOL, IRI/RDG/NCI, ESP/MEP,
-  IGM/IGMH/aIGM weak-interaction maps, ALIE/LEA/LEAE, and vdW-potential
-  mapped surfaces.
+  such as density, orbitals/wavefunctions, orbital density, spin density,
+  Laplacian, K(r)/G(r) kinetic-density cubes, standalone RDG/promolecular
+  RDG, ABACUS direct potential, partial charge, wavefunction norm cubes,
+  ELF/LOL, IRI/RDG/NCI, ESP/MEP, IGM/IGMH/aIGM weak-interaction maps,
+  ALIE/LEA/LEAE, and vdW-potential mapped surfaces.
 - Overlay Multiwfn molecular-surface extrema from `surfanalysis.pdb` onto
   mapped-surface VESTA files as an extra atoms-only phase, with automatic
   minima/maxima selection for ALIE/LEA/LEAE presets.
@@ -275,6 +278,13 @@ top of the same `cube-vesta` backend:
 
 ```bash
 multiwfn2vesta cube-preset orbital orbital.cub cube_products
+multiwfn2vesta cube-preset orbital-density orbdens.cub cube_products
+multiwfn2vesta cube-preset spin-density spindensity.cub cube_products
+multiwfn2vesta cube-preset laplacian laplacian.cub cube_products
+multiwfn2vesta cube-preset hamiltonian-ked 'K(r).cub' cube_products
+multiwfn2vesta cube-preset lagrangian-ked 'G(r).cub' cube_products
+multiwfn2vesta cube-preset rdg-scalar RDG.cub cube_products
+multiwfn2vesta cube-preset promolecular-rdg RDGprodens.cub cube_products
 multiwfn2vesta cube-preset potential pot_es.cube cube_products
 multiwfn2vesta cube-preset partial-charge pchg.cube cube_products
 multiwfn2vesta cube-preset wavefunction-norm wfc_norm.cube cube_products
@@ -299,13 +309,15 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
 
 Available presets can be listed with `multiwfn2vesta cube-preset
 --list-presets`.  Current presets cover density-like scalar cubes, signed
-orbital/wavefunction/density-difference cubes, direct ABACUS potential cubes,
-ABACUS partial-charge/state-density cubes, nonnegative ABACUS wavefunction
-norm cubes, ELF/LOL cubes, IRI/RDG/NCI mapped surfaces, STM/LDOS
-tunneling-current surfaces, binary domain isosurfaces, binary basin
-isosurfaces, signed basin-type maps, IGM/IGMH/aIGM weak-interaction mapped
-surfaces, ESP/MEP mapped density surfaces, generic molecular surface maps,
-ALIE/LEA/LEAE density-surface maps, and vdW-potential density-surface maps.
+orbital/wavefunction/density-difference cubes, Multiwfn orbital-density,
+spin-density, Laplacian, K(r), G(r), standalone RDG, and promolecular RDG
+cubes, direct ABACUS potential cubes, ABACUS partial-charge/state-density
+cubes, nonnegative ABACUS wavefunction norm cubes, ELF/LOL cubes,
+IRI/RDG/NCI mapped surfaces, STM/LDOS tunneling-current surfaces, binary
+domain isosurfaces, binary basin isosurfaces, signed basin-type maps,
+IGM/IGMH/aIGM weak-interaction mapped surfaces, ESP/MEP mapped density
+surfaces, generic molecular surface maps, ALIE/LEA/LEAE density-surface maps,
+and vdW-potential density-surface maps.
 The recipe
 records the requested preset, canonical preset, effective
 isosurface, texture scaling source, and explicit texture percentage overrides
@@ -464,13 +476,18 @@ Common functions:
 - `orbital` / `mo`: function `4`, raw `MOvalue.cub`, preset `signed`, requires
   `--orbital` for one orbital or `--orbitals` for batch export.
 - `orbital-density` / `orbdens`: function `44`, raw `orbdens.cub`, preset
-  `density`, requires `--orbital` for one orbital or `--orbitals` for batch
-  export.
-- `hamiltonian-ked` / `k(r)`: function `6`, raw `K(r).cub`, signed by
-  default.  `lagrangian-ked` / `g(r)`: function `7`, raw `G(r).cub`, density
-  style by default.
-- `laplacian`, `spin-density`, `esp`, `nuclear-esp`, `signlambda2rho`, and
-  `vdw-potential`: signed scalar fields, defaulting to the `signed` preset;
+  `orbital-density`, requires `--orbital` for one orbital or `--orbitals` for
+  batch export.
+- `laplacian` / `lap`: function `3`, raw `laplacian.cub`, preset
+  `laplacian`, signed by default.
+- `spin-density` / `spin`: function `5`, raw `spindensity.cub`, preset
+  `spin-density`, signed by default.
+- `hamiltonian-ked` / `k(r)`: function `6`, raw `K(r).cub`, preset
+  `hamiltonian-ked`, signed by default.
+- `lagrangian-ked` / `g(r)`: function `7`, raw `G(r).cub`, preset
+  `lagrangian-ked`, single positive surface by default.
+- `esp`, `nuclear-esp`, `signlambda2rho`, and `vdw-potential`: signed scalar
+  fields, defaulting to the `signed` preset;
   with `--surface-cube`, `esp`/`nuclear-esp` map through `cube-preset esp`,
   `signlambda2rho` maps through `cube-preset iri`, and `vdw-potential` maps
   through `cube-preset vdw-map`.
@@ -478,10 +495,13 @@ Common functions:
 - `alie` / `avglocion`: function `18`, raw `avglocion.cub`.  With
   `--surface-cube density.cub`, the generated ALIE cube is used as the
   texture for `cube-preset alie`.
-- `rdg`, `promolecular-rdg`, `signlambda2rho`,
-  `promolecular-signlambda2rho`, `iri`, and `delta-g`: single scalar cubes;
+- `rdg` / `promolecular-rdg`: functions `13` and `14`, raw `RDG.cub` and
+  `RDGprodens.cub`, presets `rdg-scalar` and `promolecular-rdg`.
   IRI/RDG mapped surfaces that need two coupled cubes should still use
   `iri-run` or explicit `cube-preset iri`.
+- `signlambda2rho`, `promolecular-signlambda2rho`, `iri`, and `delta-g`:
+  other single scalar cubes; sign(lambda2)rho can become the texture in a
+  mapped `cube-preset iri` workflow.
 
 Grid setup defaults to explicit point counts:
 

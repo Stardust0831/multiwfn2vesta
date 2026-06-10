@@ -1,5 +1,36 @@
 # Worklog
 
+## 2026-06-10: Grid-function display presets
+
+- Continued the Multiwfn/ABACUS/VESTA analysis-expansion sweep by tightening
+  display defaults for Multiwfn main-function-5 scalar cubes that ABACUS can
+  feed through the maintained LCAO Molden route.
+- Added dedicated `cube-preset` entries for `spin-density`, `laplacian`,
+  `hamiltonian-ked`, `lagrangian-ked`, `orbital-density`, `rdg-scalar`, and
+  `promolecular-rdg`.
+- Rechecked local Multiwfn `0123dim.f90`.  Source defaults used directly:
+  `spindensity.cub` `sur_value=0.02`, `orbdens.cub` `0.005`, `RDG.cub`
+  `0.5`, and `RDGprodens.cub` `0.4`.  Laplacian, K(r), and G(r) still need
+  system-specific isosurface tuning, with conservative maintained defaults.
+- Updated `grid-run` so function aliases now auto-select the specific display
+  presets for `laplacian`, `spin-density`, `hamiltonian-ked`,
+  `lagrangian-ked`, `orbital-density`, `rdg`, and `promolecular-rdg`.
+- Preserved the existing `cube-preset rdg` alias for the two-cube
+  `iri`/NCI mapped-surface workflow.  Standalone `RDG.cub` display uses the
+  new `rdg-scalar`/`rdg-cube` names to avoid breaking that route.
+- Added focused tests for preset listing, signed/single `ISURF` behavior,
+  manifest notes, Multiwfn-source default isosurfaces, and `grid-run`
+  function-to-preset resolution.
+- Focused validation passed: 30 `tests.test_cube_preset` tests and 25
+  `tests.test_multiwfn_grid` tests.
+- Final validation passed: `py_compile`, 55 focused tests across
+  `tests.test_cube_preset` and `tests.test_multiwfn_grid`, full 268-test
+  no-GUI regression, `bin/multiwfn2vesta --help`,
+  `bin/multiwfn2vesta cube-preset --list-presets`,
+  `bin/multiwfn2vesta grid-run --list-functions`, `git diff --check`, and a
+  targeted documentation scan for stale spin-density/orbital-density/RDG
+  preset defaults.
+
 ## 2026-06-10: ABACUS direct cube display presets
 
 - Continued the Multiwfn/ABACUS/VESTA analysis-expansion sweep by improving

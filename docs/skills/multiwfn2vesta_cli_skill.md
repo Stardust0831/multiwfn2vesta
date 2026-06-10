@@ -152,6 +152,13 @@ environment is not suitable.
 ```bash
 multiwfn2vesta cube-preset --list-presets
 multiwfn2vesta cube-preset orbital orbital.cub cube_products
+multiwfn2vesta cube-preset orbital-density orbdens.cub cube_products
+multiwfn2vesta cube-preset spin-density spindensity.cub cube_products
+multiwfn2vesta cube-preset laplacian laplacian.cub cube_products
+multiwfn2vesta cube-preset hamiltonian-ked 'K(r).cub' cube_products
+multiwfn2vesta cube-preset lagrangian-ked 'G(r).cub' cube_products
+multiwfn2vesta cube-preset rdg-scalar RDG.cub cube_products
+multiwfn2vesta cube-preset promolecular-rdg RDGprodens.cub cube_products
 multiwfn2vesta cube-preset potential pot_es.cube cube_products
 multiwfn2vesta cube-preset partial-charge pchg.cube cube_products
 multiwfn2vesta cube-preset wavefunction-norm wfc_norm.cube cube_products
@@ -171,10 +178,12 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
 
 Use this when the file is a common ABACUS/Multiwfn cube product and the
 default style is enough to start.  Presets cover density-like scalar cubes,
-signed orbital/wavefunction/density-difference cubes, direct ABACUS potential
-cubes, ABACUS partial-charge/state-density cubes, nonnegative ABACUS
-wavefunction-norm cubes, ELF/LOL, IRI/RDG/NCI mapped surfaces, binary domain
-isosurfaces, binary basin isosurfaces, signed basin-type maps,
+signed orbital/wavefunction/density-difference cubes, Multiwfn
+orbital-density, spin-density, Laplacian, K(r), G(r), standalone RDG, and
+promolecular RDG cubes, direct ABACUS potential cubes, ABACUS
+partial-charge/state-density cubes, nonnegative ABACUS wavefunction-norm
+cubes, ELF/LOL, IRI/RDG/NCI mapped surfaces, binary domain isosurfaces,
+binary basin isosurfaces, signed basin-type maps,
 IGM/IGMH/aIGM weak-interaction mapped surfaces, ESP/MEP mapped density
 surfaces, generic molecular surface maps, ALIE/LEA/LEAE density-surface maps,
 and vdW-potential density-surface maps.
@@ -388,9 +397,14 @@ multiwfn2vesta grid-run --list-functions
 ```
 
 Common functions include `density`, `orbital --orbital h`, `orbital-density`,
-`laplacian`, `hamiltonian-ked`, `lagrangian-ked`, `elf`, `lol`, `esp`,
-`alie`, `rdg`, `promolecular-rdg`, `iri`, `signlambda2rho`, and
-`promolecular-signlambda2rho`.
+`spin-density`, `laplacian`, `hamiltonian-ked`, `lagrangian-ked`, `elf`,
+`lol`, `esp`, `alie`, `rdg`, `promolecular-rdg`, `iri`,
+`signlambda2rho`, and `promolecular-signlambda2rho`.  The scalar display
+defaults are function-specific where possible: `spindensity.cub` uses
+`cube-preset spin-density`, `orbdens.cub` uses `orbital-density`,
+`laplacian.cub` uses `laplacian`, `K(r).cub` uses `hamiltonian-ked`,
+`G(r).cub` uses `lagrangian-ked`, `RDG.cub` uses `rdg-scalar`, and
+`RDGprodens.cub` uses `promolecular-rdg`.
 
 Batch frontier orbital export:
 

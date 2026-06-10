@@ -1,6 +1,34 @@
 # Project Kanban
 
-Updated: 2026-06-10 19:09 CST
+Updated: 2026-06-10 19:31 CST
+
+## Current Continuation: 2026-06-10 Grid Function Display Presets
+
+- [x] Record resumed objective: keep enriching Multiwfn wavefunction analyses
+  that ABACUS can feed through Molden or direct cubes, and express useful
+  products in VESTA.
+- [x] Inspect current branch state: local `main` is aligned with
+  `origin/main`; only untracked local probes `domain.cub` and `domain.pdb`
+  are present and must stay uncommitted.
+- [x] Re-read the analysis matrix, CLI surface, `grid-run`, and `cube-preset`
+  code to choose the next bounded high-value increment.
+- [x] Add maintained VESTA display presets for common signed/scalar
+  Multiwfn real-space grid functions that currently fall back to generic
+  presets: spin density, Laplacian, Hamiltonian kinetic energy density
+  `K(r)`, and Lagrangian kinetic energy density `G(r)`.
+- [x] Process read-only subagent review: adjust `spin-density` default to
+  Multiwfn `0123dim.f90` `sur_value=0.02`, and include adjacent standalone
+  single-cube presets for `orbdens.cub`, `RDG.cub`, and `RDGprodens.cub`
+  without changing the existing two-cube `rdg -> iri` texture route.
+- [x] Add focused tests for preset listing, signed/single surface behavior,
+  manifest notes, and `grid-run` function-to-preset resolution; focused
+  validation currently passes 30 `cube-preset` tests and 25 `grid-run` tests.
+- [x] Finish README/usage/skills/research/worklog sync and final validation:
+  `py_compile`, 55 focused tests, full 268-test no-GUI regression,
+  `bin/multiwfn2vesta --help`, `cube-preset --list-presets`,
+  `grid-run --list-functions`, `git diff --check`, and stale-doc scan.
+- [x] Mirror root docs and prepare the stable `main` closeout; final commit
+  hash and post-push branch check are reported in the assistant response.
 
 ## Current Continuation: 2026-06-10 Multiwfn Analysis Expansion Sweep
 

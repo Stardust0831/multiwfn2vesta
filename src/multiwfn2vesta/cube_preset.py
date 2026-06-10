@@ -50,6 +50,75 @@ PRESETS: Tuple[CubePreset, ...] = (
         notes="Use for molecular orbitals, real wavefunction cubes, density differences, or dual-descriptor cubes.",
     ),
     CubePreset(
+        name="spin-density",
+        aliases=("spin", "spindensity", "magnetization-density", "spin-polarization-density"),
+        description="Positive/negative isosurfaces for alpha-minus-beta spin density cubes.",
+        surface_mode="signed",
+        isosurface=0.02,
+        positive_rgb=(255, 80, 80),
+        negative_rgb=(70, 130, 255),
+        surface_opacity=(145, 255),
+        notes=(
+            "Use for Multiwfn spindensity.cub or compatible signed spin-density cubes; "
+            "positive and negative signs follow the source cube convention. "
+            "The default magnitude follows Multiwfn main-function-5 sur_value for spin density."
+        ),
+    ),
+    CubePreset(
+        name="orbital-density",
+        aliases=("orbdens", "mo-density", "orbital-density-cube"),
+        description="Single positive isosurface for orbital density cubes.",
+        surface_mode="single",
+        isosurface=0.005,
+        positive_rgb=(180, 140, 255),
+        surface_opacity=(145, 255),
+        notes=(
+            "Use for Multiwfn orbdens.cub from real-space function 44; "
+            "the default isosurface follows Multiwfn main-function-5 sur_value."
+        ),
+    ),
+    CubePreset(
+        name="laplacian",
+        aliases=("lap", "laplacian-rho", "laplacian-density"),
+        description="Positive/negative isosurfaces for the Laplacian of electron density.",
+        surface_mode="signed",
+        isosurface=0.05,
+        positive_rgb=(255, 165, 40),
+        negative_rgb=(60, 130, 255),
+        surface_opacity=(125, 255),
+        notes=(
+            "Use for Multiwfn laplacian.cub from real-space function 3; "
+            "the sign convention is the raw Laplacian of rho and the isosurface often needs system-specific tuning."
+        ),
+    ),
+    CubePreset(
+        name="hamiltonian-ked",
+        aliases=("k-r", "k(r)", "kinetic-k", "hamiltonian-kinetic-density", "ked-k"),
+        description="Positive/negative isosurfaces for Hamiltonian kinetic energy density K(r).",
+        surface_mode="signed",
+        isosurface=0.01,
+        positive_rgb=(255, 195, 55),
+        negative_rgb=(80, 110, 255),
+        surface_opacity=(130, 255),
+        notes=(
+            "Use for Multiwfn K(r).cub from real-space function 6; "
+            "K(r) can be signed, so positive and negative isosurfaces are shown by default."
+        ),
+    ),
+    CubePreset(
+        name="lagrangian-ked",
+        aliases=("g-r", "g(r)", "kinetic-g", "lagrangian-kinetic-density", "ked-g"),
+        description="Single positive isosurface for Lagrangian kinetic energy density G(r).",
+        surface_mode="single",
+        isosurface=0.01,
+        positive_rgb=(90, 210, 150),
+        surface_opacity=(145, 255),
+        notes=(
+            "Use for Multiwfn G(r).cub from real-space function 7; "
+            "G(r) is normally nonnegative and is displayed as a single positive scalar field."
+        ),
+    ),
+    CubePreset(
         name="potential",
         aliases=("potential-cube", "abacus-potential", "out-pot", "local-potential", "pot-es", "mep-cube"),
         description="Positive/negative isosurfaces for direct potential cubes.",
@@ -106,6 +175,32 @@ PRESETS: Tuple[CubePreset, ...] = (
         isosurface=0.50,
         positive_rgb=(120, 210, 120),
         notes="Use for Multiwfn LOL cubes; tune the isosurface for each system.",
+    ),
+    CubePreset(
+        name="rdg-scalar",
+        aliases=("rdg-cube", "scalar-rdg", "reduced-density-gradient"),
+        description="Single positive isosurface for standalone RDG scalar cubes.",
+        surface_mode="single",
+        isosurface=0.5,
+        positive_rgb=(130, 220, 170),
+        surface_opacity=(145, 255),
+        notes=(
+            "Use for standalone Multiwfn RDG.cub from real-space function 13. "
+            "For RDG/NCI surfaces colored by sign(lambda2)rho, keep using preset `iri` with --texture-cube."
+        ),
+    ),
+    CubePreset(
+        name="promolecular-rdg",
+        aliases=("rdg-pro", "prodens-rdg", "promolecular-rdg-scalar", "rdgprodens"),
+        description="Single positive isosurface for promolecular RDG scalar cubes.",
+        surface_mode="single",
+        isosurface=0.4,
+        positive_rgb=(100, 200, 200),
+        surface_opacity=(145, 255),
+        notes=(
+            "Use for standalone Multiwfn RDGprodens.cub from real-space function 14. "
+            "The default isosurface follows Multiwfn main-function-5 sur_value."
+        ),
     ),
     CubePreset(
         name="stm",

@@ -56,8 +56,9 @@ multiwfn2vesta aim-igmh --help
 - `cube-vesta`: 从 ABACUS/Multiwfn scalar cube 直接生成 `.vesta`，可选
   texture/color cube，默认关闭 section plane
 - `cube-preset`: 在 `cube-vesta` 后端上套用常见分析默认值，例如 density、
-  orbital/signed、ABACUS direct potential、partial charge、wavefunction norm、
-  ELF/LOL、IRI/RDG/NCI、IGM/IGMH/aIGM、ESP/MEP、ALIE/LEA/LEAE、vdW map
+  orbital/signed、spin density、Laplacian、K(r)/G(r)、ABACUS direct
+  potential、partial charge、wavefunction norm、ELF/LOL、IRI/RDG/NCI、
+  IGM/IGMH/aIGM、ESP/MEP、ALIE/LEA/LEAE、vdW map
 - `surface-extrema`: 把 Multiwfn `surfanalysis.pdb` 的分子表面极值点作为
   atoms-only phase 叠加到已有 `.vesta` 文件中
 - `cube-arith`: 对兼容 cube 做线性组合，用于 density difference、Fukui
@@ -212,6 +213,13 @@ multiwfn2vesta cube-vesta \
 multiwfn2vesta cube-preset --list-presets
 multiwfn2vesta cube-preset density density.cub cube_products
 multiwfn2vesta cube-preset orbital orbital.cub cube_products
+multiwfn2vesta cube-preset orbital-density orbdens.cub cube_products
+multiwfn2vesta cube-preset spin-density spindensity.cub cube_products
+multiwfn2vesta cube-preset laplacian laplacian.cub cube_products
+multiwfn2vesta cube-preset hamiltonian-ked 'K(r).cub' cube_products
+multiwfn2vesta cube-preset lagrangian-ked 'G(r).cub' cube_products
+multiwfn2vesta cube-preset rdg-scalar RDG.cub cube_products
+multiwfn2vesta cube-preset promolecular-rdg RDGprodens.cub cube_products
 multiwfn2vesta cube-preset potential pot_es.cube cube_products
 multiwfn2vesta cube-preset partial-charge pchg.cube cube_products
 multiwfn2vesta cube-preset wavefunction-norm wfc_norm.cube cube_products
@@ -240,6 +248,22 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
 - `density`：单等值面，默认 `--isosurface 0.01`
 - `signed`：正/负等值面，别名包括 `orbital`、`wavefunction`、
   `density-difference` 和 `dual-descriptor`
+- `orbital-density`：单正值等值面，别名包括 `orbdens`、`mo-density`，
+  用于 Multiwfn `orbdens.cub`，默认等值面 `0.005`
+- `spin-density`：正/负等值面，别名包括 `spin`、`spindensity`，用于
+  Multiwfn `spindensity.cub` 或兼容的 signed spin-density cube，默认幅值
+  `0.02`
+- `laplacian`：正/负等值面，别名包括 `lap`、`laplacian-rho`，用于
+  Multiwfn `laplacian.cub`，默认幅值 `0.05`，通常需要按体系微调
+- `hamiltonian-ked`：正/负等值面，别名包括 `k(r)`、`kinetic-k`，用于
+  Multiwfn `K(r).cub`，默认幅值 `0.01`
+- `lagrangian-ked`：单正值等值面，别名包括 `g(r)`、`kinetic-g`，用于
+  Multiwfn `G(r).cub`，默认等值面 `0.01`
+- `rdg-scalar`：单正值等值面，别名包括 `rdg-cube`、
+  `reduced-density-gradient`，用于单 cube 的 Multiwfn `RDG.cub`，默认
+  等值面 `0.5`；双 cube 的 RDG/NCI 染色图仍用 `cube-preset iri`
+- `promolecular-rdg`：单正值等值面，别名包括 `rdg-pro`、`prodens-rdg`，
+  用于 Multiwfn `RDGprodens.cub`，默认等值面 `0.4`
 - `potential`：正/负等值面，别名包括 `abacus-potential`、`out-pot`、
   `pot-es`，用于 ABACUS `out_pot` 直接势场 cube；如果是密度表面按电势染色，
   用 `esp`
@@ -448,11 +472,18 @@ multiwfn2vesta grid-run --list-functions
 - `orbital` / `mo`：函数 `4`，原始输出 `MOvalue.cub`，默认接 `signed`；
   单轨道用 `--orbital h`，多轨道批量用 `--orbitals h l l+1`
 - `orbital-density` / `orbdens`：函数 `44`，原始输出 `orbdens.cub`，
-  单轨道用 `--orbital`，多轨道批量用 `--orbitals`
-- `hamiltonian-ked` / `k(r)`：函数 `6`，原始输出 `K(r).cub`；
-  `lagrangian-ked` / `g(r)`：函数 `7`，原始输出 `G(r).cub`
-- `laplacian`、`spin-density`、`esp`、`nuclear-esp`、
-  `signlambda2rho`、`vdw-potential`：默认按 signed scalar 处理；配合
+  默认接 `cube-preset orbital-density`；单轨道用 `--orbital`，多轨道批量
+  用 `--orbitals`
+- `laplacian` / `lap`：函数 `3`，原始输出 `laplacian.cub`，默认接
+  `cube-preset laplacian`
+- `spin-density` / `spin`：函数 `5`，原始输出 `spindensity.cub`，默认接
+  `cube-preset spin-density`
+- `hamiltonian-ked` / `k(r)`：函数 `6`，原始输出 `K(r).cub`，默认接
+  `cube-preset hamiltonian-ked`
+- `lagrangian-ked` / `g(r)`：函数 `7`，原始输出 `G(r).cub`，默认接
+  `cube-preset lagrangian-ked`
+- `esp`、`nuclear-esp`、`signlambda2rho`、`vdw-potential`：默认按 signed
+  scalar 处理；配合
   `--surface-cube` 时，ESP/nuclear ESP 默认走 `cube-preset esp`，
   sign(lambda2)rho 默认走 `cube-preset iri`，vdW potential 默认走
   `cube-preset vdw-map`
@@ -460,10 +491,13 @@ multiwfn2vesta grid-run --list-functions
   表面图可以用 `--surface-cube density.cub` 自动把生成的 ALIE cube 作为
   `cube-preset alie` 的 texture
 - `elf` / `lol`：局域化函数等值面
-- `rdg` / `promolecular-rdg` / `signlambda2rho` /
-  `promolecular-signlambda2rho` / `iri` / `delta-g`：单标量 cube；如果要
-  IRI/RDG/NCI 那种 surface+texture 双 cube 图，优先用 `iri-run` 或显式
-  `cube-preset iri`
+- `rdg` / `promolecular-rdg`：函数 `13` / `14`，原始输出 `RDG.cub` /
+  `RDGprodens.cub`，默认分别接 `cube-preset rdg-scalar` /
+  `cube-preset promolecular-rdg`；如果要 IRI/RDG/NCI 那种 surface+texture
+  双 cube 图，优先用 `iri-run` 或显式 `cube-preset iri`
+- `signlambda2rho` / `promolecular-signlambda2rho` / `iri` / `delta-g`：
+  其它单标量 cube，其中 sign(lambda2)rho 配合 `--surface-cube` 可作为
+  `cube-preset iri` 的 texture
 
 轨道例子：
 

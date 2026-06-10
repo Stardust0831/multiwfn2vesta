@@ -30,17 +30,19 @@ multiwfn2vesta grid-run --list-functions
 - `gradient`, aliases `rho-gradient`, `grad-rho`: function `2`, raw
   `gradient.cub`, preset `density`.
 - `laplacian`, aliases `lap`, `laplacian-rho`: function `3`, raw
-  `laplacian.cub`, preset `signed`.
+  `laplacian.cub`, preset `laplacian` with signed positive/negative
+  isosurfaces.
 - `orbital`, aliases `mo`, `wavefunction`, `mo-value`: function `4`, raw
   `MOvalue.cub`, preset `signed`, requires `--orbital` for one orbital or
   `--orbitals` for batch export.
-- `spin-density`: function `5`, raw `spindensity.cub`, preset `signed`.
+- `spin-density`: function `5`, raw `spindensity.cub`, preset
+  `spin-density` with signed positive/negative isosurfaces.
 - `hamiltonian-ked`, aliases `k-r`, `k(r)`, `kinetic-k`,
   `hamiltonian-kinetic-density`: function `6`, raw `K(r).cub`, preset
-  `signed`.
+  `hamiltonian-ked` with signed positive/negative isosurfaces.
 - `lagrangian-ked`, aliases `g-r`, `g(r)`, `kinetic-g`,
   `lagrangian-kinetic-density`: function `7`, raw `G(r).cub`, preset
-  `density`.
+  `lagrangian-ked` with a single positive isosurface.
 - `nuclear-esp`: function `8`, raw `nucleiesp.cub`, preset `signed`;
   mapped preset `esp` when `--surface-cube` is supplied.
 - `elf`: function `9`, raw `ELF.cub`, preset `elf`.
@@ -48,9 +50,9 @@ multiwfn2vesta grid-run --list-functions
 - `esp`, aliases `mep`, `total-esp`, `electrostatic-potential`: function
   `12`, raw `totesp.cub`, preset `signed`; mapped preset `esp` with
   `--surface-cube`.
-- `rdg`: function `13`, raw `RDG.cub`, preset `density`.
+- `rdg`: function `13`, raw `RDG.cub`, preset `rdg-scalar`.
 - `promolecular-rdg`: function `14`, raw `RDGprodens.cub`, preset
-  `density`.
+  `promolecular-rdg`.
 - `signlambda2rho`: function `15`, raw `signlambda2rho.cub`, preset
   `signed`; mapped preset `iri` with `--surface-cube`.
 - `promolecular-signlambda2rho`: function `16`, raw
@@ -63,8 +65,9 @@ multiwfn2vesta grid-run --list-functions
 - `iri`: function `24`, raw `IRI.cub`, preset `density`.
 - `vdw-potential`: function `25`, raw `vdWpot.cub`, preset `signed`;
   mapped preset `vdw-map` with `--surface-cube`.
-- `orbital-density`: function `44`, raw `orbdens.cub`, preset `density`,
-  requires `--orbital` for one orbital or `--orbitals` for batch export.
+- `orbital-density`: function `44`, raw `orbdens.cub`, preset
+  `orbital-density`, requires `--orbital` for one orbital or `--orbitals` for
+  batch export.
 
 Use `--function-index N --expected-cube name.cub` for an unlisted function or
 custom command stream.

@@ -35,29 +35,29 @@ class GridFunction:
 GRID_FUNCTIONS: Tuple[GridFunction, ...] = (
     GridFunction("density", 1, "density.cub", "density", ("rho", "electron-density", "charge-density")),
     GridFunction("gradient", 2, "gradient.cub", "density", ("rho-gradient", "grad-rho")),
-    GridFunction("laplacian", 3, "laplacian.cub", "signed", ("lap", "laplacian-rho")),
+    GridFunction("laplacian", 3, "laplacian.cub", "laplacian", ("lap", "laplacian-rho")),
     GridFunction("orbital", 4, "MOvalue.cub", "signed", ("mo", "wavefunction", "mo-value"), True),
-    GridFunction("spin-density", 5, "spindensity.cub", "signed", ("spin", "spindensity")),
+    GridFunction("spin-density", 5, "spindensity.cub", "spin-density", ("spin", "spindensity")),
     GridFunction(
         "hamiltonian-ked",
         6,
         "K(r).cub",
-        "signed",
+        "hamiltonian-ked",
         ("k-r", "k(r)", "kinetic-k", "hamiltonian-kinetic-density"),
     ),
     GridFunction(
         "lagrangian-ked",
         7,
         "G(r).cub",
-        "density",
+        "lagrangian-ked",
         ("g-r", "g(r)", "kinetic-g", "lagrangian-kinetic-density"),
     ),
     GridFunction("nuclear-esp", 8, "nucleiesp.cub", "signed", ("nuc-esp", "nuclear-potential"), mapped_preset="esp"),
     GridFunction("elf", 9, "ELF.cub", "elf", ("electron-localization-function",)),
     GridFunction("lol", 10, "LOL.cub", "lol", ("localized-orbital-locator",)),
     GridFunction("esp", 12, "totesp.cub", "signed", ("mep", "total-esp", "electrostatic-potential"), mapped_preset="esp"),
-    GridFunction("rdg", 13, "RDG.cub", "density", ("reduced-density-gradient",)),
-    GridFunction("promolecular-rdg", 14, "RDGprodens.cub", "density", ("rdg-pro", "prodens-rdg")),
+    GridFunction("rdg", 13, "RDG.cub", "rdg-scalar", ("reduced-density-gradient",)),
+    GridFunction("promolecular-rdg", 14, "RDGprodens.cub", "promolecular-rdg", ("rdg-pro", "prodens-rdg")),
     GridFunction("signlambda2rho", 15, "signlambda2rho.cub", "signed", ("sl2r", "sign-lambda2-rho"), mapped_preset="iri"),
     GridFunction(
         "promolecular-signlambda2rho",
@@ -78,7 +78,7 @@ GRID_FUNCTIONS: Tuple[GridFunction, ...] = (
     GridFunction("delta-g", 22, "Delta_g.cub", "density", ("deltag", "delta_g")),
     GridFunction("iri", 24, "IRI.cub", "density", ("interaction-region-indicator",)),
     GridFunction("vdw-potential", 25, "vdWpot.cub", "signed", ("vdw", "vdwpot"), mapped_preset="vdw-map"),
-    GridFunction("orbital-density", 44, "orbdens.cub", "density", ("orbdens", "mo-density"), True),
+    GridFunction("orbital-density", 44, "orbdens.cub", "orbital-density", ("orbdens", "mo-density"), True),
 )
 
 

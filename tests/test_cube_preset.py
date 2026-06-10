@@ -85,10 +85,17 @@ class TestCubePreset(unittest.TestCase):
         text = format_preset_list()
         self.assertIn("density", text)
         self.assertIn("signed", text)
+        self.assertIn("spin-density", text)
+        self.assertIn("orbital-density", text)
+        self.assertIn("laplacian", text)
+        self.assertIn("hamiltonian-ked", text)
+        self.assertIn("lagrangian-ked", text)
         self.assertIn("potential", text)
         self.assertIn("partial-charge", text)
         self.assertIn("wavefunction-norm", text)
         self.assertIn("iri", text)
+        self.assertIn("rdg-scalar", text)
+        self.assertIn("promolecular-rdg", text)
         self.assertIn("stm", text)
         self.assertIn("domain", text)
         self.assertIn("basin", text)
@@ -201,6 +208,123 @@ basin type two
             self.assertIn("canonical_preset: `signed`", manifest)
             self.assertIn("requested_preset: `orbital`", manifest)
             self.assertIn("effective_surface_mode: `signed`", manifest)
+
+    def test_spin_density_preset_writes_signed_surfaces(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            cube = self.write_tmp(root, "spindensity.cub", SIGNED_CUBE)
+
+            result = run_preset("spindensity", cube, root / "products")
+
+            text = result.vesta_path.read_text(encoding="utf-8")
+            manifest = result.manifest_path.read_text(encoding="utf-8")
+
+            self.assertRegex(
+                text,
+                r"ISURF\n  1   1\s+0\.02\s+255\s+80\s+80\s+145\s+255\n  1   1\s+-0\.02\s+70\s+130\s+255\s+145\s+255",
+            )
+            self.assertIn("canonical_preset: `spin-density`", manifest)
+            self.assertIn("requested_preset: `spindensity`", manifest)
+            self.assertIn("alpha-minus-beta spin density", manifest)
+            self.assertIn("main-function-5 sur_value", manifest)
+
+    def test_orbital_density_preset_writes_single_positive_surface(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            cube = self.write_tmp(root, "orbdens.cub", SURFACE_CUBE)
+
+            result = run_preset("orbdens", cube, root / "products")
+
+            text = result.vesta_path.read_text(encoding="utf-8")
+            manifest = result.manifest_path.read_text(encoding="utf-8")
+
+            self.assertRegex(text, r"ISURF\n  1   1\s+0\.005\s+180\s+140\s+255\s+145\s+255")
+            self.assertNotRegex(text, r"\n  1   1\s+-0\.005")
+            self.assertIn("canonical_preset: `orbital-density`", manifest)
+            self.assertIn("requested_preset: `orbdens`", manifest)
+            self.assertIn("orbdens.cub", manifest)
+
+    def test_laplacian_preset_writes_signed_surfaces(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            cube = self.write_tmp(root, "laplacian.cub", SIGNED_CUBE)
+
+            result = run_preset("laplacian-rho", cube, root / "products")
+
+            text = result.vesta_path.read_text(encoding="utf-8")
+            manifest = result.manifest_path.read_text(encoding="utf-8")
+
+            self.assertRegex(
+                text,
+                r"ISURF\n  1   1\s+0\.05\s+255\s+165\s+40\s+125\s+255\n  1   1\s+-0\.05\s+60\s+130\s+255\s+125\s+255",
+            )
+            self.assertIn("canonical_preset: `laplacian`", manifest)
+            self.assertIn("requested_preset: `laplacian-rho`", manifest)
+            self.assertIn("laplacian.cub", manifest)
+
+    def test_hamiltonian_ked_preset_writes_signed_surfaces(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            cube = self.write_tmp(root, "K(r).cub", SIGNED_CUBE)
+
+            result = run_preset("k(r)", cube, root / "products")
+
+            text = result.vesta_path.read_text(encoding="utf-8")
+            manifest = result.manifest_path.read_text(encoding="utf-8")
+
+            self.assertRegex(
+                text,
+                r"ISURF\n  1   1\s+0\.01\s+255\s+195\s+55\s+130\s+255\n  1   1\s+-0\.01\s+80\s+110\s+255\s+130\s+255",
+            )
+            self.assertIn("canonical_preset: `hamiltonian-ked`", manifest)
+            self.assertIn("requested_preset: `k(r)`", manifest)
+            self.assertIn("K(r).cub", manifest)
+
+    def test_lagrangian_ked_preset_writes_single_positive_surface(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            cube = self.write_tmp(root, "G(r).cub", SURFACE_CUBE)
+
+            result = run_preset("lagrangian-kinetic-density", cube, root / "products")
+
+            text = result.vesta_path.read_text(encoding="utf-8")
+            manifest = result.manifest_path.read_text(encoding="utf-8")
+
+            self.assertRegex(text, r"ISURF\n  1   1\s+0\.01\s+90\s+210\s+150\s+145\s+255")
+            self.assertNotRegex(text, r"\n  1   1\s+-0\.01")
+            self.assertIn("canonical_preset: `lagrangian-ked`", manifest)
+            self.assertIn("requested_preset: `lagrangian-kinetic-density`", manifest)
+            self.assertIn("G(r).cub", manifest)
+
+    def test_standalone_rdg_scalar_preset_keeps_iri_alias_available_for_texture_route(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            cube = self.write_tmp(root, "RDG.cub", SURFACE_CUBE)
+
+            result = run_preset("rdg-cube", cube, root / "products")
+
+            text = result.vesta_path.read_text(encoding="utf-8")
+            manifest = result.manifest_path.read_text(encoding="utf-8")
+
+            self.assertRegex(text, r"ISURF\n  1   1\s+0\.5\s+130\s+220\s+170\s+145\s+255")
+            self.assertIn("canonical_preset: `rdg-scalar`", manifest)
+            self.assertIn("requested_preset: `rdg-cube`", manifest)
+            self.assertIn("For RDG/NCI surfaces colored by sign(lambda2)rho", manifest)
+
+    def test_promolecular_rdg_scalar_preset_uses_multiwfn_default(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            cube = self.write_tmp(root, "RDGprodens.cub", SURFACE_CUBE)
+
+            result = run_preset("rdg-pro", cube, root / "products")
+
+            text = result.vesta_path.read_text(encoding="utf-8")
+            manifest = result.manifest_path.read_text(encoding="utf-8")
+
+            self.assertRegex(text, r"ISURF\n  1   1\s+0\.4\s+100\s+200\s+200\s+145\s+255")
+            self.assertIn("canonical_preset: `promolecular-rdg`", manifest)
+            self.assertIn("requested_preset: `rdg-pro`", manifest)
+            self.assertIn("RDGprodens.cub", manifest)
 
     def test_abacus_direct_potential_preset_writes_signed_surfaces(self):
         with tempfile.TemporaryDirectory() as tmp:
