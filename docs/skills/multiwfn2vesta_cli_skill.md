@@ -31,6 +31,7 @@ Scriptable subcommands:
 multiwfn2vesta discover
 multiwfn2vesta abacus-molden --help
 multiwfn2vesta cube-preset --help
+multiwfn2vesta surface-extrema --help
 multiwfn2vesta cube-arith --help
 multiwfn2vesta iri-run --help
 multiwfn2vesta grid-run --help
@@ -48,6 +49,8 @@ Aliases:
 - `multiwfn2vesta cube ...` is an alias for `cube-vesta`.
 - `multiwfn2vesta preset ...` and `multiwfn2vesta analysis-cube ...` are
   aliases for `cube-preset`.
+- `multiwfn2vesta surf-extrema ...` and
+  `multiwfn2vesta surfanalysis-vesta ...` are aliases for `surface-extrema`.
 - `multiwfn2vesta cube-math ...`, `multiwfn2vesta density-diff ...`, and
   `multiwfn2vesta fukui-cube ...` are aliases for `cube-arith`.
 - `multiwfn2vesta multiwfn-iri ...` and `multiwfn2vesta rdg-run ...` are
@@ -117,7 +120,8 @@ multiwfn2vesta cube-preset orbital orbital.cub cube_products
 multiwfn2vesta cube-preset rdg IRI2_surface.cub cube_products \
   --texture-cube IRI1_color.cub
 multiwfn2vesta cube-preset alie density.cub cube_products \
-  --texture-cube avglocion.cub
+  --texture-cube avglocion.cub \
+  --surfanalysis-pdb surfanalysis.pdb
 multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
   --texture-cube vdW.cub
 ```
@@ -130,6 +134,14 @@ maps, ALIE/LEA/LEAE density-surface maps, and vdW-potential density-surface
 maps.  All VESTA writing still goes through the maintained `cube-vesta`
 backend.  `surface-map`/`molsurfmap` defaults follow the bundled Multiwfn
 `molsurfmap.vmd` template.
+
+Patch an existing VESTA file with Multiwfn surface extrema:
+
+```bash
+multiwfn2vesta surface-extrema input.vesta surfanalysis.pdb output.vesta \
+  --surface-cube density.cub \
+  --selection all
+```
 
 ### Cube arithmetic to density-difference/Fukui VESTA
 

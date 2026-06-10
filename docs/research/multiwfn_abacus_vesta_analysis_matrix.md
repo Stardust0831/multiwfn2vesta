@@ -30,6 +30,10 @@ Multiwfn evidence:
 - Bundled ALIE/LEA/LEAE/vdW surface scripts use the same VESTA-compatible
   pattern: a density/surface cube plus a mapped-property texture cube, with
   optional `surfanalysis.pdb` extrema points.
+- Multiwfn `surfana.f90` writes `surfanalysis.pdb` from molecular surface
+  analysis post-processing.  Carbon records are surface maxima, oxygen records
+  are surface minima, and the PDB B-factor field stores the mapped function
+  value when available.
 
 ABACUS evidence:
 
@@ -98,8 +102,8 @@ occupations, and density derivatives from the wavefunction representation.
 | --- | --- | --- | --- | --- | --- |
 | IRI/NCI/RDG | Full wavefunction, or promolecular approximation from structure | Molden route feasible; promolecular route can avoid wavefunction | `IRI.cub`, `RDG.cub`, `sl2r.cub`, `func1.cub`, `func2.cub` | Isosurface plus texture cube; section planes off | `multiwfn2vesta iri-run` implemented for the two-cube weak-interaction stream; `grid-run` can also export single RDG/IRI/sign(lambda2)rho cubes |
 | ESP/MEP on density surface | Full wavefunction or ABACUS `out_pot` plus density cube | Strong direct cube route; Molden route for Multiwfn ESP | `density.cub`, `totesp.cub`, `pot_es.cube`, `pots*.cube` | Density isosurface colored by potential texture | `grid-run --function esp` can export Multiwfn ESP; `cube-preset esp` still combines density surface plus potential texture |
-| Molecular surface mapped properties | Full wavefunction or cube pair | Feasible through Molden; ABACUS can provide density/potential cubes | `surf.cub`, `mapfunc.cub`, `density.cub`, `avglocion.cub`, `surfanalysis.pdb` | Surface cube plus texture; extrema as pseudo-sites | `cube-preset surface-map` now covers surface+texture display using `molsurfmap.vmd` defaults; extrema PDB overlay remains future |
-| ALIE / LEA / LEAE | Full wavefunction, occupied/virtual orbitals | Feasible only if ABACUS Molden orbitals/energies are adequate; virtual levels in metals risky | `avglocion.cub`, `userfunc.cub`, `surfanalysis.pdb` | Colored density surface plus extrema points | `cube-preset alie/lea/leae` now covers density-surface texture maps; extrema PDB overlay remains future |
+| Molecular surface mapped properties | Full wavefunction or cube pair | Feasible through Molden; ABACUS can provide density/potential cubes | `surf.cub`, `mapfunc.cub`, `density.cub`, `avglocion.cub`, `surfanalysis.pdb` | Surface cube plus texture; extrema as atoms-only overlay phase | `cube-preset surface-map` covers surface+texture display using `molsurfmap.vmd` defaults; `--surfanalysis-pdb` and `surface-extrema` overlay surface extrema |
+| ALIE / LEA / LEAE | Full wavefunction, occupied/virtual orbitals | Feasible only if ABACUS Molden orbitals/energies are adequate; virtual levels in metals risky | `avglocion.cub`, `userfunc.cub`, `surfanalysis.pdb` | Colored density surface plus extrema points | `cube-preset alie/lea/leae` covers density-surface texture maps and auto-selects minima/maxima extrema overlays from `surfanalysis.pdb` |
 | vdW/repulsion/dispersion potential | Structure and/or wavefunction depending option | Feasible, often structure driven | `vdW.cub`, `repul.cub`, `disp.cub`, `density.cub`, `vdWpot.cub` | Potential surfaces/slices, density surface context | `grid-run --function vdw-potential` covers single vdW potential cubes; `cube-preset vdw-map` covers density-surface texture maps |
 | Atom scalar coloring | Per-atom values from Multiwfn or ABACUS `mulliken.txt` | Strong for ABACUS `out_mul`; also charges/Fukui from Multiwfn | CSV/table, `mulliken.txt` | Patch `SITET` RGB values | ABACUS Mulliken parser implemented; generic Multiwfn atom table parser implemented as `multiwfn2vesta multiwfn-atom-color` |
 
@@ -166,9 +170,9 @@ Known limitations:
 
 1. Extend the generic `cube-vesta`/`cube-preset` CLI with more real-system
    templates and optional render hooks.  Core analysis display presets now
-   exist, including ALIE/LEA/LEAE/vdW surface-map presets; the remaining work
-   is coverage, optional render hooks, and `surfanalysis.pdb` extrema
-   overlays.
+   exist, including ALIE/LEA/LEAE/vdW surface-map presets and
+   `surfanalysis.pdb` extrema overlays; the remaining work is coverage,
+   optional render hooks, and richer real-system templates.
 2. Extend the implemented `abacus-molden` wrapper with more real-calculation
    smoke coverage and optional copy-to-scratch handling for converter
    side-products.

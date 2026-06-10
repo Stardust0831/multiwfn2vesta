@@ -18,6 +18,7 @@ class TestUnifiedCli(unittest.TestCase):
         self.assertIn("molden-check", text)
         self.assertIn("cube-vesta", text)
         self.assertIn("cube-preset", text)
+        self.assertIn("surface-extrema", text)
         self.assertIn("cube-arith", text)
         self.assertIn("iri-run", text)
         self.assertIn("grid-run", text)
@@ -71,6 +72,55 @@ class TestUnifiedCli(unittest.TestCase):
 
         self.assertEqual(code, 0)
         mocked.assert_called_once_with(["orbital", "orb.cub", "products"])
+
+    def test_dispatches_surface_extrema_command(self):
+        with patch("multiwfn2vesta.cli.surface_extrema_vesta.main", return_value=0) as mocked:
+            code = cli.main(["surface-extrema", "in.vesta", "surfanalysis.pdb", "out.vesta", "--surface-cube", "density.cub"])
+
+        self.assertEqual(code, 0)
+        mocked.assert_called_once_with(["in.vesta", "surfanalysis.pdb", "out.vesta", "--surface-cube", "density.cub"])
+
+    def test_dispatches_surface_extrema_alias(self):
+        with patch("multiwfn2vesta.cli.surface_extrema_vesta.main", return_value=0) as mocked:
+            code = cli.main(["surf-extrema", "in.vesta", "surfanalysis.pdb", "out.vesta", "--surface-cube", "density.cub"])
+
+        self.assertEqual(code, 0)
+        mocked.assert_called_once_with(["in.vesta", "surfanalysis.pdb", "out.vesta", "--surface-cube", "density.cub"])
+
+    def test_interactive_surface_extrema_builds_expected_args(self):
+        answers = iter(
+            [
+                "13",
+                "input.vesta",
+                "surfanalysis.pdb",
+                "out.vesta",
+                "density.cub",
+                "minima",
+                "0.12",
+                "y",
+                "n",
+            ]
+        )
+        with patch("builtins.input", lambda _prompt: next(answers)):
+            with patch("sys.stdout", io.StringIO()):
+                with patch("multiwfn2vesta.cli.surface_extrema_vesta.main", return_value=0) as mocked:
+                    code = cli.main([])
+
+        self.assertEqual(code, 0)
+        mocked.assert_called_once_with(
+            [
+                "input.vesta",
+                "surfanalysis.pdb",
+                "out.vesta",
+                "--surface-cube",
+                "density.cub",
+                "--selection",
+                "minima",
+                "--radius",
+                "0.12",
+                "--label-extrema",
+            ]
+        )
 
     def test_dispatches_cube_arith_command(self):
         with patch("multiwfn2vesta.cli.cube_arith.main", return_value=0) as mocked:

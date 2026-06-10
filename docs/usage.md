@@ -26,6 +26,7 @@ multiwfn2vesta abacus-molden --help
 multiwfn2vesta molden-check --help
 multiwfn2vesta cube-vesta --help
 multiwfn2vesta cube-preset --help
+multiwfn2vesta surface-extrema --help
 multiwfn2vesta cube-arith --help
 multiwfn2vesta iri-run --help
 multiwfn2vesta grid-run --help
@@ -48,6 +49,8 @@ multiwfn2vesta aim-igmh --help
   texture/color cube，默认关闭 section plane
 - `cube-preset`: 在 `cube-vesta` 后端上套用常见分析默认值，例如 density、
   orbital/signed、ELF/LOL、IRI/RDG/NCI、ESP/MEP、ALIE/LEA/LEAE、vdW map
+- `surface-extrema`: 把 Multiwfn `surfanalysis.pdb` 的分子表面极值点作为
+  atoms-only phase 叠加到已有 `.vesta` 文件中
 - `cube-arith`: 对兼容 cube 做线性组合，用于 density difference、Fukui
   function、dual descriptor 等后处理，并可直接接 `cube-preset` 写 `.vesta`
 - `iri-run`: 从 Multiwfn 可读波函数文件调用 IRI/RDG 弱相互作用菜单，
@@ -191,7 +194,8 @@ multiwfn2vesta cube-preset esp density.cub cube_products \
   --texture-cube esp.cub \
   --tex-physical -0.05 0.05
 multiwfn2vesta cube-preset alie density.cub cube_products \
-  --texture-cube avglocion.cub
+  --texture-cube avglocion.cub \
+  --surfanalysis-pdb surfanalysis.pdb
 multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
   --texture-cube vdW.cub
 ```
@@ -219,6 +223,31 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
 
 生成的 recipe 会追加 `Cube Preset` 段，记录请求的预设名、规范预设名、
 有效等值面、surface mode、texture 缩放来源和用户覆盖参数。
+
+如果 Multiwfn 分子表面分析已经导出了 `surfanalysis.pdb`，可以让
+`cube-preset` 直接把极值点写进同一个 `.vesta`：
+
+```bash
+multiwfn2vesta cube-preset surface-map density.cub cube_products \
+  --texture-cube mapped.cub \
+  --surfanalysis-pdb surfanalysis.pdb \
+  --surf-extrema all
+```
+
+Multiwfn 源码约定 `surfanalysis.pdb` 中 C 是 surface maximum，O 是
+surface minimum，B-factor 字段是 mapped value。维护代码会把极值点作为一个
+新的 atoms-only phase 插到 `SCENE` 前，默认半径 `0.10`，maxima 红色、
+minima 蓝色，overlay phase 的 `SBOND` 为空，并默认把 `COMPS` 改为 `0`。
+`--surf-extrema auto` 时，`alie`/`leae` 只显示 minima，`lea` 只显示 maxima，
+其他 mapped-surface 预设显示全部；也可以手动指定 `all|maxima|minima`。
+
+已有 `.vesta` 文件可以单独补极值点：
+
+```bash
+multiwfn2vesta surface-extrema input.vesta surfanalysis.pdb output.vesta \
+  --surface-cube density.cub \
+  --selection minima
+```
 
 ## Cube 算术：密度差 / Fukui / dual descriptor
 

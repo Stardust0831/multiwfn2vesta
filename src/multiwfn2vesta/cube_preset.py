@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Optional, Sequence, Tuple
 
-from . import cube_vesta
+from . import cube_vesta, surface_extrema_vesta
 
 
 RGB = Tuple[int, int, int]
@@ -190,6 +190,14 @@ def format_preset_list() -> str:
     return "\n".join(lines) + "\n"
 
 
+def default_surface_extrema_selection(preset: CubePreset) -> str:
+    if preset.name in {"alie", "leae"}:
+        return "minima"
+    if preset.name == "lea":
+        return "maxima"
+    return "all"
+
+
 def _float_pair(values: Optional[Sequence[float]]) -> Optional[Tuple[float, float]]:
     if values is None:
         return None
@@ -300,10 +308,18 @@ def run_preset(
     strict: bool = True,
     strict_compatible: bool = True,
     show_structure_bonds: bool = True,
+    surfanalysis_pdb: Optional[Path] = None,
+    surf_extrema: str = "auto",
+    extrema_radius: float = surface_extrema_vesta.DEFAULT_EXTREMA_RADIUS,
+    maxima_rgb: Optional[Sequence[int]] = None,
+    minima_rgb: Optional[Sequence[int]] = None,
+    label_extrema: bool = False,
+    keep_comps: bool = False,
 ) -> cube_vesta.CubeVestaResult:
     surface_cube = Path(surface_cube)
     output_dir = Path(output_dir)
     texture_cube = Path(texture_cube) if texture_cube is not None else None
+    surfanalysis_pdb = Path(surfanalysis_pdb) if surfanalysis_pdb is not None else None
     preset = resolve_preset(preset_name)
     if preset.texture_required and texture_cube is None:
         raise ValueError(f"Cube preset `{preset.name}` requires --texture-cube")
@@ -360,6 +376,41 @@ def run_preset(
             tex_physical=effective_tex_physical,
             tex_range_source=manifest_tex_range_source,
         )
+    if surfanalysis_pdb is not None:
+        selection = default_surface_extrema_selection(preset) if surf_extrema == "auto" else surf_extrema
+        max_rgb = _rgb(maxima_rgb, surface_extrema_vesta.DEFAULT_MAXIMA_RGB, "surface maxima")
+        min_rgb = _rgb(minima_rgb, surface_extrema_vesta.DEFAULT_MINIMA_RGB, "surface minima")
+        overlay_structure = structure or preset.structure
+        if overlay_structure == "none":
+            overlay_structure = "auto"
+        overlay = surface_extrema_vesta.overlay_surface_extrema_file(
+            result.vesta_path,
+            surfanalysis_pdb,
+            result.vesta_path,
+            surface_cube=surface_cube,
+            selection=selection,
+            title=f"{effective_title} surface extrema",
+            structure=overlay_structure,
+            boundary=_float_six(boundary),
+            radius=extrema_radius,
+            maxima_rgb=max_rgb,
+            minima_rgb=min_rgb,
+            label_extrema=label_extrema,
+            set_comps_off=not keep_comps,
+            cube_units=cube_units,
+            strict=strict,
+        )
+        if result.manifest_path is not None:
+            surface_extrema_vesta.append_overlay_manifest(
+                result.manifest_path,
+                surfanalysis_pdb=surfanalysis_pdb,
+                result=overlay,
+                radius=extrema_radius,
+                maxima_rgb=max_rgb,
+                minima_rgb=min_rgb,
+                label_extrema=label_extrema,
+                set_comps_off=not keep_comps,
+            )
     return result
 
 
@@ -395,6 +446,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser.add_argument("--non-strict", action="store_true", help="Allow cube data count mismatch")
     parser.add_argument("--no-strict-compatible", action="store_true", help="Do not require texture grid to match surface grid")
     parser.add_argument("--structure-bonds-off", action="store_true")
+    parser.add_argument("--surfanalysis-pdb", type=Path, help="Overlay Multiwfn surface extrema from surfanalysis.pdb")
+    parser.add_argument("--surf-extrema", choices=["auto", "all", "maxima", "minima"], default="auto")
+    parser.add_argument("--extrema-radius", type=float, default=surface_extrema_vesta.DEFAULT_EXTREMA_RADIUS)
+    parser.add_argument("--maxima-rgb", nargs=3, type=int, metavar=("R", "G", "B"))
+    parser.add_argument("--minima-rgb", nargs=3, type=int, metavar=("R", "G", "B"))
+    parser.add_argument("--label-extrema", action="store_true")
+    parser.add_argument("--keep-comps", action="store_true", help="Do not force COMPS 0 after adding extrema phase")
     args = parser.parse_args(argv)
 
     if args.list_presets:
@@ -432,6 +490,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             strict=not args.non_strict,
             strict_compatible=not args.no_strict_compatible,
             show_structure_bonds=not args.structure_bonds_off,
+            surfanalysis_pdb=args.surfanalysis_pdb,
+            surf_extrema=args.surf_extrema,
+            extrema_radius=args.extrema_radius,
+            maxima_rgb=args.maxima_rgb,
+            minima_rgb=args.minima_rgb,
+            label_extrema=args.label_extrema,
+            keep_comps=args.keep_comps,
         )
     except ValueError as exc:
         print(f"cube-preset: {exc}")

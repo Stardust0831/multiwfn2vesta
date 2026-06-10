@@ -211,8 +211,8 @@ explicitly.
   IGMH+AIM.
 - P1: IRI/RDG/NCI, ESP/MEP mapped surfaces, ALIE/LEA/LEAE, vdW potential,
   ABACUS/Multiwfn atom scalar coloring.  ALIE/LEA/LEAE/vdW surface-map
-  display presets now exist; `surfanalysis.pdb` extrema overlays remain a
-  future surface-map overlay layer.
+  display presets now exist, and `surfanalysis.pdb` extrema overlays are
+  maintained through `cube-preset --surfanalysis-pdb` and `surface-extrema`.
 - P2: basins, excited-state hole/electron/CDD, ETS-NOCV, AdNDP, Fukui/dual
   descriptor, NICS/current arrows.
 
@@ -222,6 +222,8 @@ explicitly.
   `docs/research/multiwfn_abacus_vesta_analysis_matrix.md`
 - Cube to VESTA:
   `docs/skills/cube_vesta_skill.md`
+- Surface extrema overlay:
+  `docs/skills/surface_extrema_vesta_skill.md`
 - Multiwfn grid-run:
   `docs/skills/multiwfn_grid_run_skill.md`
 - AIM:

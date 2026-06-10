@@ -1,5 +1,45 @@
 # Worklog
 
+## 2026-06-10: Surface extrema overlays for mapped surfaces
+
+- Continued the Multiwfn/ABACUS/VESTA roadmap by closing the next
+  surface-map gap: optional VESTA overlays for Multiwfn `surfanalysis.pdb`
+  extrema points.
+- Rechecked Multiwfn source and bundled scripts.  Evidence used:
+  `surfana.f90` menu item `2` exports `surfanalysis.pdb`; maxima are written
+  as carbon records, minima as oxygen records, and B-factor stores mapped
+  function values; bundled `molsurfmap.vmd`, `ALIE.vmd`, `LEA_isoext.vmd`,
+  and `LEAE_isoext.vmd` load `surfanalysis.pdb` for mapped-surface extrema.
+- Added `src/multiwfn2vesta/surface_extrema_vesta.py`, including
+  `surfanalysis.pdb` parsing, cube-origin coordinate alignment, VESTA
+  atoms-only phase rendering, `COMPS 0` patching, and standalone CLI
+  `multiwfn2vesta surface-extrema`.
+- Extended `cube-preset` with `--surfanalysis-pdb`, `--surf-extrema
+  auto|all|maxima|minima`, extrema radius/color controls, and optional
+  extrema labels.  Auto mode follows bundled VMD intent: `alie`/`leae`
+  minima, `lea` maxima, other mapped-surface presets all extrema.
+- Added focused tests for parser semantics, coordinate shift, extrema phase
+  insertion, standalone CLI dispatch, and `cube-preset alie` auto minima
+  overlay.
+- Real CLI smoke passed under
+  `/mnt/g/work/multiwfn2vesta/smoke/surface_extrema_overlay_20260610/`.
+  The generated VESTA file contains `MAX0001`/`MIN0001`, overlay `SBOND`
+  disabled, `COMPS 0`, and a `Surface Extrema Overlay` recipe block; the
+  standalone command produced a minima-only overlay.
+- Synced README, usage docs, cube/ABACUS skill notes, research matrix, and
+  project/root kanban/worklog.  Final validation and commit hash are reported
+  in the assistant response to avoid an infinite chain of "record the record"
+  commits.
+- Read-only pre-commit review found no blockers.  The main thread fixed the
+  only immediate documentation mismatch: standalone `surface-extrema` uses
+  `--radius`, while `cube-preset` uses `--extrema-radius`.  The skill note now
+  also records that standalone patching appends a new phase each run and that
+  `CRYST1` is not yet cross-checked against `--surface-cube`.
+- Final validation passed: `py_compile`, 52 focused tests across
+  `tests.test_surface_extrema_vesta`, `tests.test_cube_preset`, and
+  `tests.test_cli`, full 189-test no-GUI regression, `git diff --check`,
+  top-level help, `cube-preset --help`, and `surface-extrema --help`.
+
 ## 2026-06-10: README refresh at surface-map/grid tip
 
 - User asked to update README, noted that the branch state still looked odd,

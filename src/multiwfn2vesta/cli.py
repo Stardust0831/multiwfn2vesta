@@ -19,6 +19,7 @@ from . import (
     multiwfn_aim,
     multiwfn_grid,
     multiwfn_iri,
+    surface_extrema_vesta,
 )
 from .executables import discovery_report
 
@@ -29,6 +30,7 @@ COMMANDS: Dict[str, Tuple[str, str]] = {
     "molden-check": ("Check Molden sections before Multiwfn workflows", "molden_check"),
     "cube-vesta": ("Create a VESTA file from cube data", "cube_vesta"),
     "cube-preset": ("Create a VESTA file from cube data using an analysis preset", "cube_preset"),
+    "surface-extrema": ("Overlay Multiwfn surfanalysis.pdb extrema on VESTA", "surface_extrema_vesta"),
     "cube-arith": ("Combine compatible cube files, then optionally prepare VESTA", "cube_arith"),
     "iri-run": ("Run Multiwfn IRI/RDG cube generation, then prepare VESTA", "multiwfn_iri"),
     "grid-run": ("Run Multiwfn real-space function cube generation, then prepare VESTA", "multiwfn_grid"),
@@ -50,6 +52,8 @@ ALIASES = {
     "cube": "cube-vesta",
     "preset": "cube-preset",
     "analysis-cube": "cube-preset",
+    "surf-extrema": "surface-extrema",
+    "surfanalysis-vesta": "surface-extrema",
     "cube-math": "cube-arith",
     "density-diff": "cube-arith",
     "fukui-cube": "cube-arith",
@@ -89,6 +93,8 @@ Commands:
              Create a VESTA isosurface file from one cube and optional texture cube.
   cube-preset
              Apply an analysis preset before creating a VESTA cube file.
+  surface-extrema
+             Overlay Multiwfn surfanalysis.pdb extrema on an existing VESTA file.
   cube-arith
              Combine compatible cube files for density differences, Fukui, or dual descriptor.
   iri-run    Run Multiwfn IRI/RDG cube generation and prepare a VESTA mapped surface.
@@ -108,6 +114,8 @@ Aliases:
   cube       Alias for cube-vesta.
   preset, analysis-cube
              Aliases for cube-preset.
+  surf-extrema, surfanalysis-vesta
+             Aliases for surface-extrema.
   cube-math, density-diff, fukui-cube
              Aliases for cube-arith.
   multiwfn-iri, rdg-run
@@ -126,6 +134,7 @@ Examples:
   multiwfn2vesta molden-check ABACUS_Multiwfn.molden --abacus
   multiwfn2vesta cube-vesta density.cub cube_products --isosurface 0.01
   multiwfn2vesta cube-preset orbital orbital.cub cube_products
+  multiwfn2vesta surface-extrema input.vesta surfanalysis.pdb output.vesta --surface-cube density.cub
   multiwfn2vesta cube-arith products --operation dual-descriptor --anion-cube anion.cub --neutral-cube neutral.cub --cation-cube cation.cub
   multiwfn2vesta iri-run input.molden iri_products --timeout 300
   multiwfn2vesta grid-run input.molden grid_products --function density
@@ -353,6 +362,30 @@ def interactive_cube_preset() -> int:
         argv.append("--no-copy-cubes")
 
     return cube_preset.main(argv)
+
+
+def interactive_surface_extrema() -> int:
+    print("\nMultiwfn surfanalysis.pdb extrema -> VESTA overlay")
+    input_vesta = _prompt("input .vesta", required=True)
+    surfanalysis_pdb = _prompt("surfanalysis.pdb", required=True)
+    output_vesta = _prompt("output .vesta", default=str(Path(input_vesta).with_name("surface_extrema_overlay.vesta")))
+    surface_cube = _prompt("surface/density cube used for coordinate alignment", required=True)
+    argv: List[str] = [input_vesta, surfanalysis_pdb, output_vesta, "--surface-cube", surface_cube]
+
+    selection = _prompt("selection (all/maxima/minima)", default="all")
+    argv.extend(["--selection", selection])
+
+    radius = _prompt("extrema radius (empty for default)")
+    if radius:
+        argv.extend(["--radius", radius])
+
+    if _yes_no("show extrema labels", default=False):
+        argv.append("--label-extrema")
+
+    if _yes_no("keep existing COMPS setting", default=False):
+        argv.append("--keep-comps")
+
+    return surface_extrema_vesta.main(argv)
 
 
 def interactive_cube_arith() -> int:
@@ -614,6 +647,7 @@ def interactive_main() -> int:
     print("10) Wavefunction -> Multiwfn real-space function cube -> VESTA")
     print("11) Cube arithmetic -> density difference/Fukui/dual descriptor VESTA")
     print("12) Multiwfn atom table -> VESTA atom colors")
+    print("13) surfanalysis.pdb extrema -> VESTA overlay")
     print("q) Quit")
     choice = _prompt("choice", default="3").lower()
     if choice in {"0", "discover", "where", "env"}:
@@ -647,6 +681,8 @@ def interactive_main() -> int:
         return interactive_grid_run()
     if choice in {"12", "multiwfn-atom-color", "multiwfn-table-color", "atom-table-color"}:
         return interactive_multiwfn_atom_color()
+    if choice in {"13", "surface-extrema", "surf-extrema", "surfanalysis-vesta"}:
+        return interactive_surface_extrema()
     if choice in {"q", "quit", "exit"}:
         return 0
     print(f"Unknown choice: {choice}")
@@ -665,6 +701,8 @@ def run_command(command: str, args: Sequence[str]) -> int:
         return cube_vesta.main(args)
     if command == "cube-preset":
         return cube_preset.main(args)
+    if command == "surface-extrema":
+        return surface_extrema_vesta.main(args)
     if command == "cube-arith":
         return cube_arith.main(args)
     if command == "iri-run":

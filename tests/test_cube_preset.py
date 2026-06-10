@@ -60,6 +60,15 @@ alie two
 """
 
 
+SURFANALYSIS_PDB = """\
+REMARK   Unit of B-factor field (ALIE) is eV
+REMARK   Carbon: Surface maximum    Oxygen: surface minimum
+HETATM    1  C   MOL A   1       0.000   0.529   0.265  1.00  2.50           C
+HETATM    1  O   MOL A   1       0.500   1.000   0.000  1.00 -1.25           O
+END
+"""
+
+
 class TestCubePreset(unittest.TestCase):
     def write_tmp(self, root, name, text):
         path = Path(root) / name
@@ -148,6 +157,30 @@ class TestCubePreset(unittest.TestCase):
             self.assertIn("effective_isosurface: `0.0005`", manifest)
             self.assertIn("preset_tex_physical: `0.32` to `0.36`", manifest)
             self.assertIn("tex_reference_source: `full-cube`", manifest)
+
+    def test_alie_preset_auto_overlays_only_surface_minima(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            density = self.write_tmp(root, "density.cub", SURFACE_CUBE)
+            alie = self.write_tmp(root, "avglocion.cub", ALIE_TEXTURE_CUBE)
+            surfanalysis = self.write_tmp(root, "surfanalysis.pdb", SURFANALYSIS_PDB)
+
+            result = run_preset(
+                "alie",
+                density,
+                root / "products",
+                texture_cube=alie,
+                surfanalysis_pdb=surfanalysis,
+            )
+
+            text = result.vesta_path.read_text(encoding="utf-8")
+            manifest = result.manifest_path.read_text(encoding="utf-8")
+
+            self.assertIn("MIN0001", text)
+            self.assertNotIn("MAX0001", text)
+            self.assertIn("selection: `minima`", manifest)
+            self.assertIn("extrema_count: `1`", manifest)
+            self.assertIn("source_convention", manifest)
 
     def test_surface_map_preset_tracks_molsurfmap_template_defaults(self):
         with tempfile.TemporaryDirectory() as tmp:

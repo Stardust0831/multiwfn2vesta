@@ -4,7 +4,7 @@
 Multiwfn workflows and preparing VESTA visualization files.  The currently
 maintained path covers ABACUS Molden handoff, cube-to-VESTA files, Multiwfn
 real-space grid, AIM, and IRI/RDG command streams, atoms-only topology
-overlays, and AIM+IGMH multi-phase VESTA figures.
+overlays, surface extrema overlays, and AIM+IGMH multi-phase VESTA figures.
 
 The project is still experimental, but the CLI below is the maintained entry
 point.
@@ -15,26 +15,12 @@ point.
   GitHub remote.
 - GitHub remote: `origin` points to `Github:Stardust0831/multiwfn2vesta.git`,
   with `origin/HEAD -> origin/main`.
-- Branch audit before this README refresh, after `git fetch --prune origin`
-  on 2026-06-10 10:33 CST: local `main`, `origin/main`, and
-  `origin/HEAD` all pointed at
-  `19bd45dfc33f29309c90d408b5672fb137043b9f`
-  (`Add surface-map presets and grid functions`).  `git ls-remote --heads
-  origin` returned only `refs/heads/main`.
-- Current cleanup result: no extra local or remote feature branch exists, so
-  there is nothing to merge back in this pass.  The branch history contains
-  ordinary feature commits and documentation closure commits on `main`, not
-  active competing branches.
-- Most recent maintained feature implementation: surface-map VESTA presets
-  and expanded Multiwfn real-space grid function support, pushed as
-  `19bd45dfc33f29309c90d408b5672fb137043b9f`
-  (`Add surface-map presets and grid functions`).
-- Recent maintained feature pushes on 2026-06-10 include surface-map/grid
-  expansion (`19bd45dfc33f29309c90d408b5672fb137043b9f`), generic Multiwfn
-  atom table coloring (`7b305ea5762b3e8444b53338aecec190cc331a7f`), batch
-  orbital export (`dcf7bd3cac0684f48f16ebd06458345b929837fd`),
-  `cube-arith` (`4123d00ae051a710c954ed3c3712aa8b012c4bc0`), and
-  `grid-run` (`3d192dc7ae9696dd433aae04e1a3bdb488b95482`).
+- Recent branch audits on 2026-06-10 found no extra local or remote feature
+  branch to merge back; the branch history contains ordinary feature commits
+  and documentation closure commits on `main`, not active competing branches.
+- Recent maintained feature work includes surface extrema overlays for
+  `surfanalysis.pdb`, surface-map/grid expansion, generic Multiwfn atom table
+  coloring, batch orbital export, `cube-arith`, and `grid-run`.
 - Future experiment branches should be short-lived: merge or fast-forward the
   useful commits into `main`, then remove the experiment branch once
   `origin/main` contains the maintained result.
@@ -82,6 +68,9 @@ then delete the temporary branch.
 - Apply analysis-oriented cube presets for common ABACUS/Multiwfn products
   such as density, orbitals/wavefunctions, ELF/LOL, IRI/RDG/NCI, ESP/MEP,
   ALIE/LEA/LEAE, and vdW-potential mapped surfaces.
+- Overlay Multiwfn molecular-surface extrema from `surfanalysis.pdb` onto
+  mapped-surface VESTA files as an extra atoms-only phase, with automatic
+  minima/maxima selection for ALIE/LEA/LEAE presets.
 - Combine compatible cube files with linear arithmetic for density
   differences, Fukui functions, and dual descriptors, then optionally write a
   VESTA file through `cube-preset`.
@@ -142,6 +131,8 @@ multiwfn2vesta cube-arith products --operation dual-descriptor \
   --anion-cube anion_density.cub \
   --neutral-cube neutral_density.cub \
   --cation-cube cation_density.cub
+multiwfn2vesta surface-extrema input.vesta surfanalysis.pdb output.vesta \
+  --surface-cube density.cub
 multiwfn2vesta iri-run input.molden iri_products --timeout 300
 multiwfn2vesta grid-run input.molden grid_products --function density
 ```
@@ -222,7 +213,8 @@ multiwfn2vesta cube-preset esp density.cub cube_products \
   --texture-cube esp.cub \
   --tex-physical -0.05 0.05
 multiwfn2vesta cube-preset alie density.cub cube_products \
-  --texture-cube avglocion.cub
+  --texture-cube avglocion.cub \
+  --surfanalysis-pdb surfanalysis.pdb
 multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
   --texture-cube vdW.cub
 ```
@@ -236,6 +228,21 @@ maps.  The recipe records the requested preset, canonical preset, effective
 isosurface, texture scaling source, and explicit texture percentage overrides
 when they are used.  The `surface-map`/`molsurfmap` defaults follow the
 bundled Multiwfn `molsurfmap.vmd` template.
+
+When Multiwfn main function `12` has exported `surfanalysis.pdb`,
+`cube-preset --surfanalysis-pdb` embeds surface maxima/minima as an extra
+atoms-only phase.  Multiwfn writes maxima as carbon records and minima as
+oxygen records; the maintained overlay labels them `MAX0001`/`MIN0001`,
+styles maxima red and minima blue, clears overlay bonds, and sets `COMPS 0`
+for the multi-phase file.  With `--surf-extrema auto`, `alie` and `leae`
+show minima, `lea` shows maxima, and other mapped-surface presets show all
+extrema.  Existing VESTA files can be patched directly:
+
+```bash
+multiwfn2vesta surface-extrema input.vesta surfanalysis.pdb output.vesta \
+  --surface-cube density.cub \
+  --selection all
+```
 
 ## Cube Arithmetic
 

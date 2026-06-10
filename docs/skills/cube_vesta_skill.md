@@ -49,10 +49,25 @@ multiwfn2vesta cube-preset rdg IRI2_surface.cub cube_products \
 multiwfn2vesta cube-preset esp density.cub cube_products \
   --texture-cube esp.cub \
   --tex-physical -0.05 0.05
+multiwfn2vesta cube-preset alie density.cub cube_products \
+  --texture-cube avglocion.cub \
+  --surfanalysis-pdb surfanalysis.pdb
 ```
 
 `cube-preset` is a thin layer over `cube-vesta`; it selects maintained
 defaults but does not duplicate VESTA-writing logic.
+
+Surface extrema overlay:
+
+```bash
+multiwfn2vesta surface-extrema input.vesta surfanalysis.pdb output.vesta \
+  --surface-cube density.cub \
+  --selection all
+```
+
+Use `cube-preset --surfanalysis-pdb` when the extrema should be embedded as
+part of the preset run.  Use `surface-extrema` when patching an existing
+VESTA file.
 
 Cube arithmetic wrapper:
 
@@ -92,6 +107,9 @@ passes it back through `cube-preset`.
 - `<output_dir>/<stem>_cube_vesta_recipe.md`
 - for `cube-preset`, the same recipe gains a `Cube Preset` block recording
   requested/canonical preset names and effective defaults
+- if `--surfanalysis-pdb` is used, the recipe gains a `Surface Extrema
+  Overlay` block recording extrema counts, selection, radius, colors, and the
+  Multiwfn C/O source convention
 - copied cube dependencies unless `--no-copy-cubes` is used
 - if surface and texture cubes share a basename but come from different
   directories, the later dependency is renamed, for example

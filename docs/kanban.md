@@ -1,6 +1,6 @@
 # Project Kanban
 
-Updated: 2026-06-10 10:33 CST
+Updated: 2026-06-10 10:45 CST
 
 ## Current Continuation: 2026-06-10 Multiwfn Analysis Expansion
 
@@ -30,6 +30,35 @@ Updated: 2026-06-10 10:33 CST
   The final commit hash and post-push branch check are reported in the
   assistant response to avoid an infinite chain of "record the record"
   commits.
+
+## Current Increment: 2026-06-10 Surface-Map Extrema Overlay
+
+- [x] Record the continued objective: enrich maintained VESTA workflows for
+  valuable Multiwfn analyses that can start from ABACUS-compatible
+  wavefunction/cube data.
+- [x] Choose the next concrete increment: support Multiwfn molecular surface
+  extrema from `surfanalysis.pdb` as an optional VESTA overlay for
+  density-surface mapped-property workflows.
+- [x] Start a read-only sub-agent review for `surfanalysis.pdb` evidence,
+  reusable VESTA/AIM code paths, CLI shape, and test risks.
+- [x] Inspect current `cube-preset`, `cube-vesta`, AIM PDB, and multi-phase
+  VESTA style code locally.
+- [x] Implement a maintained parser/overlay command path with focused tests:
+  `surface-extrema` standalone patcher and `cube-preset --surfanalysis-pdb`.
+- [x] Real CLI smoke passed under
+  `/mnt/g/work/multiwfn2vesta/smoke/surface_extrema_overlay_20260610/`,
+  covering `cube-preset surface-map --surfanalysis-pdb` and standalone
+  `surface-extrema --selection minima`.
+- [x] Update README/usage/skill/research docs and root work records.
+- [x] Read-only pre-commit review found no blockers; documentation follow-up
+  corrected standalone `--radius` vs `cube-preset --extrema-radius` wording
+  and recorded append behavior.
+- [x] Final validation passed: `py_compile`, 52 focused tests, full
+  189-test no-GUI regression, `git diff --check`, top-level help,
+  `cube-preset --help`, and `surface-extrema --help`.
+- [x] Prepared this increment for commit and push.  The final commit hash and
+  post-push branch check are reported in the assistant response to avoid an
+  infinite chain of "record the record" commits.
 
 ## Current Request: 2026-06-10 README Refresh at 19bd45d
 
