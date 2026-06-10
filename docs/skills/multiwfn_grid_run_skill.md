@@ -1,0 +1,159 @@
+# Skill: Multiwfn real-space grid runner
+
+Use this when a Multiwfn-readable wavefunction file should become one
+real-space function cube, optionally followed by a VESTA `.vesta` file.
+
+## Command
+
+```bash
+multiwfn2vesta grid-run input.molden grid_products \
+  --function density \
+  --grid-points 40 40 40 \
+  --timeout 300
+```
+
+The workflow drives Multiwfn main menu `5` (`study3dim`), selects a
+real-space function, sets a grid, and uses post-processing option `2` to
+export a Gaussian cube file.
+
+List maintained names and aliases:
+
+```bash
+multiwfn2vesta grid-run --list-functions
+```
+
+## Function Table
+
+- `density`, aliases `rho`, `electron-density`, `charge-density`: function
+  `1`, raw `density.cub`, preset `density`.
+- `gradient`, aliases `rho-gradient`, `grad-rho`: function `2`, raw
+  `gradient.cub`, preset `density`.
+- `laplacian`, aliases `lap`, `laplacian-rho`: function `3`, raw
+  `laplacian.cub`, preset `signed`.
+- `orbital`, aliases `mo`, `wavefunction`, `mo-value`: function `4`, raw
+  `MOvalue.cub`, preset `signed`, requires `--orbital`.
+- `spin-density`: function `5`, raw `spindensity.cub`, preset `signed`.
+- `nuclear-esp`: function `8`, raw `nucleiesp.cub`, preset `signed`.
+- `elf`: function `9`, raw `ELF.cub`, preset `elf`.
+- `lol`: function `10`, raw `LOL.cub`, preset `lol`.
+- `esp`, aliases `mep`, `total-esp`, `electrostatic-potential`: function
+  `12`, raw `totesp.cub`, preset `signed`.
+- `rdg`: function `13`, raw `RDG.cub`, preset `density`.
+- `signlambda2rho`: function `15`, raw `signlambda2rho.cub`, preset
+  `signed`.
+- `delta-g`: function `22`, raw `Delta_g.cub`, preset `density`.
+- `iri`: function `24`, raw `IRI.cub`, preset `density`.
+- `vdw-potential`: function `25`, raw `vdWpot.cub`, preset `signed`.
+- `orbital-density`: function `44`, raw `orbdens.cub`, preset `density`,
+  requires `--orbital`.
+
+Use `--function-index N --expected-cube name.cub` for an unlisted function or
+custom command stream.
+
+## Grid Modes
+
+Default explicit point counts:
+
+```bash
+multiwfn2vesta grid-run input.fch grid_products \
+  --function elf \
+  --grid-mode points \
+  --grid-points 80 80 80
+```
+
+Coarse built-ins:
+
+```bash
+multiwfn2vesta grid-run input.fch grid_products --function density --grid-mode low
+multiwfn2vesta grid-run input.fch grid_products --function density --grid-mode medium
+multiwfn2vesta grid-run input.fch grid_products --function density --grid-mode high
+```
+
+Spacing mode, in Multiwfn's non-PBC grid menu:
+
+```bash
+multiwfn2vesta grid-run input.fch grid_products \
+  --function density \
+  --grid-mode spacing \
+  --grid-spacing 0.30
+```
+
+Reference-cube mode for aligned overlays:
+
+```bash
+multiwfn2vesta grid-run input.fch grid_products \
+  --function esp \
+  --grid-mode cube \
+  --grid-cube density.cub \
+  --no-vesta
+```
+
+## Outputs
+
+- `multiwfn_grid_input.txt`
+- `multiwfn_grid.stdout.txt`
+- `multiwfn_grid.stderr.txt`
+- `multiwfn_grid_raw/<Multiwfn-default>.cub`
+- `<stem>_<function>.cub`
+- `multiwfn_grid_recipe.md`
+- optional `<stem>_<function>_<preset>_cube.vesta`
+- optional `<stem>_<function>_<preset>_cube_vesta_recipe.md`
+
+The runner sets `Multiwfnpath`, `MULTIWFNPATH`, and `MultiwfnPATH` to the
+selected Multiwfn executable directory.
+
+## Choosing VESTA Output
+
+By default, `--preset auto` maps the selected function to a `cube-preset`
+style.  Use `--no-vesta` when only the cube is needed.
+
+Examples:
+
+```bash
+multiwfn2vesta grid-run input.fch products --function density
+multiwfn2vesta grid-run input.fch products --function orbital --orbital h
+multiwfn2vesta grid-run input.fch products --function elf
+multiwfn2vesta grid-run input.fch products --function esp --no-vesta
+```
+
+For two-cube mapped surfaces, generate the component cubes first, then call
+`cube-preset` manually.  Examples include ESP on density and IRI/RDG/NCI
+surface+texture figures.
+
+## Validation
+
+Focused tests:
+
+```bash
+PYTHONPATH=src python3 -m unittest tests.test_multiwfn_grid tests.test_cli -v
+```
+
+Real H2O noGUI density smoke:
+
+```bash
+bin/multiwfn2vesta grid-run \
+  /mnt/g/work/multiwfn2vesta/smoke/20260605_iri_aim_h2o/H2O.fch \
+  /mnt/g/work/multiwfn2vesta/smoke/multiwfn_grid_run_smoke_20260610_h2o_density/products \
+  --function density \
+  --grid-points 12 12 12 \
+  --stem h2o \
+  --timeout 180
+```
+
+Observed output: raw `density.cub`, processed `h2o_density.cub`,
+`h2o_density_density_cube.vesta`, and both recipe files.
+
+Real H2O noGUI ELF smoke:
+
+```bash
+bin/multiwfn2vesta grid-run \
+  /mnt/g/work/multiwfn2vesta/smoke/20260605_iri_aim_h2o/H2O.fch \
+  /mnt/g/work/multiwfn2vesta/smoke/multiwfn_grid_run_smoke_20260610_h2o_elf/products \
+  --function elf \
+  --grid-points 12 12 12 \
+  --stem h2o \
+  --timeout 180 \
+  --no-vesta
+```
+
+Observed output: raw `ELF.cub`, processed `h2o_elf.cub`, and recipe.

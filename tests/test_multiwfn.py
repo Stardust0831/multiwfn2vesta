@@ -1,15 +1,12 @@
 import unittest
-from pathlib import Path
-from src.multiwfn_vesta.multiwfn_controller import MultiwfnController
+
+from multiwfn2vesta.multiwfn_grid import build_grid_commands, resolve_grid_function
 
 class TestMultiwfn(unittest.TestCase):
-    def setUp(self):
-        self.controller = MultiwfnController()
-    
     def test_command_generation(self):
-        commands = self.controller._build_commands('electron', 'test.cube')
-        self.assertIn('5', commands)
-        self.assertIn('test.cube', commands)
+        function = resolve_grid_function("density")
+        commands = build_grid_commands(function, grid_mode="points", grid_points=(12, 12, 12))
+        self.assertEqual(commands, ["5", "1", "4", "12,12,12", "2", "0", "q"])
 
 if __name__ == '__main__':
     unittest.main()

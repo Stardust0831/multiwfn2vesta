@@ -27,6 +27,7 @@ multiwfn2vesta molden-check --help
 multiwfn2vesta cube-vesta --help
 multiwfn2vesta cube-preset --help
 multiwfn2vesta iri-run --help
+multiwfn2vesta grid-run --help
 multiwfn2vesta abacus-mulliken-color --help
 multiwfn2vesta aim-run --help
 multiwfn2vesta aim-pdb --help
@@ -48,6 +49,9 @@ multiwfn2vesta aim-igmh --help
 - `iri-run`: 从 Multiwfn 可读波函数文件调用 IRI/RDG 弱相互作用菜单，
   生成 `func1.cub`/`func2.cub`，处理成 VESTA 可用的 `IRI1`/`IRI2` cube，
   再通过 `cube-preset iri` 写 mapped-surface `.vesta`
+- `grid-run`: 从 Multiwfn 可读波函数文件调用主菜单 `5` 的 real-space
+  function grid，导出 density、MO/orbital、Laplacian、ELF、LOL、ESP/MEP、
+  RDG/IRI-like 等单 cube，并可自动接 `cube-preset` 写 `.vesta`
 - `abacus-mulliken-color`: 读取 ABACUS `out_mul 1` 生成的 `mulliken.txt`，
   按原子 Mulliken 电荷或磁矩给 VESTA `SITET` 原子颜色赋值
 - `aim-run`: 从 `.molden`、`.fch`、`.wfn` 等波函数文件调用 Multiwfn AIM，
@@ -92,8 +96,8 @@ VESTA 查找顺序：
 3. 工作区内 VESTA：`tools/VESTA-win64/VESTA.exe` 和 Linux VESTA
 4. shell 的 `PATH`
 
-`aim-run` 和 `iri-run` 本身只启动 Multiwfn，不启动 VESTA；VESTA 只在
-`aim-igmh --render-three-views` 这种显式渲染命令里被调用。
+`aim-run`、`iri-run` 和 `grid-run` 本身只启动 Multiwfn，不启动 VESTA；
+VESTA 只在 `aim-igmh --render-three-views` 这种显式渲染命令里被调用。
 
 ## Cube 文件到 VESTA
 
@@ -194,6 +198,93 @@ multiwfn2vesta cube-preset esp density.cub cube_products \
 
 生成的 recipe 会追加 `Cube Preset` 段，记录请求的预设名、规范预设名、
 有效等值面、surface mode、texture 缩放来源和用户覆盖参数。
+
+## 波函数文件到 Multiwfn 单 cube / VESTA
+
+如果起点是 Molden/FCHK/WFN/WFX 等 Multiwfn 可读波函数文件，而目标是一个
+real-space function cube，可以用 `grid-run`。它走 Multiwfn 主菜单 `5`
+(`study3dim`)，选择函数、设置格点、再在后处理菜单用 `2` 导出 cube：
+
+```bash
+multiwfn2vesta grid-run \
+  input.molden \
+  grid_products \
+  --function density \
+  --grid-points 40 40 40 \
+  --timeout 300
+```
+
+查看当前维护的函数表：
+
+```bash
+multiwfn2vesta grid-run --list-functions
+```
+
+常用函数：
+
+- `density` / `rho`：Multiwfn 函数 `1`，原始输出 `density.cub`，默认接
+  `cube-preset density`
+- `orbital` / `mo`：函数 `4`，原始输出 `MOvalue.cub`，默认接 `signed`，
+  需要 `--orbital h` 或轨道序号
+- `orbital-density` / `orbdens`：函数 `44`，原始输出 `orbdens.cub`，
+  需要 `--orbital`
+- `laplacian`、`spin-density`、`esp`、`nuclear-esp`、
+  `signlambda2rho`、`vdw-potential`：默认按 signed scalar 处理
+- `elf` / `lol`：局域化函数等值面
+- `rdg` / `iri` / `delta-g`：单标量 cube；如果要 IRI/RDG/NCI 那种
+  surface+texture 双 cube 图，优先用 `iri-run` 或显式 `cube-preset iri`
+
+轨道例子：
+
+```bash
+multiwfn2vesta grid-run input.fch grid_products \
+  --function orbital \
+  --orbital h \
+  --grid-mode points \
+  --grid-points 80 80 80
+```
+
+复用已有 cube 的格点，便于后续做双 cube 或多图层叠加：
+
+```bash
+multiwfn2vesta grid-run input.fch grid_products \
+  --function esp \
+  --grid-mode cube \
+  --grid-cube density.cub \
+  --no-vesta
+```
+
+默认输出：
+
+- `multiwfn_grid_input.txt`：实际喂给 Multiwfn 的命令流
+- `multiwfn_grid.stdout.txt` / `multiwfn_grid.stderr.txt`
+- `multiwfn_grid_raw/<Multiwfn默认文件名>.cub`
+- `<stem>_<function>.cub`
+- `multiwfn_grid_recipe.md`
+- 默认还会写 `<stem>_<function>_<preset>_cube.vesta` 和 recipe；只要 cube
+  时用 `--no-vesta`
+
+真实 H2O noGUI smoke：
+
+```bash
+bin/multiwfn2vesta grid-run \
+  /mnt/g/work/multiwfn2vesta/smoke/20260605_iri_aim_h2o/H2O.fch \
+  /mnt/g/work/multiwfn2vesta/smoke/multiwfn_grid_run_smoke_20260610_h2o_density/products \
+  --function density \
+  --grid-points 12 12 12 \
+  --stem h2o \
+  --timeout 180
+```
+
+该 smoke 返回 `0`，生成 raw `density.cub`、`h2o_density.cub`、
+`h2o_density_density_cube.vesta` 和两个 recipe。另一个真实 smoke 用
+`--function elf --no-vesta` 生成 raw `ELF.cub` 和 `h2o_elf.cub`：
+`/mnt/g/work/multiwfn2vesta/smoke/multiwfn_grid_run_smoke_20260610_h2o_elf/products/`。
+
+注意：`grid-run` 是单 cube runner。ESP-on-density、IRI/RDG/NCI mapped
+surface、IGMH 这类需要 surface cube + texture cube 或 fragment 定义的图，
+仍然要通过 `cube-preset`/`cube-vesta` 组合，或使用专门的 `iri-run`、
+`aim-igmh` 流程。
 
 ## 波函数文件到 IRI/RDG VESTA
 

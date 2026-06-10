@@ -169,6 +169,23 @@ This keeps raw Multiwfn `func1.cub`/`func2.cub`, writes processed
 VESTA mapped surface.  Use `--commands-file` for non-default weak-interaction
 menu choices.
 
+For single real-space function cubes from the same ABACUS Molden file, use
+`grid-run`:
+
+```bash
+multiwfn2vesta grid-run ABACUS_Multiwfn.molden grid_products \
+  --function density \
+  --grid-points 80 80 80 \
+  --timeout 300
+```
+
+Useful `grid-run` functions for ABACUS-compatible Molden files include
+`density`, `orbital --orbital h`, `orbital-density --orbital h`, `laplacian`,
+`elf`, `lol`, `esp`, `rdg`, `iri`, and `signlambda2rho`.  For aligned
+potential-on-density or multi-layer VESTA products, generate the component
+cubes with `--grid-mode cube --grid-cube reference.cub --no-vesta`, then call
+`cube-preset`/`cube-vesta` explicitly.
+
 ## Priority Rules
 
 - P0: generic cube VESTA, orbital cubes, density-derived cubes, ELF/LOL, AIM,
@@ -184,6 +201,8 @@ menu choices.
   `docs/research/multiwfn_abacus_vesta_analysis_matrix.md`
 - Cube to VESTA:
   `docs/skills/cube_vesta_skill.md`
+- Multiwfn grid-run:
+  `docs/skills/multiwfn_grid_run_skill.md`
 - AIM:
   `docs/skills/aim_paths_to_vesta_skill.md`
 - AIM+IGMH:

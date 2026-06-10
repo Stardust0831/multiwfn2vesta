@@ -19,6 +19,7 @@ class TestUnifiedCli(unittest.TestCase):
         self.assertIn("cube-vesta", text)
         self.assertIn("cube-preset", text)
         self.assertIn("iri-run", text)
+        self.assertIn("grid-run", text)
         self.assertIn("abacus-mulliken-color", text)
         self.assertIn("aim-run", text)
         self.assertIn("aim-pdb", text)
@@ -76,6 +77,13 @@ class TestUnifiedCli(unittest.TestCase):
         self.assertEqual(code, 0)
         mocked.assert_called_once_with(["input.molden", "products", "--timeout", "300"])
 
+    def test_dispatches_grid_run_command(self):
+        with patch("multiwfn2vesta.cli.multiwfn_grid.main", return_value=0) as mocked:
+            code = cli.main(["grid-run", "input.molden", "products", "--function", "density"])
+
+        self.assertEqual(code, 0)
+        mocked.assert_called_once_with(["input.molden", "products", "--function", "density"])
+
     def test_dispatches_abacus_mulliken_color_command(self):
         with patch("multiwfn2vesta.cli.abacus_mulliken.main", return_value=0) as mocked:
             code = cli.main(["abacus-mulliken-color", "input.vesta", "mulliken.txt", "colored.vesta"])
@@ -107,6 +115,13 @@ class TestUnifiedCli(unittest.TestCase):
     def test_dispatches_iri_run_alias(self):
         with patch("multiwfn2vesta.cli.multiwfn_iri.main", return_value=0) as mocked:
             code = cli.main(["rdg-run", "input.molden", "products"])
+
+        self.assertEqual(code, 0)
+        mocked.assert_called_once_with(["input.molden", "products"])
+
+    def test_dispatches_grid_run_alias(self):
+        with patch("multiwfn2vesta.cli.multiwfn_grid.main", return_value=0) as mocked:
+            code = cli.main(["scalar-cube-run", "input.molden", "products"])
 
         self.assertEqual(code, 0)
         mocked.assert_called_once_with(["input.molden", "products"])
@@ -311,6 +326,65 @@ class TestUnifiedCli(unittest.TestCase):
                 "--tex-physical",
                 "-0.04",
                 "0.04",
+            ]
+        )
+
+    def test_interactive_grid_run_builds_expected_args(self):
+        answers = iter(
+            [
+                "10",
+                "input.molden",
+                "grid_products",
+                "orbital",
+                "h",
+                "/opt/Multiwfn",
+                "4",
+                "180",
+                "case",
+                "points",
+                "12 13 14",
+                "n",
+                "signed",
+                "0.03",
+                "molecule",
+                "n",
+            ]
+        )
+        with patch("builtins.input", lambda _prompt: next(answers)):
+            with patch("sys.stdout", io.StringIO()):
+                with patch("multiwfn2vesta.cli.multiwfn_grid.main", return_value=0) as mocked:
+                    code = cli.main([])
+
+        self.assertEqual(code, 0)
+        mocked.assert_called_once_with(
+            [
+                "input.molden",
+                "grid_products",
+                "--function",
+                "orbital",
+                "--orbital",
+                "h",
+                "--multiwfn",
+                "/opt/Multiwfn",
+                "--nthreads",
+                "4",
+                "--timeout",
+                "180",
+                "--stem",
+                "case",
+                "--grid-mode",
+                "points",
+                "--grid-points",
+                "12",
+                "13",
+                "14",
+                "--preset",
+                "signed",
+                "--isosurface",
+                "0.03",
+                "--structure",
+                "molecule",
+                "--no-copy-cubes",
             ]
         )
 

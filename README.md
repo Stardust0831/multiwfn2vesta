@@ -3,8 +3,8 @@
 `multiwfn2vesta` is a workspace-local Python interface for running selected
 Multiwfn workflows and preparing VESTA visualization files.  The currently
 maintained path covers ABACUS Molden handoff, cube-to-VESTA files, Multiwfn
-AIM and IRI/RDG command streams, atoms-only topology overlays, and AIM+IGMH
-multi-phase VESTA figures.
+real-space grid, AIM, and IRI/RDG command streams, atoms-only topology
+overlays, and AIM+IGMH multi-phase VESTA figures.
 
 The project is still experimental, but the CLI below is the maintained entry
 point.
@@ -71,6 +71,10 @@ then delete the temporary branch.
 - Run Multiwfn IRI/RDG cube generation from a wavefunction file, process
   `func1.cub`/`func2.cub` into VESTA-ready `IRI1`/`IRI2` cubes, and write a
   mapped-surface `.vesta` through `cube-preset iri`.
+- Run Multiwfn main function `5` real-space grid generation from a
+  wavefunction file, export density, orbital/MO, Laplacian, ELF, LOL,
+  ESP/MEP, RDG/IRI-like, and related scalar cubes, and optionally write a
+  VESTA file through `cube-preset`.
 - Color VESTA atom/site styles from ABACUS `mulliken.txt` charge or
   magnetism values produced by `out_mul 1`.
 - Run Multiwfn AIM topology analysis from a wavefunction file such as
@@ -114,6 +118,7 @@ multiwfn2vesta abacus-molden abacus_calc ABACUS_Multiwfn.molden
 multiwfn2vesta molden-check ABACUS_Multiwfn.molden --abacus
 multiwfn2vesta cube-preset --list-presets
 multiwfn2vesta iri-run input.molden iri_products --timeout 300
+multiwfn2vesta grid-run input.molden grid_products --function density
 ```
 
 Multiwfn discovery checks, in order:
@@ -199,6 +204,82 @@ orbital/wavefunction/density-difference cubes, ELF/LOL cubes, IRI/RDG/NCI
 mapped surfaces, and ESP/MEP mapped density surfaces.  The recipe records the
 requested preset, canonical preset, effective isosurface, texture scaling
 source, and explicit texture percentage overrides when they are used.
+
+## Wavefunction to Scalar Cube VESTA
+
+For wavefunction inputs accepted by Multiwfn, `grid-run` drives Multiwfn main
+function `5` (`study3dim`) to export a real-space function cube, then can pass
+the cube to `cube-preset`:
+
+```bash
+multiwfn2vesta grid-run input.molden grid_products \
+  --function density \
+  --grid-points 40 40 40 \
+  --timeout 300
+```
+
+List maintained function aliases and Multiwfn default cube names with:
+
+```bash
+multiwfn2vesta grid-run --list-functions
+```
+
+Common functions:
+
+- `density` / `rho`: Multiwfn function `1`, raw `density.cub`, preset
+  `density`.
+- `orbital` / `mo`: function `4`, raw `MOvalue.cub`, preset `signed`, requires
+  `--orbital`.
+- `orbital-density` / `orbdens`: function `44`, raw `orbdens.cub`, preset
+  `density`, requires `--orbital`.
+- `laplacian`, `spin-density`, `esp`, `nuclear-esp`, `signlambda2rho`, and
+  `vdw-potential`: signed scalar fields, defaulting to the `signed` preset.
+- `elf` and `lol`: localization cubes, defaulting to `cube-preset elf/lol`.
+- `rdg`, `iri`, and `delta-g`: single scalar cubes; IRI/RDG mapped surfaces
+  that need two coupled cubes should still use `iri-run` or explicit
+  `cube-preset iri`.
+
+Grid setup defaults to explicit point counts:
+
+```bash
+multiwfn2vesta grid-run input.fch grid_products \
+  --function elf \
+  --grid-mode points \
+  --grid-points 120 120 120
+```
+
+For comparable overlays, reuse an existing cube grid:
+
+```bash
+multiwfn2vesta grid-run input.fch grid_products \
+  --function esp \
+  --grid-mode cube \
+  --grid-cube density.cub \
+  --no-vesta
+```
+
+Default outputs in `grid_products/`:
+
+- `multiwfn_grid_input.txt`: exact command stream sent to Multiwfn.
+- `multiwfn_grid.stdout.txt` and `multiwfn_grid.stderr.txt`.
+- `multiwfn_grid_raw/<Multiwfn-default>.cub`.
+- `<stem>_<function>.cub`.
+- `multiwfn_grid_recipe.md`.
+- `<stem>_<function>_<preset>_cube.vesta` and recipe, unless `--no-vesta` is
+  used.
+
+Validated H2O noGUI smokes:
+
+- `smoke/multiwfn_grid_run_smoke_20260610_h2o_density/products/`: function
+  `density`, grid `12 x 12 x 12`, generated `h2o_density.cub` and
+  `h2o_density_density_cube.vesta`.
+- `smoke/multiwfn_grid_run_smoke_20260610_h2o_elf/products/`: function `elf`,
+  grid `12 x 12 x 12`, generated `h2o_elf.cub` with `--no-vesta`.
+
+`grid-run` is for single-cube real-space functions.  ESP-on-density,
+IRI/RDG/NCI color-mapped surfaces, and other two-cube texture figures still
+need an explicit surface cube plus texture cube combination through
+`cube-preset`/`cube-vesta`, or a workflow-specific runner such as `iri-run`.
 
 ## Wavefunction to IRI/RDG VESTA
 

@@ -17,6 +17,7 @@ setup(
             'multiwfn2vesta-cube-vesta=multiwfn2vesta.cube_vesta:main',
             'multiwfn2vesta-cube-preset=multiwfn2vesta.cube_preset:main',
             'multiwfn2vesta-iri-run=multiwfn2vesta.multiwfn_iri:main',
+            'multiwfn2vesta-grid-run=multiwfn2vesta.multiwfn_grid:main',
             'multiwfn2vesta-aim-run=multiwfn2vesta.multiwfn_aim:main',
             'multiwfn2vesta-aim-pdb=multiwfn2vesta.aim_vesta:main',
             'multiwfn2vesta-aim-igmh=multiwfn2vesta.aim_igmh_vesta:main',

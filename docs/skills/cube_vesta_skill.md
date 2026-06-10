@@ -54,6 +54,18 @@ multiwfn2vesta cube-preset esp density.cub cube_products \
 `cube-preset` is a thin layer over `cube-vesta`; it selects maintained
 defaults but does not duplicate VESTA-writing logic.
 
+If starting from a Multiwfn-readable wavefunction instead of an existing cube,
+use `grid-run` for single real-space function cubes:
+
+```bash
+multiwfn2vesta grid-run input.fch grid_products \
+  --function density \
+  --grid-points 80 80 80
+```
+
+`grid-run` calls Multiwfn main function `5`, exports the cube, then optionally
+passes it back through `cube-preset`.
+
 ## Outputs
 
 - `<output_dir>/<stem>_cube.vesta`
@@ -121,11 +133,13 @@ defaults but does not duplicate VESTA-writing logic.
 ## Current Limits
 
 - No VESTA rendering is launched by this command.
-- Analysis-specific display presets now exist for common cube products, but
-  Multiwfn command streams for producing orbital, density-difference, Fukui,
-  dual-descriptor, ELF/LOL, or ESP cubes are still separate future work.
-  IRI/RDG has a maintained wavefunction runner as `multiwfn2vesta iri-run`;
-  this cube workflow remains the lower-level VESTA writer it calls.
+- Analysis-specific display presets now exist for common cube products.
+  Multiwfn main-function-5 single-cube generation now exists as
+  `multiwfn2vesta grid-run` for density, orbital/MO, Laplacian, ELF, LOL,
+  ESP/MEP, RDG/IRI-like, and related scalar cubes.  IRI/RDG mapped surfaces
+  with two coupled cubes have a separate maintained runner as
+  `multiwfn2vesta iri-run`; this cube workflow remains the lower-level VESTA
+  writer both runners call.
 - Surface-band sampling uses grid-point values, not interpolation exactly on
   the triangulated VESTA isosurface.
 - AIM/BCP pseudo-site overlays remain in the AIM/AIM+IGMH workflows, not this
@@ -142,4 +156,5 @@ Real smoke:
 ```text
 /mnt/g/work/multiwfn2vesta/smoke/cube_vesta_cli_smoke_20260610/
 /mnt/g/work/multiwfn2vesta/smoke/cube_preset_smoke_20260610/
+/mnt/g/work/multiwfn2vesta/smoke/multiwfn_grid_run_smoke_20260610_h2o_density/
 ```

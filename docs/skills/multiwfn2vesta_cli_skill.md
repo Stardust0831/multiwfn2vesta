@@ -32,6 +32,7 @@ multiwfn2vesta discover
 multiwfn2vesta abacus-molden --help
 multiwfn2vesta cube-preset --help
 multiwfn2vesta iri-run --help
+multiwfn2vesta grid-run --help
 multiwfn2vesta aim-run --help
 multiwfn2vesta aim-pdb --help
 multiwfn2vesta aim-igmh --help
@@ -47,6 +48,9 @@ Aliases:
   aliases for `cube-preset`.
 - `multiwfn2vesta multiwfn-iri ...` and `multiwfn2vesta rdg-run ...` are
   aliases for `iri-run`.
+- `multiwfn2vesta multiwfn-grid ...`,
+  `multiwfn2vesta scalar-cube-run ...`, and
+  `multiwfn2vesta function-cube ...` are aliases for `grid-run`.
 - `multiwfn2vesta multiwfn-aim ...` is the same as `aim-run`.
 - `multiwfn2vesta aim-vesta ...` is the same as `aim-pdb`.
 - `multiwfn2vesta igmh ...` is the same as `aim-igmh`.
@@ -140,6 +144,41 @@ Use `--commands-file commands.txt` to replace the default weak-interaction
 menu stream.  The runner sets `Multiwfnpath`, `MULTIWFNPATH`, and
 `MultiwfnPATH` to the selected executable directory for the subprocess.
 
+### Wavefunction to Multiwfn scalar grid cube
+
+```bash
+multiwfn2vesta grid-run \
+  input.molden \
+  grid_products \
+  --function density \
+  --grid-points 40 40 40 \
+  --timeout 300
+```
+
+Use this for Multiwfn main function `5` real-space scalar cubes.  The command
+records the exact command stream, stdout/stderr, raw Multiwfn cube, processed
+`<stem>_<function>.cub`, and a markdown recipe.  By default it calls
+`cube-preset` with the function's maintained display preset.  Pass
+`--no-vesta` for cube-only generation.
+
+Function discovery:
+
+```bash
+multiwfn2vesta grid-run --list-functions
+```
+
+Common functions include `density`, `orbital --orbital h`, `orbital-density`,
+`laplacian`, `elf`, `lol`, `esp`, `rdg`, `iri`, and `signlambda2rho`.
+Reference-cube grids are useful for aligned overlays:
+
+```bash
+multiwfn2vesta grid-run input.fch grid_products \
+  --function esp \
+  --grid-mode cube \
+  --grid-cube density.cub \
+  --no-vesta
+```
+
 ### Wavefunction to Multiwfn AIM to VESTA
 
 ```bash
@@ -206,6 +245,7 @@ bin/multiwfn2vesta --help
 bin/multiwfn2vesta discover
 bin/multiwfn2vesta cube-preset --list-presets
 bin/multiwfn2vesta iri-run --help
+bin/multiwfn2vesta grid-run --help
 bin/multiwfn2vesta aim-run --help
 bin/multiwfn2vesta aim-igmh --help
 printf 'q\n' | bin/multiwfn2vesta
@@ -239,6 +279,21 @@ bin/multiwfn2vesta iri-run \
 Observed output: raw `func1.cub`/`func2.cub`, processed `h2o_IRI1.cub` and
 `h2o_IRI2.cub`, `h2o_iri_cube.vesta`, and
 `h2o_iri_cube_vesta_recipe.md`.  VESTA was not launched.
+
+Real H2O Multiwfn noGUI grid-run density smoke:
+
+```bash
+bin/multiwfn2vesta grid-run \
+  /mnt/g/work/multiwfn2vesta/smoke/20260605_iri_aim_h2o/H2O.fch \
+  /mnt/g/work/multiwfn2vesta/smoke/multiwfn_grid_run_smoke_20260610_h2o_density/products \
+  --function density \
+  --grid-points 12 12 12 \
+  --stem h2o \
+  --timeout 180
+```
+
+Observed output: raw `density.cub`, processed `h2o_density.cub`,
+`h2o_density_density_cube.vesta`, and both recipes.  VESTA was not launched.
 
 Dry smoke for the current Ag(111)+benzene overlay:
 

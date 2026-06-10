@@ -1,5 +1,6 @@
 import unittest
-from src.multiwfn_vesta.vesta_controller import VestaController
+
+from multiwfn2vesta.vesta_controller import VestaController
 
 class TestVesta(unittest.TestCase):
     def setUp(self):

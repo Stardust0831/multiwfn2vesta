@@ -4,18 +4,12 @@ Updated: 2026-06-10
 
 ## Doing
 
-- Implement the next maintained Multiwfn cube-generation workflow beyond
-  `iri-run`: a generic `grid-run` wrapper around Multiwfn main function 5
-  (`study3dim`) for real-space function cubes such as density, orbital/MO,
-  Laplacian, ELF, LOL, ESP/MEP, RDG/IRI-like scalar grids, and related
-  fields.  First verify the noGUI command stream on H2O, then wire the output
-  into the existing `cube-preset`/`cube-vesta` backends.
 - Continue the long-running objective: research and turn valuable
   Multiwfn wavefunction analyses into maintained VESTA workflows, especially
-  routes that can start from ABACUS LCAO Molden files.  Next concrete target:
-  inspect Multiwfn source/menu command streams for orbital, density-derived,
-  ELF/LOL, ESP/MEP, and IGMH-style cube generation and implement one
-  maintainable runner beyond the existing `iri-run`.
+  routes that can start from ABACUS LCAO Molden files.  The latest
+  maintained increment is `grid-run`; next likely targets are batch orbital
+  export, Fukui/dual-descriptor cube generation, IGMH fragment command
+  streams, and more real ABACUS Molden smokes.
 - Turn the 2026-06-10 Multiwfn/ABACUS/VESTA research into the next
   maintainable features: IGMH command streams, real-system `abacus-molden`
   smoke coverage, Multiwfn atom scalar parsers, and more real IRI/RDG
@@ -36,6 +30,40 @@ Updated: 2026-06-10
 
 ## Done
 
+- Added `multiwfn2vesta grid-run`, a maintained Multiwfn main-function-5
+  (`study3dim`) real-space grid runner.  It discovers Multiwfn, writes the
+  exact command stream, stdout/stderr logs, raw cube directory, processed
+  `<stem>_<function>.cub`, a markdown recipe, and optionally calls
+  `cube-preset`/`cube-vesta` for `.vesta` output.
+- `grid-run` currently covers density, gradient, Laplacian, orbital/MO value,
+  spin density, nuclear ESP, ELF, LOL, total ESP/MEP, RDG,
+  sign(lambda2)rho, Delta-g, IRI, vdW potential, and orbital density.  Orbital
+  and orbital-density functions require `--orbital`; unlisted functions can
+  be driven with `--function-index` and `--expected-cube`.
+- Integrated `grid-run` into the unified CLI, aliases `multiwfn-grid`,
+  `scalar-cube-run`, and `function-cube`, the interactive menu as item `10`,
+  and console script `multiwfn2vesta-grid-run`.
+- Focused unit validation passed for the new runner and CLI entry points: 39
+  tests across `tests.test_multiwfn_grid` and `tests.test_cli`.
+- Final pre-commit validation passed: `py_compile`, 140-test no-GUI
+  regression, `grid-run --list-functions`, `grid-run --help`, top-level
+  `multiwfn2vesta --help`, and `git diff --check`.
+- Read-only sub-agent review found no blocking issue; the main follow-up
+  narrowed the interactive preset prompt to single-cube presets because
+  `iri`/`esp` presets require a texture cube.
+- Real H2O noGUI density smoke passed under
+  `/mnt/g/work/multiwfn2vesta/smoke/multiwfn_grid_run_smoke_20260610_h2o_density/products/`.
+  Command stream was `5 / 1 / 4 / 12,12,12 / 2 / 0 / q`; Multiwfn returned
+  `0`, wrote raw `density.cub`, processed `h2o_density.cub`, and generated
+  `h2o_density_density_cube.vesta` plus both recipe files without launching
+  VESTA.
+- Real H2O noGUI ELF smoke passed under
+  `/mnt/g/work/multiwfn2vesta/smoke/multiwfn_grid_run_smoke_20260610_h2o_elf/products/`
+  with `--function elf --no-vesta`, producing raw `ELF.cub`,
+  `h2o_elf.cub`, and a recipe.
+- Synced README, usage docs, CLI/cube/ABACUS skill notes, new
+  `docs/skills/multiwfn_grid_run_skill.md`, and the ABACUS/Multiwfn/VESTA
+  research matrix with the maintained `grid-run` workflow.
 - Rechecked the branch state for the user's README/merge-back follow-up:
   local `main` and `origin/main` both point at
   `17667f2a1a7380fb7a2c2495f9df04ef633e0577`, and
