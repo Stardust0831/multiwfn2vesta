@@ -22,6 +22,7 @@ class TestUnifiedCli(unittest.TestCase):
         self.assertIn("iri-run", text)
         self.assertIn("grid-run", text)
         self.assertIn("abacus-mulliken-color", text)
+        self.assertIn("multiwfn-atom-color", text)
         self.assertIn("aim-run", text)
         self.assertIn("aim-pdb", text)
         self.assertIn("aim-igmh", text)
@@ -95,6 +96,27 @@ class TestUnifiedCli(unittest.TestCase):
     def test_dispatches_abacus_mulliken_color_command(self):
         with patch("multiwfn2vesta.cli.abacus_mulliken.main", return_value=0) as mocked:
             code = cli.main(["abacus-mulliken-color", "input.vesta", "mulliken.txt", "colored.vesta"])
+
+        self.assertEqual(code, 0)
+        mocked.assert_called_once_with(["input.vesta", "mulliken.txt", "colored.vesta"])
+
+    def test_dispatches_multiwfn_atom_color_command(self):
+        with patch("multiwfn2vesta.cli.multiwfn_atom_table.main", return_value=0) as mocked:
+            code = cli.main(["multiwfn-atom-color", "input.vesta", "atom_values.csv", "colored.vesta"])
+
+        self.assertEqual(code, 0)
+        mocked.assert_called_once_with(["input.vesta", "atom_values.csv", "colored.vesta"])
+
+    def test_dispatches_multiwfn_atom_table_alias(self):
+        with patch("multiwfn2vesta.cli.multiwfn_atom_table.main", return_value=0) as mocked:
+            code = cli.main(["atom-table-color", "input.vesta", "atom_values.csv", "colored.vesta"])
+
+        self.assertEqual(code, 0)
+        mocked.assert_called_once_with(["input.vesta", "atom_values.csv", "colored.vesta"])
+
+    def test_atom_color_alias_remains_abacus_mulliken_for_compatibility(self):
+        with patch("multiwfn2vesta.cli.abacus_mulliken.main", return_value=0) as mocked:
+            code = cli.main(["atom-color", "input.vesta", "mulliken.txt", "colored.vesta"])
 
         self.assertEqual(code, 0)
         mocked.assert_called_once_with(["input.vesta", "mulliken.txt", "colored.vesta"])
@@ -559,6 +581,50 @@ class TestUnifiedCli(unittest.TestCase):
                 "-4",
                 "--vmax",
                 "4",
+                "--center",
+                "0.0",
+                "--section-index",
+                "0",
+                "--write-values",
+                "values.csv",
+            ]
+        )
+
+    def test_interactive_multiwfn_atom_color_builds_expected_args(self):
+        answers = iter(
+            [
+                "12",
+                "input.vesta",
+                "atom_values.csv",
+                "colored.vesta",
+                "charge",
+                "Atom",
+                "-1 1",
+                "0.0",
+                "0",
+                "values.csv",
+                "n",
+            ]
+        )
+        with patch("builtins.input", lambda _prompt: next(answers)):
+            with patch("sys.stdout", io.StringIO()):
+                with patch("multiwfn2vesta.cli.multiwfn_atom_table.main", return_value=0) as mocked:
+                    code = cli.main([])
+
+        self.assertEqual(code, 0)
+        mocked.assert_called_once_with(
+            [
+                "input.vesta",
+                "atom_values.csv",
+                "colored.vesta",
+                "--value-column",
+                "charge",
+                "--key-column",
+                "Atom",
+                "--vmin",
+                "-1",
+                "--vmax",
+                "1",
                 "--center",
                 "0.0",
                 "--section-index",

@@ -93,7 +93,9 @@ then delete the temporary branch.
   through isolated batch runs, and optionally write VESTA files through
   `cube-preset`.
 - Color VESTA atom/site styles from ABACUS `mulliken.txt` charge or
-  magnetism values produced by `out_mul 1`.
+  magnetism values produced by `out_mul 1`, or from generic Multiwfn-style
+  atom scalar tables such as charges, Fukui-like atom values, or atom
+  contribution tables.
 - Run Multiwfn AIM topology analysis from a wavefunction file such as
   `.molden`, `.fch`, `.fchk`, `.wfn`, or `.wfx`.
 - Convert Multiwfn `paths.pdb` and `CPs.pdb` to an atoms-only `.vesta` file
@@ -505,6 +507,39 @@ same element label.  Strict mode is the default and requires the selected
 VESTA `STRUC` site indices to match the Mulliken atom indices exactly; use
 `--non-strict` only when intentionally coloring a subset.
 
+## Multiwfn Atom Table Coloring
+
+For atom scalar values copied or exported from Multiwfn, or prepared manually
+from Multiwfn analyses, use the generic table parser:
+
+```bash
+multiwfn2vesta multiwfn-atom-color \
+  structure.vesta \
+  atom_values.txt \
+  structure_atom_values.vesta \
+  --value-column charge \
+  --vmin -1 --vmax 1 \
+  --write-values parsed_atom_values.csv
+```
+
+Accepted inputs are CSV, TSV, or whitespace text.  A typical Multiwfn-like
+table can be:
+
+```text
+Atom Label Charge
+1 C1 -0.12
+2 H1  0.08
+```
+
+Header names such as `Atom`, `index`, `label`, `charge`, `value`, `fukui`,
+`dual`, `contribution`, and `weight` are recognized.  Use `--value-column`
+when a table has multiple numeric columns.  Use `--key-column` when the key
+column is not obvious.  Tables may also be one ordered value per line, in
+which case strict mode requires the row count to match the selected VESTA
+`STRUC` section.  As with ABACUS Mulliken coloring, this patches VESTA
+`SITET` RGB values; VESTA will not know the original scalar values or create a
+native colorbar.
+
 ## Wavefunction to AIM VESTA
 
 For ABACUS-generated Molden files, check the file before using it as a
@@ -617,6 +652,7 @@ PYTHONPATH=src python3 -m unittest \
   tests.test_molden_check \
   tests.test_abacus_molden \
   tests.test_abacus_mulliken \
+  tests.test_multiwfn_atom_table \
   tests.test_cube_preset \
   tests.test_multiwfn_iri \
   tests.test_cube_vesta \
@@ -649,6 +685,10 @@ Smoke-tested ABACUS Mulliken atom coloring:
 The smoke used `abacus-mulliken-color` on a two-atom Fe example, selected the
 final ionic step, colored Fe1/Fe2 from magnetism `+4/-4`, and wrote
 `values.csv` for inspection.
+
+The maintained Multiwfn atom table parser is unit-tested with CSV, TSV, and
+whitespace table shapes through `tests.test_multiwfn_atom_table`; it reuses
+the same VESTA `SITET` RGB patching backend as ABACUS Mulliken coloring.
 
 Smoke-tested ABACUS Molden check:
 

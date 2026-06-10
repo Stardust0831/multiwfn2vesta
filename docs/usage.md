@@ -30,6 +30,7 @@ multiwfn2vesta cube-arith --help
 multiwfn2vesta iri-run --help
 multiwfn2vesta grid-run --help
 multiwfn2vesta abacus-mulliken-color --help
+multiwfn2vesta multiwfn-atom-color --help
 multiwfn2vesta aim-run --help
 multiwfn2vesta aim-pdb --help
 multiwfn2vesta aim-igmh --help
@@ -57,6 +58,9 @@ multiwfn2vesta aim-igmh --help
   RDG/IRI-like 等单 cube，并可自动接 `cube-preset` 写 `.vesta`
 - `abacus-mulliken-color`: 读取 ABACUS `out_mul 1` 生成的 `mulliken.txt`，
   按原子 Mulliken 电荷或磁矩给 VESTA `SITET` 原子颜色赋值
+- `multiwfn-atom-color`: 读取 Multiwfn 复制/导出的原子标量表，或手工整理
+  的 CSV/TSV/空白表，按原子序号、VESTA label 或结构顺序给 VESTA `SITET`
+  原子颜色赋值
 - `aim-run`: 从 `.molden`、`.fch`、`.wfn` 等波函数文件调用 Multiwfn AIM，
   再把生成的 `paths.pdb`/`CPs.pdb` 转成 atoms-only `.vesta`
 - `aim-pdb`: Multiwfn `paths.pdb`/`CPs.pdb` 转 atoms-only `.vesta`
@@ -466,6 +470,36 @@ multiwfn2vesta abacus-mulliken-color \
 不会让 VESTA 自动知道原始标量值或生成 colorbar。默认严格模式会要求所选
 VESTA `STRUC` site index 与 Mulliken atom index 完全一致；只有明确想给
 子集着色时才使用 `--non-strict`。
+
+## Multiwfn 原子表着色
+
+当 Multiwfn 给出的是原子电荷、Fukui-like 原子指标、轨道/片段原子贡献等
+原子标量表，而不是 ABACUS `mulliken.txt` 这种固定格式时，用通用入口：
+
+```bash
+multiwfn2vesta multiwfn-atom-color \
+  structure.vesta \
+  atom_values.txt \
+  structure_atom_values.vesta \
+  --value-column charge \
+  --vmin -1 --vmax 1 \
+  --write-values parsed_atom_values.csv
+```
+
+输入可以是 CSV、TSV 或空白分隔文本。常见格式示例：
+
+```text
+Atom Label Charge
+1 C1 -0.12
+2 H1  0.08
+```
+
+`Atom`、`index`、`label`、`charge`、`value`、`fukui`、`dual`、
+`contribution`、`weight` 等表头会被自动识别。一个表有多个数值列时，
+用 `--value-column` 指定要着色的列；key 列不明显时用 `--key-column`。
+没有表头的一列数据会被当作 VESTA `STRUC` 顺序值。默认严格模式要求表格
+原子序号、label 或有序行数与选中的 VESTA 结构完全一致；只有明确给子集
+着色时才用 `--non-strict`。
 
 ## ABACUS 计算到 Multiwfn Molden
 

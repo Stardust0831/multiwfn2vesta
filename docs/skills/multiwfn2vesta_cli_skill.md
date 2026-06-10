@@ -34,6 +34,7 @@ multiwfn2vesta cube-preset --help
 multiwfn2vesta cube-arith --help
 multiwfn2vesta iri-run --help
 multiwfn2vesta grid-run --help
+multiwfn2vesta multiwfn-atom-color --help
 multiwfn2vesta aim-run --help
 multiwfn2vesta aim-pdb --help
 multiwfn2vesta aim-igmh --help
@@ -54,6 +55,11 @@ Aliases:
 - `multiwfn2vesta multiwfn-grid ...`,
   `multiwfn2vesta scalar-cube-run ...`, and
   `multiwfn2vesta function-cube ...` are aliases for `grid-run`.
+- `multiwfn2vesta multiwfn-table-color ...` and
+  `multiwfn2vesta atom-table-color ...` are aliases for
+  `multiwfn-atom-color`.
+- `multiwfn2vesta atom-color ...` remains a backward-compatible alias for
+  `abacus-mulliken-color`.
 - `multiwfn2vesta multiwfn-aim ...` is the same as `aim-run`.
 - `multiwfn2vesta aim-vesta ...` is the same as `aim-pdb`.
 - `multiwfn2vesta igmh ...` is the same as `aim-igmh`.

@@ -1,5 +1,52 @@
 # Worklog
 
+## 2026-06-10: Multiwfn atom table coloring
+
+- Continued the long-running Multiwfn/ABACUS/VESTA roadmap by implementing a
+  maintained generic atom-scalar table entry point:
+  `multiwfn2vesta multiwfn-atom-color`.
+- Added `src/multiwfn2vesta/multiwfn_atom_table.py`.  The parser accepts
+  CSV, TSV, and whitespace tables copied/exported from Multiwfn or prepared
+  manually.  It supports one ordered value per line, one-based atom-index
+  keyed tables, VESTA-label keyed tables, `--value-column` for multi-value
+  tables, and `--key-column` when the key column is ambiguous.
+- The workflow reuses the existing VESTA atom-coloring backend:
+  per-atom values are mapped to blue-white-red RGB values in Python and
+  written into VESTA `SITET` rows.  It does not rely on a VESTA-native scalar
+  atom colormap.
+- Strict mode now requires ordered row counts to match the selected VESTA
+  `STRUC` section exactly.  For index- or label-keyed tables it requires the
+  same key set and rejects duplicate keys, but does not require the table row
+  order to match VESTA.  `--non-strict` is the explicit route for intentional
+  subset coloring.
+- Integrated the command into the unified CLI as `multiwfn-atom-color` with
+  aliases `multiwfn-table-color` and `atom-table-color`, plus interactive menu
+  item `12` and console script
+  `multiwfn2vesta-multiwfn-atom-color`.
+  The older `atom-color` alias remains mapped to `abacus-mulliken-color` for
+  compatibility.
+- Added focused tests in `tests/test_multiwfn_atom_table.py` and extended
+  `tests/test_cli.py` for direct dispatch, aliases, help text, and
+  interactive argument construction.
+- Synced README, usage docs, CLI/atom-coloring skill notes, the
+  ABACUS/Multiwfn/VESTA research matrix, and project/root kanban/worklog.
+- Focused validation passed before full regression: `py_compile` for touched
+  Python files, 45 tests across `tests.test_multiwfn_atom_table` and
+  `tests.test_cli`, and CLI help checks for `multiwfn-atom-color` and the
+  top-level launcher.
+- Read-only pre-commit review found and the main thread fixed three behavior
+  issues before commit: ambiguous multi-value tables now require
+  `--value-column` instead of relying on unordered alias iteration;
+  `atom-color` remains the historical ABACUS Mulliken alias; strict keyed
+  tables validate key sets rather than row order and reject duplicate keys.
+- Real CLI smoke passed under
+  `/mnt/g/work/multiwfn2vesta/smoke/multiwfn_atom_color_smoke_20260610/`.
+  The smoke colored a three-site H/O/H VESTA file from a Multiwfn-like
+  `Atom Label Charge Fukui` table, wrote `colored_after_review.vesta`, and
+  wrote normalized `values_after_review.csv`.
+- Final pre-commit validation passed: 178-test no-GUI regression and
+  `git diff --check`.
+
 ## 2026-06-10: README branch consolidation refresh
 
 - User asked to update README again, noted that the branch state looked odd,

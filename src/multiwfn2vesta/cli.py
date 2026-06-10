@@ -15,6 +15,7 @@ from . import (
     cube_preset,
     cube_vesta,
     molden_check,
+    multiwfn_atom_table,
     multiwfn_aim,
     multiwfn_grid,
     multiwfn_iri,
@@ -32,6 +33,7 @@ COMMANDS: Dict[str, Tuple[str, str]] = {
     "iri-run": ("Run Multiwfn IRI/RDG cube generation, then prepare VESTA", "multiwfn_iri"),
     "grid-run": ("Run Multiwfn real-space function cube generation, then prepare VESTA", "multiwfn_grid"),
     "abacus-mulliken-color": ("Color VESTA atoms from ABACUS mulliken.txt", "abacus_mulliken"),
+    "multiwfn-atom-color": ("Color VESTA atoms from a Multiwfn atom scalar table", "multiwfn_atom_table"),
     "aim-run": ("Run Multiwfn AIM on a wavefunction file, then convert PDB to VESTA", "multiwfn_aim"),
     "aim-pdb": ("Convert Multiwfn paths.pdb/CPs.pdb to atoms-only VESTA", "aim_vesta"),
     "aim-igmh": ("Style/render a saved AIM+IGMH VESTA overlay", "aim_igmh_vesta"),
@@ -58,6 +60,8 @@ ALIASES = {
     "function-cube": "grid-run",
     "mulliken-color": "abacus-mulliken-color",
     "atom-color": "abacus-mulliken-color",
+    "multiwfn-table-color": "multiwfn-atom-color",
+    "atom-table-color": "multiwfn-atom-color",
     "multiwfn-aim": "aim-run",
     "aim-vesta": "aim-pdb",
     "igmh": "aim-igmh",
@@ -91,6 +95,8 @@ Commands:
   grid-run   Run Multiwfn real-space function cube generation and prepare VESTA.
   abacus-mulliken-color
              Color VESTA atoms from ABACUS mulliken.txt charge/magnetism.
+  multiwfn-atom-color
+             Color VESTA atoms from a Multiwfn-style atom scalar table.
   aim-run    Run Multiwfn AIM on a wavefunction file, then convert to VESTA.
   aim-pdb    Convert Multiwfn paths.pdb/CPs.pdb to atoms-only VESTA.
   aim-igmh   Style a saved AIM+IGMH VESTA overlay, optionally render views.
@@ -108,6 +114,9 @@ Aliases:
              Aliases for iri-run.
   multiwfn-grid, scalar-cube-run, function-cube
              Aliases for grid-run.
+  multiwfn-table-color, atom-table-color
+             Aliases for multiwfn-atom-color.
+  atom-color  Backward-compatible alias for abacus-mulliken-color.
   aim-vesta  Alias for aim-pdb.
   igmh       Alias for aim-igmh.
 
@@ -121,6 +130,7 @@ Examples:
   multiwfn2vesta iri-run input.molden iri_products --timeout 300
   multiwfn2vesta grid-run input.molden grid_products --function density
   multiwfn2vesta abacus-mulliken-color input.vesta mulliken.txt colored.vesta
+  multiwfn2vesta multiwfn-atom-color input.vesta atom_values.csv colored.vesta --value-column charge
   multiwfn2vesta aim-run input.molden aim_out
   multiwfn2vesta aim-pdb paths.pdb aim_atoms_only.vesta --cps-pdb CPs.pdb
   multiwfn2vesta aim-igmh overlay.vesta products --label-bcp-sites
@@ -550,6 +560,45 @@ def interactive_abacus_mulliken_color() -> int:
     return abacus_mulliken.main(argv)
 
 
+def interactive_multiwfn_atom_color() -> int:
+    print("\nMultiwfn atom table -> VESTA atom colors")
+    input_vesta = _prompt("input .vesta", required=True)
+    atom_table = _prompt("atom scalar table (CSV/TSV/text)", required=True)
+    output_vesta = _prompt("output .vesta", default=str(Path(input_vesta).with_name("atom_table_colored.vesta")))
+    argv: List[str] = [input_vesta, atom_table, output_vesta]
+
+    value_column = _prompt("value column name (empty to infer)")
+    if value_column:
+        argv.extend(["--value-column", value_column])
+
+    key_column = _prompt("key column name for atom index/label (empty to infer)")
+    if key_column:
+        argv.extend(["--key-column", key_column])
+
+    scale = _prompt("fixed color range vmin vmax (empty for auto symmetric)")
+    if scale:
+        parts = scale.split()
+        if len(parts) != 2:
+            print("Color range needs exactly two numbers.")
+            return 2
+        argv.extend(["--vmin", parts[0], "--vmax", parts[1]])
+
+    center = _prompt("color center", default="0.0")
+    argv.extend(["--center", center])
+
+    section_index = _prompt("VESTA structure section index", default="0")
+    argv.extend(["--section-index", section_index])
+
+    values_csv = _prompt("write normalized values CSV (empty to skip)")
+    if values_csv:
+        argv.extend(["--write-values", values_csv])
+
+    if _yes_no("allow partial atom values", default=False):
+        argv.append("--non-strict")
+
+    return multiwfn_atom_table.main(argv)
+
+
 def interactive_main() -> int:
     print("multiwfn2vesta interactive launcher\n")
     print("0) Discover Multiwfn/VESTA executables")
@@ -564,6 +613,7 @@ def interactive_main() -> int:
     print("9) ABACUS calculation -> Multiwfn Molden")
     print("10) Wavefunction -> Multiwfn real-space function cube -> VESTA")
     print("11) Cube arithmetic -> density difference/Fukui/dual descriptor VESTA")
+    print("12) Multiwfn atom table -> VESTA atom colors")
     print("q) Quit")
     choice = _prompt("choice", default="3").lower()
     if choice in {"0", "discover", "where", "env"}:
@@ -595,6 +645,8 @@ def interactive_main() -> int:
         return interactive_abacus_molden()
     if choice in {"10", "grid-run", "multiwfn-grid", "scalar-cube-run", "function-cube"}:
         return interactive_grid_run()
+    if choice in {"12", "multiwfn-atom-color", "multiwfn-table-color", "atom-table-color"}:
+        return interactive_multiwfn_atom_color()
     if choice in {"q", "quit", "exit"}:
         return 0
     print(f"Unknown choice: {choice}")
@@ -621,6 +673,8 @@ def run_command(command: str, args: Sequence[str]) -> int:
         return multiwfn_grid.main(args)
     if command == "abacus-mulliken-color":
         return abacus_mulliken.main(args)
+    if command == "multiwfn-atom-color":
+        return multiwfn_atom_table.main(args)
     if command == "aim-run":
         return multiwfn_aim.main(args)
     if command == "aim-pdb":

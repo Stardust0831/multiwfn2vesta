@@ -94,7 +94,7 @@ occupations, and density derivatives from the wavefunction representation.
 | Molecular surface mapped properties | Full wavefunction or cube pair | Feasible through Molden; ABACUS can provide density/potential cubes | `surf.cub`, `mapfunc.cub`, `density.cub`, `avglocion.cub`, `surfanalysis.pdb` | Surface cube plus texture; extrema as pseudo-sites | Extend VESTA texture and point overlay code |
 | ALIE / LEA / LEAE | Full wavefunction, occupied/virtual orbitals | Feasible only if ABACUS Molden orbitals/energies are adequate; virtual levels in metals risky | `avglocion.cub`, `userfunc.cub`, `surfanalysis.pdb` | Colored density surface plus extrema points | Prototype on molecules/insulators first |
 | vdW/repulsion/dispersion potential | Structure and/or wavefunction depending option | Feasible, often structure driven | `vdW.cub`, `repul.cub`, `disp.cub`, `density.cub` | Potential surfaces/slices, density surface context | Add low-risk cube preset |
-| Atom scalar coloring | Per-atom values from Multiwfn or ABACUS `mulliken.txt` | Strong for ABACUS `out_mul`; also charges/Fukui from Multiwfn | CSV/table, `mulliken.txt` | Patch `SITET` RGB values | ABACUS Mulliken parser implemented; add Multiwfn atom table parsers next |
+| Atom scalar coloring | Per-atom values from Multiwfn or ABACUS `mulliken.txt` | Strong for ABACUS `out_mul`; also charges/Fukui from Multiwfn | CSV/table, `mulliken.txt` | Patch `SITET` RGB values | ABACUS Mulliken parser implemented; generic Multiwfn atom table parser implemented as `multiwfn2vesta multiwfn-atom-color` |
 
 ### P2: Specialized, Useful Later
 
@@ -167,7 +167,10 @@ Known limitations:
    templates and downstream chaining; use `grid-run --function esp` plus
    `cube-preset esp` for Multiwfn ESP-on-density templates.
 4. Add more atom-scalar parsers.  ABACUS `mulliken.txt` now feeds VESTA atom
-   coloring directly; Multiwfn atom tables remain future work.
+   coloring directly, and generic Multiwfn atom tables now feed the same
+   backend through `multiwfn2vesta multiwfn-atom-color`.  Remaining work is
+   more specialized parsers for raw Multiwfn menu transcripts when they prove
+   stable enough to support directly.
 5. Extend `grid-run` beyond the initial main-function-5 table where useful:
    kinetic density variants, more real-system orbital batch smokes, possible
    future Multiwfn main function `200` integration if it proves more reliable
@@ -197,6 +200,7 @@ Implemented or partly implemented:
   IRI/RDG runner
 - VESTA atom scalar RGB patching
 - ABACUS `mulliken.txt` charge/magnetism atom coloring
+- Generic Multiwfn atom scalar table coloring
 - VESTA camera/layer/three-view utilities
 
 Main gaps:
@@ -207,7 +211,9 @@ Main gaps:
   hooks.
 - ABACUS Molden wrapper now exists; remaining work is real-system smoke
   coverage and tighter integration with downstream Multiwfn command streams.
-- No Multiwfn atom table parser yet.
+- Generic Multiwfn atom table parsing now exists for CSV/TSV/whitespace
+  tables; remaining work is direct parsers for specialized raw Multiwfn menu
+  transcripts.
 - Maintained Multiwfn command streams now exist for AIM, IRI/RDG, and
   main-function-5 grid cubes as `multiwfn2vesta grid-run`, including repeated
   isolated batch orbital/orbital-density export through `--orbitals`.

@@ -1,6 +1,37 @@
 # Project Kanban
 
-Updated: 2026-06-10 09:29 CST
+Updated: 2026-06-10 09:44 CST
+
+## Current Request: 2026-06-10 Multiwfn Atom Table Coloring
+
+- [x] Record the continued long-running objective: turn valuable
+  Multiwfn/ABACUS wavefunction analyses into maintained VESTA workflows.
+- [x] Chosen next concrete increment from the roadmap: a generic Multiwfn
+  atom scalar table parser that feeds the maintained VESTA atom-coloring
+  backend.  This targets Multiwfn charges, Fukui-like atom contributions,
+  orbital/composition atom tables, or hand-normalized atom values exported as
+  text/CSV/TSV.
+- [x] Inspect the existing `vesta_atom_coloring`, `abacus_mulliken`, unified
+  CLI, package metadata, and tests before editing.
+- [x] Implement `multiwfn2vesta multiwfn-atom-color` plus parser tests and CLI
+  tests.
+- [x] Sync README, usage docs, skill notes, research matrix, kanban, and
+  worklog.
+- [x] Focused validation passed after review fixes: `py_compile`, 45 tests across
+  `tests.test_multiwfn_atom_table` and `tests.test_cli`, and
+  `multiwfn2vesta multiwfn-atom-color --help`.
+- [x] Read-only pre-commit review found and the main thread fixed the
+  behavior risks before commit: ambiguous multi-value tables now require
+  `--value-column`; `atom-color` remains the historical
+  `abacus-mulliken-color` alias; strict keyed tables validate key sets and
+  duplicate keys rather than row order.
+- [x] Real CLI smoke passed under
+  `/mnt/g/work/multiwfn2vesta/smoke/multiwfn_atom_color_smoke_20260610/`,
+  writing `colored_after_review.vesta` and `values_after_review.csv`.
+- [x] Full validation passed: 178-test no-GUI regression and
+  `git diff --check`.
+- [ ] Commit and push to GitHub `main` as
+  `Stardust0831`.
 
 ## Current Request: 2026-06-10 README Branch Consolidation Refresh
 
@@ -37,10 +68,11 @@ Updated: 2026-06-10 09:29 CST
 
 - Continue the long-running objective: research and turn valuable
   Multiwfn wavefunction analyses into maintained VESTA workflows, especially
-  routes that can start from ABACUS LCAO Molden files.  The batch orbital
-  `grid-run` increment is now complete and pushed; next likely targets are
-  higher-level charged-state cube templates, IGMH fragment command streams,
-  Multiwfn atom scalar parsers, and more real ABACUS Molden smokes.
+  routes that can start from ABACUS LCAO Molden files.  The current increment
+  implements a generic Multiwfn atom scalar table parser for VESTA atom
+  coloring; next likely targets after push are higher-level charged-state cube
+  templates, IGMH fragment command streams, specialized raw Multiwfn atom
+  transcript parsers, and more real ABACUS Molden smokes.
 - Turn the 2026-06-10 Multiwfn/ABACUS/VESTA research into the next
   maintainable features: IGMH command streams, real-system `abacus-molden`
   smoke coverage, Multiwfn atom scalar parsers, and more real IRI/RDG

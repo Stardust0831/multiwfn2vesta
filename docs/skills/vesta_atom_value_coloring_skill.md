@@ -43,6 +43,26 @@ maps values by one-based atom index.  Strict mode verifies exact VESTA
 `STRUC`/Mulliken index agreement; use `--non-strict` only for an intentional
 subset.
 
+Generic Multiwfn atom table shortcut:
+
+```bash
+cd /mnt/g/work/multiwfn2vesta/project
+multiwfn2vesta multiwfn-atom-color \
+  input.vesta atom_values.txt output_colored.vesta \
+  --value-column charge \
+  --vmin -1 --vmax 1 \
+  --write-values parsed_atom_values.csv
+```
+
+Use this for Multiwfn-copied/exported atom charge, Fukui-like, orbital
+contribution, or other per-atom scalar tables.  It accepts CSV, TSV, and
+whitespace text.  Headered tables can use `Atom`/`index` for one-based atom
+indices, `label`/`site_label` for VESTA labels, and columns such as `value`,
+`charge`, `fukui`, `dual`, `contribution`, or `weight` for scalars.  Use
+`--value-column` for tables with multiple numeric columns.  Strict mode
+requires exact VESTA site agreement; `--non-strict` is only for intentional
+subsets.
+
 ## Value tables
 
 Ordered values:
@@ -88,7 +108,9 @@ patch_vesta_atom_colors_file(
 
 ```bash
 cd /mnt/g/work/multiwfn2vesta/project
-PYTHONPATH=src python -m unittest tests.test_vesta_atom_coloring -v
+PYTHONPATH=src python -m unittest \
+  tests.test_vesta_atom_coloring \
+  tests.test_multiwfn_atom_table -v
 ```
 
 Inspect the output:
