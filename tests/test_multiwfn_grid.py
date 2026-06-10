@@ -29,6 +29,18 @@ density comment two
 """
 
 
+IRI_CUBE = """iri comment one
+iri comment two
+    2    -1.000000    -2.000000     0.500000
+    2     0.500000     0.000000     0.000000
+    2     0.000000     0.500000     0.000000
+    2     0.000000     0.000000     0.500000
+    8     8.000000    -1.000000    -2.000000     0.500000
+    1     1.000000    -0.500000    -2.000000     0.500000
+ 0.00 0.40 0.80 1.00 1.10 1.20 1.60 2.00
+"""
+
+
 class TestMultiwfnGridRunner(unittest.TestCase):
     def make_candidate(self, root):
         fake_exe = Path(root) / "Multiwfn_noGUI"
@@ -49,6 +61,7 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertIn("preset=orbital-density", text)
         self.assertIn("preset=rdg-scalar", text)
         self.assertIn("preset=promolecular-rdg", text)
+        self.assertIn("preset=iri-scalar", text)
         self.assertIn("promolecular-rdg", text)
         self.assertIn("alie", text)
         self.assertIn("mapped preset with --surface-cube: esp", text)
@@ -68,6 +81,8 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertEqual(resolve_grid_function("orbdens").preset, "orbital-density")
         self.assertEqual(resolve_grid_function("rdg").preset, "rdg-scalar")
         self.assertEqual(resolve_grid_function("rdg-pro").preset, "promolecular-rdg")
+        self.assertEqual(resolve_grid_function("iri").preset, "iri-scalar")
+        self.assertEqual(resolve_grid_function("interaction-region-indicator").output_filename, "IRI.cub")
         self.assertEqual(resolve_grid_function(None, 18).name, "alie")
         self.assertEqual(resolve_grid_function("sl2r-pro").index, 16)
         custom = resolve_grid_function(None, 99)
@@ -180,6 +195,42 @@ class TestMultiwfnGridRunner(unittest.TestCase):
             manifest = result.vesta_result.manifest_path.read_text(encoding="utf-8")
             self.assertIn("canonical_preset: `gradient-norm`", manifest)
             self.assertIn("effective_isosurface: `0.05`", manifest)
+
+    def test_run_multiwfn_grid_iri_uses_standalone_iri_scalar_preset(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            wavefunction = root / "h2o.fch"
+            wavefunction.write_text("wavefunction", encoding="utf-8")
+            candidate = self.make_candidate(root)
+
+            def fake_run(command, **kwargs):
+                cwd = Path(kwargs["cwd"])
+                (cwd / "IRI.cub").write_text(IRI_CUBE, encoding="utf-8")
+                return subprocess.CompletedProcess(command, 0, stdout="ok", stderr="")
+
+            with patch("multiwfn2vesta.multiwfn_grid.find_multiwfn", return_value=candidate):
+                with patch("multiwfn2vesta.multiwfn_grid.subprocess.run", side_effect=fake_run):
+                    result = run_multiwfn_grid(
+                        wavefunction,
+                        root / "products",
+                        function_name="iri",
+                        stem="case",
+                        grid_points=(10, 11, 12),
+                    )
+
+            self.assertTrue(result.success)
+            self.assertEqual(result.command_file.read_text(encoding="utf-8"), "5\n24\n4\n10,11,12\n2\n0\nq\n")
+            self.assertEqual(result.raw_cube.name, "IRI.cub")
+            self.assertEqual(result.cube.name, "case_iri.cub")
+            self.assertIsNotNone(result.vesta_result)
+            self.assertEqual(result.vesta_result.vesta_path.name, "case_iri_iri-scalar_cube.vesta")
+            recipe = result.recipe_path.read_text(encoding="utf-8")
+            self.assertIn("function_name: `iri`", recipe)
+            self.assertIn("function_index: `24`", recipe)
+            self.assertIn("auto_vesta_preset: `iri-scalar`", recipe)
+            manifest = result.vesta_result.manifest_path.read_text(encoding="utf-8")
+            self.assertIn("canonical_preset: `iri-scalar`", manifest)
+            self.assertIn("effective_isosurface: `1.0`", manifest)
 
     def test_run_multiwfn_grid_can_map_generated_texture_on_surface_cube(self):
         with tempfile.TemporaryDirectory() as tmp:

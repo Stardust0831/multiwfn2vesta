@@ -222,6 +222,7 @@ multiwfn2vesta cube-preset hamiltonian-ked 'K(r).cub' cube_products
 multiwfn2vesta cube-preset lagrangian-ked 'G(r).cub' cube_products
 multiwfn2vesta cube-preset rdg-scalar RDG.cub cube_products
 multiwfn2vesta cube-preset promolecular-rdg RDGprodens.cub cube_products
+multiwfn2vesta cube-preset iri-scalar IRI.cub cube_products
 multiwfn2vesta cube-preset potential pot_es.cube cube_products
 multiwfn2vesta cube-preset partial-charge pchg.cube cube_products
 multiwfn2vesta cube-preset wavefunction-norm wfc_norm.cube cube_products
@@ -269,6 +270,9 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
   等值面 `0.5`；双 cube 的 RDG/NCI 染色图仍用 `cube-preset iri`
 - `promolecular-rdg`：单正值等值面，别名包括 `rdg-pro`、`prodens-rdg`，
   用于 Multiwfn `RDGprodens.cub`，默认等值面 `0.4`
+- `iri-scalar`：单正值等值面，别名包括 `iri-cube`、`standalone-iri`，
+  用于单 cube 的 Multiwfn `IRI.cub`，默认等值面 `1.0`；双 cube 的
+  IRI/RDG/NCI 染色图仍用 `cube-preset iri`
 - `potential`：正/负等值面，别名包括 `abacus-potential`、`out-pot`、
   `pot-es`，用于 ABACUS `out_pot` 直接势场 cube；如果是密度表面按电势染色，
   用 `esp`
@@ -511,9 +515,12 @@ multiwfn2vesta grid-run --list-functions
   `RDGprodens.cub`，默认分别接 `cube-preset rdg-scalar` /
   `cube-preset promolecular-rdg`；如果要 IRI/RDG/NCI 那种 surface+texture
   双 cube 图，优先用 `iri-run` 或显式 `cube-preset iri`
-- `signlambda2rho` / `promolecular-signlambda2rho` / `iri` / `delta-g`：
-  其它单标量 cube，其中 sign(lambda2)rho 配合 `--surface-cube` 可作为
-  `cube-preset iri` 的 texture
+- `iri` / `interaction-region-indicator`：函数 `24`，原始输出 `IRI.cub`，
+  默认接 `cube-preset iri-scalar`，按单正值等值面显示，默认等值面
+  `1.0`
+- `signlambda2rho` / `promolecular-signlambda2rho` / `delta-g`：其它单标量
+  cube，其中 sign(lambda2)rho 配合 `--surface-cube` 可作为 `cube-preset
+  iri` 的 texture
 
 轨道例子：
 

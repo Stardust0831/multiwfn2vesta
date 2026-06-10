@@ -97,6 +97,7 @@ class TestCubePreset(unittest.TestCase):
         self.assertIn("iri", text)
         self.assertIn("rdg-scalar", text)
         self.assertIn("promolecular-rdg", text)
+        self.assertIn("iri-scalar", text)
         self.assertIn("stm", text)
         self.assertIn("domain", text)
         self.assertIn("basin", text)
@@ -343,6 +344,23 @@ basin type two
             self.assertIn("canonical_preset: `promolecular-rdg`", manifest)
             self.assertIn("requested_preset: `rdg-pro`", manifest)
             self.assertIn("RDGprodens.cub", manifest)
+
+    def test_standalone_iri_scalar_preset_keeps_texture_route_available(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            cube = self.write_tmp(root, "IRI.cub", SURFACE_CUBE)
+
+            result = run_preset("standalone-iri", cube, root / "products")
+
+            text = result.vesta_path.read_text(encoding="utf-8")
+            manifest = result.manifest_path.read_text(encoding="utf-8")
+
+            self.assertRegex(text, r"ISURF\n  1   1\s+1(?:\.0+)?\s+120\s+210\s+190\s+145\s+255")
+            self.assertNotIn("IMPORT_TEXTURE", text)
+            self.assertIn("canonical_preset: `iri-scalar`", manifest)
+            self.assertIn("requested_preset: `standalone-iri`", manifest)
+            self.assertIn("IRI.cub", manifest)
+            self.assertIn("keep using preset `iri` with --texture-cube", manifest)
 
     def test_abacus_direct_potential_preset_writes_signed_surfaces(self):
         with tempfile.TemporaryDirectory() as tmp:

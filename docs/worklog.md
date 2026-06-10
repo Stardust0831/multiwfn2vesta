@@ -1,5 +1,25 @@
 # Worklog
 
+## 2026-06-10: Standalone IRI scalar cube display preset
+
+- Added `cube-preset iri-scalar` for standalone Multiwfn `IRI.cub` from
+  main-function-5 function `24`.  It writes a single positive VESTA
+  isosurface using Multiwfn's source default `sur_value=1D0`.
+- Updated `grid-run --function iri` and alias `interaction-region-indicator`
+  so generated `IRI.cub` products route to `cube-preset iri-scalar` instead
+  of the generic density preset.
+- Preserved the existing `cube-preset iri` / `rdg` behavior for two-cube
+  IRI/RDG/NCI mapped surfaces colored by sign(lambda2)rho-like texture cubes.
+- Added focused tests for preset listing, standalone `IRI.cub` single-surface
+  output, texture-route separation, function alias resolution, and a fake
+  Multiwfn `grid-run --function iri` run that verifies the recipe and VESTA
+  manifest use `iri-scalar`.
+- Validation passed: focused `py_compile`, 59 focused tests across
+  `tests.test_cube_preset` and `tests.test_multiwfn_grid`, the full 275-test
+  no-GUI regression, `bin/multiwfn2vesta cube-preset --list-presets`,
+  `bin/multiwfn2vesta grid-run --list-functions`,
+  `bin/multiwfn2vesta --help`, and `git diff --check`.
+
 ## 2026-06-10: Gradient-norm cube display preset
 
 - Added `cube-preset gradient-norm` for Multiwfn `gradient.cub` from

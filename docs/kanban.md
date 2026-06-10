@@ -1,6 +1,52 @@
 # Project Kanban
 
-Updated: 2026-06-10 20:14 CST
+Updated: 2026-06-10 20:31 CST
+
+## Current Request: 2026-06-10 README Refresh And Main Branch Closeout
+
+- [x] Record user request: update README, inspect the unusual-looking branch
+  state, merge back to one maintained branch if needed, and use
+  `Stardust0831` identity.
+- [x] Inspect branch and identity state without destructive operations:
+  local `main`, `origin/main`, and `origin/HEAD` are aligned at
+  `34b2b012ced5dd474874fecc55f74ac17e0c4caa`; `origin` points to
+  `Github:Stardust0831/multiwfn2vesta.git`; repository-local identity is
+  `Stardust0831 <13862180016@163.com>`.
+- [x] Decide whether a branch merge is needed: no merge is needed because
+  local and remote expose only the maintained `main` branch.
+- [x] Refresh README repository-status wording to the current branch-audit
+  baseline and keep the active IRI scalar increment on the same `main`
+  branch.
+- [x] Sync root docs, validate, review, then prepare commit/push on `main`:
+  root docs mirror is clean; focused `py_compile`, 59 focused tests, full
+  275-test no-GUI regression, `cube-preset --list-presets`,
+  `grid-run --list-functions`, `bin/multiwfn2vesta --help`, remote-head
+  audit, and `git diff --check` passed.  Commit/push and post-push branch
+  verification are reported in the assistant response to avoid a
+  self-referential hash loop.
+
+## Current Continuation: 2026-06-10 IRI Scalar Cube Display
+
+- [x] Record resumed objective: keep expanding maintained VESTA-ready
+  Multiwfn/ABACUS wavefunction and cube analyses, prioritizing products that
+  ABACUS can feed through Molden or direct cube routes.
+- [x] Recheck current state: `main` is aligned with `origin/main` at
+  `34b2b012ced5dd474874fecc55f74ac17e0c4caa`; untracked local probes
+  `domain.cub` and `domain.pdb` remain uncommitted.
+- [x] Inspect current `grid-run` and `cube-preset` coverage for real-space
+  function `24` IRI scalar cubes: `grid-run` already generates `IRI.cub` but
+  routes it through generic `density`; Multiwfn 2026.6.2 `0123dim.f90`
+  confirms function `24` exports `IRI.cub` and sets `sur_value=1D0`.
+- [x] Implement a standalone `iri-scalar` preset and map `grid-run
+  --function iri` to it without changing the existing two-cube
+  `cube-preset iri` / `rdg` texture route; focused `py_compile` and
+  `tests.test_cube_preset tests.test_multiwfn_grid` currently pass with 59
+  tests.
+- [x] Sync root docs, validate, review, then prepare commit/push on `main`:
+  root docs mirror is clean; focused and full no-GUI tests passed; CLI
+  preset/function listings show `iri-scalar`; main-thread diff review found
+  no blocker.  Commit/push and post-push verification are reported in the
+  assistant response.
 
 ## Current Request: 2026-06-10 README Refresh At Spin-Density Tip
 

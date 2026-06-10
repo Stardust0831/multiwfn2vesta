@@ -217,6 +217,20 @@ PRESETS: Tuple[CubePreset, ...] = (
         ),
     ),
     CubePreset(
+        name="iri-scalar",
+        aliases=("iri-cube", "standalone-iri", "interaction-region-indicator"),
+        description="Single positive isosurface for standalone IRI scalar cubes.",
+        surface_mode="single",
+        isosurface=1.0,
+        positive_rgb=(120, 210, 190),
+        surface_opacity=(145, 255),
+        notes=(
+            "Use for standalone Multiwfn IRI.cub from real-space function 24. "
+            "For IRI/RDG/NCI surfaces colored by sign(lambda2)rho, keep using preset `iri` with --texture-cube. "
+            "The default isosurface follows Multiwfn main-function-5 sur_value."
+        ),
+    ),
+    CubePreset(
         name="stm",
         aliases=("ldos", "stm-ldos", "tunneling-current"),
         description="Constant-current STM/LDOS tunneling-current isosurface.",

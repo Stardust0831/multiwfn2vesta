@@ -139,7 +139,7 @@ occupations, and density derivatives from the wavefunction representation.
 
 | Analysis | Multiwfn input | ABACUS feasibility | Multiwfn output | VESTA representation | Project action |
 | --- | --- | --- | --- | --- | --- |
-| IRI/NCI/RDG | Full wavefunction, or promolecular approximation from structure | Molden route feasible; promolecular route can avoid wavefunction | `IRI.cub`, `RDG.cub`, `RDGprodens.cub`, `sl2r.cub`, `func1.cub`, `func2.cub` | Standalone RDG scalar isosurfaces, or isosurface plus texture cube; section planes off | `multiwfn2vesta iri-run` implemented for the two-cube weak-interaction stream; `grid-run --surface-cube` can use sign(lambda2)rho cubes as texture on an existing RDG/IRI surface; `cube-preset rdg-scalar` and `promolecular-rdg` cover standalone `RDG.cub`/`RDGprodens.cub` without stealing the existing `rdg -> iri` texture alias |
+| IRI/NCI/RDG | Full wavefunction, or promolecular approximation from structure | Molden route feasible; promolecular route can avoid wavefunction | `IRI.cub`, `RDG.cub`, `RDGprodens.cub`, `sl2r.cub`, `func1.cub`, `func2.cub` | Standalone scalar isosurfaces, or isosurface plus texture cube; section planes off | `multiwfn2vesta iri-run` implemented for the two-cube weak-interaction stream; `grid-run --surface-cube` can use sign(lambda2)rho cubes as texture on an existing RDG/IRI surface; `cube-preset rdg-scalar`, `promolecular-rdg`, and `iri-scalar` cover standalone `RDG.cub`/`RDGprodens.cub`/`IRI.cub` without stealing the existing `rdg -> iri` texture alias |
 | ESP/MEP on density surface | Full wavefunction or ABACUS `out_pot` plus density cube | Strong direct cube route; Molden route for Multiwfn ESP | `density.cub`, `totesp.cub`, `pot_es.cube`, `pots*.cube` | Density isosurface colored by potential texture | `grid-run --function esp --surface-cube density.cub --grid-mode cube --grid-cube density.cub` now generates the ESP texture and writes the mapped-surface VESTA file directly |
 | STM/LDOS | Full wavefunction with GTF information | Good candidate for Gamma LCAO Molden; metals and Fermi-level choices need care | `STM.cub` | Single positive LDOS/current isosurface or slices | `stm-run` now automates Multiwfn `300 -> 4`, switches to constant-current mode, exports `STM.cub`, and calls `cube-preset stm` |
 | Molecular surface mapped properties | Full wavefunction or cube pair | Feasible through Molden; ABACUS can provide density/potential cubes | `surf.cub`, `mapfunc.cub`, `density.cub`, `avglocion.cub`, `surfanalysis.pdb` | Surface cube plus texture; extrema as atoms-only overlay phase | `cube-preset surface-map` covers surface+texture display using `molsurfmap.vmd` defaults; `--surfanalysis-pdb` and `surface-extrema` overlay surface extrema |
@@ -327,3 +327,7 @@ Main gaps:
   gradient-norm` route and `grid-run --function gradient` maps to it instead
   of the generic density preset.  This is primarily useful for ABACUS Molden
   handoffs where Multiwfn computes `gradient.cub` from the wavefunction.
+- Standalone IRI scalar visualization now has a distinct `cube-preset
+  iri-scalar` route and `grid-run --function iri` maps to it.  The existing
+  `cube-preset iri`/`rdg` route remains reserved for two-cube IRI/RDG/NCI
+  surfaces colored by sign(lambda2)rho-like texture cubes.

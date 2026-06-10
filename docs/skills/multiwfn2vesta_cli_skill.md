@@ -160,6 +160,7 @@ multiwfn2vesta cube-preset hamiltonian-ked 'K(r).cub' cube_products
 multiwfn2vesta cube-preset lagrangian-ked 'G(r).cub' cube_products
 multiwfn2vesta cube-preset rdg-scalar RDG.cub cube_products
 multiwfn2vesta cube-preset promolecular-rdg RDGprodens.cub cube_products
+multiwfn2vesta cube-preset iri-scalar IRI.cub cube_products
 multiwfn2vesta cube-preset potential pot_es.cube cube_products
 multiwfn2vesta cube-preset partial-charge pchg.cube cube_products
 multiwfn2vesta cube-preset wavefunction-norm wfc_norm.cube cube_products
@@ -413,8 +414,9 @@ defaults are function-specific where possible: `gradient.cub` uses
 `gradient-norm`, `spindensity.cub` uses `cube-preset spin-density`,
 `orbdens.cub` uses `orbital-density`, `laplacian.cub` uses `laplacian`,
 `K(r).cub` uses `hamiltonian-ked`, `G(r).cub` uses `lagrangian-ked`,
-`RDG.cub` uses `rdg-scalar`, and `RDGprodens.cub` uses
-`promolecular-rdg`.
+`RDG.cub` uses `rdg-scalar`, `RDGprodens.cub` uses `promolecular-rdg`, and
+`IRI.cub` uses `iri-scalar`.  The existing `cube-preset iri` name remains
+the two-cube surface+texture route.
 
 Batch frontier orbital export:
 

@@ -51,6 +51,7 @@ multiwfn2vesta cube-preset hamiltonian-ked 'K(r).cub' cube_products
 multiwfn2vesta cube-preset lagrangian-ked 'G(r).cub' cube_products
 multiwfn2vesta cube-preset rdg-scalar RDG.cub cube_products
 multiwfn2vesta cube-preset promolecular-rdg RDGprodens.cub cube_products
+multiwfn2vesta cube-preset iri-scalar IRI.cub cube_products
 multiwfn2vesta cube-preset potential pot_es.cube cube_products
 multiwfn2vesta cube-preset partial-charge pchg.cube cube_products
 multiwfn2vesta cube-preset wavefunction-norm wfc_norm.cube cube_products
@@ -216,6 +217,10 @@ passes it back through `cube-preset`.
 - `promolecular-rdg` aliases: `rdg-pro`, `prodens-rdg`,
   `promolecular-rdg-scalar`; single positive surface for Multiwfn
   `RDGprodens.cub`, default isosurface `0.4`.
+- `iri-scalar` aliases: `iri-cube`, `standalone-iri`,
+  `interaction-region-indicator`; single positive surface for standalone
+  Multiwfn `IRI.cub`, default isosurface `1.0`.  Use `iri` with
+  `--texture-cube` for IRI/RDG/NCI surfaces colored by sign(lambda2)rho.
 - `potential` aliases: `abacus-potential`, `out-pot`, `local-potential`,
   `pot-es`; signed direct potential cube isosurfaces, default magnitude
   `0.05`.  Use `esp` instead for density-surface potential coloring.

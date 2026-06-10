@@ -64,7 +64,10 @@ multiwfn2vesta grid-run --list-functions
   `18`, raw `avglocion.cub`, preset `density`; mapped preset `alie` with
   `--surface-cube`.
 - `delta-g`: function `22`, raw `Delta_g.cub`, preset `density`.
-- `iri`: function `24`, raw `IRI.cub`, preset `density`.
+- `iri`, alias `interaction-region-indicator`: function `24`, raw
+  `IRI.cub`, preset `iri-scalar` with a single positive isosurface.  Use the
+  separate two-cube `cube-preset iri` route when coloring IRI/RDG/NCI surfaces
+  by sign(lambda2)rho.
 - `vdw-potential`: function `25`, raw `vdWpot.cub`, preset `signed`;
   mapped preset `vdw-map` with `--surface-cube`.
 - `orbital-density`: function `44`, raw `orbdens.cub`, preset

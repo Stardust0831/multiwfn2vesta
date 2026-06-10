@@ -76,7 +76,7 @@ GRID_FUNCTIONS: Tuple[GridFunction, ...] = (
         mapped_preset="alie",
     ),
     GridFunction("delta-g", 22, "Delta_g.cub", "density", ("deltag", "delta_g")),
-    GridFunction("iri", 24, "IRI.cub", "density", ("interaction-region-indicator",)),
+    GridFunction("iri", 24, "IRI.cub", "iri-scalar", ("interaction-region-indicator",)),
     GridFunction("vdw-potential", 25, "vdWpot.cub", "signed", ("vdw", "vdwpot"), mapped_preset="vdw-map"),
     GridFunction("orbital-density", 44, "orbdens.cub", "orbital-density", ("orbdens", "mo-density"), True),
 )
