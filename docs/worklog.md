@@ -21,6 +21,17 @@
   describes future experiment branches as short-lived branches that should be
   merged or fast-forwarded back to `main`.
 - Synced project/root kanban and worklog entries with this branch audit.
+- Validation before the first README/docs commit passed:
+  `git diff --check`, `bin/multiwfn2vesta --help`,
+  `git branch --all --verbose --no-abbrev`,
+  `git ls-remote --symref origin HEAD`, and `git ls-remote --heads origin`.
+- Committed and pushed the README branch consolidation refresh to GitHub
+  `main` as `500ffece49c42bcbb4a44d49bcd31044d915bce0`
+  (`Refresh README branch consolidation status`).
+- Post-push verification after `git fetch --prune origin`: project `HEAD`,
+  `origin/main`, and `origin/HEAD` all pointed at `500ffec`; remote heads
+  exposed only `refs/heads/main`; repository-local identity remained
+  `Stardust0831 <13862180016@163.com>`.
 
 ## 2026-06-10: Batch orbital grid export and README branch refresh
 

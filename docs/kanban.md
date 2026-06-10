@@ -19,7 +19,19 @@ Updated: 2026-06-10 09:29 CST
   state is clear and old branch-audit details do not read like competing
   active states.
 - [x] Sync project/root work records with this branch audit.
-- [ ] Validate, commit, push, and run a final branch/identity verification.
+- [x] Validated with `git diff --check`, `bin/multiwfn2vesta --help`,
+  `git branch --all --verbose --no-abbrev`, `git ls-remote --symref origin
+  HEAD`, and `git ls-remote --heads origin`.
+- [x] Committed and pushed the README branch consolidation refresh to GitHub
+  `main` as `500ffece49c42bcbb4a44d49bcd31044d915bce0`
+  (`Refresh README branch consolidation status`).
+- [x] Post-push verification after `git fetch --prune origin`: project
+  `HEAD`, `origin/main`, and `origin/HEAD` all point at `500ffec`; the remote
+  exposes only `refs/heads/main`; repository-local identity remains
+  `Stardust0831 <13862180016@163.com>`.
+- [x] Prepared this closure record for the final docs-only push.  The closure
+  commit hash and final branch check are reported in the assistant response to
+  avoid an infinite chain of "record the record" commits.
 
 ## Doing
 
