@@ -27,6 +27,11 @@ point.
   on `main`.  The active maintained increment extends `grid-run` with batch
   `orbital`/`orbital-density` export through repeated isolated single-orbital
   Multiwfn runs.
+- Batch orbital export was pushed to `main` as
+  `dcf7bd3cac0684f48f16ebd06458345b929837fd`
+  (`Add batch orbital grid export`).  Post-push verification showed local
+  `HEAD`, `origin/main`, and `origin/HEAD` all at `dcf7bd3`; the remote still
+  exposes only `refs/heads/main`.
 - Recent maintained feature pushes on 2026-06-10 include `grid-run`
   (`3d192dc7ae9696dd433aae04e1a3bdb488b95482`) and `cube-arith`
   (`4123d00ae051a710c954ed3c3712aa8b012c4bc0`).  Later documentation commits

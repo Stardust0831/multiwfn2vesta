@@ -41,6 +41,16 @@
 - Focused validation already passed before full regression:
   `py_compile` for touched Python files and 52 tests across
   `tests.test_multiwfn_grid` and `tests.test_cli`.
+- Final validation before commit passed: full 163-test no-GUI regression,
+  `grid-run --help`, top-level `multiwfn2vesta --help`, and
+  `git diff --check`.
+- Feature implementation commit was pushed to GitHub `main` at
+  `dcf7bd3cac0684f48f16ebd06458345b929837fd`
+  (`Add batch orbital grid export`).  Post-push verification after
+  `git fetch --prune origin`: `HEAD`, `origin/main`, and `origin/HEAD` all
+  pointed at `dcf7bd3`; `git ls-remote --heads origin` returned only
+  `refs/heads/main`; repository-local identity remained
+  `Stardust0831 <13862180016@163.com>`.
 
 ## 2026-06-10: Cube arithmetic foundation
 

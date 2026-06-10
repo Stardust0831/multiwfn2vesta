@@ -49,8 +49,13 @@ Updated: 2026-06-10
 - Validation for batch orbital export passed: `py_compile` for touched Python
   files, 52 focused tests across `tests.test_multiwfn_grid` and
   `tests.test_cli`, full 163-test no-GUI regression, `grid-run --help`,
-  top-level `multiwfn2vesta --help`, and `git diff --check`.  Commit/push is
-  still pending in this pass.
+  top-level `multiwfn2vesta --help`, and `git diff --check`.
+- Committed and pushed batch orbital export to GitHub `main` as
+  `dcf7bd3cac0684f48f16ebd06458345b929837fd`
+  (`Add batch orbital grid export`).  Post-push verification after
+  `git fetch --prune origin`: `HEAD`, `origin/main`, and `origin/HEAD` all
+  pointed at `dcf7bd3`; `git ls-remote --heads origin` returned only
+  `refs/heads/main`.
 - Started `multiwfn2vesta cube-arith`, a maintained compatible-cube linear
   arithmetic workflow for density difference, Fukui functions, and dual
   descriptors.  It supports generic `--term COEFF CUBE` entries and named
