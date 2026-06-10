@@ -207,6 +207,8 @@ multiwfn2vesta cube-preset rdg IRI2_surface.cub cube_products \
   --texture-cube IRI1_color.cub
 multiwfn2vesta cube-preset stm STM.cub cube_products
 multiwfn2vesta cube-preset domain domain.cub cube_products
+multiwfn2vesta cube-preset basin basin0001.cub cube_products
+multiwfn2vesta cube-preset basin-type basinsyn.cub cube_products
 multiwfn2vesta cube-preset igmh dg_inter.cub cube_products \
   --texture-cube sl2r.cub
 multiwfn2vesta cube-preset esp density.cub cube_products \
@@ -231,6 +233,12 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
 - `domain`：别名包括 `domain-cube`、`domain-analysis`、`binary-domain`，
   用于 Multiwfn domain analysis 导出的二值 `domain.cub`，默认等值面
   `0.5`
+- `basin`：别名包括 `basin-cube`、`binary-basin`、`aim-basin`、
+  `elf-basin`，用于 Multiwfn basin analysis option `-5` 导出的单个
+  二值 `basinNNNN.cub`，默认等值面 `0.5`
+- `basin-type`：别名包括 `basinsyn`、`basin-synaptic`、
+  `elf-basin-type`，用于 `basinsyn.cub`，以 signed mode 同时画
+  单突触 `-1` 和双突触 `+1` basin 区域
 - `iri`：别名 `rdg`、`nci`，需要 `--texture-cube`，默认
   `--tex-physical -0.04 0.04` 和 `--tex-range-source surface-band`
 - `igmh`：别名包括 `igm`、`igm-inter`、`igmh-inter`，用 `dg_inter.cub`
@@ -603,6 +611,29 @@ bin/multiwfn2vesta domain-run \
 
 该 smoke 返回 `0`，生成 `h2o_density_domain.cub`、
 `h2o_density_domain.pdb`、`h2o_density_domain_cube.vesta` 和 recipe。
+
+## Basin Cube 到 VESTA
+
+Multiwfn basin analysis 本身先保持半手动：生成 basin 时要先选实空间函数、
+网格策略，以及是否复用内存里的 cube/grid data。项目当前维护的是 basin
+analysis option `-5` 已导出 cube 之后的显示层。
+
+单个二值 basin cube，例如 `basin0001.cub`：
+
+```bash
+multiwfn2vesta cube-preset basin basin0001.cub basin_products
+```
+
+`basinsyn.cub` 里 Multiwfn 用 `-1` 表示 monosynaptic basin，用 `+1`
+表示 disynaptic basin，可以用 signed preset 同时画两类区域：
+
+```bash
+multiwfn2vesta cube-preset basin-type basinsyn.cub basin_products
+```
+
+`cube-preset basin` 会拒绝文件名正好是 `basin.cub` 的输入，因为这个总
+文件的格点值是 basin index，不是 `0/1` 成员关系。需要画单个 basin
+边界时，应使用 `basinNNNN.cub`。
 
 ## 波函数文件到 IRI/RDG VESTA
 

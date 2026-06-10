@@ -141,6 +141,8 @@ multiwfn2vesta cube-preset orbital orbital.cub cube_products
 multiwfn2vesta cube-preset rdg IRI2_surface.cub cube_products \
   --texture-cube IRI1_color.cub
 multiwfn2vesta cube-preset domain domain.cub cube_products
+multiwfn2vesta cube-preset basin basin0001.cub cube_products
+multiwfn2vesta cube-preset basin-type basinsyn.cub cube_products
 multiwfn2vesta cube-preset igmh dg_inter.cub cube_products \
   --texture-cube sl2r.cub
 multiwfn2vesta cube-preset alie density.cub cube_products \
@@ -153,10 +155,11 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
 Use this when the file is a common ABACUS/Multiwfn cube product and the
 default style is enough to start.  Presets cover density-like scalar cubes,
 signed orbital/wavefunction/density-difference cubes, ELF/LOL, IRI/RDG/NCI
-mapped surfaces, binary domain isosurfaces, IGM/IGMH/aIGM weak-interaction
-mapped surfaces, ESP/MEP mapped density surfaces, generic molecular surface
-maps, ALIE/LEA/LEAE density-surface maps, and vdW-potential density-surface
-maps.  All VESTA writing still goes through the maintained `cube-vesta`
+mapped surfaces, binary domain isosurfaces, binary basin isosurfaces,
+signed basin-type maps, IGM/IGMH/aIGM weak-interaction mapped surfaces,
+ESP/MEP mapped density surfaces, generic molecular surface maps,
+ALIE/LEA/LEAE density-surface maps, and vdW-potential density-surface maps.
+All VESTA writing still goes through the maintained `cube-vesta`
 backend.
 `igmh`/`igm-intra`/`aigm` defaults follow bundled Multiwfn IGM VMD templates,
 while `surface-map`/`molsurfmap` defaults follow the bundled Multiwfn

@@ -3,9 +3,9 @@
 `multiwfn2vesta` is a workspace-local Python interface for running selected
 Multiwfn workflows and preparing VESTA visualization files.  The currently
 maintained path covers ABACUS Molden handoff, cube-to-VESTA files, Multiwfn
-real-space grid, STM/LDOS, cube-domain extraction, AIM, IRI/RDG, and
-IGM/IGMH command streams, atoms-only topology overlays, surface extrema
-overlays, and AIM+IGMH multi-phase VESTA figures.
+real-space grid, STM/LDOS, cube-domain extraction, basin cube display, AIM,
+IRI/RDG, and IGM/IGMH command streams, atoms-only topology overlays, surface
+extrema overlays, and AIM+IGMH multi-phase VESTA figures.
 
 The project is still experimental, but the CLI below is the maintained entry
 point.
@@ -30,9 +30,9 @@ point.
 - The apparently unusual branch history is a normal linear `main` history
   containing feature commits and documentation closure commits, not active
   competing branches.
-- Recent maintained feature work includes cube/grid domain extraction,
-  IGM/mIGM/IGMH command-stream automation, IGMH/aIGM VESTA cube presets,
-  surface extrema overlays for
+- Recent maintained feature work includes cube/grid domain extraction, basin
+  cube VESTA presets, IGM/mIGM/IGMH command-stream automation, IGMH/aIGM
+  VESTA cube presets, surface extrema overlays for
   `surfanalysis.pdb`, surface-map/grid expansion, generic Multiwfn atom table
   coloring, batch orbital export, `cube-arith`, `grid-run`,
   `grid-run --surface-cube` mapped-surface handoff, `stm-run`
@@ -113,6 +113,9 @@ then delete the temporary branch.
   existing cube/grid file, export raw `domain.cub` and `domain.pdb`, copy them
   to stable `<stem>_domain.*` products, and write a binary domain isosurface
   through `cube-preset domain`.
+- Display Multiwfn basin-analysis cube exports: individual binary
+  `basinNNNN.cub` files through `cube-preset basin`, and signed
+  mono-/disynaptic `basinsyn.cub` maps through `cube-preset basin-type`.
 - Color VESTA atom/site styles from ABACUS `mulliken.txt` charge or
   magnetism values produced by `out_mul 1`, or from generic Multiwfn-style
   atom scalar tables such as charges, Fukui-like atom values, or atom
@@ -254,6 +257,8 @@ multiwfn2vesta cube-preset rdg IRI2_surface.cub cube_products \
   --texture-cube IRI1_color.cub
 multiwfn2vesta cube-preset stm STM.cub cube_products
 multiwfn2vesta cube-preset domain domain.cub cube_products
+multiwfn2vesta cube-preset basin basin0001.cub cube_products
+multiwfn2vesta cube-preset basin-type basinsyn.cub cube_products
 multiwfn2vesta cube-preset igmh dg_inter.cub cube_products \
   --texture-cube sl2r.cub
 multiwfn2vesta cube-preset esp density.cub cube_products \
@@ -270,9 +275,10 @@ Available presets can be listed with `multiwfn2vesta cube-preset
 --list-presets`.  Current presets cover density-like scalar cubes, signed
 orbital/wavefunction/density-difference cubes, ELF/LOL cubes, IRI/RDG/NCI
 mapped surfaces, STM/LDOS tunneling-current surfaces, binary domain
-isosurfaces, IGM/IGMH/aIGM weak-interaction mapped surfaces, ESP/MEP mapped
-density surfaces, generic molecular surface maps, ALIE/LEA/LEAE
-density-surface maps, and vdW-potential density-surface maps.  The recipe
+isosurfaces, binary basin isosurfaces, signed basin-type maps,
+IGM/IGMH/aIGM weak-interaction mapped surfaces, ESP/MEP mapped density
+surfaces, generic molecular surface maps, ALIE/LEA/LEAE density-surface
+maps, and vdW-potential density-surface maps.  The recipe
 records the requested preset, canonical preset, effective
 isosurface, texture scaling source, and explicit texture percentage overrides
 when they are used.  The `surface-map`/`molsurfmap` defaults follow the
@@ -576,6 +582,33 @@ Validated H2O density-cube noGUI smoke:
 This run used criterion `<0.5`, exported domain index `1`, produced
 `h2o_density_domain.cub`, `h2o_density_domain.pdb`, and
 `h2o_density_domain_cube.vesta`, without launching VESTA.
+
+## Basin Cube VESTA Presets
+
+Multiwfn basin analysis currently remains a semi-manual upstream workflow,
+because generating basins depends on the selected real-space function, grid
+settings, and whether a cube is already loaded in memory.  The maintained
+project layer starts at the stable exported cube products from basin analysis
+menu option `-5`.
+
+For individual binary basin cubes such as `basin0001.cub`, where Multiwfn
+writes `1` inside the selected basin and `0` outside:
+
+```bash
+multiwfn2vesta cube-preset basin basin0001.cub basin_products
+```
+
+For `basinsyn.cub`, where Multiwfn writes monosynaptic basin regions as `-1`
+and disynaptic regions as `+1`:
+
+```bash
+multiwfn2vesta cube-preset basin-type basinsyn.cub basin_products
+```
+
+The `basin` preset rejects an input file named `basin.cub`, because Multiwfn's
+all-index `basin.cub` grid values are basin indices rather than a binary
+membership mask.  Use individual `basinNNNN.cub` files for basin boundary
+surfaces.
 
 ## Wavefunction to IRI/RDG VESTA
 
@@ -886,8 +919,8 @@ views by VESTA CLI rotations, rather than writing persistent front/right/top
 
 ## Validation
 
-Current no-GUI regression passed as a 230-test suite after the domain-analysis
-runner increment:
+Current no-GUI regression passed as a 233-test suite after the basin cube
+preset increment:
 
 ```bash
 PYTHONPATH=src python3 -m unittest discover -s tests

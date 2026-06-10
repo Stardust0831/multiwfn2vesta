@@ -1,5 +1,25 @@
 # Worklog
 
+## 2026-06-10: Basin cube display presets
+
+- Continued the long-running Multiwfn/ABACUS/VESTA analysis-expansion goal by
+  addressing the next research-matrix gap: basin analysis visualization.
+- Re-read local Multiwfn `basin.f90` evidence.  Basin analysis option `-5`
+  exports all-index `basin.cub`, individual binary `basinNNNN.cub`,
+  selected-function `basinsel.cub`, and signed mono-/disynaptic
+  `basinsyn.cub`.  The source recommends isovalue `0.5` for individual
+  binary basin cube visualization.
+- Added `cube-preset basin` for individual binary `basinNNNN.cub` files and
+  `cube-preset basin-type` for `basinsyn.cub`.  This deliberately stops at
+  the display layer; a full basin-generation runner remains deferred because
+  generation depends on real-space function choice, grid source, and
+  clustering choices.
+- Added a guard that rejects `cube-preset basin basin.cub ...`, because
+  Multiwfn's all-index `basin.cub` is not a binary basin mask.
+- Validation passed: `py_compile`, 20 focused `cube-preset` tests,
+  `cube-preset --list-presets`, `git diff --check`, and the full 233-test
+  no-GUI regression.
+
 ## 2026-06-10: README branch refresh after domain runner
 
 - User asked to update README, noted that the branch state looked unusual,

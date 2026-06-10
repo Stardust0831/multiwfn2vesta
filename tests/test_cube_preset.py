@@ -88,6 +88,8 @@ class TestCubePreset(unittest.TestCase):
         self.assertIn("iri", text)
         self.assertIn("stm", text)
         self.assertIn("domain", text)
+        self.assertIn("basin", text)
+        self.assertIn("basin-type", text)
         self.assertIn("igmh", text)
         self.assertIn("aigm", text)
         self.assertIn("esp", text)
@@ -116,6 +118,70 @@ domain two
             self.assertIn("canonical_preset: `domain`", manifest)
             self.assertIn("effective_isosurface: `0.5`", manifest)
             self.assertIn("Binary Multiwfn domain.cub isosurface", manifest)
+
+    def test_basin_preset_uses_binary_isosurface_default(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            cube = self.write_tmp(root, "basin0001.cub", """basin one
+basin two
+    2    -1.000000    -2.000000     0.500000
+    2     0.500000     0.000000     0.000000
+    2     0.000000     0.500000     0.000000
+    2     0.000000     0.000000     0.500000
+    8     8.000000    -1.000000    -2.000000     0.500000
+    1     1.000000    -0.500000    -2.000000     0.500000
+ 0.0 0.0 0.0 1.0 1.0 1.0 0.0 0.0
+""")
+
+            result = run_preset("binary-basin", cube, root / "products")
+
+            manifest = result.manifest_path.read_text(encoding="utf-8")
+
+            self.assertIn("canonical_preset: `basin`", manifest)
+            self.assertIn("requested_preset: `binary-basin`", manifest)
+            self.assertIn("effective_isosurface: `0.5`", manifest)
+            self.assertIn("Binary Multiwfn basinNNNN.cub isosurface", manifest)
+
+    def test_basin_preset_rejects_all_index_basin_cube_name(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            cube = self.write_tmp(root, "basin.cub", """basin all index
+basin two
+    2    -1.000000    -2.000000     0.500000
+    2     0.500000     0.000000     0.000000
+    2     0.000000     0.500000     0.000000
+    2     0.000000     0.000000     0.500000
+    8     8.000000    -1.000000    -2.000000     0.500000
+    1     1.000000    -0.500000    -2.000000     0.500000
+ 1.0 1.0 2.0 2.0 3.0 3.0 0.0 0.0
+""")
+
+            with self.assertRaisesRegex(ValueError, "stores basin indices"):
+                run_preset("basin", cube, root / "products")
+
+    def test_basin_type_preset_uses_signed_synaptic_surfaces(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            cube = self.write_tmp(root, "basinsyn.cub", """basin type one
+basin type two
+    2    -1.000000    -2.000000     0.500000
+    2     0.500000     0.000000     0.000000
+    2     0.000000     0.500000     0.000000
+    2     0.000000     0.000000     0.500000
+    8     8.000000    -1.000000    -2.000000     0.500000
+    1     1.000000    -0.500000    -2.000000     0.500000
+ -1.0 -1.0 0.0 0.0 1.0 1.0 0.0 0.0
+""")
+
+            result = run_preset("basinsyn", cube, root / "products")
+
+            text = result.vesta_path.read_text(encoding="utf-8")
+            manifest = result.manifest_path.read_text(encoding="utf-8")
+
+            self.assertRegex(text, r"ISURF\n  1   1\s+0\.5\s+255\s+180\s+40\s+145\s+255\n  1   1\s+-0\.5\s+80\s+160\s+255\s+145\s+255")
+            self.assertIn("canonical_preset: `basin-type`", manifest)
+            self.assertIn("effective_surface_mode: `signed`", manifest)
+            self.assertIn("monosynaptic basin regions are -1", manifest)
 
     def test_orbital_alias_writes_signed_surfaces_and_preset_manifest(self):
         with tempfile.TemporaryDirectory() as tmp:

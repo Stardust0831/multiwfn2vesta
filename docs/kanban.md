@@ -1,6 +1,29 @@
 # Project Kanban
 
-Updated: 2026-06-10 16:25 CST
+Updated: 2026-06-10 17:05 CST
+
+## Current Continuation: 2026-06-10 Basin Analysis VESTA Route Exploration
+
+- [x] Record the continued long-running objective: keep enriching
+  Multiwfn analyses that can become VESTA products, especially workflows
+  compatible with ABACUS Molden or ABACUS/Multiwfn cube data.
+- [x] Re-read the current analysis matrix and local Multiwfn `basin.f90`
+  evidence before deciding whether this increment should be a full
+  command-stream runner or a safer display/preset layer for existing basin
+  cubes.
+- [x] Inspect current `cube-vesta`/`cube-preset` capabilities for displaying
+  one or more binary basin cubes without depending on VESTA UI automation.
+- [x] Implement the smallest useful basin-related increment: `cube-preset
+  basin` for individual binary `basinNNNN.cub` files and `cube-preset
+  basin-type` for signed `basinsyn.cub`, plus focused preset tests.
+- [x] Validate: `py_compile`, 20 focused `cube-preset` tests,
+  `cube-preset --list-presets`, full 233-test no-GUI regression, and
+  `git diff --check` passed.
+- [x] Address read-only review residual risk by rejecting all-index
+  `basin.cub` in the binary basin preset.
+- [x] Sync project/root docs after the guard update.
+- [x] Commit and push on `main` if stable; final commit hash is reported in
+  the assistant response.
 
 ## Current Request: 2026-06-10 README Refresh And Branch Consolidation After Domain Runner
 

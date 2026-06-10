@@ -40,6 +40,10 @@ Multiwfn evidence:
 - Multiwfn `otherfunc2.f90` exposes domain analysis under main function `200`,
   subfunction `14`, can use current grid data in memory, define domains by
   criteria such as `<0.05` or `>0.5`, and export `domain.cub`/`domain.pdb`.
+- Multiwfn `basin.f90` basin analysis option `-5` can export all-index
+  `basin.cub`, individual binary `basinNNNN.cub` files, selected-function
+  `basinsel.cub`, and signed mono-/disynaptic `basinsyn.cub`.  The source
+  explicitly recommends isovalue `0.5` for individual binary basin cubes.
 
 ABACUS evidence:
 
@@ -141,7 +145,7 @@ occupations, and density derivatives from the wavefunction representation.
 
 | Analysis | Multiwfn input | ABACUS feasibility | Multiwfn output | VESTA representation | Project action |
 | --- | --- | --- | --- | --- | --- |
-| Basin analysis | Wavefunction or grid data | Molden route possible; accuracy depends on NAO2GTO fit | `basin.cub`, `basin0001.cub`, `basinsel.cub`, attractor PDB/PQR | Separate colored basin isosurfaces | Needs cube splitting/color strategy |
+| Basin analysis | Wavefunction or grid data | Molden route possible; accuracy depends on NAO2GTO fit | `basin.cub`, `basin0001.cub`, `basinsel.cub`, `basinsyn.cub`, attractor PDB/PQR | Separate colored basin isosurfaces or signed basin-type map | Display layer implemented as `cube-preset basin` for individual binary `basinNNNN.cub` and `cube-preset basin-type` for `basinsyn.cub`; full basin generation runner remains deferred until the menu stream is bounded |
 | Domain extraction from cube/grid | Any current grid/cube data | Strong for ABACUS/Multiwfn cubes; mostly cube post-processing | `domain.cub`, `domain.pdb`, `domain.txt` | Binary domain isosurfaces and boundary-grid atoms-only layer | Implemented as `domain-run` for existing cube input plus `cube-preset domain` for binary `domain.cub` isosurfaces; `domain.pdb` is retained as boundary-grid evidence |
 | Excited-state hole/electron/CDD/transition density | Wavefunction plus excited-state information | Not a primary ABACUS ground-state route; LR-TDDFT outputs need separate study | `hole.cub`, `electron.cub`, `CDD.cub`, `transdens.cub` | Positive/negative isosurfaces | Defer until ABACUS excited-state interface is clear |
 | ETS-NOCV / AdNDP / EDA-related orbitals | Specialized wavefunctions/fragments | Weak for ABACUS periodic slabs; possible for molecule-like cases | `NOCV_*.cub`, `NOCVpair.cub`, `AdNDPorb*.cub` | Orbital-like positive/negative surfaces | Defer |
@@ -236,7 +240,11 @@ Known limitations:
    smokes and optional boundary-grid overlay utilities.  The first maintained
    path is `domain-run` on existing cube data, exporting `domain.cub` and
    `domain.pdb`, then writing VESTA through `cube-preset domain`.
-9. Keep headless/no-focus VESTA rendering as a separate backend concern.
+9. Extend basin-analysis support from the current display presets to a
+   bounded runner only after the generation menu can be parameterized without
+   hiding critical choices such as real-space function, grid source, and
+   attractor clustering.
+10. Keep headless/no-focus VESTA rendering as a separate backend concern.
    Visualization products should remain useful as `.vesta` even when rendering
    is skipped.
 
@@ -248,6 +256,8 @@ Implemented or partly implemented:
 - `multiwfn2vesta abacus-molden`
 - `multiwfn2vesta cube-vesta`
 - `multiwfn2vesta cube-preset`
+- `multiwfn2vesta cube-preset basin`
+- `multiwfn2vesta cube-preset basin-type`
 - `multiwfn2vesta cube-arith`
 - `multiwfn2vesta iri-run`
 - `multiwfn2vesta igmh-run`

@@ -87,6 +87,34 @@ PRESETS: Tuple[CubePreset, ...] = (
         notes="Use for Multiwfn domain.cub from main function 200/14; values are 1 inside the selected domain and 0 outside.",
     ),
     CubePreset(
+        name="basin",
+        aliases=("basin-cube", "binary-basin", "aim-basin", "elf-basin"),
+        description="Binary Multiwfn basinNNNN.cub isosurface.",
+        surface_mode="single",
+        isosurface=0.5,
+        positive_rgb=(100, 180, 255),
+        surface_opacity=(150, 255),
+        notes=(
+            "Use for individual Multiwfn basinNNNN.cub files exported by basin analysis option -5; "
+            "values are 1 inside the selected basin and 0 outside. "
+            "The all-index basin.cub file is not binary and should not use this preset directly."
+        ),
+    ),
+    CubePreset(
+        name="basin-type",
+        aliases=("basinsyn", "basin-synaptic", "elf-basin-type"),
+        description="Signed Multiwfn basinsyn.cub mono-/disynaptic basin map.",
+        surface_mode="signed",
+        isosurface=0.5,
+        positive_rgb=(255, 180, 40),
+        negative_rgb=(80, 160, 255),
+        surface_opacity=(145, 255),
+        notes=(
+            "Use for Multiwfn basinsyn.cub from basin analysis option -5; "
+            "monosynaptic basin regions are -1 and disynaptic regions are +1."
+        ),
+    ),
+    CubePreset(
         name="iri",
         aliases=("rdg", "nci", "weak-interaction"),
         description="IRI/RDG/NCI surface colored by sign(lambda2)rho-like texture cube.",
@@ -394,6 +422,11 @@ def run_preset(
     preset = resolve_preset(preset_name)
     if preset.texture_required and texture_cube is None:
         raise ValueError(f"Cube preset `{preset.name}` requires --texture-cube")
+    if preset.name == "basin" and surface_cube.name.lower() == "basin.cub":
+        raise ValueError(
+            "Cube preset `basin` is for individual binary basinNNNN.cub files; "
+            "Multiwfn basin.cub stores basin indices, not a binary basin mask."
+        )
 
     effective_isosurface = preset.isosurface if isosurface is None else float(isosurface)
     effective_surface_mode = surface_mode or preset.surface_mode
