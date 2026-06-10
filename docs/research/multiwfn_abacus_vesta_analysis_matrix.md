@@ -158,6 +158,7 @@ occupations, and density derivatives from the wavefunction representation.
 | ALIE / LEA / LEAE | Full wavefunction, occupied/virtual orbitals | Feasible only if ABACUS Molden orbitals/energies are adequate; virtual levels in metals risky | `avglocion.cub`, `userfunc.cub`, `surfanalysis.pdb` | Colored density surface plus extrema points | `grid-run --function alie --surface-cube density.cub` now generates ALIE texture maps directly; `cube-preset alie/lea/leae` remains the lower-level display layer and auto-selects extrema from `surfanalysis.pdb` |
 | Information-theory density functions | Full wavefunction Molden/FCH/WFN; local information entropy is a normal main-function-5 grid function | Feasible for Gamma LCAO Molden; interpretation depends on the NAO2GTO density quality | `infoentro.cub`, possible future user-function Shannon/Fisher cubes | Signed scalar isosurfaces or slices | `grid-run --function local-information-entropy` now exports Multiwfn function `11` `infoentro.cub`; `cube-preset local-information-entropy` provides a signed display default |
 | Electron delocalization / orbital overlap distance | Full wavefunction Molden/FCH/WFN | Feasible for Gamma LCAO Molden; parameter choice needs chemical interpretation | `EDR.cub`, `EDRDmax.cub` | Single positive scalar isosurfaces or slices | `grid-run --function edr --edr-length D_BOHR` now exports function `20` `EDR.cub`; `grid-run --function edrdmax` exports function `21` `EDRDmax.cub`, using Multiwfn's default exponent set unless `--edr-exponents COUNT START INCREMENT` is supplied; `cube-preset electron-delocalization-range` and `cube-preset orbital-overlap-distance` provide display defaults |
+| Becke atomic/overlap weight | Full wavefunction Molden/FCH/WFN plus atom indices | Feasible for Gamma LCAO Molden; useful for fuzzy atomic domains and pair-overlap-weight context | `Becke.cub` | Single positive `0..1` weight isosurfaces or slices | `grid-run --function becke --becke-atoms I J` now exports Multiwfn function `111` `Becke.cub`; `I J` requests Becke overlap weight, `I 0` requests Becke atomic weight, and `cube-preset becke-weight` provides a `0.5` single-positive display default |
 | vdW/repulsion/dispersion potential | Structure and/or wavefunction depending option | Feasible, often structure driven | `vdW.cub`, `repul.cub`, `disp.cub`, `density.cub`, `vdWpot.cub` | Standalone signed potential isosurfaces, potential slices, or density-surface context | `cube-preset vdw-potential` now covers standalone Multiwfn function `25` `vdWpot.cub` with `+/-1.0` kcal/mol surfaces; `grid-run --function vdw-potential` routes to it by default, while `grid-run --function vdw-potential --surface-cube density.cub` and `cube-preset vdw-map` remain the mapped density/surface route |
 | Atom scalar coloring | Per-atom values from Multiwfn or ABACUS `mulliken.txt` | Strong for ABACUS `out_mul`; also charges/Fukui from Multiwfn | CSV/table, `mulliken.txt` | Patch `SITET` RGB values | ABACUS Mulliken parser implemented; generic Multiwfn atom table parser implemented as `multiwfn2vesta multiwfn-atom-color` |
 
@@ -354,6 +355,10 @@ Main gaps:
   maps to Multiwfn function `20` `EDR.cub` and requires
   `--edr-length D_BOHR`, while `grid-run --function edrdmax` maps to
   function `21` `EDRDmax.cub` and accepts optional `--edr-exponents`.
+- Becke atomic/overlap weight now has `cube-preset becke-weight` and
+  `grid-run --function becke --becke-atoms I J`; local Multiwfn source shows
+  function `111` prompts for atom indices before grid setup and exports
+  `Becke.cub`.
   Reference-point functions such as Fermi hole and source function remain
   deferred until their prompt streams are bounded.
 - Promolecular Delta-g now has a distinct `cube-preset

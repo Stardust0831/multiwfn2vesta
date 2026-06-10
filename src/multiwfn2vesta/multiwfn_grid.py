@@ -113,6 +113,13 @@ GRID_FUNCTIONS: Tuple[GridFunction, ...] = (
         mapped_preset="vdw-map",
     ),
     GridFunction("orbital-density", 44, "orbdens.cub", "orbital-density", ("orbdens", "mo-density"), True),
+    GridFunction(
+        "becke-weight",
+        111,
+        "Becke.cub",
+        "becke-weight",
+        ("becke", "becke-overlap-weight", "becke-atomic-weight", "beckewei"),
+    ),
 )
 
 
@@ -146,6 +153,7 @@ class MultiwfnGridResult(NamedTuple):
     mapped_preset: Optional[str]
     edr_length: Optional[float]
     edr_exponents: Optional[Tuple[int, float, float]]
+    becke_atoms: Optional[Tuple[int, int]]
 
 
 class MultiwfnGridBatchResult(NamedTuple):
@@ -277,12 +285,36 @@ def _format_edr_exponents(values: Sequence[float]) -> str:
     return f"{count} {start} {increment}"
 
 
+def _normalize_becke_atoms(values: Optional[Sequence[int]]) -> Optional[Tuple[int, int]]:
+    if values is None:
+        return None
+    if len(values) != 2:
+        raise ValueError("Expected Becke atom parameters: I J")
+    first_float = float(values[0])
+    second_float = float(values[1])
+    first = int(first_float)
+    second = int(second_float)
+    if first_float != first or second_float != second:
+        raise ValueError("Becke atom indices must be integers")
+    if first <= 0:
+        raise ValueError("The first Becke atom index must be positive")
+    if second < 0:
+        raise ValueError("The second Becke atom index must be zero or positive")
+    return first, second
+
+
+def _format_becke_atoms(values: Sequence[int]) -> str:
+    first, second = _normalize_becke_atoms(values) or (0, 0)
+    return f"{first},{second}"
+
+
 def build_grid_commands(
     function: GridFunction,
     *,
     orbital: Optional[str] = None,
     edr_length: Optional[float] = None,
     edr_exponents: Optional[Sequence[float]] = None,
+    becke_atoms: Optional[Sequence[int]] = None,
     grid_mode: str = "points",
     grid_points: Sequence[int] = (40, 40, 40),
     grid_spacing: Optional[float] = None,
@@ -317,6 +349,13 @@ def build_grid_commands(
             commands.extend(["1", _format_edr_exponents(edr_exponents)])
     elif edr_exponents is not None:
         raise ValueError("--edr-exponents is only valid for orbital-overlap-distance / D(r)")
+
+    if function.index == 111:
+        if becke_atoms is None:
+            raise ValueError("Multiwfn function `becke-weight` requires --becke-atoms I J")
+        commands.append(_format_becke_atoms(becke_atoms))
+    elif becke_atoms is not None:
+        raise ValueError("--becke-atoms is only valid for Becke atomic/overlap weight")
 
     mode = grid_mode.lower()
     if grid_extension is not None and mode in {"low", "medium", "high", "points", "spacing", "cube"}:
@@ -367,6 +406,7 @@ def _write_recipe(
     mapped_preset: Optional[str] = None,
     edr_length: Optional[float] = None,
     edr_exponents: Optional[Tuple[int, float, float]] = None,
+    becke_atoms: Optional[Tuple[int, int]] = None,
     error: Optional[str] = None,
 ) -> None:
     if result is not None:
@@ -384,6 +424,7 @@ def _write_recipe(
         mapped_preset = result.mapped_preset
         edr_length = result.edr_length
         edr_exponents = result.edr_exponents
+        becke_atoms = result.becke_atoms
 
     lines = [
         "# Multiwfn Grid Run Recipe",
@@ -411,6 +452,7 @@ def _write_recipe(
             f"- mapped_vesta_preset: `{mapped_preset}`",
             f"- edr_length_bohr: `{edr_length}`",
             f"- edr_exponents_count_start_increment: `{edr_exponents}`",
+            f"- becke_atom_indices_i_j: `{becke_atoms}`",
             f"- vesta_file: `{vesta_result.vesta_path if vesta_result is not None else None}`",
             f"- vesta_recipe: `{vesta_result.manifest_path if vesta_result is not None else None}`",
             f"- error: `{error}`",
@@ -422,6 +464,7 @@ def _write_recipe(
             "- The default cube filename is determined by the selected real-space function index in Multiwfn source `0123dim.f90`.",
             "- Function `20` EDR(r;d) asks for length scale `d` in Bohr before grid setup and exports `EDR.cub`.",
             "- Function `21` D(r) can use Multiwfn's default EDR exponent set `20, 2.50, 1.50` or a manual count/start/increment set and exports `EDRDmax.cub`.",
+            "- Function `111` Becke weight asks for atom indices `I,J` before grid setup and exports `Becke.cub`; `J=0` means atomic weight and two positive indices mean overlap weight.",
         ]
     )
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
@@ -510,6 +553,7 @@ def run_multiwfn_grid(
     expected_cube: Optional[Path] = None,
     edr_length: Optional[float] = None,
     edr_exponents: Optional[Sequence[float]] = None,
+    becke_atoms: Optional[Sequence[int]] = None,
     timeout: Optional[int] = None,
     nthreads: Optional[int] = None,
     stem: Optional[str] = None,
@@ -534,6 +578,7 @@ def run_multiwfn_grid(
     function = resolve_grid_function(function_name, function_index)
     normalized_edr_length = None if edr_length is None else float(edr_length)
     normalized_edr_exponents = _normalize_edr_exponents(edr_exponents)
+    normalized_becke_atoms = _normalize_becke_atoms(becke_atoms)
     candidate = find_multiwfn(multiwfn_path)
     if candidate is None:
         raise FileNotFoundError(
@@ -571,6 +616,7 @@ def run_multiwfn_grid(
             orbital=orbital,
             edr_length=normalized_edr_length,
             edr_exponents=normalized_edr_exponents,
+            becke_atoms=normalized_becke_atoms,
             grid_mode=grid_mode,
             grid_points=grid_points,
             grid_spacing=grid_spacing,
@@ -628,6 +674,7 @@ def run_multiwfn_grid(
             mapped_preset=mapped_surface_preset(function, preset) if mapped_surface_cube is not None else None,
             edr_length=normalized_edr_length,
             edr_exponents=normalized_edr_exponents,
+            becke_atoms=normalized_becke_atoms,
             error=error,
         )
         return MultiwfnGridResult(
@@ -651,6 +698,7 @@ def run_multiwfn_grid(
             mapped_preset=mapped_surface_preset(function, preset) if mapped_surface_cube is not None else None,
             edr_length=normalized_edr_length,
             edr_exponents=normalized_edr_exponents,
+            becke_atoms=normalized_becke_atoms,
         )
     except OSError as exc:
         error = f"Failed to launch Multiwfn grid run: {exc}; inspect {stdout_log} and {stderr_log}"
@@ -669,6 +717,7 @@ def run_multiwfn_grid(
             mapped_preset=mapped_surface_preset(function, preset) if mapped_surface_cube is not None else None,
             edr_length=normalized_edr_length,
             edr_exponents=normalized_edr_exponents,
+            becke_atoms=normalized_becke_atoms,
             error=error,
         )
         return MultiwfnGridResult(
@@ -692,6 +741,7 @@ def run_multiwfn_grid(
             mapped_preset=mapped_surface_preset(function, preset) if mapped_surface_cube is not None else None,
             edr_length=normalized_edr_length,
             edr_exponents=normalized_edr_exponents,
+            becke_atoms=normalized_becke_atoms,
         )
 
     stdout_log.write_text(completed.stdout or "", encoding="utf-8")
@@ -774,6 +824,7 @@ def run_multiwfn_grid(
         mapped_preset=mapped_surface_preset(function, preset) if mapped_surface_cube is not None else None,
         edr_length=normalized_edr_length,
         edr_exponents=normalized_edr_exponents,
+        becke_atoms=normalized_becke_atoms,
     )
     _write_recipe(recipe_path, result=result)
     return result
@@ -960,6 +1011,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "Omit this option to use Multiwfn's default 20, 2.50, 1.50 set."
         ),
     )
+    parser.add_argument(
+        "--becke-atoms",
+        nargs=2,
+        type=int,
+        metavar=("I", "J"),
+        help=(
+            "Atom indices for function 111 Becke weight. Use I J for Becke "
+            "overlap weight, or I 0 for Becke atomic weight."
+        ),
+    )
     parser.add_argument("--timeout", type=int)
     parser.add_argument("--nthreads", type=int)
     parser.add_argument("--stem")
@@ -1027,8 +1088,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 raise ValueError("--raw-dir is not supported with --orbitals")
             if args.surface_cube is not None:
                 raise ValueError("--surface-cube is not supported with --orbitals")
-            if args.edr_length is not None or args.edr_exponents is not None:
-                raise ValueError("--edr-length and --edr-exponents are not supported with --orbitals")
+            if args.edr_length is not None or args.edr_exponents is not None or args.becke_atoms is not None:
+                raise ValueError("--edr-length, --edr-exponents, and --becke-atoms are not supported with --orbitals")
             result = run_multiwfn_grid_batch(
                 args.wavefunction,
                 args.output_dir,
@@ -1081,6 +1142,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             expected_cube=args.expected_cube,
             edr_length=args.edr_length,
             edr_exponents=args.edr_exponents,
+            becke_atoms=args.becke_atoms,
             timeout=args.timeout,
             nthreads=args.nthreads,
             stem=args.stem,

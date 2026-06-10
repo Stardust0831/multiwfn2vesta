@@ -1,6 +1,6 @@
 # Project Kanban
 
-Updated: 2026-06-10 22:08 CST
+Updated: 2026-06-10 22:28 CST
 
 ## Current Request: 2026-06-10 README Refresh And Branch Consolidation
 
@@ -38,14 +38,30 @@ Updated: 2026-06-10 22:08 CST
   researching and implementing valuable Multiwfn wavefunction analyses that
   can become VESTA products, with priority on ABACUS LCAO Molden-compatible
   routes.
-- [ ] Re-inspect current `grid-run`/`cube-preset` coverage, local Multiwfn
+- [x] Re-inspect current `grid-run`/`cube-preset` coverage, local Multiwfn
   2026.6.2 source exports, and the research matrix for the next bounded
-  source-backed increment.
-- [ ] Implement the selected increment with tests and documentation while
+  source-backed increment.  Selected increment: Multiwfn main-function-5
+  function `111` Becke atomic/overlap weight, because local source
+  `0123dim.f90` prompts for atom indices before grid setup and exports
+  `Becke.cub`; it is compatible with ABACUS LCAO Molden wavefunctions.
+- [x] Implement `cube-preset becke-weight` plus `grid-run --function
+  becke-weight --becke-atoms I J`, where `J=0` means Becke atomic weight and
+  `I,J` means Becke overlap weight.
+- [x] Update tests, README, usage docs, skills, research matrix, and worklog.
+- [x] Implement the selected increment with tests and documentation while
   preserving existing mapped-surface and standalone-cube route separation.
-- [ ] Sync root docs mirror, validate, review, commit, push, and verify
+  Focused validation passed: `py_compile` for changed modules/tests, 75
+  focused tests across `tests.test_cube_preset tests.test_multiwfn_grid`, and
+  `bin/multiwfn2vesta grid-run --help`.
+- [x] Sync root docs mirror, validate, review, commit, push, and verify
   `main` remains aligned with `origin/main`; keep `domain.cub` and
-  `domain.pdb` untracked.
+  `domain.pdb` untracked.  Validation passed before commit: root docs
+  checksum mirror dry-run, full 291-test no-GUI regression,
+  `cube-preset --list-presets`, `grid-run --list-functions`,
+  `grid-run --help`, `bin/multiwfn2vesta --help`, and `git diff --check`.
+  Read-only review found no High blocker; the Medium reminder is to keep
+  untracked `domain.cub` and `domain.pdb` out of staging.  Final commit hash
+  and post-push branch alignment are reported in the assistant response.
 
 ## Active Goal Continuation: 2026-06-10 Next Multiwfn VESTA Analysis Gap
 

@@ -52,6 +52,7 @@ multiwfn2vesta cube-preset lagrangian-ked 'G(r).cub' cube_products
 multiwfn2vesta cube-preset local-information-entropy infoentro.cub cube_products
 multiwfn2vesta cube-preset electron-delocalization-range EDR.cub cube_products
 multiwfn2vesta cube-preset orbital-overlap-distance EDRDmax.cub cube_products
+multiwfn2vesta cube-preset becke-weight Becke.cub cube_products
 multiwfn2vesta cube-preset rdg-scalar RDG.cub cube_products
 multiwfn2vesta cube-preset promolecular-rdg RDGprodens.cub cube_products
 multiwfn2vesta cube-preset promolecular-delta-g Delta_g.cub cube_products
@@ -231,6 +232,11 @@ passes it back through `cube-preset`.
   `21` `EDRDmax.cub`, default isosurface `0.05`.  `grid-run` uses
   Multiwfn's default exponent set unless `--edr-exponents COUNT START
   INCREMENT` is supplied.
+- `becke-weight` aliases: `becke`, `becke-overlap-weight`,
+  `becke-atomic-weight`, `beckewei`; single positive surface for Multiwfn
+  function `111` `Becke.cub`, default isosurface `0.5`.  When generating the
+  cube with `grid-run`, pass `--becke-atoms I J`; `I J` requests Becke
+  overlap weight and `I 0` requests Becke atomic weight.
 - `rdg-scalar` aliases: `rdg-cube`, `scalar-rdg`,
   `reduced-density-gradient`; single positive surface for standalone Multiwfn
   `RDG.cub`, default isosurface `0.5`.  Use `iri` with `--texture-cube` for

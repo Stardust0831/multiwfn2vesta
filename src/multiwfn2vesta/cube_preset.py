@@ -254,6 +254,20 @@ PRESETS: Tuple[CubePreset, ...] = (
         ),
     ),
     CubePreset(
+        name="becke-weight",
+        aliases=("becke", "becke-overlap-weight", "becke-atomic-weight", "beckewei"),
+        description="Single positive isosurface for Multiwfn Becke atomic/overlap weight cubes.",
+        surface_mode="single",
+        isosurface=0.5,
+        positive_rgb=(180, 220, 120),
+        surface_opacity=(145, 255),
+        notes=(
+            "Use for Multiwfn Becke.cub from real-space function 111. "
+            "Becke weights are dimensionless and normally span 0..1; "
+            "atom pair I,J gives Becke overlap weight, while I,0 gives Becke atomic weight."
+        ),
+    ),
+    CubePreset(
         name="rdg-scalar",
         aliases=("rdg-cube", "scalar-rdg", "reduced-density-gradient"),
         description="Single positive isosurface for standalone RDG scalar cubes.",

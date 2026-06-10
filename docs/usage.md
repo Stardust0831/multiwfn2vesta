@@ -225,6 +225,7 @@ multiwfn2vesta cube-preset lagrangian-ked 'G(r).cub' cube_products
 multiwfn2vesta cube-preset local-information-entropy infoentro.cub cube_products
 multiwfn2vesta cube-preset electron-delocalization-range EDR.cub cube_products
 multiwfn2vesta cube-preset orbital-overlap-distance EDRDmax.cub cube_products
+multiwfn2vesta cube-preset becke-weight Becke.cub cube_products
 multiwfn2vesta cube-preset rdg-scalar RDG.cub cube_products
 multiwfn2vesta cube-preset promolecular-rdg RDGprodens.cub cube_products
 multiwfn2vesta cube-preset promolecular-delta-g Delta_g.cub cube_products
@@ -287,6 +288,11 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
   Multiwfn 函数 `21` 的 `EDRDmax.cub`；不传 `--edr-exponents` 时使用
   Multiwfn 默认指数集合 `20, 2.50, 1.50`，也可传
   `--edr-exponents COUNT START INCREMENT` 手动控制
+- `becke-weight`：单正值等值面，别名包括 `becke`、
+  `becke-overlap-weight`、`becke-atomic-weight`，用于 Multiwfn 函数
+  `111` 的 `Becke.cub`；`grid-run` 需要 `--becke-atoms I J`，其中
+  `I J` 计算 Becke overlap weight，`I 0` 计算 Becke atomic weight；
+  默认等值面为适合 `0..1` 权重场的 `0.5`
 - `rdg-scalar`：单正值等值面，别名包括 `rdg-cube`、
   `reduced-density-gradient`，用于单 cube 的 Multiwfn `RDG.cub`，默认
   等值面 `0.5`；双 cube 的 RDG/NCI 染色图仍用 `cube-preset iri`
@@ -545,6 +551,10 @@ multiwfn2vesta grid-run --list-functions
   `EDRDmax.cub`，默认接 `cube-preset orbital-overlap-distance`，按单正值
   等值面显示；默认使用 Multiwfn 指数集合 `20, 2.50, 1.50`，可用
   `--edr-exponents COUNT START INCREMENT` 覆盖
+- `becke-weight` / `becke`：函数 `111`，原始输出 `Becke.cub`，默认接
+  `cube-preset becke-weight`，按单正值 `0.5` 等值面显示；必须传
+  `--becke-atoms I J`，其中 `I J` 是 overlap weight，`I 0` 是 atomic
+  weight
 - `esp`、`nuclear-esp`、`signlambda2rho`：默认按 signed scalar 处理；配合
   `--surface-cube` 时，ESP/nuclear ESP 默认走 `cube-preset esp`，
   sign(lambda2)rho 默认走 `cube-preset iri`
@@ -589,6 +599,12 @@ multiwfn2vesta grid-run input.fch grid_products \
 multiwfn2vesta grid-run input.fch grid_products \
   --function edrdmax \
   --edr-exponents 12 3.0 1.2 \
+  --grid-mode points \
+  --grid-points 120 120 120
+
+multiwfn2vesta grid-run input.fch grid_products \
+  --function becke \
+  --becke-atoms 1 4 \
   --grid-mode points \
   --grid-points 120 120 120
 ```

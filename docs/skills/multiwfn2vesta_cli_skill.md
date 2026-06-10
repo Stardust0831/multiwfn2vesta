@@ -161,6 +161,7 @@ multiwfn2vesta cube-preset lagrangian-ked 'G(r).cub' cube_products
 multiwfn2vesta cube-preset local-information-entropy infoentro.cub cube_products
 multiwfn2vesta cube-preset electron-delocalization-range EDR.cub cube_products
 multiwfn2vesta cube-preset orbital-overlap-distance EDRDmax.cub cube_products
+multiwfn2vesta cube-preset becke-weight Becke.cub cube_products
 multiwfn2vesta cube-preset rdg-scalar RDG.cub cube_products
 multiwfn2vesta cube-preset promolecular-rdg RDGprodens.cub cube_products
 multiwfn2vesta cube-preset promolecular-delta-g Delta_g.cub cube_products
@@ -415,7 +416,7 @@ multiwfn2vesta grid-run --list-functions
 Common functions include `density`, `gradient`, `orbital --orbital h`,
 `orbital-density`, `spin-density`, `laplacian`, `hamiltonian-ked`,
 `lagrangian-ked`, `local-information-entropy`, `elf`, `lol`, `esp`, `alie`,
-`edr`, `edrdmax`, `rdg`, `promolecular-rdg`, `delta-g`, `iri`,
+`edr`, `edrdmax`, `becke`, `rdg`, `promolecular-rdg`, `delta-g`, `iri`,
 `signlambda2rho`, `promolecular-signlambda2rho`, and `vdw-potential`.
 The scalar display defaults are
 function-specific where possible: `gradient.cub` uses `gradient-norm`,
@@ -423,13 +424,16 @@ function-specific where possible: `gradient.cub` uses `gradient-norm`,
 `orbital-density`, `laplacian.cub` uses `laplacian`, `K(r).cub` uses
 `hamiltonian-ked`, `G(r).cub` uses `lagrangian-ked`, `infoentro.cub` uses
 `local-information-entropy`, `EDR.cub` uses `electron-delocalization-range`,
-`EDRDmax.cub` uses `orbital-overlap-distance`, `RDG.cub` uses `rdg-scalar`,
-`RDGprodens.cub` uses `promolecular-rdg`, `Delta_g.cub` uses `promolecular-delta-g`,
-`IRI.cub` uses `iri-scalar`, and `vdWpot.cub` uses `vdw-potential` with
-`+/-1.0` kcal/mol signed surfaces.  The existing `cube-preset iri` name
-remains the two-cube surface+texture route, `vdw-map` remains the
-density/surface plus vdW-potential texture route, and IGM/IGMH
-`dg_inter.cub` still uses the `igmh`/`igm` texture route.
+`EDRDmax.cub` uses `orbital-overlap-distance`, `Becke.cub` uses
+`becke-weight`, `RDG.cub` uses `rdg-scalar`, `RDGprodens.cub` uses
+`promolecular-rdg`, `Delta_g.cub` uses `promolecular-delta-g`, `IRI.cub`
+uses `iri-scalar`, and `vdWpot.cub` uses `vdw-potential` with `+/-1.0`
+kcal/mol signed surfaces.  `grid-run --function becke` requires
+`--becke-atoms I J`; `I J` requests Becke overlap weight and `I 0` requests
+Becke atomic weight.  The existing `cube-preset iri` name remains the
+two-cube surface+texture route, `vdw-map` remains the density/surface plus
+vdW-potential texture route, and IGM/IGMH `dg_inter.cub` still uses the
+`igmh`/`igm` texture route.
 
 Batch frontier orbital export:
 

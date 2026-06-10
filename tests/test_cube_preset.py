@@ -110,6 +110,7 @@ class TestCubePreset(unittest.TestCase):
         self.assertIn("local-information-entropy", text)
         self.assertIn("electron-delocalization-range", text)
         self.assertIn("orbital-overlap-distance", text)
+        self.assertIn("becke-weight", text)
         self.assertIn("iri", text)
         self.assertIn("rdg-scalar", text)
         self.assertIn("promolecular-rdg", text)
@@ -388,6 +389,25 @@ basin type two
             self.assertIn("EDRDmax.cub", manifest)
             self.assertIn("default EDR exponent set 20, 2.50, 1.50", manifest)
             self.assertIn("sur_value=0.05", manifest)
+
+    def test_becke_weight_preset_writes_single_positive_surface(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            cube = self.write_tmp(root, "Becke.cub", SURFACE_CUBE)
+
+            result = run_preset("becke", cube, root / "products")
+
+            text = result.vesta_path.read_text(encoding="utf-8")
+            manifest = result.manifest_path.read_text(encoding="utf-8")
+
+            self.assertRegex(text, r"ISURF\n  1   1\s+0\.5\s+180\s+220\s+120\s+145\s+255")
+            self.assertNotRegex(text, r"\n  1   1\s+-0\.5")
+            self.assertNotIn("IMPORT_TEXTURE", text)
+            self.assertIn("canonical_preset: `becke-weight`", manifest)
+            self.assertIn("requested_preset: `becke`", manifest)
+            self.assertIn("Becke.cub", manifest)
+            self.assertIn("0..1", manifest)
+            self.assertIn("I,0", manifest)
 
     def test_standalone_rdg_scalar_preset_keeps_iri_alias_available_for_texture_route(self):
         with tempfile.TemporaryDirectory() as tmp:

@@ -78,6 +78,11 @@ multiwfn2vesta grid-run --list-functions
   `orbital-overlap-distance` with a single positive isosurface.  Omit
   `--edr-exponents` to use Multiwfn's default exponent set `20, 2.50, 1.50`,
   or pass `--edr-exponents COUNT START INCREMENT` for manual control.
+- `becke-weight`, aliases `becke`, `becke-overlap-weight`,
+  `becke-atomic-weight`, `beckewei`: function `111`, raw `Becke.cub`, preset
+  `becke-weight` with a single positive `0.5` isosurface.  Pass
+  `--becke-atoms I J`; `I J` requests Becke overlap weight and `I 0`
+  requests Becke atomic weight.
 - `delta-g`, aliases `deltag`, `delta_g`, `promolecular-deltag`,
   `delta-g-promol`: function `22`, raw `Delta_g.cub`, preset
   `promolecular-delta-g` with a single positive isosurface.  This is
@@ -220,6 +225,7 @@ multiwfn2vesta grid-run input.fch products --function hamiltonian-ked --no-vesta
 multiwfn2vesta grid-run input.fch products --function alie --no-vesta
 multiwfn2vesta grid-run input.fch products --function edr --edr-length 0.85
 multiwfn2vesta grid-run input.fch products --function edrdmax --edr-exponents 12 3.0 1.2
+multiwfn2vesta grid-run input.fch products --function becke --becke-atoms 1 4
 multiwfn2vesta grid-run input.fch products --function delta-g
 multiwfn2vesta grid-run input.fch products --function vdw-potential
 ```

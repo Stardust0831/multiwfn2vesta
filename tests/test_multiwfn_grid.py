@@ -101,6 +101,18 @@ edrdmax comment two
 """
 
 
+BECKE_CUBE = """becke comment one
+becke comment two
+    2    -1.000000    -2.000000     0.500000
+    2     0.500000     0.000000     0.000000
+    2     0.000000     0.500000     0.000000
+    2     0.000000     0.000000     0.500000
+    8     8.000000    -1.000000    -2.000000     0.500000
+    1     1.000000    -0.500000    -2.000000     0.500000
+ 0.00 0.10 0.25 0.40 0.50 0.60 0.75 1.00
+"""
+
+
 class TestMultiwfnGridRunner(unittest.TestCase):
     def make_candidate(self, root):
         fake_exe = Path(root) / "Multiwfn_noGUI"
@@ -127,6 +139,7 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertIn("preset=vdw-potential", text)
         self.assertIn("preset=electron-delocalization-range", text)
         self.assertIn("preset=orbital-overlap-distance", text)
+        self.assertIn("preset=becke-weight", text)
         self.assertIn("promolecular-rdg", text)
         self.assertIn("alie", text)
         self.assertIn("mapped preset with --surface-cube: esp", text)
@@ -163,6 +176,10 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertEqual(resolve_grid_function("edrdmax").index, 21)
         self.assertEqual(resolve_grid_function("edrdmax").output_filename, "EDRDmax.cub")
         self.assertEqual(resolve_grid_function("d(r)").preset, "orbital-overlap-distance")
+        self.assertEqual(resolve_grid_function("becke").index, 111)
+        self.assertEqual(resolve_grid_function("becke").output_filename, "Becke.cub")
+        self.assertEqual(resolve_grid_function("becke-overlap-weight").preset, "becke-weight")
+        self.assertEqual(resolve_grid_function("becke-atomic-weight").name, "becke-weight")
         self.assertEqual(resolve_grid_function(None, 18).name, "alie")
         self.assertEqual(resolve_grid_function("sl2r-pro").index, 16)
         custom = resolve_grid_function(None, 99)
@@ -228,6 +245,27 @@ class TestMultiwfnGridRunner(unittest.TestCase):
             build_grid_commands(function, edr_exponents=(12, 3.0, 1.0))
         with self.assertRaisesRegex(ValueError, "only valid for electron-delocalization-range"):
             build_grid_commands(function, edr_length=0.85)
+
+    def test_build_becke_weight_command_stream_requires_atom_pair(self):
+        function = resolve_grid_function("becke")
+
+        with self.assertRaisesRegex(ValueError, "requires --becke-atoms"):
+            build_grid_commands(function)
+        with self.assertRaisesRegex(ValueError, "first Becke atom index must be positive"):
+            build_grid_commands(function, becke_atoms=(0, 4))
+        with self.assertRaisesRegex(ValueError, "second Becke atom index must be zero or positive"):
+            build_grid_commands(function, becke_atoms=(1, -1))
+
+        self.assertEqual(
+            build_grid_commands(function, becke_atoms=(1, 4), grid_points=(10, 11, 12)),
+            ["5", "111", "1,4", "4", "10,11,12", "2", "0", "q"],
+        )
+        self.assertEqual(
+            build_grid_commands(function, becke_atoms=(5, 0), grid_mode="low"),
+            ["5", "111", "5,0", "1", "2", "0", "q"],
+        )
+        with self.assertRaisesRegex(ValueError, "only valid for Becke"):
+            build_grid_commands(resolve_grid_function("density"), becke_atoms=(1, 4))
 
     def test_run_multiwfn_grid_writes_cube_vesta_and_recipe(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -545,6 +583,48 @@ class TestMultiwfnGridRunner(unittest.TestCase):
             self.assertIn("canonical_preset: `orbital-overlap-distance`", manifest)
             self.assertIn("effective_isosurface: `0.05`", manifest)
             self.assertIn("default EDR exponent set 20, 2.50, 1.50", manifest)
+
+    def test_run_multiwfn_grid_becke_uses_atom_pair_and_dedicated_preset(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            wavefunction = root / "h2o.fch"
+            wavefunction.write_text("wavefunction", encoding="utf-8")
+            candidate = self.make_candidate(root)
+
+            def fake_run(command, **kwargs):
+                cwd = Path(kwargs["cwd"])
+                (cwd / "Becke.cub").write_text(BECKE_CUBE, encoding="utf-8")
+                return subprocess.CompletedProcess(command, 0, stdout="ok", stderr="")
+
+            with patch("multiwfn2vesta.multiwfn_grid.find_multiwfn", return_value=candidate):
+                with patch("multiwfn2vesta.multiwfn_grid.subprocess.run", side_effect=fake_run):
+                    result = run_multiwfn_grid(
+                        wavefunction,
+                        root / "products",
+                        function_name="becke",
+                        becke_atoms=(1, 4),
+                        stem="case",
+                        grid_points=(10, 11, 12),
+                    )
+
+            self.assertTrue(result.success)
+            self.assertEqual(result.becke_atoms, (1, 4))
+            self.assertEqual(result.command_file.read_text(encoding="utf-8"), "5\n111\n1,4\n4\n10,11,12\n2\n0\nq\n")
+            self.assertEqual(result.raw_cube.name, "Becke.cub")
+            self.assertEqual(result.cube.name, "case_becke-weight.cub")
+            self.assertIsNotNone(result.vesta_result)
+            self.assertEqual(
+                result.vesta_result.vesta_path.name,
+                "case_becke-weight_becke-weight_cube.vesta",
+            )
+            recipe = result.recipe_path.read_text(encoding="utf-8")
+            self.assertIn("function_index: `111`", recipe)
+            self.assertIn("becke_atom_indices_i_j: `(1, 4)`", recipe)
+            self.assertIn("Becke.cub", recipe)
+            manifest = result.vesta_result.manifest_path.read_text(encoding="utf-8")
+            self.assertIn("canonical_preset: `becke-weight`", manifest)
+            self.assertIn("effective_isosurface: `0.5`", manifest)
+            self.assertIn("Becke weights", manifest)
 
     def test_run_multiwfn_grid_vdw_surface_cube_keeps_vdw_map_route(self):
         with tempfile.TemporaryDirectory() as tmp:

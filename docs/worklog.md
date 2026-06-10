@@ -1,5 +1,34 @@
 # Worklog
 
+## 2026-06-10: Becke atomic and overlap weight cube preset
+
+- Continued the long-running Multiwfn/ABACUS/VESTA analysis objective by
+  selecting a source-backed, ABACUS LCAO Molden-compatible real-space grid
+  increment.
+- Rechecked local Multiwfn 2026.6.2 source evidence: main-function-5
+  function `111` prompts for two atom indices before grid setup, computes
+  Becke weight with `beckewei`, and exports `Becke.cub`; `I,J` computes
+  Becke overlap weight and `I,0` computes Becke atomic weight.
+- Added `cube-preset becke-weight` with aliases `becke`,
+  `becke-overlap-weight`, `becke-atomic-weight`, and `beckewei`.  The preset
+  uses a single positive `0.5` isosurface for the usual dimensionless `0..1`
+  weight range.
+- Added `grid-run --function becke --becke-atoms I J`, including atom-index
+  validation, command-stream generation, recipe fields, CLI help, and fake
+  Multiwfn `Becke.cub` tests.
+- Updated README, usage docs, cube/grid/CLI/ABACUS skills, research matrix,
+  and kanban.  Local untracked probes `domain.cub` and `domain.pdb` remain
+  uncommitted.
+- Focused validation passed before full regression: `py_compile` for the
+  changed modules/tests, 75 focused tests across `tests.test_cube_preset` and
+  `tests.test_multiwfn_grid`, and `bin/multiwfn2vesta grid-run --help`.
+- Full validation passed before commit: root docs checksum mirror dry-run,
+  full 291-test no-GUI regression, `cube-preset --list-presets`,
+  `grid-run --list-functions`, `grid-run --help`,
+  `bin/multiwfn2vesta --help`, and `git diff --check`.  Read-only review
+  found no High blocker and confirmed EDR/RDG/IRI/vdW routes are not broken;
+  `domain.cub` and `domain.pdb` remain untracked local probes.
+
 ## 2026-06-10: README branch consolidation refresh at EDR tip
 
 - User requested a README refresh, branch-state audit, possible merge-back to
