@@ -1,6 +1,6 @@
 # Project Kanban
 
-Updated: 2026-06-10 10:19 CST
+Updated: 2026-06-10 10:33 CST
 
 ## Current Continuation: 2026-06-10 Multiwfn Analysis Expansion
 
@@ -30,6 +30,29 @@ Updated: 2026-06-10 10:19 CST
   The final commit hash and post-push branch check are reported in the
   assistant response to avoid an infinite chain of "record the record"
   commits.
+
+## Current Request: 2026-06-10 README Refresh at 19bd45d
+
+- [x] Record the user's request: update README, make the branch state less
+  confusing, merge back to one branch if needed, and keep commit identity as
+  `Stardust0831`.
+- [x] Rechecked project branch state after `git fetch --prune origin`:
+  local `main`, `origin/main`, and `origin/HEAD` all point at
+  `19bd45dfc33f29309c90d408b5672fb137043b9f`
+  (`Add surface-map presets and grid functions`).
+- [x] Rechecked remote heads: `git ls-remote --heads origin` returns only
+  `refs/heads/main`, so no local or remote branch needs merging in this pass.
+- [x] Confirmed repository-local identity remains
+  `Stardust0831 <13862180016@163.com>`.
+- [x] Refresh README so the Repository Status section records the current
+  audited `main` tip and removes stale branch-audit wording.
+- [x] Sync project/root work records with this README and branch audit.
+- [x] Validate the docs update and CLI entry point before commit:
+  `git diff --check` and `bin/multiwfn2vesta --help` passed.
+- [x] Prepare the README refresh for commit and push on `main` with identity
+  `Stardust0831`.  The final commit hash and post-push branch check are
+  reported in the assistant response to avoid an infinite chain of "record
+  the record" commits.
 
 ## Current Request: 2026-06-10 README Single-Branch Refresh
 

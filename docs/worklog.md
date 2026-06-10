@@ -1,5 +1,28 @@
 # Worklog
 
+## 2026-06-10: README refresh at surface-map/grid tip
+
+- User asked to update README, noted that the branch state still looked odd,
+  suggested merging back to one branch if useful, and requested identity
+  `Stardust0831`.
+- Rechecked `/mnt/g/work/multiwfn2vesta/project` after `git fetch --prune
+  origin`.  Local `main`, `origin/main`, and `origin/HEAD` all point at
+  `19bd45dfc33f29309c90d408b5672fb137043b9f`
+  (`Add surface-map presets and grid functions`), and the GitHub remote
+  exposes only `refs/heads/main`.
+- Confirmed there is no extra local or remote feature branch to merge back in
+  this pass.  The apparently unusual branch history is a linear `main`
+  history with feature commits and documentation closure commits.
+- Confirmed repository-local identity remains
+  `Stardust0831 <13862180016@163.com>`.
+- Refreshed `README.md` Repository Status so it records the current audited
+  `main` tip, describes the current one-branch remote state, and lists the
+  latest maintained feature as the surface-map/grid expansion.
+- Validation before commit passed: `git diff --check` and
+  `bin/multiwfn2vesta --help`.  The final docs commit hash and post-push
+  branch check are reported in the assistant response to avoid an infinite
+  chain of "record the record" commits.
+
 ## 2026-06-10: Surface-map presets and expanded Multiwfn grid table
 
 - Continued the long-running Multiwfn/ABACUS/VESTA roadmap by targeting two
