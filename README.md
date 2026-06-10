@@ -15,9 +15,16 @@ point.
   GitHub remote.
 - GitHub remote: `origin` points to `Github:Stardust0831/multiwfn2vesta.git`,
   with `origin/HEAD -> origin/main`.
-- Recent branch audits on 2026-06-10 found no extra local or remote feature
-  branch to merge back; the branch history contains ordinary feature commits
-  and documentation closure commits on `main`, not active competing branches.
+- Current audited tip on 2026-06-10 11:21 CST: local `main`, `origin/main`,
+  and `origin/HEAD` all point at
+  `8bf115a3fa332e1008c370d48e70e5235e942ac5`
+  (`Add surface extrema VESTA overlay`).
+- `git ls-remote --heads origin` currently returns only
+  `refs/heads/main`; no merge-back was needed in this pass because there is no
+  extra local or remote feature branch to consolidate.
+- The apparently unusual branch history is a normal linear `main` history
+  containing feature commits and documentation closure commits, not active
+  competing branches.
 - Recent maintained feature work includes surface extrema overlays for
   `surfanalysis.pdb`, surface-map/grid expansion, generic Multiwfn atom table
   coloring, batch orbital export, `cube-arith`, and `grid-run`.
@@ -38,9 +45,10 @@ git branch --all --verbose --no-abbrev
 git ls-remote --heads origin
 ```
 
-At the time of this README refresh, the expected remote-head output is only
-`refs/heads/main`.  If a future experiment branch appears, keep all final
-project code, tests, and docs on `main` before pushing a release-style state:
+At the time of this README refresh, the expected remote-head output is
+`8bf115a3fa332e1008c370d48e70e5235e942ac5 refs/heads/main`.  If a future
+experiment branch appears, keep all final project code, tests, and docs on
+`main` before pushing a release-style state:
 
 ```bash
 git switch main

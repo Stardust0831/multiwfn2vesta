@@ -1,5 +1,32 @@
 # Worklog
 
+## 2026-06-10: README branch cleanup at surface-extrema tip
+
+- User asked to update README again, noted that the branch state looked
+  confusing, suggested merging back to one branch if useful, and requested
+  commit identity `Stardust0831`.
+- Rechecked `/mnt/g/work/multiwfn2vesta/project` after `git fetch --prune
+  origin`.  Local `main`, `origin/main`, and `origin/HEAD` all point at
+  `8bf115a3fa332e1008c370d48e70e5235e942ac5`
+  (`Add surface extrema VESTA overlay`), and `git ls-remote --heads origin`
+  exposes only `refs/heads/main`.
+- Confirmed no merge-back is needed in this pass because there is no extra
+  local or remote feature branch.  The branch shape is a single `main` history
+  containing feature commits and documentation closure commits.
+- Confirmed repository-local identity remains
+  `Stardust0831 <13862180016@163.com>`.
+- Refreshed `README.md` Repository Status so it records the current audited
+  tip, the one-branch remote state, and the future short-lived experiment
+  branch merge pattern.
+- Validation passed: `git diff --check` and `bin/multiwfn2vesta --help`.
+- Read-only pre-commit review verified the README branch-status claims.  It
+  noted that the current `docs/kanban.md` diff also contains an IGMH planning
+  block; this is retained as board planning, not described as a README feature
+  change.
+- Synced project/root kanban and worklog records.  Commit hash and post-push
+  branch check are reported in the assistant response to avoid an infinite
+  chain of "record the record" commits.
+
 ## 2026-06-10: Surface extrema overlays for mapped surfaces
 
 - Continued the Multiwfn/ABACUS/VESTA roadmap by closing the next

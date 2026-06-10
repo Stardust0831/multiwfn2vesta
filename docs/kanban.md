@@ -1,6 +1,34 @@
 # Project Kanban
 
-Updated: 2026-06-10 10:45 CST
+Updated: 2026-06-10 11:21 CST
+
+## Current Request: 2026-06-10 README Branch Cleanup at 8bf115a
+
+- [x] Record the user's request: update README, inspect the confusing branch
+  state, merge/consolidate back to one branch if needed, and use identity
+  `Stardust0831`.
+- [x] Rechecked project branch state after `git fetch --prune origin`:
+  local `main`, `origin/main`, and `origin/HEAD` all point at
+  `8bf115a3fa332e1008c370d48e70e5235e942ac5`
+  (`Add surface extrema VESTA overlay`).
+- [x] Rechecked remote heads: `git ls-remote --heads origin` returns only
+  `refs/heads/main`, so no local or remote feature branch needs merging in
+  this pass.
+- [x] Confirmed repository-local identity remains
+  `Stardust0831 <13862180016@163.com>`.
+- [x] Refresh README so the Repository Status section records the current
+  audited `main` tip, the one-branch remote state, and the future
+  merge-back pattern.
+- [x] Sync project/root work records with this README and branch audit.
+- [x] Validate the docs update and CLI entry point before commit:
+  `git diff --check` and `bin/multiwfn2vesta --help` passed.
+- [x] Read-only pre-commit review verified the README branch-status claims;
+  it also noted that the pre-existing IGMH planning block is unrelated to the
+  README cleanup, so the final response should call out that it is board
+  planning rather than a README feature change.
+- [x] Prepare the docs refresh for commit and push on `main` with identity
+  `Stardust0831`; report the final commit hash and post-push branch check in
+  the assistant response.
 
 ## Current Continuation: 2026-06-10 Multiwfn Analysis Expansion
 
@@ -30,6 +58,21 @@ Updated: 2026-06-10 10:45 CST
   The final commit hash and post-push branch check are reported in the
   assistant response to avoid an infinite chain of "record the record"
   commits.
+
+## Current Increment: 2026-06-10 IGMH VESTA Preset Foundation
+
+- [x] Record the continued objective: keep enriching VESTA workflows for
+  valuable Multiwfn analyses, especially those reachable from ABACUS LCAO
+  Molden wavefunction files.
+- [x] Choose the next concrete increment: inspect IGMH/IRI/RDG display
+  templates and add the smallest maintained VESTA preset foundation before
+  attempting full Multiwfn IGMH command-stream automation.
+- [ ] Inspect current `cube-preset`, IGMH docs/smokes, and bundled Multiwfn
+  VMD scripts for `dg_inter.cub`/`sl2r.cub` display defaults.
+- [ ] Implement a maintained IGMH visualization preset or equivalent
+  display-layer increment with focused tests.
+- [ ] Sync README/usage/skill/research docs and root work records.
+- [ ] Validate, review, commit, and push when stable.
 
 ## Current Increment: 2026-06-10 Surface-Map Extrema Overlay
 
