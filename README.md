@@ -16,13 +16,17 @@ point.
   GitHub remote.
 - GitHub remote: `origin` points to `Github:Stardust0831/multiwfn2vesta.git`,
   with `origin/HEAD -> origin/main`.
-- Branch audit on 2026-06-10 16:45 CST, after the `domain-run` feature push,
-  found local `main`, `origin/main`, and `origin/HEAD` aligned at feature
-  commit `73018ab1d8bca119d74cf9d51a39b244242bbc5f`
-  (`Add Multiwfn domain runner`).
-- `git ls-remote --heads origin` currently returns only
-  `refs/heads/main`, also at `73018ab`; no merge-back was needed in this
-  pass because there is no extra local or remote feature branch to consolidate.
+- Branch audit on 2026-06-10 16:55 CST, after the `domain-run` feature and
+  README closeout pushes, found local `main`, `origin/main`, and `origin/HEAD`
+  aligned on the same branch.  Use the commands below for the exact current
+  tip hash.
+- `git ls-remote --heads origin` currently returns only `refs/heads/main`; no
+  merge-back was needed in this pass because there is no extra local or remote
+  feature branch to consolidate.
+- The latest feature commit recorded by this audit is
+  `73018ab1d8bca119d74cf9d51a39b244242bbc5f`
+  (`Add Multiwfn domain runner`); README/status closeout commits are kept on
+  the same `main` branch.
 - The apparently unusual branch history is a normal linear `main` history
   containing feature commits and documentation closure commits, not active
   competing branches.
