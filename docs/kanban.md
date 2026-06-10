@@ -1,6 +1,51 @@
 # Project Kanban
 
-Updated: 2026-06-10 21:58 CST
+Updated: 2026-06-10 22:08 CST
+
+## Current Request: 2026-06-10 README Refresh And Branch Consolidation
+
+- [x] Record user request before editing: update README, inspect the
+  unusual-looking branch state, merge/converge back to one maintained branch
+  if needed, and keep git identity as `Stardust0831`.
+- [x] Confirm the actual maintained repository for this workspace is
+  `/mnt/g/work/multiwfn2vesta/project`; the workspace-level
+  `/mnt/g/work/multiwfn2vesta/.git` is an empty metadata stub and is not the
+  GitHub project checkout used for commits.
+- [x] Recheck branch and identity state without destructive operations:
+  after `git fetch --prune origin`, local `main`, `origin/main`, and
+  `origin/HEAD` are aligned at
+  `ef8d498bc4931bb7a03f828d43000da3c8efafc5`; `git ls-remote --heads
+  origin` exposes only `refs/heads/main`; repository-local identity is
+  `Stardust0831 <13862180016@163.com>`.
+- [x] Decide whether a branch merge is needed: no merge is needed because no
+  extra local or remote feature branch exists; this closeout should stay on
+  maintained `main`.
+- [x] Refresh README and project docs with the current branch audit,
+  one-branch policy, working checkout path, and untracked probe-file handling.
+- [x] Run read-only subagent review for the README/docs branch-consolidation
+  closeout: no High blocker; Medium reminders are to keep `domain.cub` /
+  `domain.pdb` out of staging and verify the root docs mirror after rsync.
+- [x] Sync root docs mirror, validate, review, commit, push, and verify
+  `main` remains aligned with `origin/main`; keep `domain.cub` and
+  `domain.pdb` untracked.  Validation passed before commit: root docs
+  checksum mirror dry-run, `git diff --check`, and `bin/multiwfn2vesta
+  --help`.  Final commit hash and post-push branch alignment are reported in
+  the assistant response to avoid a self-referential docs loop.
+
+## Active Goal Continuation: 2026-06-10 Next ABACUS-Molden Multiwfn Analysis
+
+- [x] Record automatic continuation of the long-running objective: keep
+  researching and implementing valuable Multiwfn wavefunction analyses that
+  can become VESTA products, with priority on ABACUS LCAO Molden-compatible
+  routes.
+- [ ] Re-inspect current `grid-run`/`cube-preset` coverage, local Multiwfn
+  2026.6.2 source exports, and the research matrix for the next bounded
+  source-backed increment.
+- [ ] Implement the selected increment with tests and documentation while
+  preserving existing mapped-surface and standalone-cube route separation.
+- [ ] Sync root docs mirror, validate, review, commit, push, and verify
+  `main` remains aligned with `origin/main`; keep `domain.cub` and
+  `domain.pdb` untracked.
 
 ## Active Goal Continuation: 2026-06-10 Next Multiwfn VESTA Analysis Gap
 

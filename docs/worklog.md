@@ -1,5 +1,22 @@
 # Worklog
 
+## 2026-06-10: README branch consolidation refresh at EDR tip
+
+- User requested a README refresh, branch-state audit, possible merge-back to
+  one branch, and git identity `Stardust0831`.
+- Confirmed the maintained GitHub checkout is
+  `/mnt/g/work/multiwfn2vesta/project`; the workspace-level
+  `/mnt/g/work/multiwfn2vesta/.git` is an empty metadata directory and is not
+  used for project commits.
+- Rechecked repository state after `git fetch --prune origin`: local `main`,
+  `origin/main`, and `origin/HEAD` are aligned at
+  `ef8d498bc4931bb7a03f828d43000da3c8efafc5` (`Add EDR grid cube presets`),
+  and `git ls-remote --heads origin` exposes only `refs/heads/main`.
+- Repository-local identity is `Stardust0831 <13862180016@163.com>`.
+- No branch merge is needed in this pass because no extra local branch or
+  remote feature branch exists; the closeout remains on maintained `main`.
+- Local untracked probes `domain.cub` and `domain.pdb` remain uncommitted.
+
 ## 2026-06-10: EDR and orbital-overlap distance cube presets
 
 - User requested a README refresh, branch-state audit, possible one-branch
