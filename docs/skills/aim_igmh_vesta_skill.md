@@ -6,6 +6,17 @@ Use this workflow when a VESTA file already contains a structure/IGMH cube
 phase and an imported AIM path/critical-point phase, and the goal is to make a
 repeatable figure-ready `.vesta` product plus optional front/right/top PNGs.
 
+If the starting point is only Multiwfn IGMH cubes, first create the IGMH cube
+layer with:
+
+```bash
+multiwfn2vesta cube-preset igmh dg_inter.cub igmh_products \
+  --texture-cube sl2r.cub
+```
+
+Then import/merge the AIM path/BCP phase in VESTA and run this style workflow
+on the saved multi-phase file.
+
 ## Maintained CLI
 
 Preferred unified entry point:

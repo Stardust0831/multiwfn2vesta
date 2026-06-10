@@ -94,7 +94,7 @@ occupations, and density derivatives from the wavefunction representation.
 | Electron density, spin density, Laplacian, kinetic density | Full wavefunction, or ABACUS density cubes for density only | Strong for density cube; Molden route for derivatives | `density.cub`, `spindensity.cub`, `laplacian.cub`, `K(r).cub`, `G(r).cub` | Single/positive-negative isosurfaces or slices | `grid-run` now covers density, spin density, Laplacian, and K(r)/G(r) single cubes |
 | ELF/LOL | Full wavefunction; ABACUS direct `out_elf` for ELF | Strong for ELF direct; Molden route for Multiwfn ELF/LOL | `ELF.cub`, `LOL.cub`, ABACUS `elf*.cube` | Isosurfaces around localized regions | `grid-run` now covers Multiwfn ELF/LOL; `cube-preset elf/lol` remains the VESTA writer |
 | AIM/QTAIM topology | Full wavefunction Molden/FCH/WFN/WFX | Feasible for Gamma LCAO Molden with `[Nval]`; validated on Ag(111)+benzene | `CPs.pdb`, `paths.pdb`, `CPprop.txt`, `mol.pdb` | Atoms-only pseudo-sites, no AIM bonds, optional labels | Already partly implemented; add ABACUS-aware recipes |
-| IGMH + AIM overlay | Full wavefunction and fragment definitions | Feasible for Gamma LCAO Molden; validated on Ag(111)+benzene | `dg_inter.cub`, `sl2r.cub`, AIM PDBs | Multi-phase VESTA density/texture plus AIM pseudo-sites | Already implemented for saved overlays; automate Multiwfn command streams next |
+| IGMH + AIM overlay | Full wavefunction and fragment definitions | Feasible for Gamma LCAO Molden; validated on Ag(111)+benzene | `dg_inter.cub`, `sl2r.cub`, AIM PDBs | Multi-phase VESTA density/texture plus AIM pseudo-sites | `cube-preset igmh` now writes the IGMH cube layer from existing `dg_inter.cub`/`sl2r.cub`; saved AIM+IGMH overlay styling is implemented; automate Multiwfn fragment command streams next |
 
 ### P1: High Value, Needs More Glue
 
@@ -239,8 +239,9 @@ Main gaps:
   fragment automation, molecular-surface extrema overlays, and more
   real-system templates.
 - Dual-cube surface texture workflows now have a preset entry point for
-  IRI/RDG/NCI, ESP/MEP, ALIE/LEA/LEAE, generic surface maps, and vdW maps,
-  but still need more real smoke cases and cleaner end-to-end templates.
+  IRI/RDG/NCI, IGM/IGMH/aIGM, ESP/MEP, ALIE/LEA/LEAE, generic surface maps,
+  and vdW maps, but still need cleaner end-to-end templates for automatically
+  running Multiwfn fragment menus.
 - Fukui/dual-descriptor visualization now has the cube-arithmetic bottom
   layer, but still needs higher-level charged-state generation templates and
   real chemistry smoke cases.

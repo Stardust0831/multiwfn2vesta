@@ -1,6 +1,22 @@
 # Project Kanban
 
-Updated: 2026-06-10 11:21 CST
+Updated: 2026-06-10 11:51 CST
+
+## Current Request: 2026-06-10 IGMH/aIGM Cube Presets
+
+- [x] Continue the long-running Multiwfn/ABACUS/VESTA objective by closing the
+  IGMH display-layer preset gap.
+- [x] Implement `cube-preset` entries for `igmh`/`igm-inter`, `igm-intra`,
+  `aigm`, and `aigm-tfi` from bundled Multiwfn VMD defaults.
+- [x] Add focused tests, documentation, a dedicated skill note, and a real
+  Ag(111)+benzene no-GUI smoke.
+- [x] Read-only pre-commit review verified the template defaults and noted
+  only that this current board heading needed refreshing.
+- [x] Final post-review validation passed: `git diff --check`, `py_compile`,
+  52 focused cube/CLI tests, full 192-test no-GUI regression, and
+  `cube-preset --list-presets`.
+- [x] Prepare the implementation, tests, docs, and new skill file for commit
+  and push on `main`; final commit hash is reported in the assistant response.
 
 ## Current Request: 2026-06-10 README Branch Cleanup at 8bf115a
 
@@ -68,12 +84,20 @@ Updated: 2026-06-10 11:21 CST
 - [x] Choose the next concrete increment: inspect IGMH/IRI/RDG display
   templates and add the smallest maintained VESTA preset foundation before
   attempting full Multiwfn IGMH command-stream automation.
-- [ ] Inspect current `cube-preset`, IGMH docs/smokes, and bundled Multiwfn
+- [x] Resume this increment after the README branch cleanup: implement the
+  preset-layer foundation first, then leave full Multiwfn IGMH command-stream
+  automation as a later increment.
+- [x] Inspect current `cube-preset`, IGMH docs/smokes, and bundled Multiwfn
   VMD scripts for `dg_inter.cub`/`sl2r.cub` display defaults.
-- [ ] Implement a maintained IGMH visualization preset or equivalent
-  display-layer increment with focused tests.
-- [ ] Sync README/usage/skill/research docs and root work records.
-- [ ] Validate, review, commit, and push when stable.
+- [x] Implement maintained weak-interaction cube presets with focused tests:
+  `igmh`/`igm-inter`, `igm-intra`, `aigm`, and `aigm-tfi`.
+- [x] Real no-GUI smoke passed on Ag(111)+benzene IGMH cubes under
+  `/mnt/g/work/multiwfn2vesta/smoke/igmh_preset_20260610_1128/products/`,
+  generating `dg_inter_igmh_cube.vesta` and recipe from `dg_inter.cub` plus
+  `sl2r.cub`.
+- [x] Sync README/usage/skill/research docs and root work records.
+- [x] Validate, review, commit, and push when stable.  Final commit hash is
+  reported in the assistant response.
 
 ## Current Increment: 2026-06-10 Surface-Map Extrema Overlay
 

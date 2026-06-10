@@ -86,6 +86,8 @@ class TestCubePreset(unittest.TestCase):
         self.assertIn("density", text)
         self.assertIn("signed", text)
         self.assertIn("iri", text)
+        self.assertIn("igmh", text)
+        self.assertIn("aigm", text)
         self.assertIn("esp", text)
         self.assertIn("alie", text)
         self.assertIn("surface-map", text)
@@ -133,6 +135,62 @@ class TestCubePreset(unittest.TestCase):
             self.assertIn("effective_tex_physical: `-0.04` to `0.04`", manifest)
             self.assertIn("canonical_preset: `iri`", manifest)
             self.assertIn("requested_preset: `rdg`", manifest)
+
+    def test_igmh_alias_uses_multiwfn_igm_inter_defaults(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            dg_inter = self.write_tmp(root, "dg_inter.cub", SURFACE_CUBE)
+            sl2r = self.write_tmp(root, "sl2r.cub", TEXTURE_CUBE)
+
+            result = run_preset("igm-inter", dg_inter, root / "products", texture_cube=sl2r)
+
+            text = result.vesta_path.read_text(encoding="utf-8")
+            manifest = result.manifest_path.read_text(encoding="utf-8")
+
+            self.assertIn("IMPORT_TEXTURE", text)
+            self.assertIn("canonical_preset: `igmh`", manifest)
+            self.assertIn("requested_preset: `igm-inter`", manifest)
+            self.assertIn("effective_isosurface: `0.01`", manifest)
+            self.assertIn("preset_tex_physical: `-0.05` to `0.05`", manifest)
+            self.assertIn("tex_reference_source: `full-cube`", manifest)
+            self.assertIn("IGM_inter.vmd", manifest)
+
+    def test_igm_intra_preset_tracks_template_isosurface(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            dg_intra = self.write_tmp(root, "dg_intra.cub", SURFACE_CUBE)
+            sl2r = self.write_tmp(root, "sl2r.cub", TEXTURE_CUBE)
+
+            result = run_preset("igmh-intra", dg_intra, root / "products", texture_cube=sl2r)
+
+            manifest = result.manifest_path.read_text(encoding="utf-8")
+
+            self.assertIn("canonical_preset: `igm-intra`", manifest)
+            self.assertIn("effective_isosurface: `0.2`", manifest)
+            self.assertIn("preset_tex_physical: `-0.05` to `0.05`", manifest)
+            self.assertIn("IGM_intra.vmd", manifest)
+
+    def test_aigm_presets_track_bundled_vmd_defaults(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            avgdg = self.write_tmp(root, "avgdg_inter.cub", SURFACE_CUBE)
+            avgsl2r = self.write_tmp(root, "avgsl2r.cub", TEXTURE_CUBE)
+            thermflu = self.write_tmp(root, "thermflu.cub", TEXTURE_CUBE)
+
+            aigm = run_preset("average-igm", avgdg, root / "aigm_products", texture_cube=avgsl2r)
+            tfi = run_preset("aigm-tfi", avgdg, root / "tfi_products", texture_cube=thermflu)
+
+            aigm_manifest = aigm.manifest_path.read_text(encoding="utf-8")
+            tfi_manifest = tfi.manifest_path.read_text(encoding="utf-8")
+
+            self.assertIn("canonical_preset: `aigm`", aigm_manifest)
+            self.assertIn("effective_isosurface: `0.008`", aigm_manifest)
+            self.assertIn("preset_tex_physical: `-0.05` to `0.05`", aigm_manifest)
+            self.assertIn("aIGM.vmd", aigm_manifest)
+            self.assertIn("canonical_preset: `aigm-tfi`", tfi_manifest)
+            self.assertIn("effective_isosurface: `0.008`", tfi_manifest)
+            self.assertIn("preset_tex_physical: `0.0` to `1.5`", tfi_manifest)
+            self.assertIn("aIGM_TFI.vmd", tfi_manifest)
 
     def test_alie_preset_uses_multiwfn_surface_map_defaults(self):
         with tempfile.TemporaryDirectory() as tmp:

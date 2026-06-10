@@ -79,6 +79,58 @@ PRESETS: Tuple[CubePreset, ...] = (
         notes="Use the IRI/RDG scalar as surface cube and sign(lambda2)rho-like cube as texture cube.",
     ),
     CubePreset(
+        name="igmh",
+        aliases=("igm", "igm-inter", "igmh-inter", "interfragment-igm", "interfragment-igmh"),
+        description="IGM/IGMH interfragment delta-g surface colored by sign(lambda2)rho.",
+        surface_mode="single",
+        isosurface=0.01000,
+        tex_physical=(-0.05, 0.05),
+        texture_required=True,
+        notes=(
+            "Use Multiwfn dg_inter.cub as surface cube and sl2r.cub as texture cube; "
+            "defaults follow the bundled IGM_inter.vmd template."
+        ),
+    ),
+    CubePreset(
+        name="igm-intra",
+        aliases=("igmh-intra", "intrafragment-igm", "intrafragment-igmh"),
+        description="IGM/IGMH intrafragment delta-g surface colored by sign(lambda2)rho.",
+        surface_mode="single",
+        isosurface=0.2000,
+        tex_physical=(-0.05, 0.05),
+        texture_required=True,
+        notes=(
+            "Use Multiwfn dg_intra.cub as surface cube and sl2r.cub as texture cube; "
+            "defaults follow the bundled IGM_intra.vmd template."
+        ),
+    ),
+    CubePreset(
+        name="aigm",
+        aliases=("average-igm", "averaged-igm", "avg-igm"),
+        description="Averaged IGM delta-g surface colored by averaged sign(lambda2)rho.",
+        surface_mode="single",
+        isosurface=0.008,
+        tex_physical=(-0.05, 0.05),
+        texture_required=True,
+        notes=(
+            "Use Multiwfn avgdg_inter.cub as surface cube and avgsl2r.cub as texture cube; "
+            "defaults follow the bundled aIGM.vmd template."
+        ),
+    ),
+    CubePreset(
+        name="aigm-tfi",
+        aliases=("aigm-thermal-fluctuation-index", "tfi-igm", "aigm-tfi-map"),
+        description="Averaged IGM delta-g surface colored by thermal fluctuation index.",
+        surface_mode="single",
+        isosurface=0.008,
+        tex_physical=(0.0, 1.5),
+        texture_required=True,
+        notes=(
+            "Use Multiwfn avgdg_inter.cub as surface cube and thermflu.cub as texture cube; "
+            "defaults follow the bundled aIGM_TFI.vmd template."
+        ),
+    ),
+    CubePreset(
         name="esp",
         aliases=("mep", "electrostatic-potential", "density-esp"),
         description="Density surface colored by electrostatic potential texture cube.",

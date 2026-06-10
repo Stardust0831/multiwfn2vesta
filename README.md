@@ -75,7 +75,8 @@ then delete the temporary branch.
   scaling, and signed positive/negative isosurface presets.
 - Apply analysis-oriented cube presets for common ABACUS/Multiwfn products
   such as density, orbitals/wavefunctions, ELF/LOL, IRI/RDG/NCI, ESP/MEP,
-  ALIE/LEA/LEAE, and vdW-potential mapped surfaces.
+  IGM/IGMH/aIGM weak-interaction maps, ALIE/LEA/LEAE, and vdW-potential
+  mapped surfaces.
 - Overlay Multiwfn molecular-surface extrema from `surfanalysis.pdb` onto
   mapped-surface VESTA files as an extra atoms-only phase, with automatic
   minima/maxima selection for ALIE/LEA/LEAE presets.
@@ -217,6 +218,8 @@ multiwfn2vesta cube-preset orbital orbital.cub cube_products
 multiwfn2vesta cube-preset elf ELF.cub cube_products
 multiwfn2vesta cube-preset rdg IRI2_surface.cub cube_products \
   --texture-cube IRI1_color.cub
+multiwfn2vesta cube-preset igmh dg_inter.cub cube_products \
+  --texture-cube sl2r.cub
 multiwfn2vesta cube-preset esp density.cub cube_products \
   --texture-cube esp.cub \
   --tex-physical -0.05 0.05
@@ -230,9 +233,10 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
 Available presets can be listed with `multiwfn2vesta cube-preset
 --list-presets`.  Current presets cover density-like scalar cubes, signed
 orbital/wavefunction/density-difference cubes, ELF/LOL cubes, IRI/RDG/NCI
-mapped surfaces, ESP/MEP mapped density surfaces, generic molecular surface
-maps, ALIE/LEA/LEAE density-surface maps, and vdW-potential density-surface
-maps.  The recipe records the requested preset, canonical preset, effective
+mapped surfaces, IGM/IGMH/aIGM weak-interaction mapped surfaces, ESP/MEP
+mapped density surfaces, generic molecular surface maps, ALIE/LEA/LEAE
+density-surface maps, and vdW-potential density-surface maps.  The recipe
+records the requested preset, canonical preset, effective
 isosurface, texture scaling source, and explicit texture percentage overrides
 when they are used.  The `surface-map`/`molsurfmap` defaults follow the
 bundled Multiwfn `molsurfmap.vmd` template.
@@ -753,6 +757,16 @@ The smoke generated a signed orbital-style `.vesta` from the `orbital` alias
 and an IRI/RDG texture-mapped `.vesta` from the `rdg` alias, both without
 launching VESTA.
 
+Smoke-tested IGMH cube preset on the Ag(111)+benzene products:
+
+```text
+/mnt/g/work/multiwfn2vesta/smoke/igmh_preset_20260610_1128/products/
+```
+
+It generated `dg_inter_igmh_cube.vesta` from `dg_inter.cub` plus
+`sl2r.cub`, using the Multiwfn `IGM_inter.vmd` defaults: isosurface `0.01`
+and texture physical range `-0.05` to `0.05`, without launching VESTA.
+
 Smoke-tested Multiwfn noGUI IRI/RDG run:
 
 ```text
@@ -779,6 +793,8 @@ and `aim_atoms_only.vesta` without launching VESTA.
 - `docs/skills/cube_vesta_skill.md`: ABACUS/Multiwfn cube to VESTA workflow.
 - `docs/skills/iri_vesta_cube_skill.md`: Multiwfn IRI/RDG cube generation and
   VESTA mapped-surface notes.
+- `docs/skills/igmh_vesta_preset_skill.md`: Multiwfn IGM/IGMH/aIGM cube
+  preset notes.
 - `docs/skills/aim_paths_to_vesta_skill.md`: AIM topology to VESTA workflow.
 - `docs/skills/aim_igmh_vesta_skill.md`: reusable AIM+IGMH overlay workflow.
 - `docs/research/multiwfn_abacus_vesta_analysis_matrix.md`: roadmap for

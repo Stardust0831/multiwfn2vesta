@@ -48,7 +48,8 @@ multiwfn2vesta aim-igmh --help
 - `cube-vesta`: 从 ABACUS/Multiwfn scalar cube 直接生成 `.vesta`，可选
   texture/color cube，默认关闭 section plane
 - `cube-preset`: 在 `cube-vesta` 后端上套用常见分析默认值，例如 density、
-  orbital/signed、ELF/LOL、IRI/RDG/NCI、ESP/MEP、ALIE/LEA/LEAE、vdW map
+  orbital/signed、ELF/LOL、IRI/RDG/NCI、IGM/IGMH/aIGM、ESP/MEP、
+  ALIE/LEA/LEAE、vdW map
 - `surface-extrema`: 把 Multiwfn `surfanalysis.pdb` 的分子表面极值点作为
   atoms-only phase 叠加到已有 `.vesta` 文件中
 - `cube-arith`: 对兼容 cube 做线性组合，用于 density difference、Fukui
@@ -190,6 +191,8 @@ multiwfn2vesta cube-preset orbital orbital.cub cube_products
 multiwfn2vesta cube-preset elf ELF.cub cube_products
 multiwfn2vesta cube-preset rdg IRI2_surface.cub cube_products \
   --texture-cube IRI1_color.cub
+multiwfn2vesta cube-preset igmh dg_inter.cub cube_products \
+  --texture-cube sl2r.cub
 multiwfn2vesta cube-preset esp density.cub cube_products \
   --texture-cube esp.cub \
   --tex-physical -0.05 0.05
@@ -209,6 +212,13 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
 - `elf` / `lol`：局域化函数等值面
 - `iri`：别名 `rdg`、`nci`，需要 `--texture-cube`，默认
   `--tex-physical -0.04 0.04` 和 `--tex-range-source surface-band`
+- `igmh`：别名包括 `igm`、`igm-inter`、`igmh-inter`，用 `dg_inter.cub`
+  加 `sl2r.cub`，默认等值面 `0.01`，染色范围 `-0.05` 到 `0.05`，对齐
+  Multiwfn `IGM_inter.vmd`
+- `igm-intra`：用 `dg_intra.cub` 加 `sl2r.cub`，默认等值面 `0.2`，对齐
+  Multiwfn `IGM_intra.vmd`
+- `aigm` / `aigm-tfi`：用 `avgdg_inter.cub` 分别加 `avgsl2r.cub` 或
+  `thermflu.cub`，默认等值面 `0.008`
 - `esp`：别名 `mep`，需要 `--texture-cube`，建议为可比较图显式给
   `--tex-physical`
 - `surface-map`：通用 density/surface cube 加 mapped-property texture cube，
@@ -427,9 +437,11 @@ bin/multiwfn2vesta grid-run \
 `/mnt/g/work/multiwfn2vesta/smoke/multiwfn_grid_run_smoke_20260610_h2o_elf/products/`。
 
 注意：`grid-run` 的每个子任务仍然只生成一个 scalar cube。ESP-on-density、
-IRI/RDG/NCI mapped surface、IGMH 这类需要 surface cube + texture cube 或
-fragment 定义的图，仍然要通过 `cube-preset`/`cube-vesta` 组合，或使用专门的
-`iri-run`、`aim-igmh` 流程。
+IRI/RDG/NCI mapped surface、IGM/IGMH/aIGM 这类需要 surface cube +
+texture cube 或 fragment 定义的图，仍然要通过 `cube-preset`/`cube-vesta`
+组合，或使用专门的 `iri-run`、`aim-igmh` 流程。当前 `cube-preset igmh`
+只负责把已有 `dg_inter.cub`/`sl2r.cub` 写成 VESTA；从波函数自动调用
+Multiwfn IGMH fragment 菜单仍是后续任务。
 
 ## 波函数文件到 IRI/RDG VESTA
 

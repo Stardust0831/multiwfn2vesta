@@ -46,6 +46,8 @@ multiwfn2vesta cube-preset orbital orbital.cub cube_products
 multiwfn2vesta cube-preset elf ELF.cub cube_products
 multiwfn2vesta cube-preset rdg IRI2_surface.cub cube_products \
   --texture-cube IRI1_color.cub
+multiwfn2vesta cube-preset igmh dg_inter.cub cube_products \
+  --texture-cube sl2r.cub
 multiwfn2vesta cube-preset esp density.cub cube_products \
   --texture-cube esp.cub \
   --tex-physical -0.05 0.05
@@ -56,6 +58,21 @@ multiwfn2vesta cube-preset alie density.cub cube_products \
 
 `cube-preset` is a thin layer over `cube-vesta`; it selects maintained
 defaults but does not duplicate VESTA-writing logic.
+
+IGM/IGMH/aIGM presets are available when Multiwfn has already produced the
+compatible cube pair:
+
+- `igmh` / `igm-inter`: `dg_inter.cub` surface plus `sl2r.cub` texture,
+  isosurface `0.01`, texture physical range `-0.05` to `0.05`.
+- `igm-intra`: `dg_intra.cub` surface plus `sl2r.cub` texture, isosurface
+  `0.2`, texture physical range `-0.05` to `0.05`.
+- `aigm`: `avgdg_inter.cub` surface plus `avgsl2r.cub` texture, isosurface
+  `0.008`, texture physical range `-0.05` to `0.05`.
+- `aigm-tfi`: `avgdg_inter.cub` surface plus `thermflu.cub` texture,
+  isosurface `0.008`, texture physical range `0.0` to `1.5`.
+
+These defaults come from the bundled Multiwfn VMD templates
+`IGM_inter.vmd`, `IGM_intra.vmd`, `aIGM.vmd`, and `aIGM_TFI.vmd`.
 
 Surface extrema overlay:
 

@@ -1,5 +1,36 @@
 # Worklog
 
+## 2026-06-10: IGMH and aIGM cube presets
+
+- Continued the Multiwfn/ABACUS/VESTA roadmap by closing a display-layer gap
+  for Multiwfn IGM/IGMH/aIGM weak-interaction cube pairs.
+- Rechecked bundled Multiwfn VMD templates:
+  `IGM_inter.vmd` uses `dg_inter.cub` as the isosurface at `0.01000` and
+  `sl2r.cub` as texture with `scaleminmax -0.05 0.05`;
+  `IGM_intra.vmd` uses `dg_intra.cub` at `0.2000` with the same texture range;
+  `aIGM.vmd` uses `avgdg_inter.cub` at `0.008` colored by `avgsl2r.cub`; and
+  `aIGM_TFI.vmd` uses `avgdg_inter.cub` at `0.008` colored by `thermflu.cub`
+  with range `0.0` to `1.5`.
+- Added `cube-preset` entries for `igmh`/`igm-inter`, `igm-intra`, `aigm`,
+  and `aigm-tfi`.  These are VESTA display presets for already-generated cube
+  pairs; Multiwfn fragment command-stream automation remains a later
+  increment.
+- Added focused tests for preset listing, alias resolution, template-derived
+  isosurfaces, texture physical ranges, and manifest notes.
+- Real no-GUI smoke passed on the Ag(111)+benzene periodic-cell IGMH cubes:
+  `/mnt/g/work/multiwfn2vesta/smoke/igmh_preset_20260610_1128/products/`.
+  The run generated `dg_inter_igmh_cube.vesta` and
+  `dg_inter_igmh_cube_vesta_recipe.md` from `dg_inter.cub` plus `sl2r.cub`
+  without launching VESTA.
+- Final validation passed after read-only review: `git diff --check`,
+  `py_compile`, 52 focused cube/CLI tests, full 192-test no-GUI regression,
+  and `cube-preset --list-presets`.
+- Synced README, usage docs, cube/CLI/ABACUS/AIM+IGMH skill notes, new
+  `docs/skills/igmh_vesta_preset_skill.md`, the research matrix, and
+  project/root kanban/worklog.  Final validation and commit hash are reported
+  in the assistant response to avoid an infinite chain of "record the record"
+  commits.
+
 ## 2026-06-10: README branch cleanup at surface-extrema tip
 
 - User asked to update README again, noted that the branch state looked

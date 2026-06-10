@@ -52,6 +52,8 @@ multiwfn2vesta cube-preset orbital wfc_real.cub cube_products
 multiwfn2vesta cube-preset elf ELF.cub cube_products
 multiwfn2vesta cube-preset rdg IRI2_surface.cub cube_products \
   --texture-cube IRI1_color.cub
+multiwfn2vesta cube-preset igmh dg_inter.cub cube_products \
+  --texture-cube sl2r.cub
 multiwfn2vesta cube-preset esp density.cub cube_products \
   --texture-cube esp.cub \
   --tex-physical -0.05 0.05
@@ -230,6 +232,8 @@ explicitly.
   `docs/skills/aim_paths_to_vesta_skill.md`
 - AIM+IGMH:
   `docs/skills/aim_igmh_vesta_skill.md`
+- IGMH cube preset:
+  `docs/skills/igmh_vesta_preset_skill.md`
 - IRI cube coloring:
   `docs/skills/iri_vesta_cube_skill.md`
 - Atom scalar coloring:
