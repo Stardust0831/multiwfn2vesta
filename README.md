@@ -17,13 +17,14 @@ point.
   GitHub remote.
 - GitHub remote: `origin` points to `Github:Stardust0831/multiwfn2vesta.git`,
   with `origin/HEAD -> origin/main`.
-- Branch audit on 2026-06-10 18:01 CST, after the `fukui-run` push, found
-  local `main`, `origin/main`, and `origin/HEAD` aligned on the same branch.
-  Use the commands below for the exact current tip hash.
+- Branch audit on 2026-06-10 18:17 CST, after the `fukui-run` branch-status
+  closeout, found local `main`, `origin/main`, and `origin/HEAD` aligned at
+  `f8e1a4815d2f32b8562f74824e7e0253c6dc6b8e`
+  (`Close Fukui runner branch status`).
 - `git ls-remote --heads origin` currently returns only `refs/heads/main`; no
   merge-back was needed in this pass because there is no extra local or remote
   feature branch to consolidate.
-- The latest feature commit recorded by this audit is
+- The latest feature commit in this audited branch state is
   `43e00d2218699574d3644c51dc0bd1249f60d0da`
   (`Add Multiwfn Fukui runner`); README/status closeout commits are kept on
   the same `main` branch.

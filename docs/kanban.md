@@ -1,6 +1,28 @@
 # Project Kanban
 
-Updated: 2026-06-10 18:01 CST
+Updated: 2026-06-10 18:17 CST
+
+## Current Continuation: 2026-06-10 README Refresh and Branch Consolidation
+
+- [x] Record user request: update README, inspect unusual branch state, converge work back to one branch, and use `Stardust0831` git identity.
+- [x] Inspect current branch/remotes and local git identity without destructive operations: local `main`, `origin/main`, and `origin/HEAD` are aligned at `f8e1a48`; the remote exposes only `refs/heads/main`; repository-local identity is `Stardust0831 <13862180016@163.com>`.
+- [x] Update README to reflect the current CLI/workflows and project status.
+- [x] Sync documentation mirror if needed and keep kanban/worklog current.
+- [x] Validate docs/tests as appropriate, review diff, commit, and push to single `main`: `bin/multiwfn2vesta --help`, `git diff --check`, branch/remote checks, and read-only subagent review passed; commit/push are performed on `main` with `Stardust0831`.
+
+## Current Continuation: 2026-06-10 aIGM/amIGM Runner Feasibility
+
+- [x] Record the continued long-running objective: keep expanding useful
+  Multiwfn wavefunction analyses that can become VESTA products, especially
+  ABACUS-compatible Molden workflows.
+- [ ] Re-read the existing IGM/mIGM/IGMH runner and local Multiwfn weak
+  interaction source before deciding whether aIGM/amIGM prompt streams are
+  stable enough for a maintained CLI.
+- [ ] If stable, implement the smallest aIGM/amIGM runner increment by
+  reusing the existing IGMH runner and `cube-preset aigm`; if not stable,
+  document the blocker with source evidence.
+- [ ] Add focused tests/docs/skill updates and sync project/root docs.
+- [ ] Validate, review if needed, then commit and push on `main` if stable.
 
 ## Current Request: 2026-06-10 README Refresh, One-Branch Closeout, And Fukui Runner
 
