@@ -83,6 +83,12 @@ multiwfn2vesta grid-run --list-functions
   `becke-weight` with a single positive `0.5` isosurface.  Pass
   `--becke-atoms I J`; `I J` requests Becke overlap weight and `I 0`
   requests Becke atomic weight.
+- `hirshfeld-weight`, aliases `hirshfeld`, `hirshfeld-atomic-weight`,
+  `hirshfeldwei`: function `112`, raw `Hirshfeld.cub`, preset
+  `hirshfeld-weight` with a single positive `0.5` isosurface.  Pass
+  `--hirshfeld-atoms ATOMS`, for example `2,3,7-10`; the maintained stream
+  uses built-in atomic densities and does not automate separate atomic
+  `.wfn` prompts yet.
 - `delta-g`, aliases `deltag`, `delta_g`, `promolecular-deltag`,
   `delta-g-promol`: function `22`, raw `Delta_g.cub`, preset
   `promolecular-delta-g` with a single positive isosurface.  This is
@@ -226,6 +232,7 @@ multiwfn2vesta grid-run input.fch products --function alie --no-vesta
 multiwfn2vesta grid-run input.fch products --function edr --edr-length 0.85
 multiwfn2vesta grid-run input.fch products --function edrdmax --edr-exponents 12 3.0 1.2
 multiwfn2vesta grid-run input.fch products --function becke --becke-atoms 1 4
+multiwfn2vesta grid-run input.fch products --function hirshfeld --hirshfeld-atoms '2,3,7-10'
 multiwfn2vesta grid-run input.fch products --function delta-g
 multiwfn2vesta grid-run input.fch products --function vdw-potential
 ```

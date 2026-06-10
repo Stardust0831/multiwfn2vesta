@@ -59,6 +59,7 @@ multiwfn2vesta cube-preset local-information-entropy infoentro.cub cube_products
 multiwfn2vesta cube-preset electron-delocalization-range EDR.cub cube_products
 multiwfn2vesta cube-preset orbital-overlap-distance EDRDmax.cub cube_products
 multiwfn2vesta cube-preset becke-weight Becke.cub cube_products
+multiwfn2vesta cube-preset hirshfeld-weight Hirshfeld.cub cube_products
 multiwfn2vesta cube-preset rdg-scalar RDG.cub cube_products
 multiwfn2vesta cube-preset promolecular-rdg RDGprodens.cub cube_products
 multiwfn2vesta cube-preset promolecular-delta-g Delta_g.cub cube_products
@@ -221,11 +222,11 @@ Useful `grid-run` functions for ABACUS-compatible Molden files include
 `density`, `gradient`, `orbital --orbital h`, `orbital-density --orbital h`,
 `spin-density`, `laplacian`, `hamiltonian-ked`, `lagrangian-ked`, `elf`,
 `lol`, `local-information-entropy`, `esp`, `rdg`, `promolecular-rdg`,
-`edr`, `edrdmax`, `becke`, `delta-g`, `iri`, `vdw-potential`, and
-`signlambda2rho`.
+`edr`, `edrdmax`, `becke`, `hirshfeld`, `delta-g`, `iri`, `vdw-potential`,
+and `signlambda2rho`.
 The single-cube display presets for `gradient.cub`, `spindensity.cub`,
 `orbdens.cub`, `infoentro.cub`, `EDR.cub`, `EDRDmax.cub`, `Becke.cub`,
-`RDG.cub`, `RDGprodens.cub`, `Delta_g.cub`, `IRI.cub`, and `vdWpot.cub` follow
+`Hirshfeld.cub`, `RDG.cub`, `RDGprodens.cub`, `Delta_g.cub`, `IRI.cub`, and `vdWpot.cub` follow
 Multiwfn main-function-5 `sur_value`
 defaults where the source defines them.  For `gradient.cub`, `infoentro.cub`,
 `EDR.cub`, `EDRDmax.cub`, and `Delta_g.cub`, Multiwfn leaves the function at
@@ -234,10 +235,12 @@ the global `sur_value=0.05`, so tune the VESTA isosurface per system.
 --function edrdmax` uses Multiwfn's default exponent set unless
 `--edr-exponents COUNT START INCREMENT` is supplied; `grid-run --function
 becke` requires `--becke-atoms I J`, with `I J` for Becke overlap weight and
-`I 0` for Becke atomic weight.  `infoentro.cub` uses signed
+`I 0` for Becke atomic weight; `grid-run --function hirshfeld` requires
+`--hirshfeld-atoms ATOMS`, for example `2,3,7-10`, and currently selects
+Multiwfn's built-in atomic-density mode.  `infoentro.cub` uses signed
 `local-information-entropy`, `EDR.cub` uses `electron-delocalization-range`,
 `EDRDmax.cub` uses `orbital-overlap-distance`, `Becke.cub` uses
-`becke-weight`, `Delta_g.cub` uses standalone
+`becke-weight`, `Hirshfeld.cub` uses `hirshfeld-weight`, `Delta_g.cub` uses standalone
 `promolecular-delta-g`, `IRI.cub` uses standalone `iri-scalar`, and
 `vdWpot.cub` uses standalone `vdw-potential` with `+/-1.0` kcal/mol signed
 surfaces.  Use the existing two-cube `cube-preset iri` route when a

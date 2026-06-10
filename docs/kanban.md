@@ -1,6 +1,58 @@
 # Project Kanban
 
-Updated: 2026-06-10 22:35 CST
+Updated: 2026-06-10 23:04 CST
+
+## Active Goal Continuation: 2026-06-10 Hirshfeld Weight Grid Cube
+
+- [x] Record automatic continuation of the long-running objective: keep
+  researching and implementing valuable Multiwfn wavefunction/grid analyses
+  that can become VESTA products, with priority on ABACUS LCAO
+  Molden-compatible routes.
+- [x] Recheck current repository state: local `main`, `origin/main`, and
+  `origin/HEAD` are aligned at
+  `e68ace19a4d2b155d8817cb3094dc9bba065ecb8`; repository-local identity is
+  `Stardust0831 <13862180016@163.com>`; only local untracked probes
+  `domain.cub` and `domain.pdb` remain outside version control.
+- [x] Inspect local Multiwfn 2026.6.2 source for the next bounded feature:
+  main-function-5 function `112` asks for a Hirshfeld atom selection string,
+  then asks how to generate atomic densities; choosing `2` uses built-in
+  atomic densities and exports `Hirshfeld.cub`.
+- [x] Implement `cube-preset hirshfeld-weight` and
+  `grid-run --function hirshfeld-weight --hirshfeld-atoms ATOMS`, initially
+  supporting the bounded built-in atomic-density mode.
+- [x] Update tests, README, usage docs, skills, research matrix, and worklog.
+- [x] Sync root docs mirror, validate, review, commit, push, and verify
+  `main` remains aligned with `origin/main`; keep `domain.cub` and
+  `domain.pdb` untracked.  Validation passed before commit: root docs
+  checksum mirror dry-run, focused `py_compile`, 78 focused tests across
+  `tests.test_cube_preset` and `tests.test_multiwfn_grid`, full 294-test
+  no-GUI regression, `cube-preset --list-presets`,
+  `grid-run --list-functions`, `grid-run --help`,
+  `bin/multiwfn2vesta --help`, and `git diff --check`.  Read-only review
+  found no High/Medium blocker and confirmed function `112` uses the
+  `5,112,<selection>,2,<grid setup>,2,0,q` built-in-density command stream.
+  Final commit hash and post-push branch alignment are reported in the
+  assistant response to avoid a self-referential docs loop.
+
+## Current Request: 2026-06-10 README Refresh And Single-Branch Closeout
+
+- [x] Record user request before final edits: update README, check the
+  unusual-looking branch state, converge to one maintained branch if needed,
+  and keep git identity as `Stardust0831`.
+- [x] Confirm current branch state: local `main`, `origin/main`, and
+  `origin/HEAD` are aligned at
+  `e68ace19a4d2b155d8817cb3094dc9bba065ecb8`; `git ls-remote --heads
+  origin` exposes only `refs/heads/main`; no extra branch needs merging.
+- [x] Refresh README and docs with the current single-branch status plus the
+  new Hirshfeld weight grid/preset workflow.
+- [x] Sync root docs mirror, run validation, perform read-only review, commit
+  and push to `origin/main`, then verify final branch alignment.  Validation
+  passed before commit: root docs checksum mirror dry-run, focused
+  `py_compile`, 78 focused tests, full 294-test no-GUI regression,
+  `cube-preset --list-presets`, `grid-run --list-functions`,
+  `grid-run --help`, `bin/multiwfn2vesta --help`, and `git diff --check`.
+  Read-only review found no High/Medium blocker.  Final commit hash and
+  post-push branch alignment are reported in the assistant response.
 
 ## Current Request: 2026-06-10 README Refresh And Branch Consolidation At Becke Tip
 

@@ -113,6 +113,18 @@ becke comment two
 """
 
 
+HIRSHFELD_CUBE = """hirshfeld comment one
+hirshfeld comment two
+    2    -1.000000    -2.000000     0.500000
+    2     0.500000     0.000000     0.000000
+    2     0.000000     0.500000     0.000000
+    2     0.000000     0.000000     0.500000
+    8     8.000000    -1.000000    -2.000000     0.500000
+    1     1.000000    -0.500000    -2.000000     0.500000
+ 0.00 0.10 0.25 0.40 0.50 0.60 0.75 1.00
+"""
+
+
 class TestMultiwfnGridRunner(unittest.TestCase):
     def make_candidate(self, root):
         fake_exe = Path(root) / "Multiwfn_noGUI"
@@ -140,6 +152,7 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertIn("preset=electron-delocalization-range", text)
         self.assertIn("preset=orbital-overlap-distance", text)
         self.assertIn("preset=becke-weight", text)
+        self.assertIn("preset=hirshfeld-weight", text)
         self.assertIn("promolecular-rdg", text)
         self.assertIn("alie", text)
         self.assertIn("mapped preset with --surface-cube: esp", text)
@@ -180,6 +193,9 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertEqual(resolve_grid_function("becke").output_filename, "Becke.cub")
         self.assertEqual(resolve_grid_function("becke-overlap-weight").preset, "becke-weight")
         self.assertEqual(resolve_grid_function("becke-atomic-weight").name, "becke-weight")
+        self.assertEqual(resolve_grid_function("hirshfeld").index, 112)
+        self.assertEqual(resolve_grid_function("hirshfeld").output_filename, "Hirshfeld.cub")
+        self.assertEqual(resolve_grid_function("hirshfeld-atomic-weight").preset, "hirshfeld-weight")
         self.assertEqual(resolve_grid_function(None, 18).name, "alie")
         self.assertEqual(resolve_grid_function("sl2r-pro").index, 16)
         custom = resolve_grid_function(None, 99)
@@ -266,6 +282,40 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         )
         with self.assertRaisesRegex(ValueError, "only valid for Becke"):
             build_grid_commands(resolve_grid_function("density"), becke_atoms=(1, 4))
+
+    def test_build_hirshfeld_weight_command_stream_uses_builtin_density(self):
+        function = resolve_grid_function("hirshfeld")
+
+        with self.assertRaisesRegex(ValueError, "requires --hirshfeld-atoms"):
+            build_grid_commands(function)
+        with self.assertRaisesRegex(ValueError, "must not be empty"):
+            build_grid_commands(function, hirshfeld_atoms=" ")
+        with self.assertRaisesRegex(ValueError, "ranges must be ascending"):
+            build_grid_commands(function, hirshfeld_atoms="5-3")
+        with self.assertRaisesRegex(ValueError, "indices must be positive"):
+            build_grid_commands(function, hirshfeld_atoms="0,2")
+        with self.assertRaisesRegex(ValueError, "currently supported"):
+            build_grid_commands(function, hirshfeld_atoms="2,3", hirshfeld_density_type="atomic-wfn")
+
+        self.assertEqual(
+            build_grid_commands(
+                function,
+                hirshfeld_atoms="2, 3, 7-10",
+                grid_points=(10, 11, 12),
+            ),
+            ["5", "112", "2,3,7-10", "2", "4", "10,11,12", "2", "0", "q"],
+        )
+        self.assertEqual(
+            build_grid_commands(
+                function,
+                hirshfeld_atoms="4",
+                hirshfeld_density_type="built-in",
+                grid_mode="low",
+            ),
+            ["5", "112", "4", "2", "1", "2", "0", "q"],
+        )
+        with self.assertRaisesRegex(ValueError, "only valid for Hirshfeld"):
+            build_grid_commands(resolve_grid_function("density"), hirshfeld_atoms="2,3")
 
     def test_run_multiwfn_grid_writes_cube_vesta_and_recipe(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -625,6 +675,53 @@ class TestMultiwfnGridRunner(unittest.TestCase):
             self.assertIn("canonical_preset: `becke-weight`", manifest)
             self.assertIn("effective_isosurface: `0.5`", manifest)
             self.assertIn("Becke weights", manifest)
+
+    def test_run_multiwfn_grid_hirshfeld_uses_atom_selection_and_dedicated_preset(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            wavefunction = root / "h2o.fch"
+            wavefunction.write_text("wavefunction", encoding="utf-8")
+            candidate = self.make_candidate(root)
+
+            def fake_run(command, **kwargs):
+                cwd = Path(kwargs["cwd"])
+                (cwd / "Hirshfeld.cub").write_text(HIRSHFELD_CUBE, encoding="utf-8")
+                return subprocess.CompletedProcess(command, 0, stdout="ok", stderr="")
+
+            with patch("multiwfn2vesta.multiwfn_grid.find_multiwfn", return_value=candidate):
+                with patch("multiwfn2vesta.multiwfn_grid.subprocess.run", side_effect=fake_run):
+                    result = run_multiwfn_grid(
+                        wavefunction,
+                        root / "products",
+                        function_name="hirshfeld",
+                        hirshfeld_atoms="2, 3, 7-10",
+                        stem="case",
+                        grid_points=(10, 11, 12),
+                    )
+
+            self.assertTrue(result.success)
+            self.assertEqual(result.hirshfeld_atoms, "2,3,7-10")
+            self.assertEqual(result.hirshfeld_density_type, "builtin")
+            self.assertEqual(
+                result.command_file.read_text(encoding="utf-8"),
+                "5\n112\n2,3,7-10\n2\n4\n10,11,12\n2\n0\nq\n",
+            )
+            self.assertEqual(result.raw_cube.name, "Hirshfeld.cub")
+            self.assertEqual(result.cube.name, "case_hirshfeld-weight.cub")
+            self.assertIsNotNone(result.vesta_result)
+            self.assertEqual(
+                result.vesta_result.vesta_path.name,
+                "case_hirshfeld-weight_hirshfeld-weight_cube.vesta",
+            )
+            recipe = result.recipe_path.read_text(encoding="utf-8")
+            self.assertIn("function_index: `112`", recipe)
+            self.assertIn("hirshfeld_atom_selection: `2,3,7-10`", recipe)
+            self.assertIn("hirshfeld_density_type: `builtin`", recipe)
+            self.assertIn("Hirshfeld.cub", recipe)
+            manifest = result.vesta_result.manifest_path.read_text(encoding="utf-8")
+            self.assertIn("canonical_preset: `hirshfeld-weight`", manifest)
+            self.assertIn("effective_isosurface: `0.5`", manifest)
+            self.assertIn("built-in atomic densities", manifest)
 
     def test_run_multiwfn_grid_vdw_surface_cube_keeps_vdw_map_route(self):
         with tempfile.TemporaryDirectory() as tmp:

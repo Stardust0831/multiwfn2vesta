@@ -268,6 +268,21 @@ PRESETS: Tuple[CubePreset, ...] = (
         ),
     ),
     CubePreset(
+        name="hirshfeld-weight",
+        aliases=("hirshfeld", "hirshfeld-atomic-weight", "hirshfeldwei"),
+        description="Single positive isosurface for Multiwfn Hirshfeld weight cubes.",
+        surface_mode="single",
+        isosurface=0.5,
+        positive_rgb=(120, 205, 170),
+        surface_opacity=(145, 255),
+        notes=(
+            "Use for Multiwfn Hirshfeld.cub from real-space function 112. "
+            "Hirshfeld weights are dimensionless and normally span 0..1; "
+            "grid-run currently uses Multiwfn's built-in atomic densities "
+            "rather than prompting for separate atomic .wfn files."
+        ),
+    ),
+    CubePreset(
         name="rdg-scalar",
         aliases=("rdg-cube", "scalar-rdg", "reduced-density-gradient"),
         description="Single positive isosurface for standalone RDG scalar cubes.",

@@ -1,5 +1,41 @@
 # Worklog
 
+## 2026-06-10: Hirshfeld weight cube preset and branch refresh
+
+- Continued the long-running Multiwfn/ABACUS/VESTA analysis objective with
+  another bounded main-function-5 grid increment that ABACUS LCAO Molden
+  files can feed.
+- Rechecked repository state: local `main`, `origin/main`, and `origin/HEAD`
+  were aligned at `e68ace19a4d2b155d8817cb3094dc9bba065ecb8` (`Refresh
+  README branch status at Becke tip`) before this feature/status closeout;
+  `git ls-remote --heads origin` exposes only `refs/heads/main`, so no
+  branch merge-back is needed.  Repository-local identity is
+  `Stardust0831 <13862180016@163.com>`.
+- Rechecked local Multiwfn 2026.6.2 source evidence: main-function-5
+  function `112` asks for a Hirshfeld atom selection string, then asks how to
+  obtain atomic densities; choosing `2` uses built-in atomic densities and
+  exports `Hirshfeld.cub`.
+- Added `cube-preset hirshfeld-weight` with aliases `hirshfeld`,
+  `hirshfeld-atomic-weight`, and `hirshfeldwei`.  The preset uses a single
+  positive `0.5` isosurface for the usual dimensionless `0..1` weight range.
+- Added `grid-run --function hirshfeld --hirshfeld-atoms ATOMS`, including
+  comma/range selection validation, command-stream generation, recipe fields,
+  CLI help, and fake Multiwfn `Hirshfeld.cub` tests.  The maintained command
+  stream intentionally supports only the built-in atomic-density path for
+  now; separate atomic `.wfn` density prompts remain deferred.
+- Updated README, usage docs, cube/grid/CLI/ABACUS skills, research matrix,
+  worklog, and kanban.  Local untracked probes `domain.cub` and `domain.pdb`
+  remain uncommitted.
+- Validation passed before commit: root docs checksum mirror dry-run,
+  focused `py_compile`, 78 focused tests across `tests.test_cube_preset` and
+  `tests.test_multiwfn_grid`, full 294-test no-GUI regression,
+  `cube-preset --list-presets`, `grid-run --list-functions`,
+  `grid-run --help`, `bin/multiwfn2vesta --help`, and `git diff --check`.
+  Read-only review found no High/Medium blocker and confirmed the function
+  `112` command stream uses built-in atomic densities as
+  `5,112,<selection>,2,<grid setup>,2,0,q`.  Final commit hash and post-push
+  branch alignment are reported in the assistant response.
+
 ## 2026-06-10: README branch consolidation refresh at Becke tip
 
 - User requested a README refresh, branch-state audit, possible merge-back to

@@ -226,6 +226,7 @@ multiwfn2vesta cube-preset local-information-entropy infoentro.cub cube_products
 multiwfn2vesta cube-preset electron-delocalization-range EDR.cub cube_products
 multiwfn2vesta cube-preset orbital-overlap-distance EDRDmax.cub cube_products
 multiwfn2vesta cube-preset becke-weight Becke.cub cube_products
+multiwfn2vesta cube-preset hirshfeld-weight Hirshfeld.cub cube_products
 multiwfn2vesta cube-preset rdg-scalar RDG.cub cube_products
 multiwfn2vesta cube-preset promolecular-rdg RDGprodens.cub cube_products
 multiwfn2vesta cube-preset promolecular-delta-g Delta_g.cub cube_products
@@ -293,6 +294,11 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
   `111` 的 `Becke.cub`；`grid-run` 需要 `--becke-atoms I J`，其中
   `I J` 计算 Becke overlap weight，`I 0` 计算 Becke atomic weight；
   默认等值面为适合 `0..1` 权重场的 `0.5`
+- `hirshfeld-weight`：单正值等值面，别名包括 `hirshfeld`、
+  `hirshfeld-atomic-weight`、`hirshfeldwei`，用于 Multiwfn 函数 `112`
+  的 `Hirshfeld.cub`；`grid-run` 需要 `--hirshfeld-atoms ATOMS`，例如
+  `2,3,7-10`；当前维护的命令流固定选择 Multiwfn 内置原子密度，暂不自动化
+  额外 atomic `.wfn` 文件提示；默认等值面为适合 `0..1` 权重场的 `0.5`
 - `rdg-scalar`：单正值等值面，别名包括 `rdg-cube`、
   `reduced-density-gradient`，用于单 cube 的 Multiwfn `RDG.cub`，默认
   等值面 `0.5`；双 cube 的 RDG/NCI 染色图仍用 `cube-preset iri`
@@ -555,6 +561,10 @@ multiwfn2vesta grid-run --list-functions
   `cube-preset becke-weight`，按单正值 `0.5` 等值面显示；必须传
   `--becke-atoms I J`，其中 `I J` 是 overlap weight，`I 0` 是 atomic
   weight
+- `hirshfeld-weight` / `hirshfeld`：函数 `112`，原始输出
+  `Hirshfeld.cub`，默认接 `cube-preset hirshfeld-weight`，按单正值
+  `0.5` 等值面显示；必须传 `--hirshfeld-atoms ATOMS`，例如
+  `2,3,7-10`；当前自动化路径使用 Multiwfn 内置原子密度
 - `esp`、`nuclear-esp`、`signlambda2rho`：默认按 signed scalar 处理；配合
   `--surface-cube` 时，ESP/nuclear ESP 默认走 `cube-preset esp`，
   sign(lambda2)rho 默认走 `cube-preset iri`
@@ -605,6 +615,12 @@ multiwfn2vesta grid-run input.fch grid_products \
 multiwfn2vesta grid-run input.fch grid_products \
   --function becke \
   --becke-atoms 1 4 \
+  --grid-mode points \
+  --grid-points 120 120 120
+
+multiwfn2vesta grid-run input.fch grid_products \
+  --function hirshfeld \
+  --hirshfeld-atoms '2,3,7-10' \
   --grid-mode points \
   --grid-points 120 120 120
 ```

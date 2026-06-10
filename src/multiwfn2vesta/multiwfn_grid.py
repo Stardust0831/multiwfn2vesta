@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -120,6 +121,13 @@ GRID_FUNCTIONS: Tuple[GridFunction, ...] = (
         "becke-weight",
         ("becke", "becke-overlap-weight", "becke-atomic-weight", "beckewei"),
     ),
+    GridFunction(
+        "hirshfeld-weight",
+        112,
+        "Hirshfeld.cub",
+        "hirshfeld-weight",
+        ("hirshfeld", "hirshfeld-atomic-weight", "hirshfeldwei"),
+    ),
 )
 
 
@@ -154,6 +162,8 @@ class MultiwfnGridResult(NamedTuple):
     edr_length: Optional[float]
     edr_exponents: Optional[Tuple[int, float, float]]
     becke_atoms: Optional[Tuple[int, int]]
+    hirshfeld_atoms: Optional[str]
+    hirshfeld_density_type: Optional[str]
 
 
 class MultiwfnGridBatchResult(NamedTuple):
@@ -308,6 +318,50 @@ def _format_becke_atoms(values: Sequence[int]) -> str:
     return f"{first},{second}"
 
 
+def _normalize_hirshfeld_atoms(value: Optional[str]) -> Optional[str]:
+    if value is None:
+        return None
+    text = str(value).strip().replace(" ", "")
+    if not text:
+        raise ValueError("Hirshfeld atom selection must not be empty")
+    for token in text.split(","):
+        if not token:
+            raise ValueError("Hirshfeld atom selection contains an empty token")
+        if re.fullmatch(r"\d+", token):
+            if int(token) <= 0:
+                raise ValueError("Hirshfeld atom indices must be positive")
+            continue
+        match = re.fullmatch(r"(\d+)-(\d+)", token)
+        if match is None:
+            raise ValueError(
+                "Hirshfeld atom selection must use positive indices and ranges, e.g. 2,3,7-10"
+            )
+        start = int(match.group(1))
+        end = int(match.group(2))
+        if start <= 0 or end <= 0:
+            raise ValueError("Hirshfeld atom indices must be positive")
+        if start > end:
+            raise ValueError("Hirshfeld atom ranges must be ascending")
+    return text
+
+
+def _normalize_hirshfeld_density_type(value: Optional[str]) -> str:
+    text = (value or "builtin").strip().lower().replace("_", "-")
+    aliases = {
+        "builtin": "builtin",
+        "built-in": "builtin",
+        "built-in-atomic-densities": "builtin",
+        "built-in-density": "builtin",
+    }
+    try:
+        return aliases[text]
+    except KeyError:
+        raise ValueError(
+            "Only --hirshfeld-density-type builtin is currently supported; "
+            "atomic .wfn density mode needs additional file prompts"
+        )
+
+
 def build_grid_commands(
     function: GridFunction,
     *,
@@ -315,6 +369,8 @@ def build_grid_commands(
     edr_length: Optional[float] = None,
     edr_exponents: Optional[Sequence[float]] = None,
     becke_atoms: Optional[Sequence[int]] = None,
+    hirshfeld_atoms: Optional[str] = None,
+    hirshfeld_density_type: Optional[str] = None,
     grid_mode: str = "points",
     grid_points: Sequence[int] = (40, 40, 40),
     grid_spacing: Optional[float] = None,
@@ -356,6 +412,18 @@ def build_grid_commands(
         commands.append(_format_becke_atoms(becke_atoms))
     elif becke_atoms is not None:
         raise ValueError("--becke-atoms is only valid for Becke atomic/overlap weight")
+
+    if function.index == 112:
+        atoms = _normalize_hirshfeld_atoms(hirshfeld_atoms)
+        if atoms is None:
+            raise ValueError("Multiwfn function `hirshfeld-weight` requires --hirshfeld-atoms ATOMS")
+        density_type = _normalize_hirshfeld_density_type(hirshfeld_density_type)
+        commands.extend([atoms, "2" if density_type == "builtin" else density_type])
+    else:
+        if hirshfeld_atoms is not None:
+            raise ValueError("--hirshfeld-atoms is only valid for Hirshfeld weight")
+        if hirshfeld_density_type is not None:
+            raise ValueError("--hirshfeld-density-type is only valid for Hirshfeld weight")
 
     mode = grid_mode.lower()
     if grid_extension is not None and mode in {"low", "medium", "high", "points", "spacing", "cube"}:
@@ -407,6 +475,8 @@ def _write_recipe(
     edr_length: Optional[float] = None,
     edr_exponents: Optional[Tuple[int, float, float]] = None,
     becke_atoms: Optional[Tuple[int, int]] = None,
+    hirshfeld_atoms: Optional[str] = None,
+    hirshfeld_density_type: Optional[str] = None,
     error: Optional[str] = None,
 ) -> None:
     if result is not None:
@@ -425,6 +495,8 @@ def _write_recipe(
         edr_length = result.edr_length
         edr_exponents = result.edr_exponents
         becke_atoms = result.becke_atoms
+        hirshfeld_atoms = result.hirshfeld_atoms
+        hirshfeld_density_type = result.hirshfeld_density_type
 
     lines = [
         "# Multiwfn Grid Run Recipe",
@@ -453,6 +525,8 @@ def _write_recipe(
             f"- edr_length_bohr: `{edr_length}`",
             f"- edr_exponents_count_start_increment: `{edr_exponents}`",
             f"- becke_atom_indices_i_j: `{becke_atoms}`",
+            f"- hirshfeld_atom_selection: `{hirshfeld_atoms}`",
+            f"- hirshfeld_density_type: `{hirshfeld_density_type}`",
             f"- vesta_file: `{vesta_result.vesta_path if vesta_result is not None else None}`",
             f"- vesta_recipe: `{vesta_result.manifest_path if vesta_result is not None else None}`",
             f"- error: `{error}`",
@@ -465,6 +539,7 @@ def _write_recipe(
             "- Function `20` EDR(r;d) asks for length scale `d` in Bohr before grid setup and exports `EDR.cub`.",
             "- Function `21` D(r) can use Multiwfn's default EDR exponent set `20, 2.50, 1.50` or a manual count/start/increment set and exports `EDRDmax.cub`.",
             "- Function `111` Becke weight asks for atom indices `I,J` before grid setup and exports `Becke.cub`; `J=0` means atomic weight and two positive indices mean overlap weight.",
+            "- Function `112` Hirshfeld weight asks for an atom selection string and an atomic-density source before grid setup; the maintained command stream uses built-in atomic densities and exports `Hirshfeld.cub`.",
         ]
     )
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
@@ -554,6 +629,8 @@ def run_multiwfn_grid(
     edr_length: Optional[float] = None,
     edr_exponents: Optional[Sequence[float]] = None,
     becke_atoms: Optional[Sequence[int]] = None,
+    hirshfeld_atoms: Optional[str] = None,
+    hirshfeld_density_type: Optional[str] = None,
     timeout: Optional[int] = None,
     nthreads: Optional[int] = None,
     stem: Optional[str] = None,
@@ -579,6 +656,12 @@ def run_multiwfn_grid(
     normalized_edr_length = None if edr_length is None else float(edr_length)
     normalized_edr_exponents = _normalize_edr_exponents(edr_exponents)
     normalized_becke_atoms = _normalize_becke_atoms(becke_atoms)
+    normalized_hirshfeld_atoms = _normalize_hirshfeld_atoms(hirshfeld_atoms)
+    normalized_hirshfeld_density_type = None
+    if function.index == 112 or hirshfeld_density_type is not None:
+        normalized_hirshfeld_density_type = _normalize_hirshfeld_density_type(
+            hirshfeld_density_type
+        )
     candidate = find_multiwfn(multiwfn_path)
     if candidate is None:
         raise FileNotFoundError(
@@ -617,6 +700,8 @@ def run_multiwfn_grid(
             edr_length=normalized_edr_length,
             edr_exponents=normalized_edr_exponents,
             becke_atoms=normalized_becke_atoms,
+            hirshfeld_atoms=normalized_hirshfeld_atoms,
+            hirshfeld_density_type=normalized_hirshfeld_density_type,
             grid_mode=grid_mode,
             grid_points=grid_points,
             grid_spacing=grid_spacing,
@@ -675,6 +760,8 @@ def run_multiwfn_grid(
             edr_length=normalized_edr_length,
             edr_exponents=normalized_edr_exponents,
             becke_atoms=normalized_becke_atoms,
+            hirshfeld_atoms=normalized_hirshfeld_atoms,
+            hirshfeld_density_type=normalized_hirshfeld_density_type,
             error=error,
         )
         return MultiwfnGridResult(
@@ -699,6 +786,8 @@ def run_multiwfn_grid(
             edr_length=normalized_edr_length,
             edr_exponents=normalized_edr_exponents,
             becke_atoms=normalized_becke_atoms,
+            hirshfeld_atoms=normalized_hirshfeld_atoms,
+            hirshfeld_density_type=normalized_hirshfeld_density_type,
         )
     except OSError as exc:
         error = f"Failed to launch Multiwfn grid run: {exc}; inspect {stdout_log} and {stderr_log}"
@@ -718,6 +807,8 @@ def run_multiwfn_grid(
             edr_length=normalized_edr_length,
             edr_exponents=normalized_edr_exponents,
             becke_atoms=normalized_becke_atoms,
+            hirshfeld_atoms=normalized_hirshfeld_atoms,
+            hirshfeld_density_type=normalized_hirshfeld_density_type,
             error=error,
         )
         return MultiwfnGridResult(
@@ -742,6 +833,8 @@ def run_multiwfn_grid(
             edr_length=normalized_edr_length,
             edr_exponents=normalized_edr_exponents,
             becke_atoms=normalized_becke_atoms,
+            hirshfeld_atoms=normalized_hirshfeld_atoms,
+            hirshfeld_density_type=normalized_hirshfeld_density_type,
         )
 
     stdout_log.write_text(completed.stdout or "", encoding="utf-8")
@@ -825,6 +918,8 @@ def run_multiwfn_grid(
         edr_length=normalized_edr_length,
         edr_exponents=normalized_edr_exponents,
         becke_atoms=normalized_becke_atoms,
+        hirshfeld_atoms=normalized_hirshfeld_atoms,
+        hirshfeld_density_type=normalized_hirshfeld_density_type,
     )
     _write_recipe(recipe_path, result=result)
     return result
@@ -1021,6 +1116,22 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "overlap weight, or I 0 for Becke atomic weight."
         ),
     )
+    parser.add_argument(
+        "--hirshfeld-atoms",
+        help=(
+            "Atom selection for function 112 Hirshfeld weight, e.g. "
+            "'2,3,7-10'. The current maintained stream uses built-in "
+            "atomic densities."
+        ),
+    )
+    parser.add_argument(
+        "--hirshfeld-density-type",
+        default=None,
+        help=(
+            "Atomic density source for function 112 Hirshfeld weight. "
+            "Only 'builtin' is currently supported."
+        ),
+    )
     parser.add_argument("--timeout", type=int)
     parser.add_argument("--nthreads", type=int)
     parser.add_argument("--stem")
@@ -1088,8 +1199,18 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 raise ValueError("--raw-dir is not supported with --orbitals")
             if args.surface_cube is not None:
                 raise ValueError("--surface-cube is not supported with --orbitals")
-            if args.edr_length is not None or args.edr_exponents is not None or args.becke_atoms is not None:
-                raise ValueError("--edr-length, --edr-exponents, and --becke-atoms are not supported with --orbitals")
+            if (
+                args.edr_length is not None
+                or args.edr_exponents is not None
+                or args.becke_atoms is not None
+                or args.hirshfeld_atoms is not None
+                or args.hirshfeld_density_type is not None
+            ):
+                raise ValueError(
+                    "--edr-length, --edr-exponents, --becke-atoms, "
+                    "--hirshfeld-atoms, and --hirshfeld-density-type are not "
+                    "supported with --orbitals"
+                )
             result = run_multiwfn_grid_batch(
                 args.wavefunction,
                 args.output_dir,
@@ -1143,6 +1264,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             edr_length=args.edr_length,
             edr_exponents=args.edr_exponents,
             becke_atoms=args.becke_atoms,
+            hirshfeld_atoms=args.hirshfeld_atoms,
+            hirshfeld_density_type=args.hirshfeld_density_type,
             timeout=args.timeout,
             nthreads=args.nthreads,
             stem=args.stem,

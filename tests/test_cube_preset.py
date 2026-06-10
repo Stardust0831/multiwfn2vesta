@@ -111,6 +111,7 @@ class TestCubePreset(unittest.TestCase):
         self.assertIn("electron-delocalization-range", text)
         self.assertIn("orbital-overlap-distance", text)
         self.assertIn("becke-weight", text)
+        self.assertIn("hirshfeld-weight", text)
         self.assertIn("iri", text)
         self.assertIn("rdg-scalar", text)
         self.assertIn("promolecular-rdg", text)
@@ -408,6 +409,25 @@ basin type two
             self.assertIn("Becke.cub", manifest)
             self.assertIn("0..1", manifest)
             self.assertIn("I,0", manifest)
+
+    def test_hirshfeld_weight_preset_writes_single_positive_surface(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            cube = self.write_tmp(root, "Hirshfeld.cub", SURFACE_CUBE)
+
+            result = run_preset("hirshfeld", cube, root / "products")
+
+            text = result.vesta_path.read_text(encoding="utf-8")
+            manifest = result.manifest_path.read_text(encoding="utf-8")
+
+            self.assertRegex(text, r"ISURF\n  1   1\s+0\.5\s+120\s+205\s+170\s+145\s+255")
+            self.assertNotRegex(text, r"\n  1   1\s+-0\.5")
+            self.assertNotIn("IMPORT_TEXTURE", text)
+            self.assertIn("canonical_preset: `hirshfeld-weight`", manifest)
+            self.assertIn("requested_preset: `hirshfeld`", manifest)
+            self.assertIn("Hirshfeld.cub", manifest)
+            self.assertIn("0..1", manifest)
+            self.assertIn("built-in atomic densities", manifest)
 
     def test_standalone_rdg_scalar_preset_keeps_iri_alias_available_for_texture_route(self):
         with tempfile.TemporaryDirectory() as tmp:

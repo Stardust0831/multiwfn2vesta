@@ -162,6 +162,7 @@ multiwfn2vesta cube-preset local-information-entropy infoentro.cub cube_products
 multiwfn2vesta cube-preset electron-delocalization-range EDR.cub cube_products
 multiwfn2vesta cube-preset orbital-overlap-distance EDRDmax.cub cube_products
 multiwfn2vesta cube-preset becke-weight Becke.cub cube_products
+multiwfn2vesta cube-preset hirshfeld-weight Hirshfeld.cub cube_products
 multiwfn2vesta cube-preset rdg-scalar RDG.cub cube_products
 multiwfn2vesta cube-preset promolecular-rdg RDGprodens.cub cube_products
 multiwfn2vesta cube-preset promolecular-delta-g Delta_g.cub cube_products
@@ -187,8 +188,9 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
 Use this when the file is a common ABACUS/Multiwfn cube product and the
 default style is enough to start.  Presets cover density-like scalar cubes,
 signed orbital/wavefunction/density-difference cubes, Multiwfn
-orbital-density, spin-density, Laplacian, K(r), G(r), standalone RDG, and
-promolecular RDG cubes, standalone IRI and vdW potential cubes, direct
+orbital-density, spin-density, Laplacian, K(r), G(r), Becke and Hirshfeld
+weight cubes, standalone RDG, and promolecular RDG cubes, standalone IRI and
+vdW potential cubes, direct
 ABACUS potential cubes, ABACUS partial-charge/state-density cubes,
 nonnegative ABACUS wavefunction-norm cubes, ELF/LOL, IRI/RDG/NCI mapped
 surfaces, binary domain isosurfaces, binary basin isosurfaces, signed
@@ -416,8 +418,9 @@ multiwfn2vesta grid-run --list-functions
 Common functions include `density`, `gradient`, `orbital --orbital h`,
 `orbital-density`, `spin-density`, `laplacian`, `hamiltonian-ked`,
 `lagrangian-ked`, `local-information-entropy`, `elf`, `lol`, `esp`, `alie`,
-`edr`, `edrdmax`, `becke`, `rdg`, `promolecular-rdg`, `delta-g`, `iri`,
-`signlambda2rho`, `promolecular-signlambda2rho`, and `vdw-potential`.
+`edr`, `edrdmax`, `becke`, `hirshfeld`, `rdg`, `promolecular-rdg`,
+`delta-g`, `iri`, `signlambda2rho`, `promolecular-signlambda2rho`, and
+`vdw-potential`.
 The scalar display defaults are
 function-specific where possible: `gradient.cub` uses `gradient-norm`,
 `spindensity.cub` uses `cube-preset spin-density`, `orbdens.cub` uses
@@ -425,15 +428,18 @@ function-specific where possible: `gradient.cub` uses `gradient-norm`,
 `hamiltonian-ked`, `G(r).cub` uses `lagrangian-ked`, `infoentro.cub` uses
 `local-information-entropy`, `EDR.cub` uses `electron-delocalization-range`,
 `EDRDmax.cub` uses `orbital-overlap-distance`, `Becke.cub` uses
-`becke-weight`, `RDG.cub` uses `rdg-scalar`, `RDGprodens.cub` uses
-`promolecular-rdg`, `Delta_g.cub` uses `promolecular-delta-g`, `IRI.cub`
-uses `iri-scalar`, and `vdWpot.cub` uses `vdw-potential` with `+/-1.0`
+`becke-weight`, `Hirshfeld.cub` uses `hirshfeld-weight`, `RDG.cub` uses
+`rdg-scalar`, `RDGprodens.cub` uses `promolecular-rdg`, `Delta_g.cub` uses
+`promolecular-delta-g`, `IRI.cub` uses `iri-scalar`, and `vdWpot.cub` uses
+`vdw-potential` with `+/-1.0`
 kcal/mol signed surfaces.  `grid-run --function becke` requires
 `--becke-atoms I J`; `I J` requests Becke overlap weight and `I 0` requests
-Becke atomic weight.  The existing `cube-preset iri` name remains the
-two-cube surface+texture route, `vdw-map` remains the density/surface plus
-vdW-potential texture route, and IGM/IGMH `dg_inter.cub` still uses the
-`igmh`/`igm` texture route.
+Becke atomic weight.  `grid-run --function hirshfeld` requires
+`--hirshfeld-atoms ATOMS`, for example `2,3,7-10`, and currently selects
+Multiwfn's built-in atomic-density mode.  The existing `cube-preset iri`
+name remains the two-cube surface+texture route, `vdw-map` remains the
+density/surface plus vdW-potential texture route, and IGM/IGMH
+`dg_inter.cub` still uses the `igmh`/`igm` texture route.
 
 Batch frontier orbital export:
 

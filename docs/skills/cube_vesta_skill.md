@@ -53,6 +53,7 @@ multiwfn2vesta cube-preset local-information-entropy infoentro.cub cube_products
 multiwfn2vesta cube-preset electron-delocalization-range EDR.cub cube_products
 multiwfn2vesta cube-preset orbital-overlap-distance EDRDmax.cub cube_products
 multiwfn2vesta cube-preset becke-weight Becke.cub cube_products
+multiwfn2vesta cube-preset hirshfeld-weight Hirshfeld.cub cube_products
 multiwfn2vesta cube-preset rdg-scalar RDG.cub cube_products
 multiwfn2vesta cube-preset promolecular-rdg RDGprodens.cub cube_products
 multiwfn2vesta cube-preset promolecular-delta-g Delta_g.cub cube_products
@@ -237,6 +238,12 @@ passes it back through `cube-preset`.
   function `111` `Becke.cub`, default isosurface `0.5`.  When generating the
   cube with `grid-run`, pass `--becke-atoms I J`; `I J` requests Becke
   overlap weight and `I 0` requests Becke atomic weight.
+- `hirshfeld-weight` aliases: `hirshfeld`, `hirshfeld-atomic-weight`,
+  `hirshfeldwei`; single positive surface for Multiwfn function `112`
+  `Hirshfeld.cub`, default isosurface `0.5`.  When generating the cube with
+  `grid-run`, pass `--hirshfeld-atoms ATOMS`, for example `2,3,7-10`.  The
+  maintained stream selects built-in atomic densities; the separate atomic
+  `.wfn` density-source mode is not automated yet.
 - `rdg-scalar` aliases: `rdg-cube`, `scalar-rdg`,
   `reduced-density-gradient`; single positive surface for standalone Multiwfn
   `RDG.cub`, default isosurface `0.5`.  Use `iri` with `--texture-cube` for
