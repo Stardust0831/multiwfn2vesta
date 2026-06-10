@@ -1,6 +1,23 @@
 # Project Kanban
 
-Updated: 2026-06-10 09:44 CST
+Updated: 2026-06-10 10:00 CST
+
+## Current Request: 2026-06-10 README Single-Branch Refresh
+
+- [x] Record the user's request: refresh README, make the branch state easier
+  to understand, merge back to one branch if needed, and use identity
+  `Stardust0831`.
+- [x] Recheck the real project Git state with fetch/prune, branch listing,
+  remote-head listing, and repository-local identity.
+- [x] Refresh README so the Repository Status section describes the current
+  `main` tip and the one-branch remote state without stale branch-audit
+  wording.
+- [x] Sync project/root work records with this README and branch audit.
+- [x] Validation passed before commit: `git diff --check` and
+  `bin/multiwfn2vesta --help`.
+- [x] Prepared this closure record for the final README/docs push.  The final
+  commit hash and post-push branch check are reported in the assistant
+  response to avoid an infinite chain of "record the record" commits.
 
 ## Current Request: 2026-06-10 Multiwfn Atom Table Coloring
 

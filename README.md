@@ -11,29 +11,30 @@ point.
 
 ## Repository Status
 
-- Maintained branch: `main`.
+- Maintained branch: `main`; this is the only branch currently exposed by the
+  GitHub remote.
 - GitHub remote: `origin` points to `Github:Stardust0831/multiwfn2vesta.git`,
   with `origin/HEAD -> origin/main`.
-- Branch audit at the start of the 2026-06-10 09:29 CST README refresh, after
-  `git fetch --prune origin`: local `main`, `origin/main`, and
-  `origin/HEAD` all pointed at
-  `2481cf79c87666503ea8d8186b4b76fba05b2847`
-  (`Record batch orbital push`), and `git ls-remote --heads origin` returns
-  only `refs/heads/main`.  Later README/worklog commits may advance `main`;
-  they do not indicate a new branch.
-- Current cleanup result: there is no extra local or remote feature branch to
-  merge back.  The apparently strange branch history has already been
-  consolidated as normal commits on `main`.
-- Most recent maintained feature implementation: batch orbital export on top
-  of `grid-run`, pushed as
-  `dcf7bd3cac0684f48f16ebd06458345b929837fd`
-  (`Add batch orbital grid export`).  Documentation closure commits after a
-  feature commit are normal `main` commits, not separate branches.
+- Current branch audit after `git fetch --prune origin` on 2026-06-10
+  10:00 CST: local `main`, `origin/main`, and `origin/HEAD` all pointed at
+  `0c1b5c6b88e65501437b6a947dc97f4876cfdc61`
+  (`Record Multiwfn atom table coloring push`), and
+  `git ls-remote --heads origin` returned only `refs/heads/main`.
+- Current cleanup result: no extra local or remote feature branch exists, so
+  there is nothing to merge back in this pass.  Earlier branch-refresh and
+  documentation-closure commits in the history are ordinary commits on
+  `main`, not active competing branches.
+- Most recent maintained feature implementation: generic Multiwfn atom scalar
+  table coloring, pushed as
+  `7b305ea5762b3e8444b53338aecec190cc331a7f`
+  (`Add Multiwfn atom table coloring`).  The current tip
+  `0c1b5c6b88e65501437b6a947dc97f4876cfdc61` is the docs/worklog closure for
+  that same feature.
 - Recent maintained feature pushes on 2026-06-10 include `grid-run`
   (`3d192dc7ae9696dd433aae04e1a3bdb488b95482`), `cube-arith`
-  (`4123d00ae051a710c954ed3c3712aa8b012c4bc0`), and batch orbital export
-  (`dcf7bd3cac0684f48f16ebd06458345b929837fd`).  Later documentation commits
-  may advance `main`, but they do not introduce extra branches.
+  (`4123d00ae051a710c954ed3c3712aa8b012c4bc0`), batch orbital export
+  (`dcf7bd3cac0684f48f16ebd06458345b929837fd`), and generic Multiwfn atom
+  table coloring (`7b305ea5762b3e8444b53338aecec190cc331a7f`).
 - Future experiment branches should be short-lived: merge or fast-forward the
   useful commits into `main`, then remove the experiment branch once
   `origin/main` contains the maintained result.

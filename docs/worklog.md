@@ -1,5 +1,29 @@
 # Worklog
 
+## 2026-06-10: README single-branch refresh
+
+- User asked to update README, noted that the branch state still looked odd,
+  suggested merging back to one branch if useful, and requested identity
+  `Stardust0831`.
+- Rechecked `/mnt/g/work/multiwfn2vesta/project` after `git fetch --prune
+  origin`.  Local `main`, `origin/main`, and `origin/HEAD` all pointed at
+  `0c1b5c6b88e65501437b6a947dc97f4876cfdc61`
+  (`Record Multiwfn atom table coloring push`), and the GitHub remote exposed
+  only `refs/heads/main`.
+- Confirmed there is no extra local or remote feature branch to merge back in
+  this pass.  The apparently unusual branch history is a linear set of normal
+  `main` commits, including feature commits and documentation closure commits.
+- Confirmed repository-local identity remains
+  `Stardust0831 <13862180016@163.com>`.
+- Refreshed `README.md` Repository Status so it records the current verified
+  `main` tip, explains that earlier branch-refresh entries are ordinary
+  `main` history rather than active branches, and lists the latest maintained
+  feature as generic Multiwfn atom scalar table coloring.
+- Validation before commit passed: `git diff --check` and
+  `bin/multiwfn2vesta --help`.  The final docs commit hash and post-push
+  branch check are reported in the assistant response to avoid an infinite
+  chain of "record the record" commits.
+
 ## 2026-06-10: Multiwfn atom table coloring
 
 - Continued the long-running Multiwfn/ABACUS/VESTA roadmap by implementing a
