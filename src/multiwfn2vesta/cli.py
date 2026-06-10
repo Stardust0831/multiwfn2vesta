@@ -20,6 +20,7 @@ from . import (
     multiwfn_grid,
     multiwfn_igmh,
     multiwfn_iri,
+    multiwfn_stm,
     surface_extrema_vesta,
 )
 from .executables import discovery_report
@@ -38,6 +39,7 @@ COMMANDS: Dict[str, Tuple[str, str]] = {
     "igm-run": ("Run Multiwfn IGM cube generation, then prepare VESTA", "multiwfn_igmh"),
     "migm-run": ("Run Multiwfn mIGM cube generation, then prepare VESTA", "multiwfn_igmh"),
     "grid-run": ("Run Multiwfn real-space function cube generation, then prepare VESTA", "multiwfn_grid"),
+    "stm-run": ("Run Multiwfn constant-current STM/LDOS cube generation, then prepare VESTA", "multiwfn_stm"),
     "abacus-mulliken-color": ("Color VESTA atoms from ABACUS mulliken.txt", "abacus_mulliken"),
     "multiwfn-atom-color": ("Color VESTA atoms from a Multiwfn atom scalar table", "multiwfn_atom_table"),
     "aim-run": ("Run Multiwfn AIM on a wavefunction file, then convert PDB to VESTA", "multiwfn_aim"),
@@ -72,6 +74,9 @@ ALIASES = {
     "multiwfn-grid": "grid-run",
     "scalar-cube-run": "grid-run",
     "function-cube": "grid-run",
+    "multiwfn-stm": "stm-run",
+    "multiwfn-stm-run": "stm-run",
+    "ldos-run": "stm-run",
     "mulliken-color": "abacus-mulliken-color",
     "atom-color": "abacus-mulliken-color",
     "multiwfn-table-color": "multiwfn-atom-color",
@@ -112,6 +117,7 @@ Commands:
   igm-run    Run Multiwfn IGM cube generation and prepare a VESTA mapped surface.
   migm-run   Run Multiwfn mIGM cube generation and prepare a VESTA mapped surface.
   grid-run   Run Multiwfn real-space function cube generation and prepare VESTA.
+  stm-run    Run Multiwfn constant-current STM/LDOS cube generation and prepare VESTA.
   abacus-mulliken-color
              Color VESTA atoms from ABACUS mulliken.txt charge/magnetism.
   multiwfn-atom-color
@@ -141,6 +147,8 @@ Aliases:
              Aliases for migm-run.
   multiwfn-grid, scalar-cube-run, function-cube
              Aliases for grid-run.
+  multiwfn-stm, multiwfn-stm-run, ldos-run
+             Aliases for stm-run.
   multiwfn-table-color, atom-table-color
              Aliases for multiwfn-atom-color.
   atom-color  Backward-compatible alias for abacus-mulliken-color.
@@ -159,6 +167,7 @@ Examples:
   multiwfn2vesta igmh-run input.molden igmh_products --fragment 1-48 --fragment 49-60
   multiwfn2vesta igm-run input.molden igm_products --fragment 1-48 --fragment 49-60
   multiwfn2vesta grid-run input.molden grid_products --function density
+  multiwfn2vesta stm-run input.molden stm_products --grid-points 80 80 40
   multiwfn2vesta abacus-mulliken-color input.vesta mulliken.txt colored.vesta
   multiwfn2vesta multiwfn-atom-color input.vesta atom_values.csv colored.vesta --value-column charge
   multiwfn2vesta aim-run input.molden aim_out
@@ -652,6 +661,78 @@ def interactive_grid_run() -> int:
     return multiwfn_grid.main(argv)
 
 
+def interactive_stm_run() -> int:
+    print("\nWavefunction -> Multiwfn STM/LDOS cube -> VESTA")
+    wavefunction = _prompt("wavefunction file (.molden/.fch/.wfn/etc.)", required=True)
+    output_dir = _prompt("output directory", default=_default_output_dir(wavefunction, "multiwfn_stm"))
+    argv: List[str] = [wavefunction, output_dir]
+
+    multiwfn = _prompt("Multiwfn executable or directory (empty for auto-discovery)")
+    if multiwfn:
+        argv.extend(["--multiwfn", multiwfn])
+
+    nthreads = _prompt("Multiwfn -nt threads (empty for default)")
+    if nthreads:
+        argv.extend(["--nthreads", nthreads])
+
+    timeout = _prompt("timeout seconds (empty for no timeout)")
+    if timeout:
+        argv.extend(["--timeout", timeout])
+
+    stem = _prompt("output stem (empty for wavefunction stem)")
+    if stem:
+        argv.extend(["--stem", stem])
+
+    bias = _prompt("bias voltage in V (empty for Multiwfn default)")
+    if bias:
+        argv.extend(["--bias", bias])
+
+    fermi = _prompt("Fermi energy in eV (empty for Multiwfn default)")
+    if fermi:
+        argv.extend(["--fermi", fermi])
+
+    prepare_fermi = _prompt("prepare occupations with 300->9 temperature K (empty to skip)")
+    if prepare_fermi:
+        argv.extend(["--prepare-fermi-temperature", prepare_fermi])
+
+    grid_points = _prompt("grid points NX NY NZ", default="80 80 40")
+    parts = grid_points.split()
+    if len(parts) != 3:
+        print("Grid points need exactly three integers.")
+        return 2
+    argv.extend(["--grid-points", parts[0], parts[1], parts[2]])
+
+    for option, label in (
+        ("--x-range", "X range in Angstrom MIN MAX (empty for Multiwfn default)"),
+        ("--y-range", "Y range in Angstrom MIN MAX (empty for Multiwfn default)"),
+        ("--z-range", "Z range in Angstrom MIN MAX (empty for Multiwfn default)"),
+    ):
+        value = _prompt(label)
+        if not value:
+            continue
+        range_parts = value.split()
+        if len(range_parts) != 2:
+            print("Range needs exactly two numbers.")
+            return 2
+        argv.extend([option, range_parts[0], range_parts[1]])
+
+    if _yes_no("skip VESTA generation", default=False):
+        argv.append("--no-vesta")
+    else:
+        preset = _prompt("VESTA cube preset", default="stm")
+        argv.extend(["--preset", preset])
+        isosurface = _prompt("override isosurface value (empty for preset default)")
+        if isosurface:
+            argv.extend(["--isosurface", isosurface])
+        structure = _prompt("structure phase (empty for preset default)")
+        if structure:
+            argv.extend(["--structure", structure])
+        if _yes_no("copy cube files beside VESTA", default=True) is False:
+            argv.append("--no-copy-cubes")
+
+    return multiwfn_stm.main(argv)
+
+
 def interactive_abacus_mulliken_color() -> int:
     print("\nABACUS Mulliken -> VESTA atom colors")
     input_vesta = _prompt("input .vesta", required=True)
@@ -746,6 +827,7 @@ def interactive_main() -> int:
     print("12) Multiwfn atom table -> VESTA atom colors")
     print("13) surfanalysis.pdb extrema -> VESTA overlay")
     print("14) Wavefunction -> Multiwfn IGM/IGMH cubes -> VESTA")
+    print("15) Wavefunction -> Multiwfn STM/LDOS cube -> VESTA")
     print("q) Quit")
     choice = _prompt("choice", default="3").lower()
     if choice in {"0", "discover", "where", "env"}:
@@ -773,6 +855,8 @@ def interactive_main() -> int:
         return interactive_iri_run()
     if choice in {"14", "igmh-run", "multiwfn-igmh", "multiwfn-igmh-run", "igm-run", "migm-run"}:
         return interactive_igmh_run()
+    if choice in {"15", "stm-run", "multiwfn-stm", "multiwfn-stm-run", "ldos-run"}:
+        return interactive_stm_run()
     if choice in {"8", "abacus-mulliken-color", "mulliken-color", "atom-color"}:
         return interactive_abacus_mulliken_color()
     if choice in {"9", "abacus-molden", "molden", "abacus-multiwfn-molden"}:
@@ -815,6 +899,8 @@ def run_command(command: str, args: Sequence[str]) -> int:
         return multiwfn_igmh.main_migm(args)
     if command == "grid-run":
         return multiwfn_grid.main(args)
+    if command == "stm-run":
+        return multiwfn_stm.main(args)
     if command == "abacus-mulliken-color":
         return abacus_mulliken.main(args)
     if command == "multiwfn-atom-color":

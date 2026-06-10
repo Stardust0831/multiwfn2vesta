@@ -68,6 +68,15 @@ PRESETS: Tuple[CubePreset, ...] = (
         notes="Use for Multiwfn LOL cubes; tune the isosurface for each system.",
     ),
     CubePreset(
+        name="stm",
+        aliases=("ldos", "stm-ldos", "tunneling-current"),
+        description="Constant-current STM/LDOS tunneling-current isosurface.",
+        surface_mode="single",
+        isosurface=0.001,
+        positive_rgb=(80, 210, 255),
+        notes="Use for Multiwfn STM.cub exported by the constant-current STM workflow; tune the isosurface for each bias/system.",
+    ),
+    CubePreset(
         name="iri",
         aliases=("rdg", "nci", "weak-interaction"),
         description="IRI/RDG/NCI surface colored by sign(lambda2)rho-like texture cube.",

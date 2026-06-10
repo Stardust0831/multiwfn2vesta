@@ -1,5 +1,41 @@
 # Worklog
 
+## 2026-06-10: Multiwfn STM/LDOS runner
+
+- Continued the long-running Multiwfn/ABACUS/VESTA analysis-expansion goal by
+  adding a maintained STM/LDOS cube route after source-prompt confirmation.
+- Added `multiwfn2vesta stm-run`, backed by
+  `src/multiwfn2vesta/multiwfn_stm.py`.  The default stream enters Multiwfn
+  main function `300`, subfunction `4`, switches from default
+  constant-distance to constant-current mode, sets grid/ranges when requested,
+  calculates, and exports `STM.cub` from the post-processing menu.
+- Added optional `--bias`, `--fermi`, `--prepare-fermi-temperature`,
+  `--grid-points`, `--x-range`, `--y-range`, and `--z-range` controls.
+  `--prepare-fermi-temperature` inserts the `300 -> 9` Fermi/occupation
+  preparation step before entering STM, useful for metallic/slab Molden files.
+- Added `cube-preset stm` plus aliases `ldos`, `stm-ldos`, and
+  `tunneling-current`, with default single positive isosurface `0.001`.
+- Integrated `stm-run` into the unified CLI, aliases `multiwfn-stm`,
+  `multiwfn-stm-run`, and `ldos-run`, the interactive chooser, and package
+  console scripts.
+- Added focused tests in `tests/test_multiwfn_stm.py` plus CLI/preset tests.
+  Focused validation passed: `py_compile` for the changed modules and
+  `PYTHONPATH=src python3 -m unittest tests.test_multiwfn_stm
+  tests.test_cube_preset tests.test_cli` (64 tests).  Full no-GUI regression
+  passed with `PYTHONPATH=src python3 -m unittest discover -s tests`
+  (221 tests).
+- Real H2O noGUI smoke passed under
+  `/mnt/g/work/multiwfn2vesta/smoke/multiwfn_stm_run_smoke_20260610/h2o/`:
+  `stm-run --grid-points 10 10 6 --stem h2o --timeout 300` generated raw
+  `STM.cub`, processed `h2o_stm.cub`, `h2o_stm_cube.vesta`, and recipes.
+  The processed cube has 600 grid points and range `3.7332e-13` to
+  `0.0151741`.
+- Optional occupation/Fermi-preparation smoke also passed under
+  `/mnt/g/work/multiwfn2vesta/smoke/multiwfn_stm_run_smoke_20260610/h2o_prepare_fermi/`:
+  `--prepare-fermi-temperature 298.15 --grid-points 6 6 4 --no-vesta`
+  generated `h2o_stm.cub` with 144 grid points and range `3.7332e-13` to
+  `0.00603356`.
+
 ## 2026-06-10: README branch refresh at grid surface bridge tip
 
 - User asked to update README again, noted that the branch state still looked

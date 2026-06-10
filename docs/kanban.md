@@ -1,6 +1,27 @@
 # Project Kanban
 
-Updated: 2026-06-10 15:12 CST
+Updated: 2026-06-10 15:34 CST
+
+## Current Continuation: 2026-06-10 STM/LDOS Runner
+
+- [x] Close the previous README refresh state: commit `bc462e1` was pushed to
+  `origin/main`, and post-push branch checks showed only `refs/heads/main`.
+- [x] Pick the next roadmap increment from the active goal: implement a
+  maintained Multiwfn STM/LDOS constant-current cube runner that can feed
+  VESTA.
+- [x] Add `stm-run` to the unified CLI, package scripts, and cube preset layer.
+- [x] Add focused tests for command-stream generation, output capture, VESTA
+  chaining, CLI dispatch, and missing-cube failures.
+- [x] Run a real H2O Multiwfn noGUI STM smoke and record the generated
+  products.
+- [x] Update README, usage docs, skills/worklog/research notes, and sync root
+  docs.
+- [x] Run validation: `py_compile`, 64 focused STM/preset/CLI tests,
+  221-test full no-GUI regression, `stm-run --help`,
+  `cube-preset --list-presets`, `git diff --check`, and root-doc checksum
+  sync check all passed; optional `--prepare-fermi-temperature 298.15`
+  STM smoke also returned 0 and generated `h2o_stm.cub`.
+- [ ] Run read-only review, then commit and push on `main`.
 
 ## Current Request: 2026-06-10 README Refresh And Branch Consolidation
 
@@ -20,7 +41,8 @@ Updated: 2026-06-10 15:12 CST
   and post-fetch branch checks.
 - [x] Run read-only pre-commit review: no blocker; reviewer confirmed branch
   audit, validation wording, kanban state, and root-doc mirror consistency.
-- [ ] Commit and push the README/docs update on `main`.
+- [x] Commit and push the README/docs update on `main`: `bc462e1`
+  (`Refresh README branch status`).
 
 ## Current Continuation: 2026-06-10 STM/LDOS Candidate After Grid Surface Bridge
 
@@ -32,11 +54,12 @@ Updated: 2026-06-10 15:12 CST
 - [x] Confirm the minimal STM command stream by a manual H2O noGUI probe:
   `300 -> 4 -> 1 -> 4 -> NX,NY,NZ -> 0 -> 2 -> 0 -> -1 -> 0 -> q`
   exports `STM.cub` in constant-current mode.
-- [ ] Implement the smallest reliable STM/LDOS increment if the prompt stream
+- [x] Implement the smallest reliable STM/LDOS increment if the prompt stream
   is stable enough, otherwise document the blocker and choose the next
   aligned increment.
-- [ ] Add tests, docs, and a no-GUI smoke scaled to the implemented boundary.
-- [ ] Sync project/root docs, review, commit, and push if stable.
+- [x] Add tests, docs, and a no-GUI smoke scaled to the implemented boundary.
+- [x] Sync project/root docs for the implemented STM/LDOS increment.
+- [ ] Review, commit, and push the implemented STM/LDOS increment if stable.
 
 ## Current Continuation: 2026-06-10 Multiwfn Analysis Expansion After IGM/mIGM
 

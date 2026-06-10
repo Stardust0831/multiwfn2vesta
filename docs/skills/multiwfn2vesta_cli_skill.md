@@ -38,6 +38,7 @@ multiwfn2vesta igmh-run --help
 multiwfn2vesta igm-run --help
 multiwfn2vesta migm-run --help
 multiwfn2vesta grid-run --help
+multiwfn2vesta stm-run --help
 multiwfn2vesta multiwfn-atom-color --help
 multiwfn2vesta aim-run --help
 multiwfn2vesta aim-pdb --help
@@ -67,6 +68,9 @@ Aliases:
 - `multiwfn2vesta multiwfn-grid ...`,
   `multiwfn2vesta scalar-cube-run ...`, and
   `multiwfn2vesta function-cube ...` are aliases for `grid-run`.
+- `multiwfn2vesta multiwfn-stm ...`,
+  `multiwfn2vesta multiwfn-stm-run ...`, and
+  `multiwfn2vesta ldos-run ...` are aliases for `stm-run`.
 - `multiwfn2vesta multiwfn-table-color ...` and
   `multiwfn2vesta atom-table-color ...` are aliases for
   `multiwfn-atom-color`.
@@ -325,6 +329,32 @@ With `--preset auto`, ESP/nuclear ESP use `cube-preset esp`, ALIE uses
 uses `cube-preset vdw-map`, and other functions fall back to `surface-map`.
 Batch orbital export rejects `--surface-cube`.
 
+### Wavefunction to Multiwfn STM/LDOS to VESTA
+
+```bash
+multiwfn2vesta stm-run \
+  input.molden \
+  stm_products \
+  --bias -1.0 \
+  --fermi -4.8 \
+  --grid-points 120 120 60 \
+  --x-range -6 6 \
+  --y-range -6 6 \
+  --z-range 2 8
+```
+
+Use this for Multiwfn main function `300`, subfunction `4`, constant-current
+STM/LDOS cubes.  The runner toggles STM from default constant-distance mode
+to constant-current mode, exports `STM.cub`, copies it to `<stem>_stm.cub`,
+and calls `cube-preset stm` unless `--no-vesta` is supplied.
+
+For metallic/slab ABACUS Molden files with smearing or non-integer
+occupations, try `--prepare-fermi-temperature TEMP_K` to insert the Multiwfn
+`300 -> 9` occupation/Fermi preparation step before STM.
+
+The wavefunction must contain GTO/GTF information.  The maintained output is a
+3D `STM.cub` isosurface, not Multiwfn's GUI 2D STM plane plot.
+
 ### Wavefunction to Multiwfn AIM to VESTA
 
 ```bash
@@ -392,10 +422,11 @@ bin/multiwfn2vesta discover
 bin/multiwfn2vesta cube-preset --list-presets
 bin/multiwfn2vesta iri-run --help
 bin/multiwfn2vesta grid-run --help
+bin/multiwfn2vesta stm-run --help
 bin/multiwfn2vesta aim-run --help
 bin/multiwfn2vesta aim-igmh --help
 printf 'q\n' | bin/multiwfn2vesta
-PYTHONPATH=src python3 -m unittest tests.test_cli tests.test_cube_preset tests.test_executables tests.test_multiwfn_aim tests.test_multiwfn_iri
+PYTHONPATH=src python3 -m unittest tests.test_cli tests.test_cube_preset tests.test_executables tests.test_multiwfn_aim tests.test_multiwfn_iri tests.test_multiwfn_stm
 ```
 
 Real H2O Multiwfn noGUI smoke:
@@ -440,6 +471,21 @@ bin/multiwfn2vesta grid-run \
 
 Observed output: raw `density.cub`, processed `h2o_density.cub`,
 `h2o_density_density_cube.vesta`, and both recipes.  VESTA was not launched.
+
+Real H2O Multiwfn noGUI STM/LDOS smoke:
+
+```bash
+bin/multiwfn2vesta stm-run \
+  /mnt/g/work/multiwfn2vesta/smoke/20260605_iri_aim_h2o/H2O.fch \
+  /mnt/g/work/multiwfn2vesta/smoke/multiwfn_stm_run_smoke_20260610/h2o \
+  --grid-points 10 10 6 \
+  --stem h2o \
+  --timeout 300
+```
+
+Observed output: raw `STM.cub`, processed `h2o_stm.cub`,
+`h2o_stm_cube.vesta`, and both recipes.  The cube has 600 grid points with
+range `3.7332e-13` to `0.0151741`; VESTA was not launched.
 
 Dry smoke for the current Ag(111)+benzene overlay:
 

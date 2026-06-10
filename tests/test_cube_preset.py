@@ -86,6 +86,7 @@ class TestCubePreset(unittest.TestCase):
         self.assertIn("density", text)
         self.assertIn("signed", text)
         self.assertIn("iri", text)
+        self.assertIn("stm", text)
         self.assertIn("igmh", text)
         self.assertIn("aigm", text)
         self.assertIn("esp", text)
@@ -135,6 +136,20 @@ class TestCubePreset(unittest.TestCase):
             self.assertIn("effective_tex_physical: `-0.04` to `0.04`", manifest)
             self.assertIn("canonical_preset: `iri`", manifest)
             self.assertIn("requested_preset: `rdg`", manifest)
+
+    def test_stm_preset_accepts_ldos_alias(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            cube = self.write_tmp(root, "STM.cub", SURFACE_CUBE)
+
+            result = run_preset("ldos", cube, root / "products")
+
+            manifest = result.manifest_path.read_text(encoding="utf-8")
+
+            self.assertIn("canonical_preset: `stm`", manifest)
+            self.assertIn("requested_preset: `ldos`", manifest)
+            self.assertIn("effective_isosurface: `0.001`", manifest)
+            self.assertIn("Constant-current STM/LDOS", manifest)
 
     def test_igmh_alias_uses_multiwfn_igm_inter_defaults(self):
         with tempfile.TemporaryDirectory() as tmp:

@@ -8,8 +8,8 @@ VESTA workflow for ABACUS-generated data.
 1. Prefer ABACUS direct cube output when the target is simply density,
    potential, ELF, partial charge, or real-space wavefunction visualization.
 2. Use ABACUS Molden only when Multiwfn needs a full wavefunction, for example
-   AIM, IGMH, IRI/RDG from actual density, orbital cubes, ELF/LOL, ALIE, or
-   density derivatives.
+   AIM, IGMH, IRI/RDG from actual density, STM/LDOS, orbital cubes, ELF/LOL,
+   ALIE, or density derivatives.
 3. For ABACUS Molden, use the latest
    `interfaces/Multiwfn_interface/molden.py` from `abacus-develop`, not the old
    `tools/molden/molden.py` path.
@@ -217,12 +217,29 @@ multiwfn2vesta grid-run ABACUS_Multiwfn.molden esp_map \
 Use explicit `cube-preset`/`cube-vesta` when both cubes already exist, for
 LEA/LEAE user-function cubes, or for more specialized multi-layer products.
 
+For constant-current STM/LDOS from ABACUS LCAO Molden, use `stm-run`:
+
+```bash
+multiwfn2vesta stm-run ABACUS_Multiwfn.molden stm_products \
+  --bias -1.0 \
+  --fermi -4.8 \
+  --grid-points 120 120 60 \
+  --x-range -6 6 \
+  --y-range -6 6 \
+  --z-range 2 8
+```
+
+If the ABACUS calculation used smearing/non-integer occupations, try
+`--prepare-fermi-temperature TEMP_K` before STM.  The maintained output is the
+3D `STM.cub` route and `cube-preset stm`, not Multiwfn's GUI 2D STM plane
+plot.
+
 ## Priority Rules
 
 - P0: generic cube VESTA, orbital cubes, density-derived cubes, ELF/LOL, AIM,
   IGMH+AIM.
-- P1: IRI/RDG/NCI, ESP/MEP mapped surfaces, ALIE/LEA/LEAE, vdW potential,
-  ABACUS/Multiwfn atom scalar coloring.  ALIE/LEA/LEAE/vdW surface-map
+- P1: IRI/RDG/NCI, ESP/MEP mapped surfaces, STM/LDOS, ALIE/LEA/LEAE,
+  vdW potential, ABACUS/Multiwfn atom scalar coloring.  ALIE/LEA/LEAE/vdW surface-map
   display presets now exist, and `surfanalysis.pdb` extrema overlays are
   maintained through `cube-preset --surfanalysis-pdb` and `surface-extrema`.
 - P2: basins, excited-state hole/electron/CDD, ETS-NOCV, AdNDP, Fukui/dual

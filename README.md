@@ -3,8 +3,9 @@
 `multiwfn2vesta` is a workspace-local Python interface for running selected
 Multiwfn workflows and preparing VESTA visualization files.  The currently
 maintained path covers ABACUS Molden handoff, cube-to-VESTA files, Multiwfn
-real-space grid, AIM, IRI/RDG, and IGM/IGMH command streams, atoms-only topology
-overlays, surface extrema overlays, and AIM+IGMH multi-phase VESTA figures.
+real-space grid, STM/LDOS, AIM, IRI/RDG, and IGM/IGMH command streams,
+atoms-only topology overlays, surface extrema overlays, and AIM+IGMH
+multi-phase VESTA figures.
 
 The project is still experimental, but the CLI below is the maintained entry
 point.
@@ -15,11 +16,11 @@ point.
   GitHub remote.
 - GitHub remote: `origin` points to `Github:Stardust0831/multiwfn2vesta.git`,
   with `origin/HEAD -> origin/main`.
-- Branch audit on 2026-06-10 15:16 CST, after `git fetch --prune origin`,
+- Branch audit on 2026-06-10 13:46 CST, after `git fetch --prune origin`,
   found local `main`, `origin/main`, and `origin/HEAD` aligned at
-  `b99d80e2d3879eb7dbad260e4b8722c50427ad98`.
+  `bc462e177a7d254138eda0118a79d6dcd653b590`.
 - `git ls-remote --heads origin` currently returns only
-  `refs/heads/main`, also at `b99d80e`; no merge-back was needed in this pass
+  `refs/heads/main`, also at `bc462e1`; no merge-back was needed in this pass
   because there is no extra local or remote feature branch to consolidate.
 - The apparently unusual branch history is a normal linear `main` history
   containing feature commits and documentation closure commits, not active
@@ -27,8 +28,9 @@ point.
 - Recent maintained feature work includes IGM/mIGM/IGMH command-stream automation,
   IGMH/aIGM VESTA cube presets, surface extrema overlays for
   `surfanalysis.pdb`, surface-map/grid expansion, generic Multiwfn atom table
-  coloring, batch orbital export, `cube-arith`, `grid-run`, and
-  `grid-run --surface-cube` mapped-surface handoff.
+  coloring, batch orbital export, `cube-arith`, `grid-run`,
+  `grid-run --surface-cube` mapped-surface handoff, and `stm-run`
+  constant-current STM/LDOS cube export.
 - Future experiment branches should be short-lived: merge or fast-forward the
   useful commits into `main`, then remove the experiment branch once
   `origin/main` contains the maintained result.
@@ -97,6 +99,9 @@ then delete the temporary branch.
   multiple orbitals through isolated batch runs, optionally write VESTA files
   through `cube-preset`, and map generated ESP/ALIE/vdW/sign(lambda2)rho
   cubes as textures on a provided density/surface cube.
+- Run Multiwfn main function `300` subfunction `4` STM simulation in
+  constant-current mode, export raw `STM.cub`, copy it to a stable
+  `<stem>_stm.cub`, and write a VESTA isosurface through `cube-preset stm`.
 - Color VESTA atom/site styles from ABACUS `mulliken.txt` charge or
   magnetism values produced by `out_mul 1`, or from generic Multiwfn-style
   atom scalar tables such as charges, Fukui-like atom values, or atom
@@ -160,6 +165,7 @@ multiwfn2vesta grid-run input.molden esp_map \
   --surface-cube density.cub \
   --grid-mode cube \
   --grid-cube density.cub
+multiwfn2vesta stm-run input.molden stm_products --grid-points 80 80 40
 ```
 
 Multiwfn discovery checks, in order:
@@ -234,6 +240,7 @@ multiwfn2vesta cube-preset orbital orbital.cub cube_products
 multiwfn2vesta cube-preset elf ELF.cub cube_products
 multiwfn2vesta cube-preset rdg IRI2_surface.cub cube_products \
   --texture-cube IRI1_color.cub
+multiwfn2vesta cube-preset stm STM.cub cube_products
 multiwfn2vesta cube-preset igmh dg_inter.cub cube_products \
   --texture-cube sl2r.cub
 multiwfn2vesta cube-preset esp density.cub cube_products \
@@ -249,9 +256,10 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
 Available presets can be listed with `multiwfn2vesta cube-preset
 --list-presets`.  Current presets cover density-like scalar cubes, signed
 orbital/wavefunction/density-difference cubes, ELF/LOL cubes, IRI/RDG/NCI
-mapped surfaces, IGM/IGMH/aIGM weak-interaction mapped surfaces, ESP/MEP
-mapped density surfaces, generic molecular surface maps, ALIE/LEA/LEAE
-density-surface maps, and vdW-potential density-surface maps.  The recipe
+mapped surfaces, STM/LDOS tunneling-current surfaces, IGM/IGMH/aIGM
+weak-interaction mapped surfaces, ESP/MEP mapped density surfaces, generic
+molecular surface maps, ALIE/LEA/LEAE density-surface maps, and
+vdW-potential density-surface maps.  The recipe
 records the requested preset, canonical preset, effective
 isosurface, texture scaling source, and explicit texture percentage overrides
 when they are used.  The `surface-map`/`molsurfmap` defaults follow the
@@ -470,6 +478,50 @@ Each `grid-run` child run still produces one new scalar cube.  For two-cube
 texture figures, use `--surface-cube` when that generated cube should color a
 pre-existing surface; otherwise use explicit `cube-preset`/`cube-vesta`, or a
 workflow-specific runner such as `iri-run` or `igmh-run`.
+
+## Wavefunction to STM/LDOS VESTA
+
+For wavefunction inputs accepted by Multiwfn and containing GTF/GTO
+information, `stm-run` drives Multiwfn main function `300`, subfunction `4`,
+switches STM from the default constant-distance mode to constant-current mode,
+calculates a 3D tunneling-current/LDOS grid, exports `STM.cub`, and then writes
+a VESTA file through `cube-preset stm`:
+
+```bash
+multiwfn2vesta stm-run input.molden stm_products \
+  --bias -1.0 \
+  --fermi -4.8 \
+  --grid-points 120 120 60 \
+  --x-range -6 6 \
+  --y-range -6 6 \
+  --z-range 2 8
+```
+
+For ABACUS metallic/slab Molden files with smeared or non-integer occupation,
+`--prepare-fermi-temperature TEMP_K` inserts the Multiwfn `300 -> 9` Fermi
+preparation step before entering the STM menu.  The runner does not create a
+2D GUI STM plane plot; the maintained output is the exported 3D `STM.cub`
+isosurface.
+
+Default outputs in `stm_products/`:
+
+- `multiwfn_stm_input.txt`: exact command stream sent to Multiwfn.
+- `multiwfn_stm.stdout.txt` and `multiwfn_stm.stderr.txt`.
+- `multiwfn_stm_raw/STM.cub`.
+- `<stem>_stm.cub`.
+- `multiwfn_stm_recipe.md`.
+- `<stem>_stm_cube.vesta` and `<stem>_stm_cube_vesta_recipe.md`, unless
+  `--no-vesta` is used.
+
+Validated H2O noGUI smoke:
+
+```text
+/mnt/g/work/multiwfn2vesta/smoke/multiwfn_stm_run_smoke_20260610/h2o/
+```
+
+This run used grid `10 x 10 x 6`, produced `h2o_stm.cub`, measured data range
+`3.7332e-13` to `0.0151741`, and wrote `h2o_stm_cube.vesta` with default STM
+isosurface `0.001`, without launching VESTA.
 
 ## Wavefunction to IRI/RDG VESTA
 
@@ -780,8 +832,8 @@ views by VESTA CLI rotations, rather than writing persistent front/right/top
 
 ## Validation
 
-Current no-GUI regression passed as a 212-test suite at the audited
-`b99d80e` tip:
+Current no-GUI regression passed as a 221-test suite after the STM/LDOS
+runner increment:
 
 ```bash
 PYTHONPATH=src python3 -m unittest discover -s tests

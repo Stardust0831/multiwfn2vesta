@@ -33,6 +33,7 @@ multiwfn2vesta igmh-run --help
 multiwfn2vesta igm-run --help
 multiwfn2vesta migm-run --help
 multiwfn2vesta grid-run --help
+multiwfn2vesta stm-run --help
 multiwfn2vesta abacus-mulliken-color --help
 multiwfn2vesta multiwfn-atom-color --help
 multiwfn2vesta aim-run --help
@@ -67,6 +68,9 @@ multiwfn2vesta aim-igmh --help
   function grid，导出 density、MO/orbital、Laplacian、K(r)/G(r)、ELF、LOL、
   ESP/MEP、ALIE、RDG/IRI-like、promolecular RDG/sign(lambda2)rho 等单 cube，
   并可自动接 `cube-preset` 写 `.vesta`
+- `stm-run`: 从含 GTO/GTF 信息的 Multiwfn 可读波函数文件调用主菜单 `300`
+  的 STM 功能，切到 constant-current 模式，导出 `STM.cub`，并可自动接
+  `cube-preset stm` 写 `.vesta`
 - `abacus-mulliken-color`: 读取 ABACUS `out_mul 1` 生成的 `mulliken.txt`，
   按原子 Mulliken 电荷或磁矩给 VESTA `SITET` 原子颜色赋值
 - `multiwfn-atom-color`: 读取 Multiwfn 复制/导出的原子标量表，或手工整理
@@ -114,7 +118,7 @@ VESTA 查找顺序：
 3. 工作区内 VESTA：`tools/VESTA-win64/VESTA.exe` 和 Linux VESTA
 4. shell 的 `PATH`
 
-`aim-run`、`iri-run`、`igmh-run` 和 `grid-run` 本身只启动 Multiwfn，不启动 VESTA；
+`aim-run`、`iri-run`、`igmh-run`、`grid-run` 和 `stm-run` 本身只启动 Multiwfn，不启动 VESTA；
 VESTA 只在 `aim-igmh --render-three-views` 这种显式渲染命令里被调用。
 
 ## Cube 文件到 VESTA
@@ -197,6 +201,7 @@ multiwfn2vesta cube-preset orbital orbital.cub cube_products
 multiwfn2vesta cube-preset elf ELF.cub cube_products
 multiwfn2vesta cube-preset rdg IRI2_surface.cub cube_products \
   --texture-cube IRI1_color.cub
+multiwfn2vesta cube-preset stm STM.cub cube_products
 multiwfn2vesta cube-preset igmh dg_inter.cub cube_products \
   --texture-cube sl2r.cub
 multiwfn2vesta cube-preset esp density.cub cube_products \
@@ -216,6 +221,8 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
 - `signed`：正/负等值面，别名包括 `orbital`、`wavefunction`、
   `density-difference` 和 `dual-descriptor`
 - `elf` / `lol`：局域化函数等值面
+- `stm`：别名包括 `ldos`、`stm-ldos`、`tunneling-current`，用于
+  Multiwfn 常电流 STM 导出的 `STM.cub`，默认等值面 `0.001`
 - `iri`：别名 `rdg`、`nci`，需要 `--texture-cube`，默认
   `--tex-physical -0.04 0.04` 和 `--tex-range-source surface-band`
 - `igmh`：别名包括 `igm`、`igm-inter`、`igmh-inter`，用 `dg_inter.cub`
@@ -479,6 +486,52 @@ bin/multiwfn2vesta grid-run \
 `iri-run`、`igmh-run`/`igm-run` 流程。
 `cube-preset igmh` 仍可单独用于把已有 `dg_inter.cub`/`sl2r.cub` 写成
 VESTA。
+
+## 波函数文件到 STM/LDOS VESTA
+
+如果波函数文件含有 GTO/GTF 信息，可以用 `stm-run` 调用 Multiwfn 主菜单
+`300`、子功能 `4`。维护路径固定用于常电流图：进入 STM 菜单后先用选项
+`1` 从默认 constant-distance 切到 constant-current，再计算 3D
+tunneling-current/LDOS grid，并在后处理菜单用选项 `2` 导出 `STM.cub`：
+
+```bash
+multiwfn2vesta stm-run input.molden stm_products \
+  --bias -1.0 \
+  --fermi -4.8 \
+  --grid-points 120 120 60 \
+  --x-range -6 6 \
+  --y-range -6 6 \
+  --z-range 2 8
+```
+
+ABACUS 金属/slab 的 Molden 如果带 smearing 或非整数占据，可先试
+`--prepare-fermi-temperature 298.15`，它会在 STM 前插入 Multiwfn
+`300 -> 9` 的 Fermi/占据准备步骤。`stm-run` 维护的是 `STM.cub` 三维等值面
+路线，不生成 Multiwfn GUI 里的 2D 平面 STM 图。
+
+默认输出：
+
+- `multiwfn_stm_input.txt`：实际喂给 Multiwfn 的命令流
+- `multiwfn_stm.stdout.txt` / `multiwfn_stm.stderr.txt`
+- `multiwfn_stm_raw/STM.cub`
+- `<stem>_stm.cub`
+- `multiwfn_stm_recipe.md`
+- 默认还会写 `<stem>_stm_cube.vesta` 和 recipe；只要 cube 时用 `--no-vesta`
+
+真实 H2O noGUI smoke：
+
+```bash
+bin/multiwfn2vesta stm-run \
+  /mnt/g/work/multiwfn2vesta/smoke/20260605_iri_aim_h2o/H2O.fch \
+  /mnt/g/work/multiwfn2vesta/smoke/multiwfn_stm_run_smoke_20260610/h2o \
+  --grid-points 10 10 6 \
+  --stem h2o \
+  --timeout 300
+```
+
+该 smoke 返回 `0`，生成 `h2o_stm.cub`、`h2o_stm_cube.vesta` 和 recipe。
+`h2o_stm.cub` 有 600 个格点，数值范围是 `3.7332e-13` 到 `0.0151741`；
+默认 `cube-preset stm` 等值面 `0.001` 落在数据范围内。
 
 ## 波函数文件到 IRI/RDG VESTA
 
