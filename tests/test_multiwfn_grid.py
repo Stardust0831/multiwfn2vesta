@@ -43,6 +43,8 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertIn("hamiltonian-ked", text)
         self.assertIn("promolecular-rdg", text)
         self.assertIn("alie", text)
+        self.assertIn("mapped preset with --surface-cube: esp", text)
+        self.assertIn("mapped preset with --surface-cube: alie", text)
         self.assertIn("requires --orbital", text)
         self.assertEqual(resolve_grid_function("rho").name, "density")
         self.assertEqual(resolve_grid_function("12").name, "esp")
@@ -125,6 +127,45 @@ class TestMultiwfnGridRunner(unittest.TestCase):
             recipe = result.recipe_path.read_text(encoding="utf-8")
             self.assertIn("function_index: `1`", recipe)
             self.assertIn("auto_vesta_preset: `density`", recipe)
+
+    def test_run_multiwfn_grid_can_map_generated_texture_on_surface_cube(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            wavefunction = root / "h2o.fch"
+            wavefunction.write_text("wavefunction", encoding="utf-8")
+            surface_cube = root / "density_surface.cub"
+            surface_cube.write_text(DENSITY_CUBE, encoding="utf-8")
+            candidate = self.make_candidate(root)
+
+            def fake_run(command, **kwargs):
+                cwd = Path(kwargs["cwd"])
+                (cwd / "totesp.cub").write_text(DENSITY_CUBE, encoding="utf-8")
+                return subprocess.CompletedProcess(command, 0, stdout="ok", stderr="")
+
+            with patch("multiwfn2vesta.multiwfn_grid.find_multiwfn", return_value=candidate):
+                with patch("multiwfn2vesta.multiwfn_grid.subprocess.run", side_effect=fake_run):
+                    result = run_multiwfn_grid(
+                        wavefunction,
+                        root / "products",
+                        function_name="esp",
+                        surface_cube=surface_cube,
+                        stem="case",
+                        grid_points=(8, 8, 8),
+                    )
+
+            self.assertTrue(result.success)
+            self.assertEqual(result.surface_cube, surface_cube.resolve())
+            self.assertEqual(result.mapped_preset, "esp")
+            self.assertEqual(result.cube.name, "case_esp.cub")
+            self.assertIsNotNone(result.vesta_result)
+            self.assertEqual(result.vesta_result.vesta_path.name, "case_esp_esp_cube.vesta")
+            self.assertIn("IMPORT_TEXTURE", result.vesta_result.vesta_path.read_text(encoding="utf-8"))
+            manifest = result.vesta_result.manifest_path.read_text(encoding="utf-8")
+            self.assertIn("requested_preset: `esp`", manifest)
+            self.assertIn("texture_cube:", manifest)
+            recipe = result.recipe_path.read_text(encoding="utf-8")
+            self.assertIn("surface_cube_for_texture_map:", recipe)
+            self.assertIn("mapped_vesta_preset: `esp`", recipe)
 
     def test_run_multiwfn_grid_can_skip_vesta_generation(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -370,6 +411,26 @@ class TestMultiwfnGridRunner(unittest.TestCase):
 
         self.assertEqual(code, 2)
         self.assertIn("--raw-dir is not supported with --orbitals", stderr.getvalue())
+
+    def test_main_rejects_batch_surface_cube(self):
+        stderr = io.StringIO()
+        with patch("sys.stderr", stderr):
+            code = __import__("multiwfn2vesta.multiwfn_grid", fromlist=["main"]).main(
+                [
+                    "input.fch",
+                    "products",
+                    "--function",
+                    "orbital",
+                    "--orbitals",
+                    "h",
+                    "l",
+                    "--surface-cube",
+                    "density.cub",
+                ]
+            )
+
+        self.assertEqual(code, 2)
+        self.assertIn("--surface-cube is not supported with --orbitals", stderr.getvalue())
 
     def test_main_rejects_keep_going_without_batch(self):
         stderr = io.StringIO()

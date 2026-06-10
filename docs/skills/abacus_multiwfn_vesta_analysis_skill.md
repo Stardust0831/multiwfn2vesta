@@ -202,10 +202,20 @@ multiwfn2vesta grid-run ABACUS_Multiwfn.molden orbital_products \
 The batch route repeats isolated single-orbital Multiwfn runs and writes a
 top-level manifest plus one child directory per orbital.  Use
 `--function orbital-density --orbitals ...` for density-like orbital maps.
-For aligned potential-on-density, ALIE/LEA/LEAE, vdW-map, or multi-layer
-VESTA products, generate the component cubes with `--grid-mode cube
---grid-cube reference.cub --no-vesta`, then call `cube-preset`/`cube-vesta`
-explicitly.
+For aligned potential-on-density, ALIE, vdW-map, or sign(lambda2)rho maps
+where one density/surface cube is already available, let `grid-run` generate
+the texture cube on the same grid and immediately call the mapped preset:
+
+```bash
+multiwfn2vesta grid-run ABACUS_Multiwfn.molden esp_map \
+  --function esp \
+  --surface-cube density.cub \
+  --grid-mode cube \
+  --grid-cube density.cub
+```
+
+Use explicit `cube-preset`/`cube-vesta` when both cubes already exist, for
+LEA/LEAE user-function cubes, or for more specialized multi-layer products.
 
 ## Priority Rules
 

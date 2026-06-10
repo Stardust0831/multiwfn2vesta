@@ -92,8 +92,9 @@ then delete the temporary branch.
   wavefunction file, export density, orbital/MO, Laplacian, K(r)/G(r)
   kinetic-energy-density cubes, ELF, LOL, ESP/MEP, ALIE, RDG/IRI-like,
   promolecular RDG/sign(lambda2)rho, and related scalar cubes, export
-  multiple orbitals through isolated batch runs, and optionally write VESTA
-  files through `cube-preset`.
+  multiple orbitals through isolated batch runs, optionally write VESTA files
+  through `cube-preset`, and map generated ESP/ALIE/vdW/sign(lambda2)rho
+  cubes as textures on a provided density/surface cube.
 - Color VESTA atom/site styles from ABACUS `mulliken.txt` charge or
   magnetism values produced by `out_mul 1`, or from generic Multiwfn-style
   atom scalar tables such as charges, Fukui-like atom values, or atom
@@ -351,11 +352,14 @@ Common functions:
   default.  `lagrangian-ked` / `g(r)`: function `7`, raw `G(r).cub`, density
   style by default.
 - `laplacian`, `spin-density`, `esp`, `nuclear-esp`, `signlambda2rho`, and
-  `vdw-potential`: signed scalar fields, defaulting to the `signed` preset.
+  `vdw-potential`: signed scalar fields, defaulting to the `signed` preset;
+  with `--surface-cube`, `esp`/`nuclear-esp` map through `cube-preset esp`,
+  `signlambda2rho` maps through `cube-preset iri`, and `vdw-potential` maps
+  through `cube-preset vdw-map`.
 - `elf` and `lol`: localization cubes, defaulting to `cube-preset elf/lol`.
-- `alie` / `avglocion`: function `18`, raw `avglocion.cub`.  For the
-  conventional ALIE surface map, combine it with `density.cub` via
-  `cube-preset alie`.
+- `alie` / `avglocion`: function `18`, raw `avglocion.cub`.  With
+  `--surface-cube density.cub`, the generated ALIE cube is used as the
+  texture for `cube-preset alie`.
 - `rdg`, `promolecular-rdg`, `signlambda2rho`,
   `promolecular-signlambda2rho`, `iri`, and `delta-g`: single scalar cubes;
   IRI/RDG mapped surfaces that need two coupled cubes should still use
@@ -379,6 +383,28 @@ multiwfn2vesta grid-run input.fch grid_products \
   --grid-cube density.cub \
   --no-vesta
 ```
+
+For mapped-surface figures, pass a compatible density/surface cube.  The
+generated grid cube is then used as the texture cube in `cube-preset`:
+
+```bash
+multiwfn2vesta grid-run input.fch esp_map \
+  --function esp \
+  --surface-cube density.cub \
+  --grid-mode cube \
+  --grid-cube density.cub
+
+multiwfn2vesta grid-run input.fch alie_map \
+  --function alie \
+  --surface-cube density.cub \
+  --grid-mode cube \
+  --grid-cube density.cub
+```
+
+With `--preset auto`, mapped defaults are `esp` for ESP/nuclear ESP, `alie`
+for ALIE, `iri` for sign(lambda2)rho, `vdw-map` for vdW potential, and
+`surface-map` for other functions.  Batch orbital export rejects
+`--surface-cube`.
 
 For frontier-orbital batches, use `--orbitals`.  If `--function` is omitted in
 batch mode, it defaults to `orbital`; use `--function orbital-density` for
@@ -429,12 +455,14 @@ Validated H2O noGUI smokes:
   `h2o_density_density_cube.vesta`.
 - `smoke/multiwfn_grid_run_smoke_20260610_h2o_elf/products/`: function `elf`,
   grid `12 x 12 x 12`, generated `h2o_elf.cub` with `--no-vesta`.
+- `smoke/multiwfn_grid_surface_cube_map_20260610/h2o_esp_map/`: function
+  `esp`, grid reused from `h2o_density.cub`, generated `h2o_esp.cub` and
+  `h2o_esp_esp_cube.vesta` as a density-surface ESP texture map.
 
-Each `grid-run` child run still produces one scalar cube.  ESP-on-density,
-IRI/RDG/NCI color-mapped surfaces and other two-cube texture figures still
-need an explicit surface cube plus texture cube combination through
-`cube-preset`/`cube-vesta`, or a workflow-specific runner such as `iri-run`
-or `igmh-run`.
+Each `grid-run` child run still produces one new scalar cube.  For two-cube
+texture figures, use `--surface-cube` when that generated cube should color a
+pre-existing surface; otherwise use explicit `cube-preset`/`cube-vesta`, or a
+workflow-specific runner such as `iri-run` or `igmh-run`.
 
 ## Wavefunction to IRI/RDG VESTA
 

@@ -29,6 +29,7 @@ class GridFunction:
     preset: str
     aliases: Tuple[str, ...] = ()
     requires_orbital: bool = False
+    mapped_preset: Optional[str] = None
 
 
 GRID_FUNCTIONS: Tuple[GridFunction, ...] = (
@@ -51,19 +52,20 @@ GRID_FUNCTIONS: Tuple[GridFunction, ...] = (
         "density",
         ("g-r", "g(r)", "kinetic-g", "lagrangian-kinetic-density"),
     ),
-    GridFunction("nuclear-esp", 8, "nucleiesp.cub", "signed", ("nuc-esp", "nuclear-potential")),
+    GridFunction("nuclear-esp", 8, "nucleiesp.cub", "signed", ("nuc-esp", "nuclear-potential"), mapped_preset="esp"),
     GridFunction("elf", 9, "ELF.cub", "elf", ("electron-localization-function",)),
     GridFunction("lol", 10, "LOL.cub", "lol", ("localized-orbital-locator",)),
-    GridFunction("esp", 12, "totesp.cub", "signed", ("mep", "total-esp", "electrostatic-potential")),
+    GridFunction("esp", 12, "totesp.cub", "signed", ("mep", "total-esp", "electrostatic-potential"), mapped_preset="esp"),
     GridFunction("rdg", 13, "RDG.cub", "density", ("reduced-density-gradient",)),
     GridFunction("promolecular-rdg", 14, "RDGprodens.cub", "density", ("rdg-pro", "prodens-rdg")),
-    GridFunction("signlambda2rho", 15, "signlambda2rho.cub", "signed", ("sl2r", "sign-lambda2-rho")),
+    GridFunction("signlambda2rho", 15, "signlambda2rho.cub", "signed", ("sl2r", "sign-lambda2-rho"), mapped_preset="iri"),
     GridFunction(
         "promolecular-signlambda2rho",
         16,
         "signlambda2rhoprodens.cub",
         "signed",
         ("prodens-signlambda2rho", "promolecular-sl2r", "sl2r-pro"),
+        mapped_preset="iri",
     ),
     GridFunction(
         "alie",
@@ -71,10 +73,11 @@ GRID_FUNCTIONS: Tuple[GridFunction, ...] = (
         "avglocion.cub",
         "density",
         ("average-local-ionization-energy", "avglocion"),
+        mapped_preset="alie",
     ),
     GridFunction("delta-g", 22, "Delta_g.cub", "density", ("deltag", "delta_g")),
     GridFunction("iri", 24, "IRI.cub", "density", ("interaction-region-indicator",)),
-    GridFunction("vdw-potential", 25, "vdWpot.cub", "signed", ("vdw", "vdwpot")),
+    GridFunction("vdw-potential", 25, "vdWpot.cub", "signed", ("vdw", "vdwpot"), mapped_preset="vdw-map"),
     GridFunction("orbital-density", 44, "orbdens.cub", "density", ("orbdens", "mo-density"), True),
 )
 
@@ -105,6 +108,8 @@ class MultiwfnGridResult(NamedTuple):
     recipe_path: Path
     vesta_result: Optional[CubeVestaResult]
     error: Optional[str]
+    surface_cube: Optional[Path]
+    mapped_preset: Optional[str]
 
 
 class MultiwfnGridBatchResult(NamedTuple):
@@ -123,9 +128,10 @@ def available_functions_text() -> str:
     for function in GRID_FUNCTIONS:
         aliases = f" (aliases: {', '.join(function.aliases)})" if function.aliases else ""
         orbital = "; requires --orbital" if function.requires_orbital else ""
+        mapped = f"; mapped preset with --surface-cube: {function.mapped_preset}" if function.mapped_preset else ""
         lines.append(
             f"- {function.name}{aliases}: index={function.index}, "
-            f"Multiwfn output={function.output_filename}, preset={function.preset}{orbital}"
+            f"Multiwfn output={function.output_filename}, preset={function.preset}{orbital}{mapped}"
         )
     return "\n".join(lines) + "\n"
 
@@ -147,6 +153,12 @@ def resolve_grid_function(function: Optional[str], function_index: Optional[int]
             known = ", ".join(sorted(FUNCTION_BY_NAME))
             raise ValueError(f"Unknown Multiwfn grid function: {function}. Known names/aliases: {known}")
         return resolve_grid_function(None, index)
+
+
+def mapped_surface_preset(function: GridFunction, preset: str = "auto") -> str:
+    if preset == "auto":
+        return function.mapped_preset or "surface-map"
+    return preset
 
 
 def _command_text(commands: Sequence[str]) -> str:
@@ -271,6 +283,8 @@ def _write_recipe(
     raw_cube: Optional[Path] = None,
     cube: Optional[Path] = None,
     vesta_result: Optional[CubeVestaResult] = None,
+    surface_cube: Optional[Path] = None,
+    mapped_preset: Optional[str] = None,
     error: Optional[str] = None,
 ) -> None:
     if result is not None:
@@ -284,6 +298,8 @@ def _write_recipe(
         cube = result.cube
         vesta_result = result.vesta_result
         error = result.error
+        surface_cube = result.surface_cube
+        mapped_preset = result.mapped_preset
 
     lines = [
         "# Multiwfn Grid Run Recipe",
@@ -307,6 +323,8 @@ def _write_recipe(
             f"- command_file: `{command_file}`",
             f"- raw_cube: `{raw_cube}`",
             f"- processed_cube: `{cube}`",
+            f"- surface_cube_for_texture_map: `{surface_cube}`",
+            f"- mapped_vesta_preset: `{mapped_preset}`",
             f"- vesta_file: `{vesta_result.vesta_path if vesta_result is not None else None}`",
             f"- vesta_recipe: `{vesta_result.manifest_path if vesta_result is not None else None}`",
             f"- error: `{error}`",
@@ -416,6 +434,7 @@ def run_multiwfn_grid(
     keep_raw_cube: bool = True,
     make_vesta: bool = True,
     vesta_output_dir: Optional[Path] = None,
+    surface_cube: Optional[Path] = None,
     preset: str = "auto",
     isosurface: Optional[float] = None,
     structure: Optional[str] = None,
@@ -433,6 +452,11 @@ def run_multiwfn_grid(
     wavefunction = Path(wavefunction).expanduser().resolve()
     if not wavefunction.exists():
         raise FileNotFoundError(f"Wavefunction file not found: {wavefunction}")
+    mapped_surface_cube: Optional[Path] = None
+    if surface_cube is not None:
+        mapped_surface_cube = Path(surface_cube).expanduser().resolve()
+        if not mapped_surface_cube.exists():
+            raise FileNotFoundError(f"Surface cube file not found: {mapped_surface_cube}")
 
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -506,6 +530,8 @@ def run_multiwfn_grid(
             function=function,
             command_file=command_file,
             raw_cube=raw_cube,
+            surface_cube=mapped_surface_cube,
+            mapped_preset=mapped_surface_preset(function, preset) if mapped_surface_cube is not None else None,
             error=error,
         )
         return MultiwfnGridResult(
@@ -525,6 +551,8 @@ def run_multiwfn_grid(
             recipe_path,
             None,
             error,
+            mapped_surface_cube,
+            mapped_surface_preset(function, preset) if mapped_surface_cube is not None else None,
         )
     except OSError as exc:
         error = f"Failed to launch Multiwfn grid run: {exc}; inspect {stdout_log} and {stderr_log}"
@@ -539,6 +567,8 @@ def run_multiwfn_grid(
             function=function,
             command_file=command_file,
             raw_cube=raw_cube,
+            surface_cube=mapped_surface_cube,
+            mapped_preset=mapped_surface_preset(function, preset) if mapped_surface_cube is not None else None,
             error=error,
         )
         return MultiwfnGridResult(
@@ -558,6 +588,8 @@ def run_multiwfn_grid(
             recipe_path,
             None,
             error,
+            mapped_surface_cube,
+            mapped_surface_preset(function, preset) if mapped_surface_cube is not None else None,
         )
 
     stdout_log.write_text(completed.stdout or "", encoding="utf-8")
@@ -588,17 +620,32 @@ def run_multiwfn_grid(
 
     if completed.returncode == 0 and cli_returncode == 0 and make_vesta and cube is not None:
         try:
-            preset_name = function.preset if preset == "auto" else preset
-            vesta_result = run_preset(
-                preset_name,
-                cube,
-                Path(vesta_output_dir) if vesta_output_dir is not None else output_dir,
-                stem=f"{output_stem}_{function.name}_{preset_name}",
-                isosurface=isosurface,
-                structure=structure,
-                boundary=boundary,
-                copy_cubes=copy_cubes,
-            )
+            if mapped_surface_cube is not None:
+                preset_name = mapped_surface_preset(function, preset)
+                vesta_result = run_preset(
+                    preset_name,
+                    mapped_surface_cube,
+                    Path(vesta_output_dir) if vesta_output_dir is not None else output_dir,
+                    texture_cube=cube,
+                    stem=f"{output_stem}_{function.name}_{preset_name}",
+                    title=f"{mapped_surface_cube.stem} colored by {function.name}",
+                    isosurface=isosurface,
+                    structure=structure,
+                    boundary=boundary,
+                    copy_cubes=copy_cubes,
+                )
+            else:
+                preset_name = function.preset if preset == "auto" else preset
+                vesta_result = run_preset(
+                    preset_name,
+                    cube,
+                    Path(vesta_output_dir) if vesta_output_dir is not None else output_dir,
+                    stem=f"{output_stem}_{function.name}_{preset_name}",
+                    isosurface=isosurface,
+                    structure=structure,
+                    boundary=boundary,
+                    copy_cubes=copy_cubes,
+                )
         except Exception as exc:
             error = f"Failed to generate VESTA file from Multiwfn grid cube: {exc}"
             cli_returncode = GRID_PROCESSING_FAILED_CODE
@@ -621,6 +668,8 @@ def run_multiwfn_grid(
         recipe_path=recipe_path,
         vesta_result=vesta_result,
         error=error,
+        surface_cube=mapped_surface_cube,
+        mapped_preset=mapped_surface_preset(function, preset) if mapped_surface_cube is not None else None,
     )
     _write_recipe(recipe_path, result=result)
     return result
@@ -820,6 +869,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser.add_argument("--move-raw-cube", action="store_true")
     parser.add_argument("--no-vesta", action="store_true")
     parser.add_argument("--vesta-output-dir", type=Path)
+    parser.add_argument(
+        "--surface-cube",
+        type=Path,
+        help=(
+            "Use the generated grid cube as a texture on this surface cube. "
+            "With --preset auto, ESP/ALIE/vdW/sign(lambda2)rho functions choose a mapped-surface preset."
+        ),
+    )
     parser.add_argument("--preset", default="auto", help="Cube preset for VESTA output; default auto from function")
     parser.add_argument("--isosurface", type=float)
     parser.add_argument("--structure", choices=["auto", "none", "molecule", "crystal"])
@@ -849,6 +906,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 )
             if args.raw_dir is not None:
                 raise ValueError("--raw-dir is not supported with --orbitals")
+            if args.surface_cube is not None:
+                raise ValueError("--surface-cube is not supported with --orbitals")
             result = run_multiwfn_grid_batch(
                 args.wavefunction,
                 args.output_dir,
@@ -913,6 +972,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             keep_raw_cube=not args.move_raw_cube,
             make_vesta=not args.no_vesta,
             vesta_output_dir=args.vesta_output_dir,
+            surface_cube=args.surface_cube,
             preset=args.preset,
             isosurface=args.isosurface,
             structure=args.structure,

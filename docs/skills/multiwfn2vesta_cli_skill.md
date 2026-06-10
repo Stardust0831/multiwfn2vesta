@@ -309,6 +309,22 @@ multiwfn2vesta grid-run input.fch grid_products \
   --no-vesta
 ```
 
+When the reference cube is also the surface to display, use `--surface-cube`
+and let the generated grid cube become the texture:
+
+```bash
+multiwfn2vesta grid-run input.fch esp_map \
+  --function esp \
+  --surface-cube density.cub \
+  --grid-mode cube \
+  --grid-cube density.cub
+```
+
+With `--preset auto`, ESP/nuclear ESP use `cube-preset esp`, ALIE uses
+`cube-preset alie`, sign(lambda2)rho uses `cube-preset iri`, vdW potential
+uses `cube-preset vdw-map`, and other functions fall back to `surface-map`.
+Batch orbital export rejects `--surface-cube`.
+
 ### Wavefunction to Multiwfn AIM to VESTA
 
 ```bash

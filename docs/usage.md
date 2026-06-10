@@ -356,9 +356,13 @@ multiwfn2vesta grid-run --list-functions
 - `hamiltonian-ked` / `k(r)`：函数 `6`，原始输出 `K(r).cub`；
   `lagrangian-ked` / `g(r)`：函数 `7`，原始输出 `G(r).cub`
 - `laplacian`、`spin-density`、`esp`、`nuclear-esp`、
-  `signlambda2rho`、`vdw-potential`：默认按 signed scalar 处理
+  `signlambda2rho`、`vdw-potential`：默认按 signed scalar 处理；配合
+  `--surface-cube` 时，ESP/nuclear ESP 默认走 `cube-preset esp`，
+  sign(lambda2)rho 默认走 `cube-preset iri`，vdW potential 默认走
+  `cube-preset vdw-map`
 - `alie` / `avglocion`：函数 `18`，原始输出 `avglocion.cub`；常规 ALIE
-  表面图要再和 `density.cub` 通过 `cube-preset alie` 组合
+  表面图可以用 `--surface-cube density.cub` 自动把生成的 ALIE cube 作为
+  `cube-preset alie` 的 texture
 - `elf` / `lol`：局域化函数等值面
 - `rdg` / `promolecular-rdg` / `signlambda2rho` /
   `promolecular-signlambda2rho` / `iri` / `delta-g`：单标量 cube；如果要
@@ -415,6 +419,27 @@ multiwfn2vesta grid-run input.fch grid_products \
   --no-vesta
 ```
 
+如果这个已有 cube 本身就是要显示的 density/surface cube，可以直接让
+`grid-run` 把新生成的 cube 当作 texture 写成 mapped-surface VESTA：
+
+```bash
+multiwfn2vesta grid-run input.fch esp_map \
+  --function esp \
+  --surface-cube density.cub \
+  --grid-mode cube \
+  --grid-cube density.cub
+
+multiwfn2vesta grid-run input.fch alie_map \
+  --function alie \
+  --surface-cube density.cub \
+  --grid-mode cube \
+  --grid-cube density.cub
+```
+
+`--preset auto` 时，ESP/nuclear ESP 选 `esp`，ALIE 选 `alie`，
+sign(lambda2)rho 选 `iri`，vdW potential 选 `vdw-map`，其它函数回退到
+`surface-map`。批量轨道导出暂不支持 `--surface-cube`。
+
 默认输出：
 
 - `multiwfn_grid_input.txt`：实际喂给 Multiwfn 的命令流
@@ -442,9 +467,16 @@ bin/multiwfn2vesta grid-run \
 `--function elf --no-vesta` 生成 raw `ELF.cub` 和 `h2o_elf.cub`：
 `/mnt/g/work/multiwfn2vesta/smoke/multiwfn_grid_run_smoke_20260610_h2o_elf/products/`。
 
-注意：`grid-run` 的每个子任务仍然只生成一个 scalar cube。ESP-on-density
-这类 surface cube + texture cube 图仍然要通过 `cube-preset`/`cube-vesta`
-组合；IRI/RDG/NCI 和 IGM/IGMH 已有专门的 `iri-run`、`igmh-run`/`igm-run` 流程。
+新增 mapped-surface smoke：
+`/mnt/g/work/multiwfn2vesta/smoke/multiwfn_grid_surface_cube_map_20260610/h2o_esp_map/`。
+它复用已有 `h2o_density.cub` 的格点，生成 `h2o_esp.cub`，并写出
+`h2o_esp_esp_cube.vesta`；recipe 中 Surface Cube 是 density，Texture Cube
+是 ESP。
+
+注意：`grid-run` 的每个子任务仍然只生成一个新的 scalar cube。若这个 cube
+要给已有 surface 染色，用 `--surface-cube`；其它更特殊的双 cube 图仍可显式
+走 `cube-preset`/`cube-vesta`。IRI/RDG/NCI 和 IGM/IGMH 已有专门的
+`iri-run`、`igmh-run`/`igm-run` 流程。
 `cube-preset igmh` 仍可单独用于把已有 `dg_inter.cub`/`sl2r.cub` 写成
 VESTA。
 

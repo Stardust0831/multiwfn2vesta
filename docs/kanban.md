@@ -1,6 +1,33 @@
 # Project Kanban
 
-Updated: 2026-06-10 13:31 CST
+Updated: 2026-06-10 14:35 CST
+
+## Current Continuation: 2026-06-10 Multiwfn Analysis Expansion After IGM/mIGM
+
+- [x] Record the resumed long-running objective: continue researching and
+  implementing valuable Multiwfn wavefunction analyses that can be visualized
+  in VESTA, especially ABACUS-compatible Molden workflows.
+- [x] Re-read the current roadmap, maintained CLI surface, and Multiwfn source
+  evidence before choosing the next concrete increment.
+- [x] Pick one increment that makes the requested end state more true without
+  broad unrelated refactors: let `grid-run` use a generated Multiwfn grid cube
+  as a texture on a provided density/surface cube through a new
+  `--surface-cube` route, covering ESP/ALIE/vdW/sign(lambda2)rho mapped
+  surfaces without hand-running `cube-preset`.
+- [x] Implement the increment with tests, docs, and a smoke or no-GUI
+  validation scaled to the risk: `grid-run --surface-cube` now maps the
+  generated grid cube as texture on a provided surface cube, with mapped
+  presets for ESP/ALIE/vdW/sign(lambda2)rho and a real H2O ESP mapped-surface
+  smoke.
+- [x] Validate the increment: `py_compile`, 65 focused grid/CLI tests,
+  212-test full no-GUI regression, `git diff --check`, `grid-run --help`,
+  `grid-run --list-functions`, and the real H2O ESP mapped-surface smoke
+  passed.
+- [x] Sync project/root docs and leave the board ready for the next
+  continuation.
+- [x] Run final read-only pre-commit review: no blockers; noted only that
+  external positional unpacking of `MultiwfnGridResult` would see the added
+  trailing fields.
 
 ## Current Request: 2026-06-10 README and Single-Branch Closure for IGM/mIGM
 

@@ -41,24 +41,28 @@ multiwfn2vesta grid-run --list-functions
 - `lagrangian-ked`, aliases `g-r`, `g(r)`, `kinetic-g`,
   `lagrangian-kinetic-density`: function `7`, raw `G(r).cub`, preset
   `density`.
-- `nuclear-esp`: function `8`, raw `nucleiesp.cub`, preset `signed`.
+- `nuclear-esp`: function `8`, raw `nucleiesp.cub`, preset `signed`;
+  mapped preset `esp` when `--surface-cube` is supplied.
 - `elf`: function `9`, raw `ELF.cub`, preset `elf`.
 - `lol`: function `10`, raw `LOL.cub`, preset `lol`.
 - `esp`, aliases `mep`, `total-esp`, `electrostatic-potential`: function
-  `12`, raw `totesp.cub`, preset `signed`.
+  `12`, raw `totesp.cub`, preset `signed`; mapped preset `esp` with
+  `--surface-cube`.
 - `rdg`: function `13`, raw `RDG.cub`, preset `density`.
 - `promolecular-rdg`: function `14`, raw `RDGprodens.cub`, preset
   `density`.
 - `signlambda2rho`: function `15`, raw `signlambda2rho.cub`, preset
-  `signed`.
+  `signed`; mapped preset `iri` with `--surface-cube`.
 - `promolecular-signlambda2rho`: function `16`, raw
-  `signlambda2rhoprodens.cub`, preset `signed`.
+  `signlambda2rhoprodens.cub`, preset `signed`; mapped preset `iri` with
+  `--surface-cube`.
 - `alie`, aliases `average-local-ionization-energy`, `avglocion`: function
-  `18`, raw `avglocion.cub`, preset `density`.  For conventional ALIE
-  figures, combine this with `density.cub` using `cube-preset alie`.
+  `18`, raw `avglocion.cub`, preset `density`; mapped preset `alie` with
+  `--surface-cube`.
 - `delta-g`: function `22`, raw `Delta_g.cub`, preset `density`.
 - `iri`: function `24`, raw `IRI.cub`, preset `density`.
-- `vdw-potential`: function `25`, raw `vdWpot.cub`, preset `signed`.
+- `vdw-potential`: function `25`, raw `vdWpot.cub`, preset `signed`;
+  mapped preset `vdw-map` with `--surface-cube`.
 - `orbital-density`: function `44`, raw `orbdens.cub`, preset `density`,
   requires `--orbital` for one orbital or `--orbitals` for batch export.
 
@@ -130,6 +134,22 @@ multiwfn2vesta grid-run input.fch grid_products \
   --no-vesta
 ```
 
+Mapped-surface mode reuses the same surface cube for display and grid
+alignment.  The generated grid cube becomes the texture cube:
+
+```bash
+multiwfn2vesta grid-run input.fch esp_map \
+  --function esp \
+  --surface-cube density.cub \
+  --grid-mode cube \
+  --grid-cube density.cub
+```
+
+With `--preset auto`, mapped defaults are `esp` for ESP/nuclear ESP, `alie`
+for ALIE, `iri` for sign(lambda2)rho, `vdw-map` for vdW potential, and
+`surface-map` for other functions.  Batch orbital export rejects
+`--surface-cube`.
+
 ## Outputs
 
 Single-run outputs:
@@ -165,15 +185,15 @@ multiwfn2vesta grid-run input.fch products --function orbital --orbital h
 multiwfn2vesta grid-run input.fch products --orbitals h l l+1 --no-vesta
 multiwfn2vesta grid-run input.fch products --function elf
 multiwfn2vesta grid-run input.fch products --function esp --no-vesta
+multiwfn2vesta grid-run input.fch products --function esp --surface-cube density.cub --grid-mode cube --grid-cube density.cub
 multiwfn2vesta grid-run input.fch products --function hamiltonian-ked --no-vesta
 multiwfn2vesta grid-run input.fch products --function alie --no-vesta
 ```
 
-For two-cube mapped surfaces, generate the component cubes first, then call
-`cube-preset` manually.  Examples include ESP on density and IRI/RDG/NCI
-surface+texture figures.  For ALIE, export `density.cub` and `avglocion.cub`
-on the same grid, then call `cube-preset alie density.cub ... --texture-cube
-avglocion.cub`.
+For two-cube mapped surfaces, use `--surface-cube` when the new grid cube
+should color an existing density/surface cube.  Use manual `cube-preset` when
+the surface and texture cubes are both already available or need special
+handling.
 
 ## Validation
 
@@ -212,3 +232,20 @@ bin/multiwfn2vesta grid-run \
 ```
 
 Observed output: raw `ELF.cub`, processed `h2o_elf.cub`, and recipe.
+
+Real H2O noGUI ESP mapped-surface smoke:
+
+```bash
+bin/multiwfn2vesta grid-run \
+  /mnt/g/work/multiwfn2vesta/smoke/20260605_iri_aim_h2o/H2O.fch \
+  /mnt/g/work/multiwfn2vesta/smoke/multiwfn_grid_surface_cube_map_20260610/h2o_esp_map \
+  --function esp \
+  --surface-cube /mnt/g/work/multiwfn2vesta/smoke/multiwfn_grid_surface_map_20260610/h2o_density/h2o_density.cub \
+  --grid-mode cube \
+  --grid-cube /mnt/g/work/multiwfn2vesta/smoke/multiwfn_grid_surface_map_20260610/h2o_density/h2o_density.cub \
+  --timeout 300 \
+  --stem h2o
+```
+
+Observed output: `h2o_esp.cub`, `h2o_esp_esp_cube.vesta`, and recipes showing
+the density cube as Surface Cube and ESP as Texture Cube.

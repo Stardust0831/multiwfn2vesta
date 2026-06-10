@@ -1,5 +1,29 @@
 # Worklog
 
+## 2026-06-10: grid-run mapped-surface bridge
+
+- Continued the long-running Multiwfn/ABACUS/VESTA analysis-expansion goal by
+  closing a small but common gap between single-cube `grid-run` outputs and
+  VESTA surface+texture figures.
+- Added `grid-run --surface-cube SURFACE.cub`.  The command still generates
+  one new Multiwfn real-space grid cube, but when `--surface-cube` is present
+  that new cube is passed to `cube-preset` as the texture cube on the provided
+  density/surface cube.
+- Added mapped-preset defaults for main-function-5 outputs: ESP/nuclear ESP
+  use `esp`, ALIE uses `alie`, sign(lambda2)rho uses `iri`, vdW potential
+  uses `vdw-map`, and other functions fall back to `surface-map`.
+- Batch orbital export now rejects `--surface-cube`, because each child run
+  owns its own output and mapped-surface batch semantics are not yet defined.
+- Real H2O noGUI smoke passed under
+  `/mnt/g/work/multiwfn2vesta/smoke/multiwfn_grid_surface_cube_map_20260610/h2o_esp_map/`:
+  `grid-run --function esp --surface-cube h2o_density.cub --grid-mode cube`
+  generated `h2o_esp.cub` and `h2o_esp_esp_cube.vesta`.  The VESTA recipe
+  records the density cube as Surface Cube and ESP as Texture Cube.
+- A read-only source exploration noted two good later candidates: an STM/LDOS
+  runner from Multiwfn main function `300`, subfunction `4`, exporting
+  `STM.cub`; and domain extraction from main function `200`, subfunction
+  `14`, exporting `domain.cub`/`domain.pdb`.
+
 ## 2026-06-10: IGM and mIGM command streams
 
 - Continued the long-running Multiwfn/ABACUS/VESTA analysis-expansion goal by
