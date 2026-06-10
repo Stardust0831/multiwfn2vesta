@@ -1,5 +1,25 @@
 # Worklog
 
+## 2026-06-10: README branch refresh at STM runner tip
+
+- User asked to update README again, noted that the branch state looked
+  unusual, suggested merging back to one branch if useful, and requested Git
+  identity `Stardust0831`.
+- Rechecked `/mnt/g/work/multiwfn2vesta/project` after
+  `git fetch --prune origin`: local `main`, `origin/main`, and `origin/HEAD`
+  are aligned at
+  `fdf85863ccb01c5783ce912163f1ec4a34060dd7`
+  (`Add Multiwfn STM runner`).
+- Rechecked remote heads with `git ls-remote --heads origin`: the remote
+  exposes only `refs/heads/main`, also at `fdf8586`, so no branch merge-back
+  is needed in this pass.
+- Confirmed repository-local identity remains
+  `Stardust0831 <13862180016@163.com>`.
+- Refreshed `README.md` Repository Status so the branch-audit commit and
+  remote-head wording match the current STM/LDOS runner tip.
+- Left untracked `domain.cub` and `domain.pdb` untouched as local
+  domain-analysis probe artifacts; they are not part of this README cleanup.
+
 ## 2026-06-10: Multiwfn STM/LDOS runner
 
 - Continued the long-running Multiwfn/ABACUS/VESTA analysis-expansion goal by

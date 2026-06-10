@@ -2,6 +2,35 @@
 
 Updated: 2026-06-10 15:34 CST
 
+## Current Request: 2026-06-10 README Refresh at STM Runner Tip
+
+- [x] Record the user's request before editing: update README, inspect the
+  odd-looking branch state, consolidate back to a single branch if needed, and
+  keep Git identity as `Stardust0831`.
+- [x] Recheck branch state after `git fetch --prune origin`: local `main`,
+  `origin/main`, and `origin/HEAD` are aligned at
+  `fdf85863ccb01c5783ce912163f1ec4a34060dd7`
+  (`Add Multiwfn STM runner`).
+- [x] Recheck remote heads: `git ls-remote --heads origin` returns only
+  `refs/heads/main`, also at `fdf8586`, so no merge-back is needed in this
+  pass.
+- [x] Confirm repository-local identity is
+  `Stardust0831 <13862180016@163.com>`.
+- [x] Refresh `README.md` Repository Status so it records the current
+  STM-runner tip rather than stale `bc462e1` branch-audit wording.
+- [ ] Sync project/root docs, run documentation validation, review, then
+  commit and push on `main` if stable.
+
+## Current Continuation: 2026-06-10 Domain Extraction Candidate After STM/LDOS
+
+- [x] Confirm the domain-analysis prompt stream is stable enough for a
+  dedicated runner: Multiwfn `200 -> 14`, using current grid data in memory,
+  supports `<0.5`-style criteria and exports `domain.cub`/`domain.pdb`.
+- [ ] Implement a maintained cube/domain runner and VESTA preset if the
+  prompt stream remains reproducible.
+- [ ] Add focused tests, docs, and a small noGUI smoke if implemented.
+- [ ] Sync project/root docs, review, commit, and push if stable.
+
 ## Current Continuation: 2026-06-10 STM/LDOS Runner
 
 - [x] Close the previous README refresh state: commit `bc462e1` was pushed to
@@ -21,7 +50,8 @@ Updated: 2026-06-10 15:34 CST
   `cube-preset --list-presets`, `git diff --check`, and root-doc checksum
   sync check all passed; optional `--prepare-fermi-temperature 298.15`
   STM smoke also returned 0 and generated `h2o_stm.cub`.
-- [ ] Run read-only review, then commit and push on `main`.
+- [x] Run read-only review, then commit and push on `main`: `fdf8586`
+  (`Add Multiwfn STM runner`).
 
 ## Current Request: 2026-06-10 README Refresh And Branch Consolidation
 
