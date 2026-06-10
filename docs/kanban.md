@@ -18,8 +18,9 @@ Updated: 2026-06-10 15:34 CST
   `Stardust0831 <13862180016@163.com>`.
 - [x] Refresh `README.md` Repository Status so it records the current
   STM-runner tip rather than stale `bc462e1` branch-audit wording.
-- [ ] Sync project/root docs, run documentation validation, review, then
-  commit and push on `main` if stable.
+- [x] Sync project/root docs, run documentation validation, review, then
+  commit and push on `main`: `1493c80` (`Refresh README branch status at STM
+  tip`).
 
 ## Current Continuation: 2026-06-10 Domain Extraction Candidate After STM/LDOS
 

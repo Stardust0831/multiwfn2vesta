@@ -19,6 +19,8 @@
   remote-head wording match the current STM/LDOS runner tip.
 - Left untracked `domain.cub` and `domain.pdb` untouched as local
   domain-analysis probe artifacts; they are not part of this README cleanup.
+- Committed and pushed the README/docs refresh on `main` as `1493c80`
+  (`Refresh README branch status at STM tip`).
 
 ## 2026-06-10: Multiwfn STM/LDOS runner
 
