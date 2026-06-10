@@ -6,10 +6,11 @@ Updated: 2026-06-10
 
 - Continue the long-running objective: research and turn valuable
   Multiwfn wavefunction analyses into maintained VESTA workflows, especially
-  routes that can start from ABACUS LCAO Molden files.  The latest
-  maintained increment is `grid-run`; next likely targets are batch orbital
-  export, Fukui/dual-descriptor cube generation, IGMH fragment command
-  streams, and more real ABACUS Molden smokes.
+  routes that can start from ABACUS LCAO Molden files.  The current increment
+  is `cube-arith`, a cube arithmetic bottom layer for density-difference,
+  Fukui, and dual-descriptor visualization; next likely targets after this are
+  batch orbital export, higher-level charged-state cube templates, IGMH
+  fragment command streams, and more real ABACUS Molden smokes.
 - Turn the 2026-06-10 Multiwfn/ABACUS/VESTA research into the next
   maintainable features: IGMH command streams, real-system `abacus-molden`
   smoke coverage, Multiwfn atom scalar parsers, and more real IRI/RDG
@@ -30,6 +31,29 @@ Updated: 2026-06-10
 
 ## Done
 
+- Started `multiwfn2vesta cube-arith`, a maintained compatible-cube linear
+  arithmetic workflow for density difference, Fukui functions, and dual
+  descriptors.  It supports generic `--term COEFF CUBE` entries and named
+  operations `density-difference`, `fukui-plus`, `fukui-minus`, and
+  `dual-descriptor`, writes `<stem>.cub` plus a markdown recipe, and
+  optionally calls `cube-preset`; `--preset auto` uses `density` for
+  `fukui-plus/minus` and `signed` otherwise.
+- Integrated `cube-arith` into the unified CLI, aliases `cube-math`,
+  `density-diff`, and `fukui-cube`, the interactive menu as item `11`, and
+  console script `multiwfn2vesta-cube-arith`.
+- Focused validation for the cube arithmetic feature passed: 39
+  tests across `tests.test_cube_arith` and `tests.test_cli`, plus
+  `py_compile`.
+- Real CLI smokes passed under
+  `/mnt/g/work/multiwfn2vesta/smoke/cube_arith_smoke_20260610/products_auto_signed/`
+  and
+  `/mnt/g/work/multiwfn2vesta/smoke/cube_arith_smoke_20260610/products_auto_fukui/`,
+  covering auto signed VESTA output and cube-only Fukui output.
+- Read-only pre-commit review found and the main thread fixed a real unit
+  compatibility issue: `cube-arith` now rejects mixed Bohr/Angstrom cube unit
+  conventions by default.
+- Full no-GUI regression passed for the cube arithmetic increment: 153 tests
+  across the project test suite.
 - Added `multiwfn2vesta grid-run`, a maintained Multiwfn main-function-5
   (`study3dim`) real-space grid runner.  It discovers Multiwfn, writes the
   exact command stream, stdout/stderr logs, raw cube directory, processed

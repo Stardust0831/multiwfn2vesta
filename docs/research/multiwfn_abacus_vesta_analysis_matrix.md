@@ -103,7 +103,7 @@ occupations, and density derivatives from the wavefunction representation.
 | Basin analysis | Wavefunction or grid data | Molden route possible; accuracy depends on NAO2GTO fit | `basin.cub`, `basin0001.cub`, `basinsel.cub`, attractor PDB/PQR | Separate colored basin isosurfaces | Needs cube splitting/color strategy |
 | Excited-state hole/electron/CDD/transition density | Wavefunction plus excited-state information | Not a primary ABACUS ground-state route; LR-TDDFT outputs need separate study | `hole.cub`, `electron.cub`, `CDD.cub`, `transdens.cub` | Positive/negative isosurfaces | Defer until ABACUS excited-state interface is clear |
 | ETS-NOCV / AdNDP / EDA-related orbitals | Specialized wavefunctions/fragments | Weak for ABACUS periodic slabs; possible for molecule-like cases | `NOCV_*.cub`, `NOCVpair.cub`, `AdNDPorb*.cub` | Orbital-like positive/negative surfaces | Defer |
-| Fukui / dual descriptor | Multiple charge-state wavefunctions or orbital-weighted approximation | Possible for finite molecules or charged supercells; periodic charged systems risky | `userfunc.cub`, density-difference cubes | Positive/negative surfaces and atom scalar coloring | Defer; implement as cube arithmetic first |
+| Fukui / dual descriptor | Multiple charge-state wavefunctions or orbital-weighted approximation | Possible for finite molecules or charged supercells; periodic charged systems risky | `userfunc.cub`, density-difference cubes | Positive/negative surfaces and atom scalar coloring | Cube arithmetic bottom layer implemented as `multiwfn2vesta cube-arith`; charged-state cube generation remains separate |
 | NICS/current/arrows | Magnetic-response data | Not main maintained route | vector/text data, if available | Arrows/text overlays | Keep as misc, not main code |
 
 ## ABACUS Molden Rules
@@ -170,8 +170,10 @@ Known limitations:
    coloring directly; Multiwfn atom tables remain future work.
 5. Extend `grid-run` beyond the initial main-function-5 table where useful:
    kinetic density variants, custom function indices, batch orbital cubes via
-   main function `200`, Fukui/dual-descriptor workflows, and IGMH fragment
-   command streams.
+   main function `200`, end-to-end Fukui/dual-descriptor cube generation on
+   shared grids, and IGMH fragment command streams.  The cube arithmetic
+   foundation for density-difference/Fukui/dual-descriptor maps now exists as
+   `multiwfn2vesta cube-arith`.
 6. Keep headless/no-focus VESTA rendering as a separate backend concern.
    Visualization products should remain useful as `.vesta` even when rendering
    is skipped.
@@ -184,6 +186,7 @@ Implemented or partly implemented:
 - `multiwfn2vesta abacus-molden`
 - `multiwfn2vesta cube-vesta`
 - `multiwfn2vesta cube-preset`
+- `multiwfn2vesta cube-arith`
 - `multiwfn2vesta iri-run`
 - `multiwfn2vesta grid-run`
 - `multiwfn2vesta aim-run`
@@ -211,3 +214,6 @@ Main gaps:
 - Dual-cube surface texture workflows now have a preset entry point for
   IRI/RDG/NCI and ESP/MEP, but still need more real smoke cases and cleaner
   end-to-end templates.
+- Fukui/dual-descriptor visualization now has the cube-arithmetic bottom
+  layer, but still needs higher-level charged-state generation templates and
+  real chemistry smoke cases.

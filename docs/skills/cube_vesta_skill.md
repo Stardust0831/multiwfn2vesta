@@ -54,6 +54,26 @@ multiwfn2vesta cube-preset esp density.cub cube_products \
 `cube-preset` is a thin layer over `cube-vesta`; it selects maintained
 defaults but does not duplicate VESTA-writing logic.
 
+Cube arithmetic wrapper:
+
+```bash
+multiwfn2vesta cube-arith cube_arith_products \
+  --term 1.0 rho_a.cub \
+  --term -1.0 rho_b.cub \
+  --stem density_difference
+
+multiwfn2vesta cube-arith cube_arith_products \
+  --operation dual-descriptor \
+  --anion-cube density_Nplus1.cub \
+  --neutral-cube density_N.cub \
+  --cation-cube density_Nminus1.cub
+```
+
+`cube-arith` writes a new cube from compatible input cubes and, unless
+`--no-vesta` is used, sends that cube through `cube-preset` for display.  It
+is the maintained bottom layer for density-difference, Fukui, and
+dual-descriptor maps.
+
 If starting from a Multiwfn-readable wavefunction instead of an existing cube,
 use `grid-run` for single real-space function cubes:
 
@@ -134,6 +154,9 @@ passes it back through `cube-preset`.
 
 - No VESTA rendering is launched by this command.
 - Analysis-specific display presets now exist for common cube products.
+  Cube arithmetic now exists as `multiwfn2vesta cube-arith` for compatible
+  cube linear combinations such as density difference, Fukui functions, and
+  dual descriptors.
   Multiwfn main-function-5 single-cube generation now exists as
   `multiwfn2vesta grid-run` for density, orbital/MO, Laplacian, ELF, LOL,
   ESP/MEP, RDG/IRI-like, and related scalar cubes.  IRI/RDG mapped surfaces

@@ -26,6 +26,7 @@ multiwfn2vesta abacus-molden --help
 multiwfn2vesta molden-check --help
 multiwfn2vesta cube-vesta --help
 multiwfn2vesta cube-preset --help
+multiwfn2vesta cube-arith --help
 multiwfn2vesta iri-run --help
 multiwfn2vesta grid-run --help
 multiwfn2vesta abacus-mulliken-color --help
@@ -46,6 +47,8 @@ multiwfn2vesta aim-igmh --help
   texture/color cube，默认关闭 section plane
 - `cube-preset`: 在 `cube-vesta` 后端上套用常见分析默认值，例如 density、
   orbital/signed、ELF/LOL、IRI/RDG/NCI、ESP/MEP
+- `cube-arith`: 对兼容 cube 做线性组合，用于 density difference、Fukui
+  function、dual descriptor 等后处理，并可直接接 `cube-preset` 写 `.vesta`
 - `iri-run`: 从 Multiwfn 可读波函数文件调用 IRI/RDG 弱相互作用菜单，
   生成 `func1.cub`/`func2.cub`，处理成 VESTA 可用的 `IRI1`/`IRI2` cube，
   再通过 `cube-preset iri` 写 mapped-surface `.vesta`
@@ -198,6 +201,65 @@ multiwfn2vesta cube-preset esp density.cub cube_products \
 
 生成的 recipe 会追加 `Cube Preset` 段，记录请求的预设名、规范预设名、
 有效等值面、surface mode、texture 缩放来源和用户覆盖参数。
+
+## Cube 算术：密度差 / Fukui / dual descriptor
+
+`cube-arith` 是兼容 cube 的线性组合工具。它适合把 ABACUS 或 Multiwfn 已经
+生成好的同网格密度/波函数/差分 cube 组合成新的 cube，再交给 `cube-preset`
+画 VESTA 等值面。它不负责生成带电态波函数本身；带电态、中性态、激发态或
+不同片段的 cube 要先由 ABACUS、Multiwfn 或 `grid-run` 产生。
+
+任意线性组合：
+
+```bash
+multiwfn2vesta cube-arith cube_arith_products \
+  --term 1.0 rho_a.cub \
+  --term -1.0 rho_b.cub \
+  --stem density_difference
+```
+
+Fukui 和 dual descriptor 快捷入口：
+
+```bash
+multiwfn2vesta cube-arith cube_arith_products \
+  --operation fukui-plus \
+  --anion-cube density_Nplus1.cub \
+  --neutral-cube density_N.cub
+
+multiwfn2vesta cube-arith cube_arith_products \
+  --operation fukui-minus \
+  --neutral-cube density_N.cub \
+  --cation-cube density_Nminus1.cub
+
+multiwfn2vesta cube-arith cube_arith_products \
+  --operation dual-descriptor \
+  --anion-cube density_Nplus1.cub \
+  --neutral-cube density_N.cub \
+  --cation-cube density_Nminus1.cub
+```
+
+公式：
+
+- `density-difference`: `plus - minus`
+- `fukui-plus`: `rho(N+1) - rho(N)`
+- `fukui-minus`: `rho(N) - rho(N-1)`
+- `dual-descriptor`: `rho(N+1) - 2*rho(N) + rho(N-1)`
+
+默认输出：
+
+- `<stem>.cub`
+- `<stem>_cube_arith_recipe.md`
+- 默认 `--preset auto`：`fukui-plus/minus` 用 `density`，`density-difference`、
+  `dual-descriptor` 和任意 `linear` 组合用 `signed`
+
+兼容性规则：
+
+- 所有输入 cube 必须有相同 grid origin、grid vectors、点数和 cube 单位约定；
+  默认 `--cube-units auto` 下正 grid count 视为 Bohr，负 grid count 视为
+  Angstrom，混用会被拒绝
+- 默认还要求 atom list 一致；确认只需要共用格点时可用 `--no-strict-atoms`
+- 程序拒绝把输出 cube 写到任何输入 cube 路径上，避免覆盖原始数据
+- 若只想生成 cube，不写 VESTA，用 `--no-vesta`
 
 ## 波函数文件到 Multiwfn 单 cube / VESTA
 

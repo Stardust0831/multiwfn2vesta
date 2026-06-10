@@ -31,6 +31,7 @@ Scriptable subcommands:
 multiwfn2vesta discover
 multiwfn2vesta abacus-molden --help
 multiwfn2vesta cube-preset --help
+multiwfn2vesta cube-arith --help
 multiwfn2vesta iri-run --help
 multiwfn2vesta grid-run --help
 multiwfn2vesta aim-run --help
@@ -46,6 +47,8 @@ Aliases:
 - `multiwfn2vesta cube ...` is an alias for `cube-vesta`.
 - `multiwfn2vesta preset ...` and `multiwfn2vesta analysis-cube ...` are
   aliases for `cube-preset`.
+- `multiwfn2vesta cube-math ...`, `multiwfn2vesta density-diff ...`, and
+  `multiwfn2vesta fukui-cube ...` are aliases for `cube-arith`.
 - `multiwfn2vesta multiwfn-iri ...` and `multiwfn2vesta rdg-run ...` are
   aliases for `iri-run`.
 - `multiwfn2vesta multiwfn-grid ...`,
@@ -114,6 +117,26 @@ default style is enough to start.  Presets cover density-like scalar cubes,
 signed orbital/wavefunction/density-difference cubes, ELF/LOL, IRI/RDG/NCI
 mapped surfaces, and ESP/MEP mapped density surfaces.  All VESTA writing still
 goes through the maintained `cube-vesta` backend.
+
+### Cube arithmetic to density-difference/Fukui VESTA
+
+```bash
+multiwfn2vesta cube-arith cube_arith_products \
+  --operation dual-descriptor \
+  --anion-cube density_Nplus1.cub \
+  --neutral-cube density_N.cub \
+  --cation-cube density_Nminus1.cub
+```
+
+Use this after ABACUS, Multiwfn, or `grid-run` has produced compatible cube
+files.  It writes a new cube and, by default, calls `cube-preset`; `--preset
+auto` uses `density` for `fukui-plus/minus` and `signed` for
+`density-difference`, `dual-descriptor`, and generic linear combinations.
+Generic linear combinations use repeated `--term COEFF CUBE` entries.
+
+The named formulae are `rho(N+1)-rho(N)` for `fukui-plus`,
+`rho(N)-rho(N-1)` for `fukui-minus`, and
+`rho(N+1)-2*rho(N)+rho(N-1)` for `dual-descriptor`.
 
 ### Wavefunction to Multiwfn IRI/RDG to VESTA
 

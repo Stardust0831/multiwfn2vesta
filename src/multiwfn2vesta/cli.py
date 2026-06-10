@@ -11,6 +11,7 @@ from . import (
     abacus_mulliken,
     aim_igmh_vesta,
     aim_vesta,
+    cube_arith,
     cube_preset,
     cube_vesta,
     molden_check,
@@ -27,6 +28,7 @@ COMMANDS: Dict[str, Tuple[str, str]] = {
     "molden-check": ("Check Molden sections before Multiwfn workflows", "molden_check"),
     "cube-vesta": ("Create a VESTA file from cube data", "cube_vesta"),
     "cube-preset": ("Create a VESTA file from cube data using an analysis preset", "cube_preset"),
+    "cube-arith": ("Combine compatible cube files, then optionally prepare VESTA", "cube_arith"),
     "iri-run": ("Run Multiwfn IRI/RDG cube generation, then prepare VESTA", "multiwfn_iri"),
     "grid-run": ("Run Multiwfn real-space function cube generation, then prepare VESTA", "multiwfn_grid"),
     "abacus-mulliken-color": ("Color VESTA atoms from ABACUS mulliken.txt", "abacus_mulliken"),
@@ -46,6 +48,9 @@ ALIASES = {
     "cube": "cube-vesta",
     "preset": "cube-preset",
     "analysis-cube": "cube-preset",
+    "cube-math": "cube-arith",
+    "density-diff": "cube-arith",
+    "fukui-cube": "cube-arith",
     "multiwfn-iri": "iri-run",
     "rdg-run": "iri-run",
     "multiwfn-grid": "grid-run",
@@ -80,6 +85,8 @@ Commands:
              Create a VESTA isosurface file from one cube and optional texture cube.
   cube-preset
              Apply an analysis preset before creating a VESTA cube file.
+  cube-arith
+             Combine compatible cube files for density differences, Fukui, or dual descriptor.
   iri-run    Run Multiwfn IRI/RDG cube generation and prepare a VESTA mapped surface.
   grid-run   Run Multiwfn real-space function cube generation and prepare VESTA.
   abacus-mulliken-color
@@ -95,6 +102,8 @@ Aliases:
   cube       Alias for cube-vesta.
   preset, analysis-cube
              Aliases for cube-preset.
+  cube-math, density-diff, fukui-cube
+             Aliases for cube-arith.
   multiwfn-iri, rdg-run
              Aliases for iri-run.
   multiwfn-grid, scalar-cube-run, function-cube
@@ -108,6 +117,7 @@ Examples:
   multiwfn2vesta molden-check ABACUS_Multiwfn.molden --abacus
   multiwfn2vesta cube-vesta density.cub cube_products --isosurface 0.01
   multiwfn2vesta cube-preset orbital orbital.cub cube_products
+  multiwfn2vesta cube-arith products --operation dual-descriptor --anion-cube anion.cub --neutral-cube neutral.cub --cation-cube cation.cub
   multiwfn2vesta iri-run input.molden iri_products --timeout 300
   multiwfn2vesta grid-run input.molden grid_products --function density
   multiwfn2vesta abacus-mulliken-color input.vesta mulliken.txt colored.vesta
@@ -335,6 +345,59 @@ def interactive_cube_preset() -> int:
     return cube_preset.main(argv)
 
 
+def interactive_cube_arith() -> int:
+    print("\nCube arithmetic -> cube / VESTA")
+    output_dir = _prompt("output directory", default="cube_arith_products")
+    argv: List[str] = [output_dir]
+    operation = _prompt(
+        "operation (linear/density-difference/fukui-plus/fukui-minus/dual-descriptor)",
+        default="linear",
+    )
+    argv.extend(["--operation", operation])
+    if operation == "linear":
+        while True:
+            term = _prompt("term as COEFF CUBE (empty when done)", required=False)
+            if not term:
+                break
+            parts = term.split(maxsplit=1)
+            if len(parts) != 2:
+                print("Each term needs a coefficient and a cube path.")
+                return 2
+            argv.extend(["--term", parts[0], parts[1]])
+    elif operation in {"difference", "density-difference"}:
+        plus_cube = _prompt("plus cube", required=True)
+        minus_cube = _prompt("minus cube", required=True)
+        argv.extend(["--plus-cube", plus_cube, "--minus-cube", minus_cube])
+    else:
+        neutral_cube = _prompt("neutral N cube", required=True)
+        argv.extend(["--neutral-cube", neutral_cube])
+        if operation in {"fukui-plus", "dual-descriptor"}:
+            anion_cube = _prompt("anion N+1 cube", required=True)
+            argv.extend(["--anion-cube", anion_cube])
+        if operation in {"fukui-minus", "dual-descriptor"}:
+            cation_cube = _prompt("cation N-1 cube", required=True)
+            argv.extend(["--cation-cube", cation_cube])
+
+    stem = _prompt("output stem (empty for operation default)")
+    if stem:
+        argv.extend(["--stem", stem])
+
+    if _yes_no("skip VESTA generation", default=False):
+        argv.append("--no-vesta")
+    else:
+        preset = _prompt("VESTA cube preset (auto/density/signed/...)", default="auto")
+        argv.extend(["--preset", preset])
+        isosurface = _prompt("override isosurface value (empty for preset default)")
+        if isosurface:
+            argv.extend(["--isosurface", isosurface])
+        structure = _prompt("structure phase (auto/none/molecule/crystal)", default="auto")
+        argv.extend(["--structure", structure])
+        if _yes_no("copy output cube beside VESTA", default=True) is False:
+            argv.append("--no-copy-cubes")
+
+    return cube_arith.main(argv)
+
+
 def interactive_iri_run() -> int:
     print("\nWavefunction -> Multiwfn IRI/RDG cubes -> VESTA")
     wavefunction = _prompt("wavefunction file (.molden/.fch/.wfn/etc.)", required=True)
@@ -491,6 +554,7 @@ def interactive_main() -> int:
     print("8) ABACUS Mulliken -> VESTA atom colors")
     print("9) ABACUS calculation -> Multiwfn Molden")
     print("10) Wavefunction -> Multiwfn real-space function cube -> VESTA")
+    print("11) Cube arithmetic -> density difference/Fukui/dual descriptor VESTA")
     print("q) Quit")
     choice = _prompt("choice", default="3").lower()
     if choice in {"0", "discover", "where", "env"}:
@@ -512,6 +576,8 @@ def interactive_main() -> int:
         return interactive_cube_vesta()
     if choice in {"6", "cube-preset", "preset", "analysis-cube"}:
         return interactive_cube_preset()
+    if choice in {"11", "cube-arith", "cube-math", "density-diff", "fukui-cube"}:
+        return interactive_cube_arith()
     if choice in {"7", "iri-run", "multiwfn-iri", "rdg-run"}:
         return interactive_iri_run()
     if choice in {"8", "abacus-mulliken-color", "mulliken-color", "atom-color"}:
@@ -538,6 +604,8 @@ def run_command(command: str, args: Sequence[str]) -> int:
         return cube_vesta.main(args)
     if command == "cube-preset":
         return cube_preset.main(args)
+    if command == "cube-arith":
+        return cube_arith.main(args)
     if command == "iri-run":
         return multiwfn_iri.main(args)
     if command == "grid-run":

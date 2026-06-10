@@ -18,6 +18,7 @@ class TestUnifiedCli(unittest.TestCase):
         self.assertIn("molden-check", text)
         self.assertIn("cube-vesta", text)
         self.assertIn("cube-preset", text)
+        self.assertIn("cube-arith", text)
         self.assertIn("iri-run", text)
         self.assertIn("grid-run", text)
         self.assertIn("abacus-mulliken-color", text)
@@ -70,6 +71,13 @@ class TestUnifiedCli(unittest.TestCase):
         self.assertEqual(code, 0)
         mocked.assert_called_once_with(["orbital", "orb.cub", "products"])
 
+    def test_dispatches_cube_arith_command(self):
+        with patch("multiwfn2vesta.cli.cube_arith.main", return_value=0) as mocked:
+            code = cli.main(["cube-arith", "products", "--term", "1", "a.cub", "--term", "-1", "b.cub"])
+
+        self.assertEqual(code, 0)
+        mocked.assert_called_once_with(["products", "--term", "1", "a.cub", "--term", "-1", "b.cub"])
+
     def test_dispatches_iri_run_command(self):
         with patch("multiwfn2vesta.cli.multiwfn_iri.main", return_value=0) as mocked:
             code = cli.main(["iri-run", "input.molden", "products", "--timeout", "300"])
@@ -111,6 +119,13 @@ class TestUnifiedCli(unittest.TestCase):
 
         self.assertEqual(code, 0)
         mocked.assert_called_once_with(["density", "density.cub", "out"])
+
+    def test_dispatches_cube_arith_alias(self):
+        with patch("multiwfn2vesta.cli.cube_arith.main", return_value=0) as mocked:
+            code = cli.main(["fukui-cube", "products", "--operation", "fukui-plus"])
+
+        self.assertEqual(code, 0)
+        mocked.assert_called_once_with(["products", "--operation", "fukui-plus"])
 
     def test_dispatches_iri_run_alias(self):
         with patch("multiwfn2vesta.cli.multiwfn_iri.main", return_value=0) as mocked:
@@ -326,6 +341,52 @@ class TestUnifiedCli(unittest.TestCase):
                 "--tex-physical",
                 "-0.04",
                 "0.04",
+            ]
+        )
+
+    def test_interactive_cube_arith_builds_expected_args(self):
+        answers = iter(
+            [
+                "11",
+                "arith_products",
+                "dual-descriptor",
+                "neutral.cub",
+                "anion.cub",
+                "cation.cub",
+                "dual",
+                "n",
+                "signed",
+                "0.01",
+                "crystal",
+                "n",
+            ]
+        )
+        with patch("builtins.input", lambda _prompt: next(answers)):
+            with patch("sys.stdout", io.StringIO()):
+                with patch("multiwfn2vesta.cli.cube_arith.main", return_value=0) as mocked:
+                    code = cli.main([])
+
+        self.assertEqual(code, 0)
+        mocked.assert_called_once_with(
+            [
+                "arith_products",
+                "--operation",
+                "dual-descriptor",
+                "--neutral-cube",
+                "neutral.cub",
+                "--anion-cube",
+                "anion.cub",
+                "--cation-cube",
+                "cation.cub",
+                "--stem",
+                "dual",
+                "--preset",
+                "signed",
+                "--isosurface",
+                "0.01",
+                "--structure",
+                "crystal",
+                "--no-copy-cubes",
             ]
         )
 

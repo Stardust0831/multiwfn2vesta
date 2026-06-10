@@ -1,5 +1,46 @@
 # Worklog
 
+## 2026-06-10: Cube arithmetic foundation
+
+- Continued the long-running Multiwfn/ABACUS/VESTA roadmap by implementing
+  `multiwfn2vesta cube-arith`, a maintained compatible-cube linear arithmetic
+  bottom layer for density differences, Fukui functions, and dual
+  descriptors.
+- The command supports generic repeated `--term COEFF CUBE` entries plus named
+  operations: `density-difference` (`plus - minus`), `fukui-plus`
+  (`rho(N+1)-rho(N)`), `fukui-minus` (`rho(N)-rho(N-1)`), and
+  `dual-descriptor` (`rho(N+1)-2*rho(N)+rho(N-1)`).
+- The workflow writes `<stem>.cub`, `<stem>_cube_arith_recipe.md`, refuses to
+  overwrite any input cube, requires compatible cube grids by default, and
+  optionally calls `cube-preset` for VESTA output.  The default display preset
+  is `auto`: `fukui-plus/minus` use `density`, while density differences,
+  dual descriptors, and generic linear combinations use `signed`.
+- Integrated the command into the unified CLI, aliases `cube-math`,
+  `density-diff`, and `fukui-cube`, interactive menu item `11`, and console
+  script `multiwfn2vesta-cube-arith`.
+- Added `tests/test_cube_arith.py` and extended `tests/test_cli.py`.
+  Focused validation passed: 39 tests across `tests.test_cube_arith` and
+  `tests.test_cli`, plus `py_compile`.
+- A read-only pre-commit review found a real unit compatibility edge case.
+  The main thread fixed it by requiring matching cube unit conventions by
+  default, so `--cube-units auto` rejects mixed positive-count Bohr and
+  negative-count Angstrom cube headers before arithmetic.  An explicit
+  `--cube-units bohr` or `--cube-units angstrom` remains a user override.
+- Real CLI smokes passed under
+  `/mnt/g/work/multiwfn2vesta/smoke/cube_arith_smoke_20260610/products_auto_signed/`
+  and
+  `/mnt/g/work/multiwfn2vesta/smoke/cube_arith_smoke_20260610/products_auto_fukui/`.
+  The first wrote `signed_half.cub`, its arithmetic recipe, and signed VESTA
+  files via `--preset auto`; the second wrote a zero Fukui-plus cube and
+  recipe with `--no-vesta`.
+- Full no-GUI regression passed after the auto-preset/unit fix: 153 tests across
+  the project suite.
+- Synced README, usage docs, cube/CLI skill notes, new
+  `docs/skills/cube_arith_skill.md`, the ABACUS/Multiwfn/VESTA research
+  matrix, and project/root work records.  This is documented as a cube
+  post-processing foundation, not as automatic generation of charged-state
+  wavefunctions.
+
 ## 2026-06-10: Multiwfn real-space grid runner
 
 - Continued the long-running Multiwfn/ABACUS/VESTA roadmap by turning

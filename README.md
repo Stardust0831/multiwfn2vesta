@@ -14,18 +14,19 @@ point.
 - Maintained branch: `main`.
 - GitHub remote: `origin` points to `Github:Stardust0831/multiwfn2vesta.git`,
   with `origin/HEAD -> origin/main`.
-- Latest local/remote branch audit on 2026-06-10: local `main` tracks
-  `origin/main`, `origin/HEAD` points to `origin/main`, and
-  `git ls-remote --heads origin` returns only `refs/heads/main`.
+- Latest local/remote branch audit on 2026-06-10 before this README refresh:
+  local `main` tracks `origin/main`, `origin/HEAD` points to `origin/main`,
+  and `git ls-remote --heads origin` returns only `refs/heads/main`.
 - Current cleanup result on 2026-06-10: there is no extra local or remote
   feature branch to merge back, so no merge action is required.  The
   apparently strange branch history is already represented as commits on
   `main`.
-- Latest maintained feature push on 2026-06-10: `grid-run` was committed and
-  pushed as `3d192dc7ae9696dd433aae04e1a3bdb488b95482`
-  (`Add Multiwfn grid runner`).  After `git fetch --prune`, `HEAD`,
-  `origin/main`, and `origin/HEAD` all pointed at that commit, and the remote
-  still exposed only `refs/heads/main`.
+- Previous maintained feature push on 2026-06-10: `grid-run` was committed as
+  `3d192dc7ae9696dd433aae04e1a3bdb488b95482`
+  (`Add Multiwfn grid runner`) and closed with documentation commit
+  `9c9a43b402164044f32d94ad2c49f018d13e2b6f`
+  (`Record grid runner push`).  The current maintained increment is
+  `cube-arith`.
 - Previous experiment branches should be treated as short-lived workspaces:
   merge or fast-forward the useful commits into `main`, then remove the
   experiment branch once `origin/main` contains the maintained result.
@@ -73,6 +74,9 @@ then delete the temporary branch.
 - Apply analysis-oriented cube presets for common ABACUS/Multiwfn products
   such as density, orbitals/wavefunctions, ELF/LOL, IRI/RDG/NCI, and ESP/MEP
   mapped surfaces.
+- Combine compatible cube files with linear arithmetic for density
+  differences, Fukui functions, and dual descriptors, then optionally write a
+  VESTA file through `cube-preset`.
 - Run Multiwfn IRI/RDG cube generation from a wavefunction file, process
   `func1.cub`/`func2.cub` into VESTA-ready `IRI1`/`IRI2` cubes, and write a
   mapped-surface `.vesta` through `cube-preset iri`.
@@ -122,6 +126,10 @@ multiwfn2vesta discover
 multiwfn2vesta abacus-molden abacus_calc ABACUS_Multiwfn.molden
 multiwfn2vesta molden-check ABACUS_Multiwfn.molden --abacus
 multiwfn2vesta cube-preset --list-presets
+multiwfn2vesta cube-arith products --operation dual-descriptor \
+  --anion-cube anion_density.cub \
+  --neutral-cube neutral_density.cub \
+  --cation-cube cation_density.cub
 multiwfn2vesta iri-run input.molden iri_products --timeout 300
 multiwfn2vesta grid-run input.molden grid_products --function density
 ```
@@ -209,6 +217,61 @@ orbital/wavefunction/density-difference cubes, ELF/LOL cubes, IRI/RDG/NCI
 mapped surfaces, and ESP/MEP mapped density surfaces.  The recipe records the
 requested preset, canonical preset, effective isosurface, texture scaling
 source, and explicit texture percentage overrides when they are used.
+
+## Cube Arithmetic
+
+`cube-arith` linearly combines compatible cube files and can send the result
+to `cube-preset`.  This is the maintained bottom layer for density
+differences, Fukui functions, and dual descriptors.  It does not compute the
+underlying charged-state or excited-state wavefunctions; generate those cubes
+first with ABACUS, Multiwfn, or `grid-run`.
+
+Generic linear combination:
+
+```bash
+multiwfn2vesta cube-arith cube_arith_products \
+  --term 1.0 cube_a.cub \
+  --term -1.0 cube_b.cub \
+  --stem density_difference
+```
+
+Common shortcuts:
+
+```bash
+multiwfn2vesta cube-arith cube_arith_products \
+  --operation fukui-plus \
+  --anion-cube density_Nplus1.cub \
+  --neutral-cube density_N.cub
+
+multiwfn2vesta cube-arith cube_arith_products \
+  --operation fukui-minus \
+  --neutral-cube density_N.cub \
+  --cation-cube density_Nminus1.cub
+
+multiwfn2vesta cube-arith cube_arith_products \
+  --operation dual-descriptor \
+  --anion-cube density_Nplus1.cub \
+  --neutral-cube density_N.cub \
+  --cation-cube density_Nminus1.cub
+```
+
+The formulae are:
+
+- `density-difference`: `plus - minus`
+- `fukui-plus`: `rho(N+1) - rho(N)`
+- `fukui-minus`: `rho(N) - rho(N-1)`
+- `dual-descriptor`: `rho(N+1) - 2*rho(N) + rho(N-1)`
+
+All input cubes must share grid origin, grid vectors, point counts, and cube
+unit convention.  With `--cube-units auto`, ordinary positive grid counts are
+treated as Bohr and negative grid counts as Angstrom; mixed conventions are
+rejected by default.  Atom lists must also match by default.  Use
+`--no-strict-atoms` only when you have a deliberate atom-list mismatch but
+still trust the shared grid.  The command refuses to overwrite any input cube.
+Default outputs are `<stem>.cub`, `<stem>_cube_arith_recipe.md`, and, unless
+`--no-vesta` is used, a VESTA file plus recipe.  `--preset auto` uses
+`density` for `fukui-plus/minus` and `signed` for `density-difference`,
+`dual-descriptor`, and generic linear combinations.
 
 ## Wavefunction to Scalar Cube VESTA
 
