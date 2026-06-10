@@ -1,6 +1,48 @@
 # Project Kanban
 
-Updated: 2026-06-10 17:05 CST
+Updated: 2026-06-10 17:11 CST
+
+## Current Request: 2026-06-10 README Refresh, One-Branch Closeout, And Fukui Runner
+
+- [x] Record the user's request before editing: update README, inspect the
+  odd-looking branch state, consolidate back to one branch if needed, and keep
+  Git identity as `Stardust0831`.
+- [x] Recheck repository state without discarding in-progress runner work:
+  local `main`, `origin/main`, and `origin/HEAD` are aligned at `e92d98a`,
+  and `git ls-remote --heads origin` exposes only `refs/heads/main`.
+- [x] Confirm repository-local identity is
+  `Stardust0831 <13862180016@163.com>`.
+- [x] Finish focused `fukui-run` CLI tests before documenting the new surface:
+  `tests.test_multiwfn_fukui` plus `tests.test_cli` currently pass 52 tests.
+- [x] Refresh README and docs so the front page records the current
+  single-branch state and the new high-level Fukui/dual-descriptor runner.
+- [x] Sync `project/docs/` to the root docs mirror and verify with
+  `rsync -ani --checksum docs/ ../docs/`.
+- [x] Run code/help validation before mirror sync and review: `py_compile`
+  passed, 88 focused tests passed, the full 242-test no-GUI regression
+  passed, `bin/multiwfn2vesta --help`,
+  `bin/multiwfn2vesta fukui-run --help`,
+  `bin/multiwfn2vesta cube-preset --list-presets`, and `git diff --check`
+  passed.
+- [x] Run read-only subagent review: no blocker.  The non-blocking P2 about
+  VESTA failure after cube arithmetic was fixed by preserving cube-only
+  output in the top-level recipe while returning nonzero for the VESTA
+  failure; the P3 was to write final sync/review status back to this board.
+- [ ] Commit and push on `main`, then recheck local/remote branch state.
+
+## Current Continuation: 2026-06-10 Fukui/Dual Descriptor Wavefunction Runner
+
+- [x] Record the continued long-running objective: keep expanding
+  Multiwfn analyses that can become VESTA products from ABACUS-compatible
+  wavefunction or cube data.
+- [x] Confirm that existing `grid-run` density generation and `cube-arith`
+  operations can be composed into a maintained Fukui/dual-descriptor runner
+  without reimplementing cube math.
+- [x] Implement the smallest useful high-level runner for finite-system
+  charged-state wavefunctions, with explicit periodic/charged-system caveats.
+- [x] Add focused tests, CLI wiring, docs, and a skill note.
+- [x] Sync project/root docs, validate, run read-only review, then commit and
+  push on `main` if stable.
 
 ## Current Continuation: 2026-06-10 Basin Analysis VESTA Route Exploration
 

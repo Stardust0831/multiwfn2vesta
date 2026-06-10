@@ -1,5 +1,49 @@
 # Worklog
 
+## 2026-06-10: Fukui/dual descriptor runner and README branch closeout
+
+- User asked to update the README, noted that the branch state looked unusual,
+  and requested that commits use identity `Stardust0831`.
+- Rechecked repository state before editing: local `main`, `origin/main`, and
+  `origin/HEAD` were aligned at
+  `e92d98ad631b35ac27eebd9ce6f7da97a7ec5689`
+  (`Add Multiwfn basin cube presets`), and `git ls-remote --heads origin`
+  exposed only `refs/heads/main`.  No merge-back branch was present.
+- Confirmed repository-local identity:
+  `Stardust0831 <13862180016@163.com>`.
+- Added `multiwfn2vesta fukui-run`, backed by
+  `src/multiwfn2vesta/multiwfn_fukui.py`.  The command composes existing
+  maintained layers instead of duplicating them: neutral density is generated
+  first through `grid-run --function density`, charged-state densities reuse
+  the neutral cube as `--grid-mode cube --grid-cube <neutral_density.cub>`,
+  and Fukui/dual maps are built through `cube-arith`.
+- Supported operations are `fukui-plus`, `fukui-minus`, `dual-descriptor`, and
+  `all`.  The runner requires only the charged states needed by the selected
+  operations and writes `multiwfn_fukui_recipe.md` with caveats and child run
+  paths.
+- Integrated the command into the unified CLI, interactive chooser item `17`,
+  aliases `multiwfn-fukui`, `multiwfn-fukui-run`, and
+  `dual-descriptor-run`, plus package console scripts.
+- Added focused tests in `tests/test_multiwfn_fukui.py` and CLI coverage for
+  help text, command dispatch, alias dispatch, and interactive argument
+  building.
+- Updated README, usage notes, research matrix, unified CLI skill, and added
+  `docs/skills/multiwfn_fukui_run_skill.md`.  The documented scope is finite
+  or otherwise carefully reviewed charged-state systems; existing compatible
+  density cubes should still use `cube-arith` directly.
+- Read-only review found no blocker.  It noted one P2 residual risk: if
+  VESTA preset generation failed after cube arithmetic had written the output
+  cube, the top-level Fukui recipe could still say the operation was not
+  generated.  Fixed this by retrying the arithmetic child in cube-only mode
+  and recording that cube output while still returning a nonzero code for the
+  VESTA failure.
+- Validation passed after the review fix: `py_compile` for the new runner,
+  CLI, and tests; 88 focused tests covering `multiwfn_fukui`, unified CLI,
+  `cube_arith`, and `multiwfn_grid`; `bin/multiwfn2vesta --help`;
+  `bin/multiwfn2vesta fukui-run --help`; `bin/multiwfn2vesta cube-preset
+  --list-presets`; `git diff --check`; and the full 242-test no-GUI
+  regression.
+
 ## 2026-06-10: Basin cube display presets
 
 - Continued the long-running Multiwfn/ABACUS/VESTA analysis-expansion goal by

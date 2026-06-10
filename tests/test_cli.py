@@ -25,6 +25,7 @@ class TestUnifiedCli(unittest.TestCase):
         self.assertIn("igm-run", text)
         self.assertIn("migm-run", text)
         self.assertIn("grid-run", text)
+        self.assertIn("fukui-run", text)
         self.assertIn("stm-run", text)
         self.assertIn("domain-run", text)
         self.assertIn("abacus-mulliken-color", text)
@@ -168,6 +169,41 @@ class TestUnifiedCli(unittest.TestCase):
 
         self.assertEqual(code, 0)
         mocked.assert_called_once_with(["input.molden", "products", "--function", "density"])
+
+    def test_dispatches_fukui_run_command(self):
+        with patch("multiwfn2vesta.cli.multiwfn_fukui.main", return_value=0) as mocked:
+            code = cli.main(
+                [
+                    "fukui-run",
+                    "products",
+                    "--neutral",
+                    "neutral.molden",
+                    "--anion",
+                    "anion.molden",
+                    "--operation",
+                    "fukui-plus",
+                ]
+            )
+
+        self.assertEqual(code, 0)
+        mocked.assert_called_once_with(
+            [
+                "products",
+                "--neutral",
+                "neutral.molden",
+                "--anion",
+                "anion.molden",
+                "--operation",
+                "fukui-plus",
+            ]
+        )
+
+    def test_dispatches_fukui_run_alias(self):
+        with patch("multiwfn2vesta.cli.multiwfn_fukui.main", return_value=0) as mocked:
+            code = cli.main(["dual-descriptor-run", "products", "--neutral", "n.molden"])
+
+        self.assertEqual(code, 0)
+        mocked.assert_called_once_with(["products", "--neutral", "n.molden"])
 
     def test_dispatches_stm_run_command(self):
         with patch("multiwfn2vesta.cli.multiwfn_stm.main", return_value=0) as mocked:
@@ -611,6 +647,70 @@ class TestUnifiedCli(unittest.TestCase):
                 "--grid-mode",
                 "low",
                 "--no-vesta",
+            ]
+        )
+
+    def test_interactive_fukui_run_builds_expected_args(self):
+        answers = iter(
+            [
+                "17",
+                "fukui_products",
+                "neutral.molden",
+                "all",
+                "anion.molden",
+                "cation.molden",
+                "/opt/Multiwfn",
+                "4",
+                "300",
+                "case",
+                "points",
+                "10 11 12",
+                "n",
+                "n",
+                "signed",
+                "0.02",
+                "molecule",
+                "n",
+            ]
+        )
+        with patch("builtins.input", lambda _prompt: next(answers)):
+            with patch("sys.stdout", io.StringIO()):
+                with patch("multiwfn2vesta.cli.multiwfn_fukui.main", return_value=0) as mocked:
+                    code = cli.main([])
+
+        self.assertEqual(code, 0)
+        mocked.assert_called_once_with(
+            [
+                "fukui_products",
+                "--neutral",
+                "neutral.molden",
+                "--operation",
+                "all",
+                "--anion",
+                "anion.molden",
+                "--cation",
+                "cation.molden",
+                "--multiwfn",
+                "/opt/Multiwfn",
+                "--nthreads",
+                "4",
+                "--timeout",
+                "300",
+                "--stem",
+                "case",
+                "--grid-mode",
+                "points",
+                "--grid-points",
+                "10",
+                "11",
+                "12",
+                "--preset",
+                "signed",
+                "--isosurface",
+                "0.02",
+                "--structure",
+                "molecule",
+                "--no-copy-cubes",
             ]
         )
 

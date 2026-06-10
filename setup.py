@@ -22,6 +22,7 @@ setup(
             'multiwfn2vesta-igm-run=multiwfn2vesta.multiwfn_igmh:main_igm',
             'multiwfn2vesta-migm-run=multiwfn2vesta.multiwfn_igmh:main_migm',
             'multiwfn2vesta-grid-run=multiwfn2vesta.multiwfn_grid:main',
+            'multiwfn2vesta-fukui-run=multiwfn2vesta.multiwfn_fukui:main',
             'multiwfn2vesta-stm-run=multiwfn2vesta.multiwfn_stm:main',
             'multiwfn2vesta-domain-run=multiwfn2vesta.multiwfn_domain:main',
             'multiwfn2vesta-multiwfn-atom-color=multiwfn2vesta.multiwfn_atom_table:main',

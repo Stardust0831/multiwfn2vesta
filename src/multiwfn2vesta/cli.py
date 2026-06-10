@@ -18,6 +18,7 @@ from . import (
     multiwfn_atom_table,
     multiwfn_aim,
     multiwfn_grid,
+    multiwfn_fukui,
     multiwfn_domain,
     multiwfn_igmh,
     multiwfn_iri,
@@ -40,6 +41,7 @@ COMMANDS: Dict[str, Tuple[str, str]] = {
     "igm-run": ("Run Multiwfn IGM cube generation, then prepare VESTA", "multiwfn_igmh"),
     "migm-run": ("Run Multiwfn mIGM cube generation, then prepare VESTA", "multiwfn_igmh"),
     "grid-run": ("Run Multiwfn real-space function cube generation, then prepare VESTA", "multiwfn_grid"),
+    "fukui-run": ("Run charged-state Multiwfn density cubes, then build Fukui/dual maps", "multiwfn_fukui"),
     "stm-run": ("Run Multiwfn constant-current STM/LDOS cube generation, then prepare VESTA", "multiwfn_stm"),
     "domain-run": ("Run Multiwfn domain analysis from an existing cube, then prepare VESTA", "multiwfn_domain"),
     "abacus-mulliken-color": ("Color VESTA atoms from ABACUS mulliken.txt", "abacus_mulliken"),
@@ -76,6 +78,9 @@ ALIASES = {
     "multiwfn-grid": "grid-run",
     "scalar-cube-run": "grid-run",
     "function-cube": "grid-run",
+    "multiwfn-fukui": "fukui-run",
+    "multiwfn-fukui-run": "fukui-run",
+    "dual-descriptor-run": "fukui-run",
     "multiwfn-stm": "stm-run",
     "multiwfn-stm-run": "stm-run",
     "ldos-run": "stm-run",
@@ -122,6 +127,7 @@ Commands:
   igm-run    Run Multiwfn IGM cube generation and prepare a VESTA mapped surface.
   migm-run   Run Multiwfn mIGM cube generation and prepare a VESTA mapped surface.
   grid-run   Run Multiwfn real-space function cube generation and prepare VESTA.
+  fukui-run  Run charged-state density cubes and prepare Fukui/dual descriptor VESTA.
   stm-run    Run Multiwfn constant-current STM/LDOS cube generation and prepare VESTA.
   domain-run
              Run Multiwfn domain analysis from a cube and prepare VESTA.
@@ -154,6 +160,8 @@ Aliases:
              Aliases for migm-run.
   multiwfn-grid, scalar-cube-run, function-cube
              Aliases for grid-run.
+  multiwfn-fukui, multiwfn-fukui-run, dual-descriptor-run
+             Aliases for fukui-run.
   multiwfn-stm, multiwfn-stm-run, ldos-run
              Aliases for stm-run.
   multiwfn-domain, multiwfn-domain-run, cube-domain
@@ -176,6 +184,7 @@ Examples:
   multiwfn2vesta igmh-run input.molden igmh_products --fragment 1-48 --fragment 49-60
   multiwfn2vesta igm-run input.molden igm_products --fragment 1-48 --fragment 49-60
   multiwfn2vesta grid-run input.molden grid_products --function density
+  multiwfn2vesta fukui-run fukui_products --neutral neutral.molden --anion anion.molden --cation cation.molden
   multiwfn2vesta stm-run input.molden stm_products --grid-points 80 80 40
   multiwfn2vesta domain-run density.cub domain_products --criterion '<0.5'
   multiwfn2vesta abacus-mulliken-color input.vesta mulliken.txt colored.vesta
@@ -671,6 +680,80 @@ def interactive_grid_run() -> int:
     return multiwfn_grid.main(argv)
 
 
+def interactive_fukui_run() -> int:
+    print("\nCharged-state wavefunctions -> Multiwfn density cubes -> Fukui/dual VESTA")
+    output_dir = _prompt("output directory", default="multiwfn_fukui")
+    argv: List[str] = [output_dir]
+
+    neutral = _prompt("neutral N-electron wavefunction", required=True)
+    argv.extend(["--neutral", neutral])
+
+    operation_text = _prompt(
+        "operation(s): all, fukui-plus, fukui-minus, dual-descriptor",
+        default="all",
+    )
+    operations = [item.strip().lower().replace("_", "-") for item in operation_text.split()]
+    for operation in operations:
+        argv.extend(["--operation", operation])
+
+    if any(item in {"all", "fukui-plus", "dual-descriptor"} for item in operations):
+        anion = _prompt("anion N+1 wavefunction", required=True)
+        argv.extend(["--anion", anion])
+    if any(item in {"all", "fukui-minus", "dual-descriptor"} for item in operations):
+        cation = _prompt("cation N-1 wavefunction", required=True)
+        argv.extend(["--cation", cation])
+
+    multiwfn = _prompt("Multiwfn executable or directory (empty for auto-discovery)")
+    if multiwfn:
+        argv.extend(["--multiwfn", multiwfn])
+
+    nthreads = _prompt("Multiwfn -nt threads (empty for default)")
+    if nthreads:
+        argv.extend(["--nthreads", nthreads])
+
+    timeout = _prompt("timeout seconds (empty for no timeout)")
+    if timeout:
+        argv.extend(["--timeout", timeout])
+
+    stem = _prompt("output stem (empty for operation/state defaults)")
+    if stem:
+        argv.extend(["--stem", stem])
+
+    grid_mode = _prompt("neutral grid mode (low/medium/high/points/spacing/cube/pbc-cell)", default="points")
+    argv.extend(["--grid-mode", grid_mode])
+    if grid_mode == "points":
+        grid_points = _prompt("neutral grid points NX NY NZ", default="40 40 40")
+        parts = grid_points.split()
+        if len(parts) != 3:
+            print("Grid points need exactly three integers.")
+            return 2
+        argv.extend(["--grid-points", parts[0], parts[1], parts[2]])
+    elif grid_mode == "spacing":
+        spacing = _prompt("neutral grid spacing in Bohr", required=True)
+        argv.extend(["--grid-spacing", spacing])
+    elif grid_mode == "cube":
+        reference_cube = _prompt("reference cube for neutral grid", required=True)
+        argv.extend(["--grid-cube", reference_cube])
+
+    if _yes_no("also write VESTA density files for each charged state", default=False):
+        argv.append("--state-vesta")
+
+    if _yes_no("skip Fukui/dual VESTA generation", default=False):
+        argv.append("--no-vesta")
+    else:
+        preset = _prompt("VESTA cube preset (auto/density/signed/...)", default="auto")
+        argv.extend(["--preset", preset])
+        isosurface = _prompt("override isosurface value (empty for preset default)")
+        if isosurface:
+            argv.extend(["--isosurface", isosurface])
+        structure = _prompt("structure phase (auto/none/molecule/crystal)", default="auto")
+        argv.extend(["--structure", structure])
+        if _yes_no("copy cube files beside VESTA", default=True) is False:
+            argv.append("--no-copy-cubes")
+
+    return multiwfn_fukui.main(argv)
+
+
 def interactive_stm_run() -> int:
     print("\nWavefunction -> Multiwfn STM/LDOS cube -> VESTA")
     wavefunction = _prompt("wavefunction file (.molden/.fch/.wfn/etc.)", required=True)
@@ -884,6 +967,7 @@ def interactive_main() -> int:
     print("14) Wavefunction -> Multiwfn IGM/IGMH cubes -> VESTA")
     print("15) Wavefunction -> Multiwfn STM/LDOS cube -> VESTA")
     print("16) Cube -> Multiwfn domain analysis -> VESTA")
+    print("17) Charged-state wavefunctions -> Fukui/dual descriptor VESTA")
     print("q) Quit")
     choice = _prompt("choice", default="3").lower()
     if choice in {"0", "discover", "where", "env"}:
@@ -921,6 +1005,8 @@ def interactive_main() -> int:
         return interactive_abacus_molden()
     if choice in {"10", "grid-run", "multiwfn-grid", "scalar-cube-run", "function-cube"}:
         return interactive_grid_run()
+    if choice in {"17", "fukui-run", "multiwfn-fukui", "multiwfn-fukui-run", "dual-descriptor-run"}:
+        return interactive_fukui_run()
     if choice in {"12", "multiwfn-atom-color", "multiwfn-table-color", "atom-table-color"}:
         return interactive_multiwfn_atom_color()
     if choice in {"13", "surface-extrema", "surf-extrema", "surfanalysis-vesta"}:
@@ -957,6 +1043,8 @@ def run_command(command: str, args: Sequence[str]) -> int:
         return multiwfn_igmh.main_migm(args)
     if command == "grid-run":
         return multiwfn_grid.main(args)
+    if command == "fukui-run":
+        return multiwfn_fukui.main(args)
     if command == "stm-run":
         return multiwfn_stm.main(args)
     if command == "domain-run":

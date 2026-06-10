@@ -33,6 +33,7 @@ multiwfn2vesta igmh-run --help
 multiwfn2vesta igm-run --help
 multiwfn2vesta migm-run --help
 multiwfn2vesta grid-run --help
+multiwfn2vesta fukui-run --help
 multiwfn2vesta stm-run --help
 multiwfn2vesta domain-run --help
 multiwfn2vesta abacus-mulliken-color --help
@@ -69,6 +70,9 @@ multiwfn2vesta aim-igmh --help
   function grid，导出 density、MO/orbital、Laplacian、K(r)/G(r)、ELF、LOL、
   ESP/MEP、ALIE、RDG/IRI-like、promolecular RDG/sign(lambda2)rho 等单 cube，
   并可自动接 `cube-preset` 写 `.vesta`
+- `fukui-run`: 从中性、阴离子、阳离子波函数分别生成共享格点的 density
+  cube，再调用 `cube-arith` 生成 Fukui+/Fukui-/dual descriptor cube 和
+  可选 `.vesta`
 - `stm-run`: 从含 GTO/GTF 信息的 Multiwfn 可读波函数文件调用主菜单 `300`
   的 STM 功能，切到 constant-current 模式，导出 `STM.cub`，并可自动接
   `cube-preset stm` 写 `.vesta`
@@ -122,7 +126,7 @@ VESTA 查找顺序：
 3. 工作区内 VESTA：`tools/VESTA-win64/VESTA.exe` 和 Linux VESTA
 4. shell 的 `PATH`
 
-`aim-run`、`iri-run`、`igmh-run`、`grid-run`、`stm-run` 和 `domain-run` 本身只启动 Multiwfn，不启动 VESTA；
+`aim-run`、`iri-run`、`igmh-run`、`grid-run`、`fukui-run`、`stm-run` 和 `domain-run` 本身只启动 Multiwfn，不启动 VESTA；
 VESTA 只在 `aim-igmh --render-three-views` 这种显式渲染命令里被调用。
 
 ## Cube 文件到 VESTA
@@ -346,6 +350,58 @@ multiwfn2vesta cube-arith cube_arith_products \
 - 默认还要求 atom list 一致；确认只需要共用格点时可用 `--no-strict-atoms`
 - 程序拒绝把输出 cube 写到任何输入 cube 路径上，避免覆盖原始数据
 - 若只想生成 cube，不写 VESTA，用 `--no-vesta`
+
+## 波函数文件到 Fukui / dual descriptor VESTA
+
+如果已经有中性态、N+1 态、N-1 态的 Multiwfn 可读波函数文件，可以用
+`fukui-run` 一次性完成密度 cube 生成和差分后处理：
+
+```bash
+multiwfn2vesta fukui-run fukui_products \
+  --neutral neutral.molden \
+  --anion anion.molden \
+  --cation cation.molden \
+  --operation all \
+  --grid-mode points \
+  --grid-points 80 80 80
+```
+
+执行逻辑：
+
+- 先对 `--neutral` 调用 `grid-run --function density`，生成中性态 density
+  cube
+- 再对需要的 charged state 调用 `grid-run --function density --grid-mode cube
+  --grid-cube <neutral_density.cub>`，强制复用中性态 cube 的格点
+- 最后用 `cube-arith` 生成 `fukui-plus`、`fukui-minus` 或
+  `dual-descriptor`
+
+只算亲核/亲电 Fukui 的一个方向时，可以少给不需要的带电态：
+
+```bash
+multiwfn2vesta fukui-run fplus_products \
+  --neutral neutral.fch \
+  --anion anion.fch \
+  --operation fukui-plus
+
+multiwfn2vesta fukui-run fminus_products \
+  --neutral neutral.fch \
+  --cation cation.fch \
+  --operation fukui-minus
+```
+
+默认输出：
+
+- `multiwfn_fukui_recipe.md`：顶层 manifest，记录 caveat、子任务路径和
+  差分结果
+- `neutral_density/`、`anion_density/`、`cation_density/`：普通 `grid-run`
+  子目录，含 Multiwfn 命令流、stdout/stderr、raw cube 和处理后的 density
+  cube
+- `fukui_plus/`、`fukui_minus/`、`dual_descriptor/`：普通 `cube-arith` 子目录，
+  含差分 cube、recipe 和可选 VESTA 文件
+
+这个流程主要面向有限体系和可比较的几何。带电周期性超胞、金属 slab 或带
+背景电荷的体系在物理解释上要谨慎；如果三个 density cube 已经由别的流程
+生成好，直接用 `cube-arith` 更透明。
 
 ## 波函数文件到 Multiwfn 单 cube / VESTA
 

@@ -3,9 +3,10 @@
 `multiwfn2vesta` is a workspace-local Python interface for running selected
 Multiwfn workflows and preparing VESTA visualization files.  The currently
 maintained path covers ABACUS Molden handoff, cube-to-VESTA files, Multiwfn
-real-space grid, STM/LDOS, cube-domain extraction, basin cube display, AIM,
-IRI/RDG, and IGM/IGMH command streams, atoms-only topology overlays, surface
-extrema overlays, and AIM+IGMH multi-phase VESTA figures.
+real-space grid, charged-state Fukui/dual-descriptor maps, STM/LDOS,
+cube-domain extraction, basin cube display, AIM, IRI/RDG, and IGM/IGMH
+command streams, atoms-only topology overlays, surface extrema overlays, and
+AIM+IGMH multi-phase VESTA figures.
 
 The project is still experimental, but the CLI below is the maintained entry
 point.
@@ -16,23 +17,23 @@ point.
   GitHub remote.
 - GitHub remote: `origin` points to `Github:Stardust0831/multiwfn2vesta.git`,
   with `origin/HEAD -> origin/main`.
-- Branch audit on 2026-06-10 16:55 CST, after the `domain-run` feature and
-  README closeout pushes, found local `main`, `origin/main`, and `origin/HEAD`
-  aligned on the same branch.  Use the commands below for the exact current
-  tip hash.
+- Branch audit on 2026-06-10 16:42 CST, before this README/Fukui closeout,
+  found local `main`, `origin/main`, and `origin/HEAD` aligned on the same
+  branch.  Use the commands below for the exact current tip hash.
 - `git ls-remote --heads origin` currently returns only `refs/heads/main`; no
   merge-back was needed in this pass because there is no extra local or remote
   feature branch to consolidate.
-- The latest feature commit recorded by this audit is
-  `73018ab1d8bca119d74cf9d51a39b244242bbc5f`
-  (`Add Multiwfn domain runner`); README/status closeout commits are kept on
-  the same `main` branch.
+- The baseline feature commit recorded by this audit is
+  `e92d98ad631b35ac27eebd9ce6f7da97a7ec5689`
+  (`Add Multiwfn basin cube presets`); README/status closeout commits and
+  follow-up feature increments are kept on the same `main` branch.
 - The apparently unusual branch history is a normal linear `main` history
   containing feature commits and documentation closure commits, not active
   competing branches.
-- Recent maintained feature work includes cube/grid domain extraction, basin
-  cube VESTA presets, IGM/mIGM/IGMH command-stream automation, IGMH/aIGM
-  VESTA cube presets, surface extrema overlays for
+- Recent maintained feature work includes charged-state `fukui-run`
+  orchestration, cube/grid domain extraction, basin cube VESTA presets,
+  IGM/mIGM/IGMH command-stream automation, IGMH/aIGM VESTA cube presets,
+  surface extrema overlays for
   `surfanalysis.pdb`, surface-map/grid expansion, generic Multiwfn atom table
   coloring, batch orbital export, `cube-arith`, `grid-run`,
   `grid-run --surface-cube` mapped-surface handoff, `stm-run`
@@ -92,6 +93,9 @@ then delete the temporary branch.
 - Combine compatible cube files with linear arithmetic for density
   differences, Fukui functions, and dual descriptors, then optionally write a
   VESTA file through `cube-preset`.
+- Run high-level Fukui/dual-descriptor maps from neutral, anion, and cation
+  wavefunction files by generating Multiwfn density cubes on a shared neutral
+  grid and then delegating the map arithmetic to `cube-arith`.
 - Run Multiwfn IRI/RDG cube generation from a wavefunction file, process
   `func1.cub`/`func2.cub` into VESTA-ready `IRI1`/`IRI2` cubes, and write a
   mapped-surface `.vesta` through `cube-preset iri`.
@@ -164,6 +168,11 @@ multiwfn2vesta cube-arith products --operation dual-descriptor \
   --anion-cube anion_density.cub \
   --neutral-cube neutral_density.cub \
   --cation-cube cation_density.cub
+multiwfn2vesta fukui-run fukui_products \
+  --neutral neutral.molden \
+  --anion anion.molden \
+  --cation cation.molden \
+  --operation dual-descriptor
 multiwfn2vesta surface-extrema input.vesta surfanalysis.pdb output.vesta \
   --surface-cube density.cub
 multiwfn2vesta iri-run input.molden iri_products --timeout 300
@@ -353,6 +362,58 @@ Default outputs are `<stem>.cub`, `<stem>_cube_arith_recipe.md`, and, unless
 `--no-vesta` is used, a VESTA file plus recipe.  `--preset auto` uses
 `density` for `fukui-plus/minus` and `signed` for `density-difference`,
 `dual-descriptor`, and generic linear combinations.
+
+## Wavefunction to Fukui/Dual VESTA
+
+When the neutral, anion, and cation wavefunctions are available as
+Multiwfn-readable files, `fukui-run` composes the maintained density grid
+runner and cube arithmetic layer:
+
+```bash
+multiwfn2vesta fukui-run fukui_products \
+  --neutral neutral.molden \
+  --anion anion.molden \
+  --cation cation.molden \
+  --operation all \
+  --grid-mode points \
+  --grid-points 80 80 80
+```
+
+The neutral density cube is generated first.  Required charged-state density
+cubes are then generated with `grid-run --grid-mode cube --grid-cube
+<neutral_density.cub>`, so all resulting density cubes share the neutral cube
+grid before `cube-arith` builds the requested maps.
+
+Useful operation subsets:
+
+```bash
+multiwfn2vesta fukui-run fplus_products \
+  --neutral neutral.fch \
+  --anion anion.fch \
+  --operation fukui-plus
+
+multiwfn2vesta fukui-run dual_products \
+  --neutral neutral.fch \
+  --anion anion.fch \
+  --cation cation.fch \
+  --operation dual-descriptor
+```
+
+Default outputs in `fukui_products/`:
+
+- `multiwfn_fukui_recipe.md`: top-level manifest and caveats.
+- `neutral_density/`, `anion_density/`, and/or `cation_density/`: ordinary
+  `grid-run` child directories with Multiwfn command streams, logs, raw cubes,
+  processed density cubes, and optional per-state density VESTA files when
+  `--state-vesta` is used.
+- `fukui_plus/`, `fukui_minus/`, and/or `dual_descriptor/`: ordinary
+  `cube-arith` output directories with the map cube, arithmetic recipe, and
+  optional VESTA file.
+
+This workflow is intended for finite systems with comparable geometries.
+Charged periodic supercells can be physically delicate, especially for slabs
+or metals, so inspect the setup before interpreting the map.  If the density
+cubes already exist, use `cube-arith` directly.
 
 ## Wavefunction to Scalar Cube VESTA
 
@@ -919,11 +980,21 @@ views by VESTA CLI rotations, rather than writing persistent front/right/top
 
 ## Validation
 
-Current no-GUI regression passed as a 233-test suite after the basin cube
-preset increment:
+Current no-GUI regression passed as a 242-test suite after the `fukui-run`
+increment:
 
 ```bash
 PYTHONPATH=src python3 -m unittest discover -s tests
+```
+
+Focused `fukui-run` validation used:
+
+```bash
+PYTHONPATH=src python3 -m py_compile src/multiwfn2vesta/multiwfn_fukui.py src/multiwfn2vesta/cli.py tests/test_multiwfn_fukui.py tests/test_cli.py
+PYTHONPATH=src python3 -m unittest tests.test_multiwfn_fukui tests.test_cli tests.test_cube_arith tests.test_multiwfn_grid
+bin/multiwfn2vesta --help
+bin/multiwfn2vesta fukui-run --help
+bin/multiwfn2vesta cube-preset --list-presets
 ```
 
 For documentation-only refreshes, the minimum local validation is:
@@ -1049,6 +1120,8 @@ and `aim_atoms_only.vesta` without launching VESTA.
   preset notes.
 - `docs/skills/multiwfn_igmh_run_skill.md`: Multiwfn IGM/mIGM/IGMH command-stream
   runner notes.
+- `docs/skills/multiwfn_fukui_run_skill.md`: shared-grid
+  Fukui/dual-descriptor runner notes.
 - `docs/skills/aim_paths_to_vesta_skill.md`: AIM topology to VESTA workflow.
 - `docs/skills/aim_igmh_vesta_skill.md`: reusable AIM+IGMH overlay workflow.
 - `docs/research/multiwfn_abacus_vesta_analysis_matrix.md`: roadmap for

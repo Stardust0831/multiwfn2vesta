@@ -149,7 +149,7 @@ occupations, and density derivatives from the wavefunction representation.
 | Domain extraction from cube/grid | Any current grid/cube data | Strong for ABACUS/Multiwfn cubes; mostly cube post-processing | `domain.cub`, `domain.pdb`, `domain.txt` | Binary domain isosurfaces and boundary-grid atoms-only layer | Implemented as `domain-run` for existing cube input plus `cube-preset domain` for binary `domain.cub` isosurfaces; `domain.pdb` is retained as boundary-grid evidence |
 | Excited-state hole/electron/CDD/transition density | Wavefunction plus excited-state information | Not a primary ABACUS ground-state route; LR-TDDFT outputs need separate study | `hole.cub`, `electron.cub`, `CDD.cub`, `transdens.cub` | Positive/negative isosurfaces | Defer until ABACUS excited-state interface is clear |
 | ETS-NOCV / AdNDP / EDA-related orbitals | Specialized wavefunctions/fragments | Weak for ABACUS periodic slabs; possible for molecule-like cases | `NOCV_*.cub`, `NOCVpair.cub`, `AdNDPorb*.cub` | Orbital-like positive/negative surfaces | Defer |
-| Fukui / dual descriptor | Multiple charge-state wavefunctions or orbital-weighted approximation | Possible for finite molecules or charged supercells; periodic charged systems risky | `userfunc.cub`, density-difference cubes | Positive/negative surfaces and atom scalar coloring | Cube arithmetic bottom layer implemented as `multiwfn2vesta cube-arith`; charged-state cube generation remains separate |
+| Fukui / dual descriptor | Multiple charge-state wavefunctions or orbital-weighted approximation | Possible for finite molecules or charged supercells; periodic charged systems risky | `userfunc.cub`, density-difference cubes | Positive/negative surfaces and atom scalar coloring | `multiwfn2vesta fukui-run` now generates shared-grid charged-state density cubes through `grid-run`, then delegates formulae to `cube-arith`; real chemistry smokes remain needed |
 | NICS/current/arrows | Magnetic-response data | Not main maintained route | vector/text data, if available | Arrows/text overlays | Keep as misc, not main code |
 
 ## ABACUS Molden Rules
@@ -220,15 +220,14 @@ Known limitations:
    more specialized parsers for raw Multiwfn menu transcripts when they prove
    stable enough to support directly.
 5. Extend `grid-run` beyond the initial main-function-5 table where useful:
-   more real-system orbital batch smokes, possible future Multiwfn main
+   more real-system orbital batch smokes and possible future Multiwfn main
    function `200` integration if it proves more reliable than repeated
-   isolated runs, end-to-end Fukui/dual-descriptor cube generation on shared
-   grids.  K(r)/G(r), ALIE, and
-   promolecular RDG/sign(lambda2)rho table entries are now maintained.  The
-   cube arithmetic foundation for density-difference/Fukui/dual-descriptor
-   maps now exists as `multiwfn2vesta cube-arith`, and `--surface-cube`
-   bridges ESP/ALIE/vdW/sign(lambda2)rho grid outputs into mapped-surface
-   VESTA files.
+   isolated runs.  K(r)/G(r), ALIE, and promolecular
+   RDG/sign(lambda2)rho table entries are now maintained.  The cube arithmetic
+   foundation for density-difference/Fukui/dual-descriptor maps exists as
+   `multiwfn2vesta cube-arith`; `fukui-run` now composes shared-grid density
+   generation with that arithmetic layer; and `--surface-cube` bridges
+   ESP/ALIE/vdW/sign(lambda2)rho grid outputs into mapped-surface VESTA files.
 6. Extend weak-interaction command streams beyond standard IGM/mIGM/IGMH if
    needed: aIGM/amIGM and more real ABACUS slab smokes should be added only
    after their prompt streams are stable.
@@ -264,6 +263,7 @@ Implemented or partly implemented:
 - `multiwfn2vesta igm-run`
 - `multiwfn2vesta migm-run`
 - `multiwfn2vesta grid-run`
+- `multiwfn2vesta fukui-run`
 - `multiwfn2vesta stm-run`
 - `multiwfn2vesta domain-run`
 - `multiwfn2vesta aim-run`
@@ -295,15 +295,17 @@ Main gaps:
 - Maintained Multiwfn command streams now exist for AIM, IRI/RDG,
   IGM/mIGM/IGMH, plus main-function-5 grid cubes as `multiwfn2vesta grid-run`,
   including repeated isolated batch orbital/orbital-density export through
-  `--orbitals`.  Remaining gaps are higher-level Fukui/dual-descriptor
-  generation, aIGM/amIGM command streams, molecular-surface extrema overlays,
-  and more real-system templates.
+  `--orbitals`.  `fukui-run` composes those density-grid runs with
+  `cube-arith` for shared-grid Fukui/dual maps.  Remaining gaps are
+  aIGM/amIGM command streams, molecular-surface extrema overlays, and more
+  real-system templates.
 - Dual-cube surface texture workflows now have a preset entry point for
   IRI/RDG/NCI, IGM/IGMH/aIGM, ESP/MEP, ALIE/LEA/LEAE, generic surface maps,
   and vdW maps.  Standard IGM, mIGM, and IGMH now have end-to-end fragment
   runners; `grid-run --surface-cube` covers the common case where one newly
   generated grid cube colors an existing surface; aIGM/amIGM still need their
   own maintained prompt streams.
-- Fukui/dual-descriptor visualization now has the cube-arithmetic bottom
-  layer, but still needs higher-level charged-state generation templates and
-  real chemistry smoke cases.
+- Fukui/dual-descriptor visualization now has both the cube-arithmetic bottom
+  layer and the `fukui-run` shared-grid charged-state orchestration layer; it
+  still needs real chemistry smoke cases and guidance for charged periodic
+  systems.

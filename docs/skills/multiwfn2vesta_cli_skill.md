@@ -38,6 +38,7 @@ multiwfn2vesta igmh-run --help
 multiwfn2vesta igm-run --help
 multiwfn2vesta migm-run --help
 multiwfn2vesta grid-run --help
+multiwfn2vesta fukui-run --help
 multiwfn2vesta stm-run --help
 multiwfn2vesta domain-run --help
 multiwfn2vesta multiwfn-atom-color --help
@@ -69,6 +70,9 @@ Aliases:
 - `multiwfn2vesta multiwfn-grid ...`,
   `multiwfn2vesta scalar-cube-run ...`, and
   `multiwfn2vesta function-cube ...` are aliases for `grid-run`.
+- `multiwfn2vesta multiwfn-fukui ...`,
+  `multiwfn2vesta multiwfn-fukui-run ...`, and
+  `multiwfn2vesta dual-descriptor-run ...` are aliases for `fukui-run`.
 - `multiwfn2vesta multiwfn-stm ...`,
   `multiwfn2vesta multiwfn-stm-run ...`, and
   `multiwfn2vesta ldos-run ...` are aliases for `stm-run`.
@@ -192,6 +196,51 @@ Generic linear combinations use repeated `--term COEFF CUBE` entries.
 The named formulae are `rho(N+1)-rho(N)` for `fukui-plus`,
 `rho(N)-rho(N-1)` for `fukui-minus`, and
 `rho(N+1)-2*rho(N)+rho(N-1)` for `dual-descriptor`.
+
+### Wavefunction to shared-grid Fukui/dual VESTA
+
+```bash
+multiwfn2vesta fukui-run fukui_products \
+  --neutral neutral.molden \
+  --anion anion.molden \
+  --cation cation.molden \
+  --operation all \
+  --grid-mode points \
+  --grid-points 80 80 80
+```
+
+Use this when neutral, N+1, and/or N-1 wavefunction files are available and
+the desired product is a Fukui or dual-descriptor cube.  The command is a
+composition layer:
+
+- neutral density is generated first through `grid-run --function density`;
+- charged-state density cubes are generated through `grid-run --grid-mode
+  cube --grid-cube <neutral_density.cub>` so they share the neutral grid;
+- requested maps are produced by `cube-arith`.
+
+Operation subsets:
+
+```bash
+multiwfn2vesta fukui-run fplus_products \
+  --neutral neutral.fch \
+  --anion anion.fch \
+  --operation fukui-plus
+
+multiwfn2vesta fukui-run dual_products \
+  --neutral neutral.fch \
+  --anion anion.fch \
+  --cation cation.fch \
+  --operation dual-descriptor
+```
+
+Default outputs are `multiwfn_fukui_recipe.md`, one `grid-run` child
+directory per required state, and one `cube-arith` child directory per
+requested operation.  Use `--state-vesta` to also write density VESTA files
+for the individual states.  Use `--no-vesta` for map cube-only output.
+
+This route is intended for finite systems with comparable geometries.  Charged
+periodic cells and metal slabs need separate physical checks before the maps
+are interpreted.
 
 ### Wavefunction to Multiwfn IRI/RDG to VESTA
 
@@ -446,12 +495,13 @@ bin/multiwfn2vesta discover
 bin/multiwfn2vesta cube-preset --list-presets
 bin/multiwfn2vesta iri-run --help
 bin/multiwfn2vesta grid-run --help
+bin/multiwfn2vesta fukui-run --help
 bin/multiwfn2vesta stm-run --help
 bin/multiwfn2vesta domain-run --help
 bin/multiwfn2vesta aim-run --help
 bin/multiwfn2vesta aim-igmh --help
 printf 'q\n' | bin/multiwfn2vesta
-PYTHONPATH=src python3 -m unittest tests.test_cli tests.test_cube_preset tests.test_executables tests.test_multiwfn_aim tests.test_multiwfn_iri tests.test_multiwfn_stm tests.test_multiwfn_domain
+PYTHONPATH=src python3 -m unittest tests.test_cli tests.test_cube_preset tests.test_executables tests.test_multiwfn_aim tests.test_multiwfn_iri tests.test_multiwfn_grid tests.test_multiwfn_fukui tests.test_multiwfn_stm tests.test_multiwfn_domain
 ```
 
 Real H2O Multiwfn noGUI smoke:
