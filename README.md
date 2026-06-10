@@ -97,8 +97,8 @@ then delete the temporary branch.
   mapped-surface VESTA files as an extra atoms-only phase, with automatic
   minima/maxima selection for ALIE/LEA/LEAE presets.
 - Combine compatible cube files with linear arithmetic for density
-  differences, Fukui functions, and dual descriptors, then optionally write a
-  VESTA file through `cube-preset`.
+  differences, alpha-minus-beta spin density, Fukui functions, and dual
+  descriptors, then optionally write a VESTA file through `cube-preset`.
 - Run high-level Fukui/dual-descriptor maps from neutral, anion, and cation
   wavefunction files by generating Multiwfn density cubes on a shared neutral
   grid and then delegating the map arithmetic to `cube-arith`.
@@ -179,6 +179,9 @@ multiwfn2vesta cube-arith products --operation dual-descriptor \
   --anion-cube anion_density.cub \
   --neutral-cube neutral_density.cub \
   --cation-cube cation_density.cub
+multiwfn2vesta cube-arith products --operation spin-density \
+  --plus-cube alpha_density.cub \
+  --minus-cube beta_density.cub
 multiwfn2vesta fukui-run fukui_products \
   --neutral neutral.molden \
   --anion anion.molden \
@@ -345,9 +348,10 @@ multiwfn2vesta surface-extrema input.vesta surfanalysis.pdb output.vesta \
 
 `cube-arith` linearly combines compatible cube files and can send the result
 to `cube-preset`.  This is the maintained bottom layer for density
-differences, Fukui functions, and dual descriptors.  It does not compute the
-underlying charged-state or excited-state wavefunctions; generate those cubes
-first with ABACUS, Multiwfn, or `grid-run`.
+differences, alpha-minus-beta spin density, Fukui functions, and dual
+descriptors.  It does not compute the underlying charged-state, spin-channel,
+or excited-state wavefunctions; generate those cubes first with ABACUS,
+Multiwfn, or `grid-run`.
 
 Generic linear combination:
 
@@ -376,11 +380,18 @@ multiwfn2vesta cube-arith cube_arith_products \
   --anion-cube density_Nplus1.cub \
   --neutral-cube density_N.cub \
   --cation-cube density_Nminus1.cub
+
+multiwfn2vesta cube-arith cube_arith_products \
+  --operation spin-density \
+  --plus-cube alpha_density.cub \
+  --minus-cube beta_density.cub \
+  --stem spin_density
 ```
 
 The formulae are:
 
 - `density-difference`: `plus - minus`
+- `spin-density`: `alpha/spin-up density - beta/spin-down density`
 - `fukui-plus`: `rho(N+1) - rho(N)`
 - `fukui-minus`: `rho(N) - rho(N-1)`
 - `dual-descriptor`: `rho(N+1) - 2*rho(N) + rho(N-1)`
@@ -393,8 +404,9 @@ rejected by default.  Atom lists must also match by default.  Use
 still trust the shared grid.  The command refuses to overwrite any input cube.
 Default outputs are `<stem>.cub`, `<stem>_cube_arith_recipe.md`, and, unless
 `--no-vesta` is used, a VESTA file plus recipe.  `--preset auto` uses
-`density` for `fukui-plus/minus` and `signed` for `density-difference`,
-`dual-descriptor`, and generic linear combinations.
+`density` for `fukui-plus/minus`, `spin-density` for `spin-density`, and
+`signed` for `density-difference`, `dual-descriptor`, and generic linear
+combinations.
 
 ## Wavefunction to Fukui/Dual VESTA
 

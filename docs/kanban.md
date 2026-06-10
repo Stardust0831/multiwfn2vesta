@@ -1,6 +1,6 @@
 # Project Kanban
 
-Updated: 2026-06-10 20:10 CST
+Updated: 2026-06-10 19:54 CST
 
 ## Current Request: 2026-06-10 README Refresh And Branch Convergence
 
@@ -41,10 +41,24 @@ Updated: 2026-06-10 20:10 CST
   explicit `cube-arith` spin-density operation for alpha/beta or
   spin-up/spin-down density cubes, then route the result to
   `cube-preset spin-density`.
-- [ ] Implement CLI/tests/docs for `cube-arith --operation spin-density`
-  without changing the existing generic `density-difference` behavior.
-- [ ] Sync root docs, validate, review, then commit and push on `main` if
-  stable.
+- [x] Implement CLI/tests/docs for `cube-arith --operation spin-density`
+  without changing the existing generic `density-difference` behavior:
+  `spin-density` uses `--plus-cube` alpha/spin-up density minus
+  `--minus-cube` beta/spin-down density, and `--preset auto` routes the
+  product to `cube-preset spin-density`.
+- [x] Add focused tests for operation term construction, default
+  `spin-density` VESTA preset selection, generated signed `ISURF` defaults,
+  command-line execution, and interactive CLI argument construction; focused
+  `tests.test_cube_arith` and `tests.test_cli` passed.
+- [x] Update README, Chinese usage docs, worklog, skills, and the ABACUS
+  analysis matrix with the new alpha/beta cube arithmetic route.
+- [x] Sync root docs, validate, and review: root docs mirror is clean;
+  `py_compile`, focused `tests.test_cube_arith tests.test_cli` with 63 tests,
+  full 271-test no-GUI regression, `bin/multiwfn2vesta cube-arith --help`,
+  `bin/multiwfn2vesta --help`, `git diff --check`, and read-only subagent
+  review all passed.
+- [ ] Commit and push on `main` with `Stardust0831` identity; report the
+  final hash and post-push branch check in the assistant response.
 
 ## Current Continuation: 2026-06-10 Grid Function Display Presets
 

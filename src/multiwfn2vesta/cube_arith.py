@@ -174,9 +174,9 @@ def terms_for_operation(
     key = operation.strip().lower()
     if key == "linear":
         raise ValueError("The linear operation requires explicit --term entries")
-    if key in {"difference", "density-difference"}:
+    if key in {"difference", "density-difference", "spin-density"}:
         if plus_cube is None or minus_cube is None:
-            raise ValueError("density-difference requires --plus-cube and --minus-cube")
+            raise ValueError(f"{key} requires --plus-cube and --minus-cube")
         return (CubeTerm(1.0, Path(plus_cube)), CubeTerm(-1.0, Path(minus_cube)))
     if key == "fukui-plus":
         if anion_cube is None or neutral_cube is None:
@@ -223,6 +223,8 @@ def _default_preset(operation: str) -> str:
     key = operation.strip().lower()
     if key in {"fukui-plus", "fukui-minus"}:
         return "density"
+    if key == "spin-density":
+        return "spin-density"
     return "signed"
 
 
@@ -340,19 +342,31 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser.add_argument("output_dir", type=Path)
     parser.add_argument(
         "--operation",
-        choices=["linear", "difference", "density-difference", "fukui-plus", "fukui-minus", "dual-descriptor"],
+        choices=[
+            "linear",
+            "difference",
+            "density-difference",
+            "spin-density",
+            "fukui-plus",
+            "fukui-minus",
+            "dual-descriptor",
+        ],
         default="linear",
     )
     parser.add_argument("--term", nargs=2, action="append", metavar=("COEFF", "CUBE"))
-    parser.add_argument("--plus-cube", type=Path, help="Positive cube for density-difference")
-    parser.add_argument("--minus-cube", type=Path, help="Negative cube for density-difference")
+    parser.add_argument("--plus-cube", type=Path, help="Positive/alpha/spin-up cube for density-difference or spin-density")
+    parser.add_argument("--minus-cube", type=Path, help="Negative/beta/spin-down cube for density-difference or spin-density")
     parser.add_argument("--neutral-cube", type=Path, help="Neutral N-electron density cube for Fukui/dual descriptor")
     parser.add_argument("--anion-cube", type=Path, help="N+1 density cube for fukui-plus/dual descriptor")
     parser.add_argument("--cation-cube", type=Path, help="N-1 density cube for fukui-minus/dual descriptor")
     parser.add_argument("--stem")
     parser.add_argument("--output-cube", type=Path)
     parser.add_argument("--no-vesta", action="store_true")
-    parser.add_argument("--preset", default=DEFAULT_PRESET, help="Cube preset for VESTA output; auto uses density for fukui-plus/minus and signed otherwise")
+    parser.add_argument(
+        "--preset",
+        default=DEFAULT_PRESET,
+        help="Cube preset for VESTA output; auto uses density for fukui-plus/minus, spin-density for spin-density, and signed otherwise",
+    )
     parser.add_argument("--isosurface", type=float)
     parser.add_argument("--structure", choices=["auto", "none", "molecule", "crystal"], default="auto")
     parser.add_argument("--boundary", nargs=6, type=float, metavar=("XMIN", "XMAX", "YMIN", "YMAX", "ZMIN", "ZMAX"))

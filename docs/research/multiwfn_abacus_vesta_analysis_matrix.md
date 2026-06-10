@@ -128,7 +128,7 @@ occupations, and density derivatives from the wavefunction representation.
 | --- | --- | --- | --- | --- | --- |
 | Generic cube visualizer | Any `.cub` from Multiwfn or ABACUS | Strong: `out_chg`, `out_pot`, `out_pchg`, `out_wfc_*`, `out_elf` | Cube | Density/texture import, isosurface, section off by default | Implemented as `multiwfn2vesta cube-vesta`; `cube-preset` adds common analysis defaults, including direct ABACUS potential/partial-charge/wavefunction-norm presets |
 | Molecular orbitals and band wavefunctions | Full wavefunction Molden/FCH/WFN, or ABACUS real-space `get_wf` cubes | Strong for Gamma LCAO Molden; direct cube route for selected bands | `orb*.cub`, `MOvalue.cub`, `orbdens.cub`, or ABACUS `wfi*.cube` | Positive/negative orbital isosurfaces; orbital-density magnitude as a single surface | `cube-preset orbital` and `cube-preset orbital-density` implemented; `grid-run --function orbital --orbital ...`, `grid-run --function orbital-density --orbital ...`, and `grid-run --orbitals ...` cover isolated orbital exports |
-| Electron density, spin density, Laplacian, kinetic density | Full wavefunction, or ABACUS density cubes for density only | Strong for density cube; Molden route for derivatives | `density.cub`, `spindensity.cub`, `laplacian.cub`, `K(r).cub`, `G(r).cub` | Single/positive-negative isosurfaces or slices | `grid-run` now covers density, spin density, Laplacian, and K(r)/G(r) single cubes; `cube-preset spin-density`, `laplacian`, `hamiltonian-ked`, and `lagrangian-ked` provide maintained display defaults |
+| Electron density, spin density, Laplacian, kinetic density | Full wavefunction, or ABACUS density cubes for density only | Strong for density cube; Molden route for derivatives | `density.cub`, `spindensity.cub`, `laplacian.cub`, `K(r).cub`, `G(r).cub` | Single/positive-negative isosurfaces or slices | `grid-run` now covers density, spin density, Laplacian, and K(r)/G(r) single cubes; `cube-preset spin-density`, `laplacian`, `hamiltonian-ked`, and `lagrangian-ked` provide maintained display defaults; `cube-arith --operation spin-density` builds alpha-minus-beta spin-density cubes from compatible spin-channel density cubes and routes them to `cube-preset spin-density` |
 | ELF/LOL | Full wavefunction; ABACUS direct `out_elf` for ELF | Strong for ELF direct; Molden route for Multiwfn ELF/LOL | `ELF.cub`, `LOL.cub`, ABACUS `elf*.cube` | Isosurfaces around localized regions | `grid-run` now covers Multiwfn ELF/LOL; `cube-preset elf/lol` remains the VESTA writer |
 | AIM/QTAIM topology | Full wavefunction Molden/FCH/WFN/WFX | Feasible for Gamma LCAO Molden with `[Nval]`; validated on Ag(111)+benzene | `CPs.pdb`, `paths.pdb`, `CPprop.txt`, `mol.pdb` | Atoms-only pseudo-sites, no AIM bonds, optional labels | Already partly implemented; add ABACUS-aware recipes |
 | IGM/IGMH + AIM overlay | Full wavefunction and fragment definitions | Feasible for Gamma LCAO Molden; validated on Ag(111)+benzene | `dg_inter.cub`, `sl2r.cub`, AIM PDBs | Multi-phase VESTA density/texture plus AIM pseudo-sites | `igmh-run`/`igm-run`/`migm-run` now automate standard Multiwfn fragment streams and call `cube-preset igmh`/`igm`; saved AIM+IGMH overlay styling is implemented |
@@ -229,9 +229,9 @@ Known limitations:
    function `200` integration if it proves more reliable than repeated
    isolated runs.  K(r)/G(r), ALIE, and promolecular
    RDG/sign(lambda2)rho table entries are now maintained.  The cube arithmetic
-   foundation for density-difference/Fukui/dual-descriptor maps exists as
-   `multiwfn2vesta cube-arith`; `fukui-run` now composes shared-grid density
-   generation with that arithmetic layer; and `--surface-cube` bridges
+   foundation for density-difference/spin-density/Fukui/dual-descriptor maps
+   exists as `multiwfn2vesta cube-arith`; `fukui-run` now composes shared-grid
+   density generation with that arithmetic layer; and `--surface-cube` bridges
    ESP/ALIE/vdW/sign(lambda2)rho grid outputs into mapped-surface VESTA files.
 6. Extend weak-interaction command streams beyond standard IGM/mIGM/IGMH where
    needed.  aIGM/amIGM now have a maintained trajectory-average runner; the
@@ -303,9 +303,11 @@ Main gaps:
 - Maintained Multiwfn command streams now exist for AIM, IRI/RDG,
   IGM/mIGM/IGMH, aIGM/amIGM trajectory averages, plus main-function-5 grid cubes as `multiwfn2vesta grid-run`,
   including repeated isolated batch orbital/orbital-density export through
-  `--orbitals`.  `fukui-run` composes those density-grid runs with
-  `cube-arith` for shared-grid Fukui/dual maps.  Remaining gaps are broader
-  real-system templates and less UI-dependent render hooks.
+  `--orbitals`.  `cube-arith --operation spin-density` covers pre-existing
+  compatible alpha/beta or spin-up/spin-down density cubes, while `fukui-run`
+  composes density-grid runs with `cube-arith` for shared-grid Fukui/dual
+  maps.  Remaining gaps are broader real-system templates and less
+  UI-dependent render hooks.
 - Dual-cube surface texture workflows now have a preset entry point for
   IRI/RDG/NCI, IGM/IGMH/aIGM, ESP/MEP, ALIE/LEA/LEAE, generic surface maps,
   and vdW maps.  Standard IGM, mIGM, and IGMH now have end-to-end fragment
@@ -313,7 +315,10 @@ Main gaps:
   generated grid cube colors an existing surface; aIGM/amIGM now have their
   own maintained trajectory-average prompt streams and still need real MD/AIMD
   smoke coverage.
-- Fukui/dual-descriptor visualization now has both the cube-arithmetic bottom
-  layer and the `fukui-run` shared-grid charged-state orchestration layer; it
-  still needs real chemistry smoke cases and guidance for charged periodic
-  systems.
+- Spin-density visualization now has both a direct `cube-preset spin-density`
+  path for existing `spindensity.cub` and a named `cube-arith
+  --operation spin-density` route for compatible alpha/beta or
+  spin-up/spin-down density cubes.  Fukui/dual-descriptor visualization has
+  both the cube-arithmetic bottom layer and the `fukui-run` shared-grid
+  charged-state orchestration layer; it still needs real chemistry smoke cases
+  and guidance for charged periodic systems.

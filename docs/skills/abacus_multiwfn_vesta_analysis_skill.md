@@ -74,8 +74,8 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
 ```
 
 For signed ABACUS/Multiwfn scalar cubes such as real wavefunction amplitudes,
-real orbital cubes, density differences, Fukui functions, or dual
-descriptors:
+real orbital cubes, spin density, density differences, Fukui functions, or
+dual descriptors:
 
 ```bash
 multiwfn2vesta cube-vesta signed_scalar.cub cube_products \
@@ -85,6 +85,20 @@ multiwfn2vesta cube-vesta signed_scalar.cub cube_products \
 
 This writes both positive and negative `ISURF` entries in one `.vesta` file,
 using yellow for positive values and blue for negative values by default.
+Use `cube-preset spin-density` directly when Multiwfn has already exported
+`spindensity.cub`.  When separate alpha/beta or spin-up/spin-down density
+cubes already exist on the same grid, build the spin-density cube first:
+
+```bash
+multiwfn2vesta cube-arith spin_products \
+  --operation spin-density \
+  --plus-cube alpha_density.cub \
+  --minus-cube beta_density.cub \
+  --stem spin_density
+```
+
+`cube-arith --preset auto` sends this product through
+`cube-preset spin-density`; it does not generate the spin-channel cubes.
 
 For a surface cube plus a compatible texture cube:
 
@@ -250,8 +264,8 @@ plot.
 
 ## Priority Rules
 
-- P0: generic cube VESTA, orbital cubes, density-derived cubes, ELF/LOL, AIM,
-  IGMH+AIM.
+- P0: generic cube VESTA, orbital cubes, density-derived/spin-density cubes,
+  ELF/LOL, AIM, IGMH+AIM.
 - P1: IRI/RDG/NCI, ESP/MEP mapped surfaces, STM/LDOS, ALIE/LEA/LEAE,
   vdW potential, ABACUS/Multiwfn atom scalar coloring.  ALIE/LEA/LEAE/vdW surface-map
   display presets now exist, and `surfanalysis.pdb` extrema overlays are

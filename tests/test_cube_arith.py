@@ -121,6 +121,8 @@ class TestCubeArithmetic(unittest.TestCase):
         neutral = Path("neutral.cub")
         anion = Path("anion.cub")
         cation = Path("cation.cub")
+        alpha = Path("alpha.cub")
+        beta = Path("beta.cub")
 
         self.assertEqual(
             terms_for_operation("fukui-plus", neutral_cube=neutral, anion_cube=anion),
@@ -133,6 +135,10 @@ class TestCubeArithmetic(unittest.TestCase):
         self.assertEqual(
             terms_for_operation("dual-descriptor", neutral_cube=neutral, anion_cube=anion, cation_cube=cation),
             (CubeTerm(1.0, anion), CubeTerm(-2.0, neutral), CubeTerm(1.0, cation)),
+        )
+        self.assertEqual(
+            terms_for_operation("spin-density", plus_cube=alpha, minus_cube=beta),
+            (CubeTerm(1.0, alpha), CubeTerm(-1.0, beta)),
         )
 
     def test_run_workflow_writes_cube_recipe_and_signed_vesta(self):
@@ -198,6 +204,33 @@ class TestCubeArithmetic(unittest.TestCase):
             text = result.vesta_result.vesta_path.read_text(encoding="utf-8")
             self.assertIn("ISURF\n  1   1        0.6", text)
             self.assertNotIn("      -0.6", text)
+
+    def test_spin_density_auto_preset_uses_spin_density_surfaces(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            alpha = self.write_tmp(root, "alpha_density.cub", BASE_CUBE)
+            beta = self.write_tmp(root, "beta_density.cub", THIRD_CUBE)
+
+            result = run_workflow(
+                root / "products",
+                operation="spin-density",
+                terms=terms_for_operation("spin-density", plus_cube=alpha, minus_cube=beta),
+                stem="spin_density",
+            )
+
+            self.assertIsNotNone(result.vesta_result)
+            self.assertEqual(result.output_cube.name, "spin_density.cub")
+            self.assertEqual(result.vesta_result.vesta_path.name, "spin_density_spin-density_cube.vesta")
+            self.assertEqual(self.read_values(result.output_cube), [-1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+            text = result.vesta_result.vesta_path.read_text(encoding="utf-8")
+            manifest = result.vesta_result.manifest_path.read_text(encoding="utf-8")
+            self.assertRegex(
+                text,
+                r"ISURF\n  1   1\s+0\.02\s+255\s+80\s+80\s+145\s+255\n  1   1\s+-0\.02\s+70\s+130\s+255\s+145\s+255",
+            )
+            self.assertIn("canonical_preset: `spin-density`", manifest)
+            self.assertIn("requested_preset: `spin-density`", manifest)
+            self.assertIn("alpha-minus-beta spin density", manifest)
 
     def test_rejects_incompatible_grid_and_atoms(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -271,6 +304,33 @@ class TestCubeArithmetic(unittest.TestCase):
             self.assertTrue((root / "products" / "dual.cub").exists())
             self.assertIn("dual.cub", output.getvalue())
             self.assertEqual(self.read_values(root / "products" / "dual.cub"), [2.0 - 1.5 * i for i in range(1, 9)])
+
+    def test_main_runs_spin_density_and_reports_vesta_outputs(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            alpha = self.write_tmp(root, "alpha.cub", BASE_CUBE)
+            beta = self.write_tmp(root, "beta.cub", THIRD_CUBE)
+            output = io.StringIO()
+
+            with patch("sys.stdout", output):
+                code = main(
+                    [
+                        str(root / "products"),
+                        "--operation",
+                        "spin-density",
+                        "--plus-cube",
+                        str(alpha),
+                        "--minus-cube",
+                        str(beta),
+                        "--stem",
+                        "spin",
+                    ]
+                )
+
+            self.assertEqual(code, 0)
+            self.assertTrue((root / "products" / "spin.cub").exists())
+            self.assertTrue((root / "products" / "spin_spin-density_cube.vesta").exists())
+            self.assertIn("spin_spin-density_cube.vesta", output.getvalue())
 
     def test_main_reports_missing_terms(self):
         output = io.StringIO()

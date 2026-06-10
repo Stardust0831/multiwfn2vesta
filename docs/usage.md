@@ -61,8 +61,9 @@ multiwfn2vesta aim-igmh --help
   IGM/IGMH/aIGM、ESP/MEP、ALIE/LEA/LEAE、vdW map
 - `surface-extrema`: 把 Multiwfn `surfanalysis.pdb` 的分子表面极值点作为
   atoms-only phase 叠加到已有 `.vesta` 文件中
-- `cube-arith`: 对兼容 cube 做线性组合，用于 density difference、Fukui
-  function、dual descriptor 等后处理，并可直接接 `cube-preset` 写 `.vesta`
+- `cube-arith`: 对兼容 cube 做线性组合，用于 density difference、
+  alpha-minus-beta spin density、Fukui function、dual descriptor 等后处理，
+  并可直接接 `cube-preset` 写 `.vesta`
 - `iri-run`: 从 Multiwfn 可读波函数文件调用 IRI/RDG 弱相互作用菜单，
   生成 `func1.cub`/`func2.cub`，处理成 VESTA 可用的 `IRI1`/`IRI2` cube，
   再通过 `cube-preset iri` 写 mapped-surface `.vesta`
@@ -333,12 +334,12 @@ multiwfn2vesta surface-extrema input.vesta surfanalysis.pdb output.vesta \
   --selection minima
 ```
 
-## Cube 算术：密度差 / Fukui / dual descriptor
+## Cube 算术：密度差 / spin density / Fukui / dual descriptor
 
 `cube-arith` 是兼容 cube 的线性组合工具。它适合把 ABACUS 或 Multiwfn 已经
 生成好的同网格密度/波函数/差分 cube 组合成新的 cube，再交给 `cube-preset`
 画 VESTA 等值面。它不负责生成带电态波函数本身；带电态、中性态、激发态或
-不同片段的 cube 要先由 ABACUS、Multiwfn 或 `grid-run` 产生。
+不同自旋通道的 cube 要先由 ABACUS、Multiwfn 或 `grid-run` 产生。
 
 任意线性组合：
 
@@ -349,9 +350,15 @@ multiwfn2vesta cube-arith cube_arith_products \
   --stem density_difference
 ```
 
-Fukui 和 dual descriptor 快捷入口：
+spin density、Fukui 和 dual descriptor 快捷入口：
 
 ```bash
+multiwfn2vesta cube-arith cube_arith_products \
+  --operation spin-density \
+  --plus-cube alpha_density.cub \
+  --minus-cube beta_density.cub \
+  --stem spin_density
+
 multiwfn2vesta cube-arith cube_arith_products \
   --operation fukui-plus \
   --anion-cube density_Nplus1.cub \
@@ -372,6 +379,7 @@ multiwfn2vesta cube-arith cube_arith_products \
 公式：
 
 - `density-difference`: `plus - minus`
+- `spin-density`: `alpha/spin-up density - beta/spin-down density`
 - `fukui-plus`: `rho(N+1) - rho(N)`
 - `fukui-minus`: `rho(N) - rho(N-1)`
 - `dual-descriptor`: `rho(N+1) - 2*rho(N) + rho(N-1)`
@@ -380,8 +388,9 @@ multiwfn2vesta cube-arith cube_arith_products \
 
 - `<stem>.cub`
 - `<stem>_cube_arith_recipe.md`
-- 默认 `--preset auto`：`fukui-plus/minus` 用 `density`，`density-difference`、
-  `dual-descriptor` 和任意 `linear` 组合用 `signed`
+- 默认 `--preset auto`：`fukui-plus/minus` 用 `density`，`spin-density` 用
+  `spin-density`，`density-difference`、`dual-descriptor` 和任意 `linear`
+  组合用 `signed`
 
 兼容性规则：
 

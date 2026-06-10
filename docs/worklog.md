@@ -1,5 +1,27 @@
 # Worklog
 
+## 2026-06-10: Spin-density cube arithmetic
+
+- Added a named `cube-arith --operation spin-density` shortcut for compatible
+  alpha/beta or spin-up/spin-down density cubes.  The operation writes
+  alpha/spin-up density minus beta/spin-down density through the existing
+  cube arithmetic backend.
+- Preserved the generic `density-difference` behavior.  `spin-density` shares
+  the same `plus - minus` arithmetic shape, but has its own semantic
+  operation name and default display route.
+- Updated `--preset auto` so `spin-density` products go through
+  `cube-preset spin-density`, giving the maintained red/blue signed
+  isosurfaces and Multiwfn `spindensity.cub` default magnitude `0.02`.
+- Extended the unified CLI help and interactive launcher so menu item `11`
+  can build spin-density arguments with alpha/spin-up and beta/spin-down cube
+  prompts.
+- Added tests for operation term construction, VESTA preset selection,
+  generated `ISURF` colors/defaults, CLI command execution, and interactive
+  argument construction.  Focused validation passed for
+  `tests.test_cube_arith` and `tests.test_cli`.
+- Updated README, Chinese usage docs, cube arithmetic skill, unified CLI
+  skill, cube-to-VESTA skill, ABACUS analysis skill, and the analysis matrix.
+
 ## 2026-06-10: README branch convergence refresh
 
 - Rechecked the branch state for the user's README/branch-convergence request.

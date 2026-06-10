@@ -1,8 +1,8 @@
-# Skill: Cube arithmetic for density differences and Fukui maps
+# Skill: Cube arithmetic for density differences, spin density, and Fukui maps
 
 Use this workflow when compatible ABACUS or Multiwfn cube files should be
 combined before VESTA visualization.  Typical cases are density differences,
-Fukui functions, and dual descriptors.
+alpha-minus-beta spin density, Fukui functions, and dual descriptors.
 
 ## Command
 
@@ -18,6 +18,12 @@ multiwfn2vesta cube-arith cube_arith_products \
 Named operations:
 
 ```bash
+multiwfn2vesta cube-arith cube_arith_products \
+  --operation spin-density \
+  --plus-cube alpha_density.cub \
+  --minus-cube beta_density.cub \
+  --stem spin_density
+
 multiwfn2vesta cube-arith cube_arith_products \
   --operation fukui-plus \
   --anion-cube density_Nplus1.cub \
@@ -38,6 +44,7 @@ multiwfn2vesta cube-arith cube_arith_products \
 ## Formulae
 
 - `density-difference`: `plus - minus`
+- `spin-density`: `alpha/spin-up density - beta/spin-down density`
 - `fukui-plus`: `rho(N+1) - rho(N)`
 - `fukui-minus`: `rho(N) - rho(N-1)`
 - `dual-descriptor`: `rho(N+1) - 2*rho(N) + rho(N-1)`
@@ -47,11 +54,12 @@ multiwfn2vesta cube-arith cube_arith_products \
 - `<stem>.cub`
 - `<stem>_cube_arith_recipe.md`
 - by default, a VESTA output via `cube-preset`; `--preset auto` uses
-  `density` for `fukui-plus/minus` and `signed` otherwise
+  `density` for `fukui-plus/minus`, `spin-density` for `spin-density`, and
+  `signed` otherwise
 
 Use `--no-vesta` for cube-only output.  Use `--preset density`, `--preset
-signed`, or another `cube-preset` value to override the automatic display
-style.
+spin-density`, `--preset signed`, or another `cube-preset` value to override
+the automatic display style.
 
 ## Requirements
 
@@ -67,16 +75,22 @@ style.
 
 ## ABACUS and Multiwfn context
 
-`cube-arith` does not generate charged-state or excited-state wavefunctions.
-Generate the source cubes first, for example:
+`cube-arith` does not generate charged-state, spin-channel, or excited-state
+wavefunctions.  Generate the source cubes first, for example:
 
-- ABACUS `out_chg`, `out_pchg`, `out_wfc_norm`, or `out_wfc_re_im`
+- ABACUS `out_chg`, spin-channel density exports when available, `out_pchg`,
+  `out_wfc_norm`, or `out_wfc_re_im`
 - `multiwfn2vesta grid-run ... --function density`
 - `multiwfn2vesta grid-run ... --function orbital`
 
 For comparable Fukui/dual-descriptor maps, all source cubes should be
 generated on the same grid.  With Multiwfn, use `grid-run --grid-mode cube
 --grid-cube reference.cub` after making the first cube.
+
+For spin density, pass the alpha/spin-up density cube as `--plus-cube` and
+the beta/spin-down density cube as `--minus-cube`.  If Multiwfn has already
+exported `spindensity.cub`, use `cube-preset spin-density` directly instead
+of recomputing the difference.
 
 ## Validation
 

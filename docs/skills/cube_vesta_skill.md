@@ -105,6 +105,12 @@ multiwfn2vesta cube-arith cube_arith_products \
   --stem density_difference
 
 multiwfn2vesta cube-arith cube_arith_products \
+  --operation spin-density \
+  --plus-cube alpha_density.cub \
+  --minus-cube beta_density.cub \
+  --stem spin_density
+
+multiwfn2vesta cube-arith cube_arith_products \
   --operation dual-descriptor \
   --anion-cube density_Nplus1.cub \
   --neutral-cube density_N.cub \
@@ -113,8 +119,9 @@ multiwfn2vesta cube-arith cube_arith_products \
 
 `cube-arith` writes a new cube from compatible input cubes and, unless
 `--no-vesta` is used, sends that cube through `cube-preset` for display.  It
-is the maintained bottom layer for density-difference, Fukui, and
-dual-descriptor maps.
+is the maintained bottom layer for density-difference, alpha-minus-beta spin
+density, Fukui, and dual-descriptor maps.  If Multiwfn already exported
+`spindensity.cub`, use `cube-preset spin-density` directly.
 
 If starting from a Multiwfn-readable wavefunction instead of an existing cube,
 use `grid-run` for single real-space function cubes:
@@ -243,8 +250,8 @@ passes it back through `cube-preset`.
 - No VESTA rendering is launched by this command.
 - Analysis-specific display presets now exist for common cube products.
   Cube arithmetic now exists as `multiwfn2vesta cube-arith` for compatible
-  cube linear combinations such as density difference, Fukui functions, and
-  dual descriptors.
+  cube linear combinations such as density difference, alpha-minus-beta spin
+  density, Fukui functions, and dual descriptors.
   Multiwfn main-function-5 single-cube generation now exists as
   `multiwfn2vesta grid-run` for density, orbital/MO, Laplacian, K(r)/G(r),
   ELF, LOL, ESP/MEP, ALIE, RDG/IRI-like, promolecular RDG/sign(lambda2)rho,

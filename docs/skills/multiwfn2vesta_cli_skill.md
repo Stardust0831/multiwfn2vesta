@@ -201,9 +201,15 @@ multiwfn2vesta surface-extrema input.vesta surfanalysis.pdb output.vesta \
   --selection all
 ```
 
-### Cube arithmetic to density-difference/Fukui VESTA
+### Cube arithmetic to density-difference/spin-density/Fukui VESTA
 
 ```bash
+multiwfn2vesta cube-arith cube_arith_products \
+  --operation spin-density \
+  --plus-cube alpha_density.cub \
+  --minus-cube beta_density.cub \
+  --stem spin_density
+
 multiwfn2vesta cube-arith cube_arith_products \
   --operation dual-descriptor \
   --anion-cube density_Nplus1.cub \
@@ -213,11 +219,13 @@ multiwfn2vesta cube-arith cube_arith_products \
 
 Use this after ABACUS, Multiwfn, or `grid-run` has produced compatible cube
 files.  It writes a new cube and, by default, calls `cube-preset`; `--preset
-auto` uses `density` for `fukui-plus/minus` and `signed` for
-`density-difference`, `dual-descriptor`, and generic linear combinations.
+auto` uses `density` for `fukui-plus/minus`, `spin-density` for
+`spin-density`, and `signed` for `density-difference`, `dual-descriptor`,
+and generic linear combinations.
 Generic linear combinations use repeated `--term COEFF CUBE` entries.
 
-The named formulae are `rho(N+1)-rho(N)` for `fukui-plus`,
+The named formulae are `alpha/spin-up density - beta/spin-down density` for
+`spin-density`, `rho(N+1)-rho(N)` for `fukui-plus`,
 `rho(N)-rho(N-1)` for `fukui-minus`, and
 `rho(N+1)-2*rho(N)+rho(N-1)` for `dual-descriptor`.
 

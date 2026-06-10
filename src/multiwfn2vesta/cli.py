@@ -36,7 +36,7 @@ COMMANDS: Dict[str, Tuple[str, str]] = {
     "cube-vesta": ("Create a VESTA file from cube data", "cube_vesta"),
     "cube-preset": ("Create a VESTA file from cube data using an analysis preset", "cube_preset"),
     "surface-extrema": ("Overlay Multiwfn surfanalysis.pdb extrema on VESTA", "surface_extrema_vesta"),
-    "cube-arith": ("Combine compatible cube files, then optionally prepare VESTA", "cube_arith"),
+    "cube-arith": ("Combine compatible cube files for differences, spin density, Fukui, or dual maps", "cube_arith"),
     "iri-run": ("Run Multiwfn IRI/RDG cube generation, then prepare VESTA", "multiwfn_iri"),
     "igmh-run": ("Run Multiwfn IGMH cube generation, then prepare VESTA", "multiwfn_igmh"),
     "igm-run": ("Run Multiwfn IGM cube generation, then prepare VESTA", "multiwfn_igmh"),
@@ -130,7 +130,7 @@ Commands:
   surface-extrema
              Overlay Multiwfn surfanalysis.pdb extrema on an existing VESTA file.
   cube-arith
-             Combine compatible cube files for density differences, Fukui, or dual descriptor.
+             Combine compatible cube files for density differences, spin density, Fukui, or dual descriptor.
   iri-run    Run Multiwfn IRI/RDG cube generation and prepare a VESTA mapped surface.
   igmh-run   Run Multiwfn IGMH cube generation and prepare a VESTA mapped surface.
   igm-run    Run Multiwfn IGM cube generation and prepare a VESTA mapped surface.
@@ -194,6 +194,7 @@ Examples:
   multiwfn2vesta cube-vesta density.cub cube_products --isosurface 0.01
   multiwfn2vesta cube-preset orbital orbital.cub cube_products
   multiwfn2vesta surface-extrema input.vesta surfanalysis.pdb output.vesta --surface-cube density.cub
+  multiwfn2vesta cube-arith products --operation spin-density --plus-cube alpha.cub --minus-cube beta.cub
   multiwfn2vesta cube-arith products --operation dual-descriptor --anion-cube anion.cub --neutral-cube neutral.cub --cation-cube cation.cub
   multiwfn2vesta iri-run input.molden iri_products --timeout 300
   multiwfn2vesta igmh-run input.molden igmh_products --fragment 1-48 --fragment 49-60
@@ -458,7 +459,7 @@ def interactive_cube_arith() -> int:
     output_dir = _prompt("output directory", default="cube_arith_products")
     argv: List[str] = [output_dir]
     operation = _prompt(
-        "operation (linear/density-difference/fukui-plus/fukui-minus/dual-descriptor)",
+        "operation (linear/density-difference/spin-density/fukui-plus/fukui-minus/dual-descriptor)",
         default="linear",
     )
     argv.extend(["--operation", operation])
@@ -472,9 +473,13 @@ def interactive_cube_arith() -> int:
                 print("Each term needs a coefficient and a cube path.")
                 return 2
             argv.extend(["--term", parts[0], parts[1]])
-    elif operation in {"difference", "density-difference"}:
-        plus_cube = _prompt("plus cube", required=True)
-        minus_cube = _prompt("minus cube", required=True)
+    elif operation in {"difference", "density-difference", "spin-density"}:
+        if operation == "spin-density":
+            plus_cube = _prompt("alpha/spin-up density cube", required=True)
+            minus_cube = _prompt("beta/spin-down density cube", required=True)
+        else:
+            plus_cube = _prompt("plus cube", required=True)
+            minus_cube = _prompt("minus cube", required=True)
         argv.extend(["--plus-cube", plus_cube, "--minus-cube", minus_cube])
     else:
         neutral_cube = _prompt("neutral N cube", required=True)
@@ -1069,7 +1074,7 @@ def interactive_main() -> int:
     print("8) ABACUS Mulliken -> VESTA atom colors")
     print("9) ABACUS calculation -> Multiwfn Molden")
     print("10) Wavefunction -> Multiwfn real-space function cube -> VESTA")
-    print("11) Cube arithmetic -> density difference/Fukui/dual descriptor VESTA")
+    print("11) Cube arithmetic -> density difference/spin density/Fukui/dual descriptor VESTA")
     print("12) Multiwfn atom table -> VESTA atom colors")
     print("13) surfanalysis.pdb extrema -> VESTA overlay")
     print("14) Wavefunction -> Multiwfn IGM/IGMH cubes -> VESTA")
