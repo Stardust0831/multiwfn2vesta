@@ -55,6 +55,13 @@ GRID_FUNCTIONS: Tuple[GridFunction, ...] = (
     GridFunction("nuclear-esp", 8, "nucleiesp.cub", "signed", ("nuc-esp", "nuclear-potential"), mapped_preset="esp"),
     GridFunction("elf", 9, "ELF.cub", "elf", ("electron-localization-function",)),
     GridFunction("lol", 10, "LOL.cub", "lol", ("localized-orbital-locator",)),
+    GridFunction(
+        "local-information-entropy",
+        11,
+        "infoentro.cub",
+        "local-information-entropy",
+        ("information-entropy", "infoentro", "local-info-entropy", "local-shannon-entropy"),
+    ),
     GridFunction("esp", 12, "totesp.cub", "signed", ("mep", "total-esp", "electrostatic-potential"), mapped_preset="esp"),
     GridFunction("rdg", 13, "RDG.cub", "rdg-scalar", ("reduced-density-gradient",)),
     GridFunction("promolecular-rdg", 14, "RDGprodens.cub", "promolecular-rdg", ("rdg-pro", "prodens-rdg")),

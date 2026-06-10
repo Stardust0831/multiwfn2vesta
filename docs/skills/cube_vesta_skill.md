@@ -49,6 +49,7 @@ multiwfn2vesta cube-preset spin-density spindensity.cub cube_products
 multiwfn2vesta cube-preset laplacian laplacian.cub cube_products
 multiwfn2vesta cube-preset hamiltonian-ked 'K(r).cub' cube_products
 multiwfn2vesta cube-preset lagrangian-ked 'G(r).cub' cube_products
+multiwfn2vesta cube-preset local-information-entropy infoentro.cub cube_products
 multiwfn2vesta cube-preset rdg-scalar RDG.cub cube_products
 multiwfn2vesta cube-preset promolecular-rdg RDGprodens.cub cube_products
 multiwfn2vesta cube-preset iri-scalar IRI.cub cube_products
@@ -210,6 +211,11 @@ passes it back through `cube-preset`.
   surfaces for Multiwfn `K(r).cub`, default magnitude `0.01`.
 - `lagrangian-ked` aliases: `g-r`, `g(r)`, `kinetic-g`; single positive
   surface for Multiwfn `G(r).cub`, default isosurface `0.01`.
+- `local-information-entropy` aliases: `information-entropy`, `infoentro`,
+  `local-info-entropy`, `local-shannon-entropy`; positive/negative surfaces
+  for Multiwfn `infoentro.cub`, default magnitude `0.05`.  Multiwfn function
+  `11` evaluates local information entropy as `-rho/N*ln(rho/N)` and keeps
+  the global main-function-5 `sur_value`.
 - `rdg-scalar` aliases: `rdg-cube`, `scalar-rdg`,
   `reduced-density-gradient`; single positive surface for standalone Multiwfn
   `RDG.cub`, default isosurface `0.5`.  Use `iri` with `--texture-cube` for

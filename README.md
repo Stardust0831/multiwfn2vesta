@@ -18,11 +18,11 @@ point.
   GitHub remote.
 - GitHub remote: `origin` points to `Github:Stardust0831/multiwfn2vesta.git`,
   with `origin/HEAD -> origin/main`.
-- Branch audit on 2026-06-10 20:30 CST found local `main`, `origin/main`, and
+- Branch audit on 2026-06-10 20:39 CST found local `main`, `origin/main`, and
   `origin/HEAD` aligned at
-  `34b2b012ced5dd474874fecc55f74ac17e0c4caa`
-  (`Add gradient norm cube preset`) before the standalone IRI scalar preset
-  update.
+  `287974cdd66db52b8f0f3581b63537d221980da1`
+  (`Add standalone IRI cube preset`) before the local-information-entropy
+  preset update.
 - `git ls-remote --heads origin` currently returns only `refs/heads/main`; no
   merge-back was needed in this pass because there is no extra local or remote
   feature branch to consolidate.
@@ -34,8 +34,8 @@ point.
   competing branches.
 - Recent maintained feature work includes dedicated VESTA presets for
   Multiwfn gradient norm, spin-density, orbital-density, Laplacian, K(r),
-  G(r), standalone RDG, promolecular RDG, and standalone IRI scalar cubes,
-  ABACUS direct cube presets for potential,
+  G(r), local information entropy, standalone RDG, promolecular RDG, and
+  standalone IRI scalar cubes, ABACUS direct cube presets for potential,
   partial-charge, and wavefunction-norm cubes, charged-state `fukui-run`
   orchestration, aIGM/amIGM trajectory-average weak-interaction generation,
   cube/grid domain extraction, basin cube VESTA presets,
@@ -288,6 +288,7 @@ multiwfn2vesta cube-preset spin-density spindensity.cub cube_products
 multiwfn2vesta cube-preset laplacian laplacian.cub cube_products
 multiwfn2vesta cube-preset hamiltonian-ked 'K(r).cub' cube_products
 multiwfn2vesta cube-preset lagrangian-ked 'G(r).cub' cube_products
+multiwfn2vesta cube-preset local-information-entropy infoentro.cub cube_products
 multiwfn2vesta cube-preset rdg-scalar RDG.cub cube_products
 multiwfn2vesta cube-preset promolecular-rdg RDGprodens.cub cube_products
 multiwfn2vesta cube-preset iri-scalar IRI.cub cube_products
@@ -316,10 +317,10 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
 Available presets can be listed with `multiwfn2vesta cube-preset
 --list-presets`.  Current presets cover density-like scalar cubes, signed
 orbital/wavefunction/density-difference cubes, Multiwfn gradient norm,
-orbital-density, spin-density, Laplacian, K(r), G(r), standalone RDG,
-promolecular RDG, and standalone IRI scalar cubes, direct ABACUS potential
-cubes, ABACUS partial-charge/state-density cubes, nonnegative ABACUS
-wavefunction norm cubes, ELF/LOL cubes, IRI/RDG/NCI mapped surfaces,
+orbital-density, spin-density, Laplacian, K(r), G(r), local information
+entropy, standalone RDG, promolecular RDG, and standalone IRI scalar cubes,
+direct ABACUS potential cubes, ABACUS partial-charge/state-density cubes,
+nonnegative ABACUS wavefunction norm cubes, ELF/LOL cubes, IRI/RDG/NCI mapped surfaces,
 STM/LDOS tunneling-current surfaces, binary domain isosurfaces, binary basin
 isosurfaces, signed basin-type maps, IGM/IGMH/aIGM weak-interaction mapped
 surfaces, ESP/MEP mapped density surfaces, generic molecular surface maps,
@@ -505,6 +506,11 @@ Common functions:
   `hamiltonian-ked`, signed by default.
 - `lagrangian-ked` / `g(r)`: function `7`, raw `G(r).cub`, preset
   `lagrangian-ked`, single positive surface by default.
+- `local-information-entropy` / `information-entropy`: function `11`, raw
+  `infoentro.cub`, preset `local-information-entropy`, signed by default.
+  Multiwfn evaluates function `11` as local information entropy
+  `-rho/N*ln(rho/N)` and keeps the global main-function-5 default
+  `sur_value=0.05`.
 - `esp`, `nuclear-esp`, `signlambda2rho`, and `vdw-potential`: signed scalar
   fields, defaulting to the `signed` preset;
   with `--surface-cube`, `esp`/`nuclear-esp` map through `cube-preset esp`,

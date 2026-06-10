@@ -191,6 +191,23 @@ PRESETS: Tuple[CubePreset, ...] = (
         notes="Use for Multiwfn LOL cubes; tune the isosurface for each system.",
     ),
     CubePreset(
+        name="local-information-entropy",
+        aliases=("information-entropy", "infoentro", "local-info-entropy", "local-shannon-entropy"),
+        description="Positive/negative isosurfaces for Multiwfn local information entropy cubes.",
+        surface_mode="signed",
+        isosurface=0.05,
+        positive_rgb=(245, 190, 70),
+        negative_rgb=(80, 150, 255),
+        surface_opacity=(135, 255),
+        notes=(
+            "Use for Multiwfn infoentro.cub from real-space function 11. "
+            "Multiwfn evaluates local information entropy as -rho/N*ln(rho/N); "
+            "the field is shown as signed because dense regions can be negative depending on units/system. "
+            "Multiwfn does not reset sur_value for this function, so the default follows "
+            "the global main-function-5 sur_value=0.05."
+        ),
+    ),
+    CubePreset(
         name="rdg-scalar",
         aliases=("rdg-cube", "scalar-rdg", "reduced-density-gradient"),
         description="Single positive isosurface for standalone RDG scalar cubes.",

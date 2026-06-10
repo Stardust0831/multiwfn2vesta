@@ -41,6 +41,18 @@ iri comment two
 """
 
 
+INFOENTRO_CUBE = """info entropy comment one
+info entropy comment two
+    2    -1.000000    -2.000000     0.500000
+    2     0.500000     0.000000     0.000000
+    2     0.000000     0.500000     0.000000
+    2     0.000000     0.000000     0.500000
+    8     8.000000    -1.000000    -2.000000     0.500000
+    1     1.000000    -0.500000    -2.000000     0.500000
+ -0.20 -0.10 0.00 0.02 0.04 0.06 0.08 0.10
+"""
+
+
 class TestMultiwfnGridRunner(unittest.TestCase):
     def make_candidate(self, root):
         fake_exe = Path(root) / "Multiwfn_noGUI"
@@ -58,6 +70,7 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertIn("preset=laplacian", text)
         self.assertIn("preset=hamiltonian-ked", text)
         self.assertIn("preset=lagrangian-ked", text)
+        self.assertIn("preset=local-information-entropy", text)
         self.assertIn("preset=orbital-density", text)
         self.assertIn("preset=rdg-scalar", text)
         self.assertIn("preset=promolecular-rdg", text)
@@ -76,6 +89,9 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertEqual(resolve_grid_function("k(r)").preset, "hamiltonian-ked")
         self.assertEqual(resolve_grid_function("lagrangian-kinetic-density").index, 7)
         self.assertEqual(resolve_grid_function("lagrangian-kinetic-density").preset, "lagrangian-ked")
+        self.assertEqual(resolve_grid_function("information-entropy").index, 11)
+        self.assertEqual(resolve_grid_function("local-info-entropy").output_filename, "infoentro.cub")
+        self.assertEqual(resolve_grid_function("local-shannon-entropy").preset, "local-information-entropy")
         self.assertEqual(resolve_grid_function("spin").preset, "spin-density")
         self.assertEqual(resolve_grid_function("lap").preset, "laplacian")
         self.assertEqual(resolve_grid_function("orbdens").preset, "orbital-density")
@@ -194,6 +210,45 @@ class TestMultiwfnGridRunner(unittest.TestCase):
             self.assertIn("auto_vesta_preset: `gradient-norm`", recipe)
             manifest = result.vesta_result.manifest_path.read_text(encoding="utf-8")
             self.assertIn("canonical_preset: `gradient-norm`", manifest)
+            self.assertIn("effective_isosurface: `0.05`", manifest)
+
+    def test_run_multiwfn_grid_information_entropy_uses_dedicated_preset(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            wavefunction = root / "h2o.fch"
+            wavefunction.write_text("wavefunction", encoding="utf-8")
+            candidate = self.make_candidate(root)
+
+            def fake_run(command, **kwargs):
+                cwd = Path(kwargs["cwd"])
+                (cwd / "infoentro.cub").write_text(INFOENTRO_CUBE, encoding="utf-8")
+                return subprocess.CompletedProcess(command, 0, stdout="ok", stderr="")
+
+            with patch("multiwfn2vesta.multiwfn_grid.find_multiwfn", return_value=candidate):
+                with patch("multiwfn2vesta.multiwfn_grid.subprocess.run", side_effect=fake_run):
+                    result = run_multiwfn_grid(
+                        wavefunction,
+                        root / "products",
+                        function_name="information-entropy",
+                        stem="case",
+                        grid_points=(10, 11, 12),
+                    )
+
+            self.assertTrue(result.success)
+            self.assertEqual(result.command_file.read_text(encoding="utf-8"), "5\n11\n4\n10,11,12\n2\n0\nq\n")
+            self.assertEqual(result.raw_cube.name, "infoentro.cub")
+            self.assertEqual(result.cube.name, "case_local-information-entropy.cub")
+            self.assertIsNotNone(result.vesta_result)
+            self.assertEqual(
+                result.vesta_result.vesta_path.name,
+                "case_local-information-entropy_local-information-entropy_cube.vesta",
+            )
+            recipe = result.recipe_path.read_text(encoding="utf-8")
+            self.assertIn("function_name: `local-information-entropy`", recipe)
+            self.assertIn("function_index: `11`", recipe)
+            self.assertIn("auto_vesta_preset: `local-information-entropy`", recipe)
+            manifest = result.vesta_result.manifest_path.read_text(encoding="utf-8")
+            self.assertIn("canonical_preset: `local-information-entropy`", manifest)
             self.assertIn("effective_isosurface: `0.05`", manifest)
 
     def test_run_multiwfn_grid_iri_uses_standalone_iri_scalar_preset(self):

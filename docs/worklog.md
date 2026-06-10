@@ -1,5 +1,32 @@
 # Worklog
 
+## 2026-06-10: Local information entropy cube display preset
+
+- Added `cube-preset local-information-entropy` for Multiwfn
+  `infoentro.cub` from main-function-5 function `11`.  It writes signed
+  positive/negative VESTA isosurfaces with default magnitude `0.05`.
+- Updated `grid-run --function local-information-entropy` and aliases
+  `information-entropy`, `infoentro`, `local-info-entropy`, and
+  `local-shannon-entropy` so generated `infoentro.cub` products route to the
+  dedicated preset instead of a generic scalar preset.
+- Rechecked local Multiwfn 2026.6.2 source evidence: `function.f90` lists
+  function `11` as local information entropy and evaluates
+  `-rho/N*ln(rho/N)`; `0123dim.f90` exports `infoentro.cub` and does not
+  reset `sur_value`, so the maintained default follows the global
+  main-function-5 `sur_value=0.05`.
+- Deferred Fermi hole/source function/EDR/D(r) cube routes because they need
+  reference points or extra EDR parameters beyond the stable single-function
+  `grid-run` stream.
+- Added focused tests for preset listing, signed `ISURF` defaults, manifest
+  notes, function alias resolution, and a fake Multiwfn
+  `grid-run --function information-entropy` run that verifies the recipe and
+  VESTA manifest use `local-information-entropy`.
+- Validation passed: focused `py_compile`, 61 focused tests across
+  `tests.test_cube_preset` and `tests.test_multiwfn_grid`, the full 277-test
+  no-GUI regression, `bin/multiwfn2vesta cube-preset --list-presets`,
+  `bin/multiwfn2vesta grid-run --list-functions`,
+  `bin/multiwfn2vesta --help`, and `git diff --check`.
+
 ## 2026-06-10: Standalone IRI scalar cube display preset
 
 - Added `cube-preset iri-scalar` for standalone Multiwfn `IRI.cub` from

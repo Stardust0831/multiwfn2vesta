@@ -55,6 +55,7 @@ multiwfn2vesta cube-preset spin-density spindensity.cub cube_products
 multiwfn2vesta cube-preset laplacian laplacian.cub cube_products
 multiwfn2vesta cube-preset hamiltonian-ked 'K(r).cub' cube_products
 multiwfn2vesta cube-preset lagrangian-ked 'G(r).cub' cube_products
+multiwfn2vesta cube-preset local-information-entropy infoentro.cub cube_products
 multiwfn2vesta cube-preset rdg-scalar RDG.cub cube_products
 multiwfn2vesta cube-preset promolecular-rdg RDGprodens.cub cube_products
 multiwfn2vesta cube-preset iri-scalar IRI.cub cube_products
@@ -214,14 +215,16 @@ multiwfn2vesta grid-run ABACUS_Multiwfn.molden grid_products \
 Useful `grid-run` functions for ABACUS-compatible Molden files include
 `density`, `gradient`, `orbital --orbital h`, `orbital-density --orbital h`,
 `spin-density`, `laplacian`, `hamiltonian-ked`, `lagrangian-ked`, `elf`,
-`lol`, `esp`, `rdg`, `promolecular-rdg`, `iri`, and `signlambda2rho`.
+`lol`, `local-information-entropy`, `esp`, `rdg`, `promolecular-rdg`,
+`iri`, and `signlambda2rho`.
 The single-cube display presets for `gradient.cub`, `spindensity.cub`,
-`orbdens.cub`, `RDG.cub`, `RDGprodens.cub`, and `IRI.cub` follow Multiwfn
-main-function-5 `sur_value` defaults where the source defines them.  For
-`gradient.cub`, Multiwfn leaves the function at the global `sur_value=0.05`,
-so tune the VESTA isosurface per system.  `IRI.cub` uses standalone
-`iri-scalar`; use the existing two-cube `cube-preset iri` route when a
-sign(lambda2)rho-like texture cube is available.
+`orbdens.cub`, `infoentro.cub`, `RDG.cub`, `RDGprodens.cub`, and `IRI.cub`
+follow Multiwfn main-function-5 `sur_value` defaults where the source defines
+them.  For `gradient.cub` and `infoentro.cub`, Multiwfn leaves the function
+at the global `sur_value=0.05`, so tune the VESTA isosurface per system.
+`infoentro.cub` uses signed `local-information-entropy`; `IRI.cub` uses
+standalone `iri-scalar`; use the existing two-cube `cube-preset iri` route
+when a sign(lambda2)rho-like texture cube is available.
 
 For ABACUS LCAO Molden frontier orbital inspection, batch export is now the
 maintained route:

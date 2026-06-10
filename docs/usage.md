@@ -220,6 +220,7 @@ multiwfn2vesta cube-preset spin-density spindensity.cub cube_products
 multiwfn2vesta cube-preset laplacian laplacian.cub cube_products
 multiwfn2vesta cube-preset hamiltonian-ked 'K(r).cub' cube_products
 multiwfn2vesta cube-preset lagrangian-ked 'G(r).cub' cube_products
+multiwfn2vesta cube-preset local-information-entropy infoentro.cub cube_products
 multiwfn2vesta cube-preset rdg-scalar RDG.cub cube_products
 multiwfn2vesta cube-preset promolecular-rdg RDGprodens.cub cube_products
 multiwfn2vesta cube-preset iri-scalar IRI.cub cube_products
@@ -265,6 +266,11 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
   Multiwfn `K(r).cub`，默认幅值 `0.01`
 - `lagrangian-ked`：单正值等值面，别名包括 `g(r)`、`kinetic-g`，用于
   Multiwfn `G(r).cub`，默认等值面 `0.01`
+- `local-information-entropy`：正/负等值面，别名包括
+  `information-entropy`、`infoentro`、`local-info-entropy`，用于
+  Multiwfn `infoentro.cub`；Multiwfn 函数 `11` 计算局部信息熵
+  `-rho/N*ln(rho/N)`，源码没有重设等值面，因此默认幅值沿用全局
+  `sur_value=0.05`
 - `rdg-scalar`：单正值等值面，别名包括 `rdg-cube`、
   `reduced-density-gradient`，用于单 cube 的 Multiwfn `RDG.cub`，默认
   等值面 `0.5`；双 cube 的 RDG/NCI 染色图仍用 `cube-preset iri`
@@ -502,6 +508,9 @@ multiwfn2vesta grid-run --list-functions
   `cube-preset hamiltonian-ked`
 - `lagrangian-ked` / `g(r)`：函数 `7`，原始输出 `G(r).cub`，默认接
   `cube-preset lagrangian-ked`
+- `local-information-entropy` / `information-entropy`：函数 `11`，原始
+  输出 `infoentro.cub`，默认接 `cube-preset local-information-entropy`，
+  按正/负等值面显示，默认幅值 `0.05`
 - `esp`、`nuclear-esp`、`signlambda2rho`、`vdw-potential`：默认按 signed
   scalar 处理；配合
   `--surface-cube` 时，ESP/nuclear ESP 默认走 `cube-preset esp`，

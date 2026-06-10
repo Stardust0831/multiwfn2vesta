@@ -94,6 +94,7 @@ class TestCubePreset(unittest.TestCase):
         self.assertIn("potential", text)
         self.assertIn("partial-charge", text)
         self.assertIn("wavefunction-norm", text)
+        self.assertIn("local-information-entropy", text)
         self.assertIn("iri", text)
         self.assertIn("rdg-scalar", text)
         self.assertIn("promolecular-rdg", text)
@@ -314,6 +315,25 @@ basin type two
             self.assertIn("canonical_preset: `lagrangian-ked`", manifest)
             self.assertIn("requested_preset: `lagrangian-kinetic-density`", manifest)
             self.assertIn("G(r).cub", manifest)
+
+    def test_local_information_entropy_preset_writes_signed_surfaces(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            cube = self.write_tmp(root, "infoentro.cub", SIGNED_CUBE)
+
+            result = run_preset("infoentro", cube, root / "products")
+
+            text = result.vesta_path.read_text(encoding="utf-8")
+            manifest = result.manifest_path.read_text(encoding="utf-8")
+
+            self.assertRegex(
+                text,
+                r"ISURF\n  1   1\s+0\.05\s+245\s+190\s+70\s+135\s+255\n  1   1\s+-0\.05\s+80\s+150\s+255\s+135\s+255",
+            )
+            self.assertIn("canonical_preset: `local-information-entropy`", manifest)
+            self.assertIn("requested_preset: `infoentro`", manifest)
+            self.assertIn("infoentro.cub", manifest)
+            self.assertIn("-rho/N*ln(rho/N)", manifest)
 
     def test_standalone_rdg_scalar_preset_keeps_iri_alias_available_for_texture_route(self):
         with tempfile.TemporaryDirectory() as tmp:

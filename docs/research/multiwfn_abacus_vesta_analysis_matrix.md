@@ -24,6 +24,9 @@ Multiwfn evidence:
   global `define.f90` default `0.05`, `spindensity.cub` uses `0.02`,
   `RDG.cub` uses `0.5`, `RDGprodens.cub` uses `0.4`, `IRI.cub` uses `1.0`,
   and `orbdens.cub` uses `0.005`.
+- Multiwfn `function.f90` lists function `11` as local information entropy,
+  evaluates it as `-rho/N*ln(rho/N)`, and `0123dim.f90` exports the cube as
+  `infoentro.cub` while leaving the global `sur_value=0.05`.
 - Weak-interaction module `visweak.f90` exports `sl2r.cub`, `dg_inter.cub`,
   `dg_intra.cub`, `dg.cub`, `avgRDG.cub`, `avgsl2r.cub`, and related scatter
   data.
@@ -144,6 +147,7 @@ occupations, and density derivatives from the wavefunction representation.
 | STM/LDOS | Full wavefunction with GTF information | Good candidate for Gamma LCAO Molden; metals and Fermi-level choices need care | `STM.cub` | Single positive LDOS/current isosurface or slices | `stm-run` now automates Multiwfn `300 -> 4`, switches to constant-current mode, exports `STM.cub`, and calls `cube-preset stm` |
 | Molecular surface mapped properties | Full wavefunction or cube pair | Feasible through Molden; ABACUS can provide density/potential cubes | `surf.cub`, `mapfunc.cub`, `density.cub`, `avglocion.cub`, `surfanalysis.pdb` | Surface cube plus texture; extrema as atoms-only overlay phase | `cube-preset surface-map` covers surface+texture display using `molsurfmap.vmd` defaults; `--surfanalysis-pdb` and `surface-extrema` overlay surface extrema |
 | ALIE / LEA / LEAE | Full wavefunction, occupied/virtual orbitals | Feasible only if ABACUS Molden orbitals/energies are adequate; virtual levels in metals risky | `avglocion.cub`, `userfunc.cub`, `surfanalysis.pdb` | Colored density surface plus extrema points | `grid-run --function alie --surface-cube density.cub` now generates ALIE texture maps directly; `cube-preset alie/lea/leae` remains the lower-level display layer and auto-selects extrema from `surfanalysis.pdb` |
+| Information-theory density functions | Full wavefunction Molden/FCH/WFN; local information entropy is a normal main-function-5 grid function | Feasible for Gamma LCAO Molden; interpretation depends on the NAO2GTO density quality | `infoentro.cub`, possible future user-function Shannon/Fisher cubes | Signed scalar isosurfaces or slices | `grid-run --function local-information-entropy` now exports Multiwfn function `11` `infoentro.cub`; `cube-preset local-information-entropy` provides a signed display default |
 | vdW/repulsion/dispersion potential | Structure and/or wavefunction depending option | Feasible, often structure driven | `vdW.cub`, `repul.cub`, `disp.cub`, `density.cub`, `vdWpot.cub` | Potential surfaces/slices, density surface context | `grid-run --function vdw-potential --surface-cube density.cub` maps vdW potential onto density directly; `cube-preset vdw-map` remains the lower-level writer |
 | Atom scalar coloring | Per-atom values from Multiwfn or ABACUS `mulliken.txt` | Strong for ABACUS `out_mul`; also charges/Fukui from Multiwfn | CSV/table, `mulliken.txt` | Patch `SITET` RGB values | ABACUS Mulliken parser implemented; generic Multiwfn atom table parser implemented as `multiwfn2vesta multiwfn-atom-color` |
 
@@ -331,3 +335,9 @@ Main gaps:
   iri-scalar` route and `grid-run --function iri` maps to it.  The existing
   `cube-preset iri`/`rdg` route remains reserved for two-cube IRI/RDG/NCI
   surfaces colored by sign(lambda2)rho-like texture cubes.
+- Local information entropy now has a distinct `cube-preset
+  local-information-entropy` route and `grid-run --function
+  information-entropy` maps to Multiwfn function `11` `infoentro.cub`.
+  Reference-point functions such as Fermi hole and source function, and
+  extra-parameter functions such as EDR/D(r), remain deferred until their
+  prompt streams are bounded.

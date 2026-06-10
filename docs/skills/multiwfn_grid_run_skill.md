@@ -49,6 +49,11 @@ multiwfn2vesta grid-run --list-functions
   mapped preset `esp` when `--surface-cube` is supplied.
 - `elf`: function `9`, raw `ELF.cub`, preset `elf`.
 - `lol`: function `10`, raw `LOL.cub`, preset `lol`.
+- `local-information-entropy`, aliases `information-entropy`, `infoentro`,
+  `local-info-entropy`, `local-shannon-entropy`: function `11`, raw
+  `infoentro.cub`, preset `local-information-entropy` with signed
+  positive/negative isosurfaces.  Multiwfn evaluates this as
+  `-rho/N*ln(rho/N)` and keeps the global main-function-5 `sur_value=0.05`.
 - `esp`, aliases `mep`, `total-esp`, `electrostatic-potential`: function
   `12`, raw `totesp.cub`, preset `signed`; mapped preset `esp` with
   `--surface-cube`.

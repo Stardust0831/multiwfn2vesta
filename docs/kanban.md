@@ -1,6 +1,31 @@
 # Project Kanban
 
-Updated: 2026-06-10 20:31 CST
+Updated: 2026-06-10 20:39 CST
+
+## Active Goal Continuation: 2026-06-10 Local Information Entropy Cube
+
+- [x] Record continuation objective: keep expanding useful Multiwfn
+  wavefunction analyses that can become VESTA products, especially analyses
+  ABACUS can feed through LCAO Molden or direct cube routes.
+- [x] Recheck current state: local `main` is aligned with `origin/main` at
+  `287974cdd66db52b8f0f3581b63537d221980da1`; untracked local probes
+  `domain.cub` and `domain.pdb` remain uncommitted.
+- [x] Inspect current source-backed grid-function gaps: Multiwfn 2026.6.2
+  `function.f90` lists function `11` as local information entropy and
+  `0123dim.f90` exports it as `infoentro.cub`; Fermi hole/source function/EDR
+  remain deferred because they need reference points or extra EDR parameters.
+- [x] Add a maintained `cube-preset` and `grid-run` mapping for
+  `infoentro.cub`, with focused tests and docs: implemented
+  `cube-preset local-information-entropy`, mapped `grid-run --function
+  information-entropy` to Multiwfn function `11`, documented the source
+  evidence, and focused `py_compile` plus
+  `tests.test_cube_preset tests.test_multiwfn_grid` passed with 61 tests.
+- [x] Sync root docs, validate, review, then prepare commit/push on `main`:
+  focused `py_compile`, 61 focused tests, full 277-test no-GUI regression,
+  `cube-preset --list-presets`, `grid-run --list-functions`,
+  `bin/multiwfn2vesta --help`, and `git diff --check` passed.  Commit/push
+  and post-push branch verification are reported in the assistant response to
+  avoid a self-referential hash loop.
 
 ## Current Request: 2026-06-10 README Refresh And Main Branch Closeout
 
