@@ -43,6 +43,10 @@
   `bin/multiwfn2vesta fukui-run --help`; `bin/multiwfn2vesta cube-preset
   --list-presets`; `git diff --check`; and the full 242-test no-GUI
   regression.
+- Pushed commit `43e00d2218699574d3644c51dc0bd1249f60d0da`
+  (`Add Multiwfn Fukui runner`) to `origin/main`.  Post-push branch checks
+  found local `main`, `origin/main`, and `origin/HEAD` aligned at that commit;
+  `git ls-remote --heads origin` still exposed only `refs/heads/main`.
 
 ## 2026-06-10: Basin cube display presets
 

@@ -1,6 +1,6 @@
 # Project Kanban
 
-Updated: 2026-06-10 17:11 CST
+Updated: 2026-06-10 18:01 CST
 
 ## Current Request: 2026-06-10 README Refresh, One-Branch Closeout, And Fukui Runner
 
@@ -28,7 +28,10 @@ Updated: 2026-06-10 17:11 CST
   VESTA failure after cube arithmetic was fixed by preserving cube-only
   output in the top-level recipe while returning nonzero for the VESTA
   failure; the P3 was to write final sync/review status back to this board.
-- [ ] Commit and push on `main`, then recheck local/remote branch state.
+- [x] Commit and push on `main`: `43e00d2` (`Add Multiwfn Fukui runner`).
+- [x] Recheck local/remote branch state after push: local `main`,
+  `origin/main`, and `origin/HEAD` are aligned at `43e00d2`, and
+  `git ls-remote --heads origin` exposes only `refs/heads/main`.
 
 ## Current Continuation: 2026-06-10 Fukui/Dual Descriptor Wavefunction Runner
 
