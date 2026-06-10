@@ -15,18 +15,20 @@ point.
   GitHub remote.
 - GitHub remote: `origin` points to `Github:Stardust0831/multiwfn2vesta.git`,
   with `origin/HEAD -> origin/main`.
-- Branch audit on 2026-06-10 13:15 CST, after `git fetch --prune origin`,
-  found local `main`, `origin/main`, and `origin/HEAD` aligned.
+- Branch audit on 2026-06-10 15:16 CST, after `git fetch --prune origin`,
+  found local `main`, `origin/main`, and `origin/HEAD` aligned at
+  `b99d80e2d3879eb7dbad260e4b8722c50427ad98`.
 - `git ls-remote --heads origin` currently returns only
-  `refs/heads/main`; no merge-back was needed in this pass because there is no
-  extra local or remote feature branch to consolidate.
+  `refs/heads/main`, also at `b99d80e`; no merge-back was needed in this pass
+  because there is no extra local or remote feature branch to consolidate.
 - The apparently unusual branch history is a normal linear `main` history
   containing feature commits and documentation closure commits, not active
   competing branches.
 - Recent maintained feature work includes IGM/mIGM/IGMH command-stream automation,
   IGMH/aIGM VESTA cube presets, surface extrema overlays for
   `surfanalysis.pdb`, surface-map/grid expansion, generic Multiwfn atom table
-  coloring, batch orbital export, `cube-arith`, and `grid-run`.
+  coloring, batch orbital export, `cube-arith`, `grid-run`, and
+  `grid-run --surface-cube` mapped-surface handoff.
 - Future experiment branches should be short-lived: merge or fast-forward the
   useful commits into `main`, then remove the experiment branch once
   `origin/main` contains the maintained result.
@@ -153,6 +155,11 @@ multiwfn2vesta igm-run input.molden igm_products \
   --fragment 1-48 --fragment 49-60 \
   --grid-mode spacing --grid-spacing 0.25
 multiwfn2vesta grid-run input.molden grid_products --function density
+multiwfn2vesta grid-run input.molden esp_map \
+  --function esp \
+  --surface-cube density.cub \
+  --grid-mode cube \
+  --grid-cube density.cub
 ```
 
 Multiwfn discovery checks, in order:
@@ -773,25 +780,18 @@ views by VESTA CLI rotations, rather than writing persistent front/right/top
 
 ## Validation
 
-Current focused no-GUI checks pass as a 118-test no-GUI regression set:
+Current no-GUI regression passed as a 212-test suite at the audited
+`b99d80e` tip:
 
 ```bash
-PYTHONPATH=src python3 -m unittest \
-  tests.test_molden_check \
-  tests.test_abacus_molden \
-  tests.test_abacus_mulliken \
-  tests.test_multiwfn_atom_table \
-  tests.test_cube_preset \
-  tests.test_multiwfn_iri \
-  tests.test_cube_vesta \
-  tests.test_cli \
-  tests.test_aim_igmh_vesta \
-  tests.test_vesta_aim_overlay_style \
-  tests.test_executables \
-  tests.test_multiwfn_aim \
-  tests.test_iri_cube \
-  tests.test_aim_vesta \
-  tests.test_vesta_atom_coloring
+PYTHONPATH=src python3 -m unittest discover -s tests
+```
+
+For documentation-only refreshes, the minimum local validation is:
+
+```bash
+git diff --check
+bin/multiwfn2vesta --help
 ```
 
 Smoke-tested ABACUS Molden wrapper git export:

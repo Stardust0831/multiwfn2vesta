@@ -1,6 +1,42 @@
 # Project Kanban
 
-Updated: 2026-06-10 14:35 CST
+Updated: 2026-06-10 15:12 CST
+
+## Current Request: 2026-06-10 README Refresh And Branch Consolidation
+
+- [x] Record the user's request before editing: update README, inspect the
+  odd-looking branch state, consolidate back to a single branch if needed, and
+  keep Git identity as `Stardust0831`.
+- [x] Inspect the current branch state: local `main`, `origin/main`, and
+  `origin/HEAD` are aligned at `b99d80e`; no extra local or remote feature
+  branch is visible, so no merge is currently required.
+- [x] Confirm repository identity is `Stardust0831 <13862180016@163.com>`.
+- [x] Refresh README so it reflects the current maintained CLI/workflows after
+  the recent grid mapped-surface bridge.
+- [x] Sync `project/docs/` to the root `docs/` mirror after documentation
+  edits.
+- [x] Validate documentation/branch state with `git diff --check`,
+  `bin/multiwfn2vesta --help`, `rsync -ani --checksum project/docs/ docs/`,
+  and post-fetch branch checks.
+- [x] Run read-only pre-commit review: no blocker; reviewer confirmed branch
+  audit, validation wording, kanban state, and root-doc mirror consistency.
+- [ ] Commit and push the README/docs update on `main`.
+
+## Current Continuation: 2026-06-10 STM/LDOS Candidate After Grid Surface Bridge
+
+- [x] Record the resumed long-running objective: continue enriching
+  ABACUS-compatible Multiwfn wavefunction analyses that can produce VESTA
+  visualization products.
+- [x] Re-read current project state and Multiwfn STM source prompts before
+  choosing the exact implementation boundary.
+- [x] Confirm the minimal STM command stream by a manual H2O noGUI probe:
+  `300 -> 4 -> 1 -> 4 -> NX,NY,NZ -> 0 -> 2 -> 0 -> -1 -> 0 -> q`
+  exports `STM.cub` in constant-current mode.
+- [ ] Implement the smallest reliable STM/LDOS increment if the prompt stream
+  is stable enough, otherwise document the blocker and choose the next
+  aligned increment.
+- [ ] Add tests, docs, and a no-GUI smoke scaled to the implemented boundary.
+- [ ] Sync project/root docs, review, commit, and push if stable.
 
 ## Current Continuation: 2026-06-10 Multiwfn Analysis Expansion After IGM/mIGM
 

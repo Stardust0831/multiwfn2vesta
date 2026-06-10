@@ -1,5 +1,24 @@
 # Worklog
 
+## 2026-06-10: README branch refresh at grid surface bridge tip
+
+- User asked to update README again, noted that the branch state still looked
+  unusual, suggested merging back to one branch if useful, and requested Git
+  identity `Stardust0831`.
+- Rechecked `/mnt/g/work/multiwfn2vesta/project` after
+  `git fetch --prune origin`: local `main`, `origin/main`, and `origin/HEAD`
+  are aligned at `b99d80e2d3879eb7dbad260e4b8722c50427ad98`
+  (`Add grid mapped-surface bridge`).  `git ls-remote --heads origin`
+  exposes only `refs/heads/main`, also at `b99d80e`; no merge-back is needed
+  in this pass.
+- Confirmed repository-local identity remains
+  `Stardust0831 <13862180016@163.com>`.
+- Refreshed `README.md` so the front page records the current audited branch
+  state, explicitly mentions the `grid-run --surface-cube` mapped-surface
+  handoff, shows a quick ESP-on-density `grid-run` example, and replaces the
+  stale 118-test validation note with the current 212-test no-GUI regression
+  command.
+
 ## 2026-06-10: grid-run mapped-surface bridge
 
 - Continued the long-running Multiwfn/ABACUS/VESTA analysis-expansion goal by
