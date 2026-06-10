@@ -50,6 +50,46 @@ PRESETS: Tuple[CubePreset, ...] = (
         notes="Use for molecular orbitals, real wavefunction cubes, density differences, or dual-descriptor cubes.",
     ),
     CubePreset(
+        name="potential",
+        aliases=("potential-cube", "abacus-potential", "out-pot", "local-potential", "pot-es", "mep-cube"),
+        description="Positive/negative isosurfaces for direct potential cubes.",
+        surface_mode="signed",
+        isosurface=0.05,
+        positive_rgb=(255, 90, 60),
+        negative_rgb=(60, 120, 255),
+        surface_opacity=(120, 255),
+        notes=(
+            "Use for direct ABACUS out_pot cubes such as pots*.cube or pot_es.cube, "
+            "or other signed potential scalar fields. For potential mapped on a density surface, use preset `esp`."
+        ),
+    ),
+    CubePreset(
+        name="partial-charge",
+        aliases=("pchg", "abacus-pchg", "out-pchg", "band-density", "state-density", "partial-density"),
+        description="Single positive isosurface for ABACUS partial charge/state density cubes.",
+        surface_mode="single",
+        isosurface=0.001,
+        positive_rgb=(130, 210, 255),
+        surface_opacity=(150, 255),
+        notes=(
+            "Use for ABACUS calculation get_pchg / out_pchg partial charge cubes. "
+            "Tune the isosurface for the selected state, band, or energy window."
+        ),
+    ),
+    CubePreset(
+        name="wavefunction-norm",
+        aliases=("wfc-norm", "abacus-wfc-norm", "out-wfc-norm", "wavefunction-magnitude", "wfc-abs"),
+        description="Single positive isosurface for nonnegative wavefunction norm/magnitude cubes.",
+        surface_mode="single",
+        isosurface=0.001,
+        positive_rgb=(180, 120, 255),
+        surface_opacity=(145, 255),
+        notes=(
+            "Use for ABACUS out_wfc_norm nonnegative wavefunction norm or magnitude cubes. "
+            "For signed real/imaginary wavefunction cubes from out_wfc_re_im, use preset `signed` or alias `orbital`."
+        ),
+    ),
+    CubePreset(
         name="elf",
         aliases=("abacus-elf",),
         description="ELF localization isosurface.",

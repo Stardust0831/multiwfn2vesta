@@ -56,8 +56,8 @@ multiwfn2vesta aim-igmh --help
 - `cube-vesta`: 从 ABACUS/Multiwfn scalar cube 直接生成 `.vesta`，可选
   texture/color cube，默认关闭 section plane
 - `cube-preset`: 在 `cube-vesta` 后端上套用常见分析默认值，例如 density、
-  orbital/signed、ELF/LOL、IRI/RDG/NCI、IGM/IGMH/aIGM、ESP/MEP、
-  ALIE/LEA/LEAE、vdW map
+  orbital/signed、ABACUS direct potential、partial charge、wavefunction norm、
+  ELF/LOL、IRI/RDG/NCI、IGM/IGMH/aIGM、ESP/MEP、ALIE/LEA/LEAE、vdW map
 - `surface-extrema`: 把 Multiwfn `surfanalysis.pdb` 的分子表面极值点作为
   atoms-only phase 叠加到已有 `.vesta` 文件中
 - `cube-arith`: 对兼容 cube 做线性组合，用于 density difference、Fukui
@@ -212,6 +212,9 @@ multiwfn2vesta cube-vesta \
 multiwfn2vesta cube-preset --list-presets
 multiwfn2vesta cube-preset density density.cub cube_products
 multiwfn2vesta cube-preset orbital orbital.cub cube_products
+multiwfn2vesta cube-preset potential pot_es.cube cube_products
+multiwfn2vesta cube-preset partial-charge pchg.cube cube_products
+multiwfn2vesta cube-preset wavefunction-norm wfc_norm.cube cube_products
 multiwfn2vesta cube-preset elf ELF.cub cube_products
 multiwfn2vesta cube-preset rdg IRI2_surface.cub cube_products \
   --texture-cube IRI1_color.cub
@@ -237,6 +240,14 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
 - `density`：单等值面，默认 `--isosurface 0.01`
 - `signed`：正/负等值面，别名包括 `orbital`、`wavefunction`、
   `density-difference` 和 `dual-descriptor`
+- `potential`：正/负等值面，别名包括 `abacus-potential`、`out-pot`、
+  `pot-es`，用于 ABACUS `out_pot` 直接势场 cube；如果是密度表面按电势染色，
+  用 `esp`
+- `partial-charge`：单正值等值面，别名包括 `pchg`、`out-pchg`、
+  `band-density`，用于 ABACUS `calculation get_pchg` / `out_pchg` 态密度
+- `wavefunction-norm`：单正值等值面，别名包括 `out-wfc-norm`、
+  `wavefunction-magnitude`，用于 ABACUS `out_wfc_norm` 非负波函数模/模方；
+  对 `out_wfc_re_im` 的实部/虚部 signed cube 仍用 `signed`/`orbital`
 - `elf` / `lol`：局域化函数等值面
 - `stm`：别名包括 `ldos`、`stm-ldos`、`tunneling-current`，用于
   Multiwfn 常电流 STM 导出的 `STM.cub`，默认等值面 `0.001`

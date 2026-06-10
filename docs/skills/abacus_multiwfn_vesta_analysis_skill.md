@@ -49,6 +49,9 @@ without manually spelling every `cube-vesta` option:
 ```bash
 multiwfn2vesta cube-preset density density.cub cube_products
 multiwfn2vesta cube-preset orbital wfc_real.cub cube_products
+multiwfn2vesta cube-preset potential pot_es.cube cube_products
+multiwfn2vesta cube-preset partial-charge pchg.cube cube_products
+multiwfn2vesta cube-preset wavefunction-norm wfc_norm.cube cube_products
 multiwfn2vesta cube-preset elf ELF.cub cube_products
 multiwfn2vesta cube-preset rdg IRI2_surface.cub cube_products \
   --texture-cube IRI1_color.cub

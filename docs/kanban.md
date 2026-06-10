@@ -1,6 +1,38 @@
 # Project Kanban
 
-Updated: 2026-06-10 18:54 CST
+Updated: 2026-06-10 19:09 CST
+
+## Current Continuation: 2026-06-10 Multiwfn Analysis Expansion Sweep
+
+- [x] Record resumed objective: keep surveying useful Multiwfn analyses that
+  can become VESTA products, prioritizing wavefunction/cube workflows that
+  ABACUS can produce directly or through the maintained Molden bridge.
+- [x] Re-read the current analysis matrix, CLI surface, and local Multiwfn
+  source evidence to choose the next high-value maintainable increment.
+- [x] Implement or document the next bounded feature without touching files
+  outside `/mnt/g/work/multiwfn2vesta`.
+- [x] Add focused tests, update README/usage/skills/worklog, sync root docs,
+  run review, and validate the direct ABACUS cube preset increment.
+- [x] Prepare the stable `main` increment for commit and push; final commit
+  hash and post-push branch check are reported in the assistant response.
+
+## Current Request: 2026-06-10 README Refresh And One-Branch Closeout
+
+- [x] Record user request: update README, inspect the unusual-looking branch
+  state, converge work back to one branch if needed, and use
+  `Stardust0831` identity.
+- [x] Recheck repository state without destructive operations: local `main`,
+  `origin/main`, and `origin/HEAD` are aligned at
+  `809e2611aa51cd9a37fd5966b6d4e2e4673f9e44`; `git ls-remote --heads
+  origin` exposes only `refs/heads/main`.
+- [x] Confirm repository-local identity is
+  `Stardust0831 <13862180016@163.com>`.
+- [x] Refresh README branch/status wording so the recorded hash is the
+  pre-increment branch-audit baseline and not a stale final commit claim.
+- [x] Keep the new ABACUS direct cube preset docs and skills in the same
+  maintained `main` increment.
+- [x] Resync root docs after final metadata edits, then prepare the `main`
+  commit/push closeout with final hash reported in the assistant response.
 
 ## Active Goal Continuation: 2026-06-10 Multiwfn Analysis Expansion
 

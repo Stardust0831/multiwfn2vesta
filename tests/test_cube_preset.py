@@ -85,6 +85,9 @@ class TestCubePreset(unittest.TestCase):
         text = format_preset_list()
         self.assertIn("density", text)
         self.assertIn("signed", text)
+        self.assertIn("potential", text)
+        self.assertIn("partial-charge", text)
+        self.assertIn("wavefunction-norm", text)
         self.assertIn("iri", text)
         self.assertIn("stm", text)
         self.assertIn("domain", text)
@@ -198,6 +201,58 @@ basin type two
             self.assertIn("canonical_preset: `signed`", manifest)
             self.assertIn("requested_preset: `orbital`", manifest)
             self.assertIn("effective_surface_mode: `signed`", manifest)
+
+    def test_abacus_direct_potential_preset_writes_signed_surfaces(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            cube = self.write_tmp(root, "pot_es.cube", SIGNED_CUBE)
+
+            result = run_preset("out-pot", cube, root / "products")
+
+            text = result.vesta_path.read_text(encoding="utf-8")
+            manifest = result.manifest_path.read_text(encoding="utf-8")
+
+            self.assertRegex(
+                text,
+                r"ISURF\n  1   1\s+0\.05\s+255\s+90\s+60\s+120\s+255\n  1   1\s+-0\.05\s+60\s+120\s+255\s+120\s+255",
+            )
+            self.assertIn("canonical_preset: `potential`", manifest)
+            self.assertIn("requested_preset: `out-pot`", manifest)
+            self.assertIn("effective_surface_mode: `signed`", manifest)
+            self.assertIn("direct ABACUS out_pot cubes", manifest)
+
+    def test_abacus_partial_charge_preset_writes_single_positive_surface(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            cube = self.write_tmp(root, "pchg.cube", SURFACE_CUBE)
+
+            result = run_preset("abacus-pchg", cube, root / "products")
+
+            text = result.vesta_path.read_text(encoding="utf-8")
+            manifest = result.manifest_path.read_text(encoding="utf-8")
+
+            self.assertRegex(text, r"ISURF\n  1   1\s+0\.001\s+130\s+210\s+255\s+150\s+255")
+            self.assertIn("canonical_preset: `partial-charge`", manifest)
+            self.assertIn("requested_preset: `abacus-pchg`", manifest)
+            self.assertIn("effective_surface_mode: `single`", manifest)
+            self.assertIn("out_pchg partial charge cubes", manifest)
+
+    def test_abacus_wavefunction_norm_preset_distinguishes_nonnegative_wfc(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            cube = self.write_tmp(root, "wfc_norm.cube", SURFACE_CUBE)
+
+            result = run_preset("out-wfc-norm", cube, root / "products")
+
+            text = result.vesta_path.read_text(encoding="utf-8")
+            manifest = result.manifest_path.read_text(encoding="utf-8")
+
+            self.assertRegex(text, r"ISURF\n  1   1\s+0\.001\s+180\s+120\s+255\s+145\s+255")
+            self.assertNotRegex(text, r"\n  1   1\s+-0\.001")
+            self.assertIn("canonical_preset: `wavefunction-norm`", manifest)
+            self.assertIn("requested_preset: `out-wfc-norm`", manifest)
+            self.assertIn("effective_surface_mode: `single`", manifest)
+            self.assertIn("out_wfc_norm", manifest)
 
     def test_iri_preset_requires_texture_cube(self):
         with tempfile.TemporaryDirectory() as tmp:

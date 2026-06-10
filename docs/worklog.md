@@ -1,5 +1,24 @@
 # Worklog
 
+## 2026-06-10: ABACUS direct cube display presets
+
+- Continued the Multiwfn/ABACUS/VESTA analysis-expansion sweep by improving
+  the direct ABACUS cube route, where no additional Multiwfn wavefunction
+  analysis is needed.
+- Added `cube-preset potential` for direct `out_pot`/potential cube signed
+  positive/negative isosurfaces.  This is distinct from `cube-preset esp`,
+  which remains the density/surface cube plus potential texture workflow.
+- Added `cube-preset partial-charge` for ABACUS `calculation get_pchg` /
+  `out_pchg` partial charge, band-density, or state-density cubes.
+- Added `cube-preset wavefunction-norm` for nonnegative ABACUS
+  `out_wfc_norm` wavefunction norm/magnitude cubes; signed real/imaginary
+  `out_wfc_re_im` cubes still use `cube-preset signed` or alias `orbital`.
+- Added focused tests for preset listing, aliases, signed/single surface
+  behavior, and manifest notes.
+- Validation passed: `py_compile`, 23 focused `cube-preset` tests,
+  `cube-preset --list-presets`, `bin/multiwfn2vesta --help`,
+  `git diff --check`, and the full 261-test no-GUI regression.
+
 ## 2026-06-10: aIGM/amIGM trajectory-average runner
 
 - Continued the long-running Multiwfn/ABACUS/VESTA analysis-expansion goal by

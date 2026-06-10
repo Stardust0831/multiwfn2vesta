@@ -152,6 +152,9 @@ environment is not suitable.
 ```bash
 multiwfn2vesta cube-preset --list-presets
 multiwfn2vesta cube-preset orbital orbital.cub cube_products
+multiwfn2vesta cube-preset potential pot_es.cube cube_products
+multiwfn2vesta cube-preset partial-charge pchg.cube cube_products
+multiwfn2vesta cube-preset wavefunction-norm wfc_norm.cube cube_products
 multiwfn2vesta cube-preset rdg IRI2_surface.cub cube_products \
   --texture-cube IRI1_color.cub
 multiwfn2vesta cube-preset domain domain.cub cube_products
@@ -168,11 +171,13 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
 
 Use this when the file is a common ABACUS/Multiwfn cube product and the
 default style is enough to start.  Presets cover density-like scalar cubes,
-signed orbital/wavefunction/density-difference cubes, ELF/LOL, IRI/RDG/NCI
-mapped surfaces, binary domain isosurfaces, binary basin isosurfaces,
-signed basin-type maps, IGM/IGMH/aIGM weak-interaction mapped surfaces,
-ESP/MEP mapped density surfaces, generic molecular surface maps,
-ALIE/LEA/LEAE density-surface maps, and vdW-potential density-surface maps.
+signed orbital/wavefunction/density-difference cubes, direct ABACUS potential
+cubes, ABACUS partial-charge/state-density cubes, nonnegative ABACUS
+wavefunction-norm cubes, ELF/LOL, IRI/RDG/NCI mapped surfaces, binary domain
+isosurfaces, binary basin isosurfaces, signed basin-type maps,
+IGM/IGMH/aIGM weak-interaction mapped surfaces, ESP/MEP mapped density
+surfaces, generic molecular surface maps, ALIE/LEA/LEAE density-surface maps,
+and vdW-potential density-surface maps.
 All VESTA writing still goes through the maintained `cube-vesta`
 backend.
 `igmh`/`igm-intra`/`aigm` defaults follow bundled Multiwfn IGM VMD templates,

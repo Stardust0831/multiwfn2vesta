@@ -43,6 +43,9 @@ Analysis preset wrapper:
 ```bash
 multiwfn2vesta cube-preset --list-presets
 multiwfn2vesta cube-preset orbital orbital.cub cube_products
+multiwfn2vesta cube-preset potential pot_es.cube cube_products
+multiwfn2vesta cube-preset partial-charge pchg.cube cube_products
+multiwfn2vesta cube-preset wavefunction-norm wfc_norm.cube cube_products
 multiwfn2vesta cube-preset elf ELF.cub cube_products
 multiwfn2vesta cube-preset rdg IRI2_surface.cub cube_products \
   --texture-cube IRI1_color.cub
@@ -176,6 +179,16 @@ passes it back through `cube-preset`.
 - `signed` aliases: `orbital`, `mo`, `wavefunction`, `abacus-wfc`,
   `density-difference`, `dual-descriptor`; positive/negative surfaces,
   default magnitude `0.02`.
+- `potential` aliases: `abacus-potential`, `out-pot`, `local-potential`,
+  `pot-es`; signed direct potential cube isosurfaces, default magnitude
+  `0.05`.  Use `esp` instead for density-surface potential coloring.
+- `partial-charge` aliases: `pchg`, `abacus-pchg`, `out-pchg`,
+  `band-density`, `state-density`; single positive surface for ABACUS
+  `get_pchg`/`out_pchg` cubes, default isosurface `0.001`.
+- `wavefunction-norm` aliases: `wfc-norm`, `abacus-wfc-norm`,
+  `out-wfc-norm`, `wavefunction-magnitude`; single positive surface for
+  nonnegative ABACUS `out_wfc_norm` cubes, default isosurface `0.001`.
+  Use `signed`/`orbital` for real/imaginary `out_wfc_re_im` cubes.
 - `elf` alias: `abacus-elf`; single surface, default isosurface `0.80`.
 - `lol`; single surface, default isosurface `0.50`.
 - `iri` aliases: `rdg`, `nci`, `weak-interaction`; requires
