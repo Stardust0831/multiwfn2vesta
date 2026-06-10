@@ -17,6 +17,12 @@
   `Stardust0831 <13862180016@163.com>`.
 - Refreshed README Repository Status while closing the in-progress
   `domain-run` feature increment on `main`.
+- After the domain-run feature push, rechecked local `main`, `origin/main`,
+  and `origin/HEAD` at
+  `73018ab1d8bca119d74cf9d51a39b244242bbc5f`
+  (`Add Multiwfn domain runner`).  `git ls-remote --heads origin` still
+  exposes only `refs/heads/main`, so the repository remains consolidated on a
+  single maintained branch.
 
 ## 2026-06-10: Multiwfn domain analysis runner from cube data
 

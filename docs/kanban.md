@@ -22,7 +22,14 @@ Updated: 2026-06-10 16:25 CST
   `git diff --check` passed.
 - [x] Run read-only review: no blocker; residual risks were limited to keeping
   local `domain.cub`/`domain.pdb` unstaged and Multiwfn menu-version drift.
-- [ ] Commit/push on `main` if the branch state is stable.
+- [x] Commit and push the feature increment on `main`: `73018ab`
+  (`Add Multiwfn domain runner`).
+- [x] Run post-push branch check: local `main`, `origin/main`, and
+  `origin/HEAD` are aligned at `73018ab`; `git ls-remote --heads origin`
+  returns only `refs/heads/main`.
+- [x] Prepare README/kanban closeout so the front page records the
+  post-domain-run branch state; this docs-only closeout is committed on the
+  same `main` branch.
 
 ## Current Continuation: 2026-06-10 Domain Analysis Runner From Cube Data
 
@@ -45,7 +52,7 @@ Updated: 2026-06-10 16:25 CST
   worklog for the new domain route.
 - [x] Sync project/root docs and run final validation.
 - [x] Run final read-only review: no blocker.
-- [ ] Commit and push on `main` if stable.
+- [x] Commit and push on `main`: `73018ab` (`Add Multiwfn domain runner`).
 
 ## Current Request: 2026-06-10 README Refresh at STM Runner Tip
 

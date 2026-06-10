@@ -16,22 +16,24 @@ point.
   GitHub remote.
 - GitHub remote: `origin` points to `Github:Stardust0831/multiwfn2vesta.git`,
   with `origin/HEAD -> origin/main`.
-- Branch audit on 2026-06-10 16:30 CST, after `git fetch --prune origin`,
-  found local `main`, `origin/main`, and `origin/HEAD` aligned at
-  `da7d4b759c663d7a1b53ec8cb71e5d96db28d68d`.
+- Branch audit on 2026-06-10 16:45 CST, after the `domain-run` feature push,
+  found local `main`, `origin/main`, and `origin/HEAD` aligned at feature
+  commit `73018ab1d8bca119d74cf9d51a39b244242bbc5f`
+  (`Add Multiwfn domain runner`).
 - `git ls-remote --heads origin` currently returns only
-  `refs/heads/main`, also at `da7d4b7`; no merge-back was needed in this pass
-  because there is no extra local or remote feature branch to consolidate.
+  `refs/heads/main`, also at `73018ab`; no merge-back was needed in this
+  pass because there is no extra local or remote feature branch to consolidate.
 - The apparently unusual branch history is a normal linear `main` history
   containing feature commits and documentation closure commits, not active
   competing branches.
-- Recent maintained feature work includes IGM/mIGM/IGMH command-stream automation,
-  IGMH/aIGM VESTA cube presets, surface extrema overlays for
+- Recent maintained feature work includes cube/grid domain extraction,
+  IGM/mIGM/IGMH command-stream automation, IGMH/aIGM VESTA cube presets,
+  surface extrema overlays for
   `surfanalysis.pdb`, surface-map/grid expansion, generic Multiwfn atom table
   coloring, batch orbital export, `cube-arith`, `grid-run`,
   `grid-run --surface-cube` mapped-surface handoff, `stm-run`
-  constant-current STM/LDOS cube export, and `domain-run` cube/grid domain
-  extraction.
+  constant-current STM/LDOS cube export, and earlier AIM/IRI/RDG/AIM+IGMH
+  VESTA workflows.
 - Future experiment branches should be short-lived: merge or fast-forward the
   useful commits into `main`, then remove the experiment branch once
   `origin/main` contains the maintained result.
