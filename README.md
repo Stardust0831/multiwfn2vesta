@@ -15,8 +15,9 @@ point.
   GitHub remote.
 - GitHub remote: `origin` points to `Github:Stardust0831/multiwfn2vesta.git`,
   with `origin/HEAD -> origin/main`.
-- Current branch audit after `git fetch --prune origin` on 2026-06-10
-  10:00 CST: local `main`, `origin/main`, and `origin/HEAD` all pointed at
+- Branch audit before this README refresh, after `git fetch --prune origin`
+  on 2026-06-10 10:00 CST: local `main`, `origin/main`, and
+  `origin/HEAD` all pointed at
   `0c1b5c6b88e65501437b6a947dc97f4876cfdc61`
   (`Record Multiwfn atom table coloring push`), and
   `git ls-remote --heads origin` returned only `refs/heads/main`.
@@ -27,7 +28,7 @@ point.
 - Most recent maintained feature implementation: generic Multiwfn atom scalar
   table coloring, pushed as
   `7b305ea5762b3e8444b53338aecec190cc331a7f`
-  (`Add Multiwfn atom table coloring`).  The current tip
+  (`Add Multiwfn atom table coloring`).  The pre-refresh tip
   `0c1b5c6b88e65501437b6a947dc97f4876cfdc61` is the docs/worklog closure for
   that same feature.
 - Recent maintained feature pushes on 2026-06-10 include `grid-run`

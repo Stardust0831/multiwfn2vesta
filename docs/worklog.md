@@ -15,10 +15,10 @@
   `main` commits, including feature commits and documentation closure commits.
 - Confirmed repository-local identity remains
   `Stardust0831 <13862180016@163.com>`.
-- Refreshed `README.md` Repository Status so it records the current verified
-  `main` tip, explains that earlier branch-refresh entries are ordinary
-  `main` history rather than active branches, and lists the latest maintained
-  feature as generic Multiwfn atom scalar table coloring.
+- Refreshed `README.md` Repository Status so it records the verified
+  pre-refresh `main` tip, explains that earlier branch-refresh entries are
+  ordinary `main` history rather than active branches, and lists the latest
+  maintained feature as generic Multiwfn atom scalar table coloring.
 - Validation before commit passed: `git diff --check` and
   `bin/multiwfn2vesta --help`.  The final docs commit hash and post-push
   branch check are reported in the assistant response to avoid an infinite
