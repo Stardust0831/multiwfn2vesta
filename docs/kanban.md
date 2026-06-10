@@ -46,6 +46,12 @@ Updated: 2026-06-10
 - Updated README branch-maintenance notes with the current verified commit,
   expected one-branch remote state, maintainer identity commands, and the
   future fast-forward merge pattern for short-lived experiment branches.
+- Committed and pushed the README branch follow-up to GitHub `main` as
+  `41bfc9ce691b8de195a69566b56ac84df335947b`
+  (`Refresh README branch follow-up`).  After push, `HEAD`, `origin/main`,
+  and `origin/HEAD` pointed at that commit; the separate
+  `src/multiwfn2vesta/multiwfn_grid.py` draft remained untracked and was not
+  part of the branch-cleanup commit.
 - Rechecked README/branch state for the user's 2026-06-10 cleanup request:
   after `git fetch --prune`, the project has local `main`, `origin/main`,
   and `origin/HEAD -> origin/main`; `git ls-remote --heads origin` reports

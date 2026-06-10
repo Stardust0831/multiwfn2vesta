@@ -25,6 +25,15 @@
   (`src/multiwfn2vesta/multiwfn_grid.py`) and related kanban notes.  That
   feature remains a separate increment and is intentionally not treated as a
   branch-merge cleanup.
+- Committed and pushed the README branch follow-up as
+  `41bfc9ce691b8de195a69566b56ac84df335947b`
+  (`Refresh README branch follow-up`).  Push target was
+  `Github:Stardust0831/multiwfn2vesta.git`, branch `main`, advancing the
+  remote from `17667f2` to `41bfc9c`.
+- Post-push status check showed `HEAD -> main`, `origin/main`, and
+  `origin/HEAD` all at `41bfc9c`; `src/multiwfn2vesta/multiwfn_grid.py`
+  remained untracked, confirming the README/branch cleanup did not include
+  the unfinished `grid-run` code.
 
 ## 2026-06-10: README branch-state refresh
 
