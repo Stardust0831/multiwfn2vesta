@@ -446,13 +446,22 @@ def interactive_grid_run() -> int:
     output_dir = _prompt("output directory", default=_default_output_dir(wavefunction, "multiwfn_grid"))
     argv: List[str] = [wavefunction, output_dir]
 
-    function_name = _prompt("function name/index (density/elf/lol/esp/orbital/...)", default="density")
+    orbital = _prompt("orbital index/label, or multiple space-separated labels for batch (empty to skip)")
+    function_default = "orbital" if orbital else "density"
+    function_name = _prompt(
+        "function name/index (density/elf/lol/esp/orbital/...)",
+        default=function_default,
+    )
     if function_name:
         argv.extend(["--function", function_name])
 
-    orbital = _prompt("orbital index/label for orbital functions (empty to skip)")
     if orbital:
-        argv.extend(["--orbital", orbital])
+        orbitals = orbital.split()
+        if len(orbitals) == 1:
+            argv.extend(["--orbital", orbitals[0]])
+        else:
+            argv.append("--orbitals")
+            argv.extend(orbitals)
 
     multiwfn = _prompt("Multiwfn executable or directory (empty for auto-discovery)")
     if multiwfn:

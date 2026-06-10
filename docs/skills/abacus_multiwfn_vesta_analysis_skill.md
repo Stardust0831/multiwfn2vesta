@@ -181,10 +181,24 @@ multiwfn2vesta grid-run ABACUS_Multiwfn.molden grid_products \
 
 Useful `grid-run` functions for ABACUS-compatible Molden files include
 `density`, `orbital --orbital h`, `orbital-density --orbital h`, `laplacian`,
-`elf`, `lol`, `esp`, `rdg`, `iri`, and `signlambda2rho`.  For aligned
-potential-on-density or multi-layer VESTA products, generate the component
-cubes with `--grid-mode cube --grid-cube reference.cub --no-vesta`, then call
-`cube-preset`/`cube-vesta` explicitly.
+`elf`, `lol`, `esp`, `rdg`, `iri`, and `signlambda2rho`.
+
+For ABACUS LCAO Molden frontier orbital inspection, batch export is now the
+maintained route:
+
+```bash
+multiwfn2vesta grid-run ABACUS_Multiwfn.molden orbital_products \
+  --orbitals h l l+1 \
+  --grid-points 80 80 80 \
+  --no-vesta
+```
+
+The batch route repeats isolated single-orbital Multiwfn runs and writes a
+top-level manifest plus one child directory per orbital.  Use
+`--function orbital-density --orbitals ...` for density-like orbital maps.
+For aligned potential-on-density or multi-layer VESTA products, generate the
+component cubes with `--grid-mode cube --grid-cube reference.cub --no-vesta`,
+then call `cube-preset`/`cube-vesta` explicitly.
 
 ## Priority Rules
 

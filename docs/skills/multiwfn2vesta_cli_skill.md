@@ -192,6 +192,24 @@ multiwfn2vesta grid-run --list-functions
 
 Common functions include `density`, `orbital --orbital h`, `orbital-density`,
 `laplacian`, `elf`, `lol`, `esp`, `rdg`, `iri`, and `signlambda2rho`.
+
+Batch frontier orbital export:
+
+```bash
+multiwfn2vesta grid-run input.fch orbital_products \
+  --orbitals h l l+1 \
+  --grid-points 80 80 80 \
+  --no-vesta
+```
+
+With `--orbitals` and no explicit `--function`, the CLI defaults to
+`orbital`.  Use `--function orbital-density --orbitals h l` for orbital
+density cubes.  Batch mode is repeated isolated single-orbital execution: each
+orbital gets a child directory with its own command stream, logs, raw cube
+directory, processed cube, optional VESTA output, and one top-level
+`multiwfn_grid_batch_recipe.md`.  Add `--keep-going` to continue after a
+failed orbital; otherwise later orbitals are marked `skipped`.
+
 Reference-cube grids are useful for aligned overlays:
 
 ```bash

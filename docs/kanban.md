@@ -4,11 +4,15 @@ Updated: 2026-06-10
 
 ## Doing
 
+- Current increment: extend `multiwfn2vesta grid-run` with a batch
+  `orbital`/`orbital-density` export mode for ABACUS/Multiwfn Molden orbital
+  visualization.  The intended shape is multiple single-orbital runs with
+  separate command/log/recipe files, plus one batch manifest.
 - Continue the long-running objective: research and turn valuable
   Multiwfn wavefunction analyses into maintained VESTA workflows, especially
-  routes that can start from ABACUS LCAO Molden files.  The latest maintained
-  increment is `cube-arith`; next likely targets are batch orbital export,
-  higher-level charged-state cube templates, IGMH fragment command streams,
+  routes that can start from ABACUS LCAO Molden files.  The latest in-progress
+  increment is batch orbital export on top of `grid-run`; next likely targets
+  are higher-level charged-state cube templates, IGMH fragment command streams,
   and more real ABACUS Molden smokes.
 - Turn the 2026-06-10 Multiwfn/ABACUS/VESTA research into the next
   maintainable features: IGMH command streams, real-system `abacus-molden`
@@ -30,6 +34,23 @@ Updated: 2026-06-10
 
 ## Done
 
+- Implemented batch `orbital`/`orbital-density` export on top of
+  `multiwfn2vesta grid-run`.  Batch mode repeats isolated single-orbital
+  Multiwfn main-function-5 runs with one child output directory per orbital
+  plus a top-level `multiwfn_grid_batch_recipe.md`.
+- `grid-run --orbitals h l l+1` now defaults to `--function orbital` when no
+  explicit function is supplied.  `--function orbital-density --orbitals ...`
+  exports orbital-density cubes.  `--keep-going` continues after failed
+  orbitals; otherwise later orbitals are marked `skipped`.
+- Hardened batch argument handling after read-only sub-agent review:
+  `--orbitals` rejects `--orbital`, `--commands-file`, `--expected-cube`, and
+  `--raw-dir`; `--keep-going` without `--orbitals` is rejected instead of
+  being silently ignored.
+- Validation for batch orbital export passed: `py_compile` for touched Python
+  files, 52 focused tests across `tests.test_multiwfn_grid` and
+  `tests.test_cli`, full 163-test no-GUI regression, `grid-run --help`,
+  top-level `multiwfn2vesta --help`, and `git diff --check`.  Commit/push is
+  still pending in this pass.
 - Started `multiwfn2vesta cube-arith`, a maintained compatible-cube linear
   arithmetic workflow for density difference, Fukui functions, and dual
   descriptors.  It supports generic `--term COEFF CUBE` entries and named

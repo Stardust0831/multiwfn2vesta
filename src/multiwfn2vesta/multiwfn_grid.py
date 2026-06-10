@@ -78,6 +78,17 @@ class MultiwfnGridResult(NamedTuple):
     error: Optional[str]
 
 
+class MultiwfnGridBatchResult(NamedTuple):
+    wavefunction: Path
+    output_dir: Path
+    function: GridFunction
+    orbitals: Tuple[str, ...]
+    results: Tuple[MultiwfnGridResult, ...]
+    recipe_path: Path
+    success: bool
+    cli_returncode: int
+
+
 def available_functions_text() -> str:
     lines = ["Available Multiwfn grid functions:", ""]
     for function in GRID_FUNCTIONS:
@@ -151,6 +162,19 @@ def _format_float_triple(values: Optional[Sequence[float]]) -> str:
     if len(values) != 3:
         raise ValueError("Expected three values")
     return "{},{},{}".format(float(values[0]), float(values[1]), float(values[2]))
+
+
+def _safe_orbital_label(orbital: str) -> str:
+    safe = []
+    for char in str(orbital).strip():
+        if char.isalnum() or char in {"-", "_"}:
+            safe.append(char)
+        elif char == "+":
+            safe.append("plus")
+        else:
+            safe.append("_")
+    label = "".join(safe).strip("_")
+    return label or "orbital"
 
 
 def build_grid_commands(
@@ -265,6 +289,76 @@ def _write_recipe(
             "- The default cube filename is determined by the selected real-space function index in Multiwfn source `0123dim.f90`.",
         ]
     )
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def _write_batch_recipe(path: Path, result: MultiwfnGridBatchResult) -> None:
+    failed = [item for item in result.results if not item.success]
+    skipped = max(0, len(result.orbitals) - len(result.results))
+    lines = [
+        "# Multiwfn Grid Batch Recipe",
+        "",
+        f"- wavefunction: `{result.wavefunction}`",
+        f"- output_dir: `{result.output_dir}`",
+        f"- function_name: `{result.function.name}`",
+        f"- function_index: `{result.function.index}`",
+        f"- orbitals: `{', '.join(result.orbitals)}`",
+        f"- success: `{result.success}`",
+        f"- cli_returncode: `{result.cli_returncode}`",
+        f"- completed_runs: `{len(result.results)}`",
+        f"- failed_runs: `{len(failed)}`",
+        f"- skipped_runs: `{skipped}`",
+        "",
+        "## Runs",
+        "",
+    ]
+    for index, requested_orbital in enumerate(result.orbitals, start=1):
+        safe_label = _safe_orbital_label(requested_orbital)
+        run_name = f"{index:03d}_{result.function.name}_{safe_label}"
+        item = result.results[index - 1] if index <= len(result.results) else None
+        status = "skipped"
+        if item is not None:
+            status = "success" if item.success else "failed"
+        lines.extend(
+            [
+                f"### {run_name}",
+                "",
+                f"- requested_orbital: `{requested_orbital}`",
+                f"- safe_label: `{safe_label}`",
+                f"- status: `{status}`",
+            ]
+        )
+        if item is None:
+            lines.extend(
+                [
+                    f"- output_dir: `{result.output_dir / run_name}`",
+                    "- raw_dir: `None`",
+                    "- command_file: `None`",
+                    "- stdout_log: `None`",
+                    "- stderr_log: `None`",
+                    "- raw_cube: `None`",
+                    "- processed_cube: `None`",
+                    "- vesta_file: `None`",
+                    "- error: `not run yet or skipped after an earlier failure`",
+                    "",
+                ]
+            )
+            continue
+        lines.extend(
+            [
+                f"- output_dir: `{item.output_dir}`",
+                f"- raw_dir: `{item.raw_dir}`",
+                f"- command_file: `{item.command_file}`",
+                f"- stdout_log: `{item.stdout_log}`",
+                f"- stderr_log: `{item.stderr_log}`",
+                f"- raw_cube: `{item.raw_cube}`",
+                f"- processed_cube: `{item.cube}`",
+                f"- vesta_file: `"
+                f"{item.vesta_result.vesta_path if item.vesta_result is not None else None}`",
+                f"- error: `{item.error}`",
+                "",
+            ]
+        )
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
@@ -503,6 +597,115 @@ def run_multiwfn_grid(
     return result
 
 
+def run_multiwfn_grid_batch(
+    wavefunction: Path,
+    output_dir: Path,
+    *,
+    orbitals: Sequence[str],
+    function_name: Optional[str] = "orbital",
+    function_index: Optional[int] = None,
+    multiwfn_path: Optional[str] = None,
+    timeout: Optional[int] = None,
+    nthreads: Optional[int] = None,
+    stem: Optional[str] = None,
+    grid_mode: str = "points",
+    grid_points: Sequence[int] = (40, 40, 40),
+    grid_spacing: Optional[float] = None,
+    grid_cube: Optional[Path] = None,
+    grid_extension: Optional[float] = None,
+    pbc_origin: Optional[Sequence[float]] = None,
+    pbc_lengths: Optional[Sequence[float]] = None,
+    keep_raw_cube: bool = True,
+    make_vesta: bool = True,
+    vesta_output_dir: Optional[Path] = None,
+    preset: str = "auto",
+    isosurface: Optional[float] = None,
+    structure: Optional[str] = None,
+    boundary: Optional[Sequence[float]] = None,
+    copy_cubes: bool = True,
+    keep_going: bool = False,
+) -> MultiwfnGridBatchResult:
+    function = resolve_grid_function(function_name, function_index)
+    if not function.requires_orbital:
+        raise ValueError(
+            "Batch orbital export requires an orbital function such as "
+            "`orbital` or `orbital-density`"
+        )
+    normalized_orbitals = tuple(
+        str(orbital).strip() for orbital in orbitals if str(orbital).strip()
+    )
+    if not normalized_orbitals:
+        raise ValueError("At least one orbital is required for batch orbital export")
+
+    wavefunction = Path(wavefunction).expanduser().resolve()
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    batch_stem = stem or wavefunction.stem
+    recipe_path = output_dir / "multiwfn_grid_batch_recipe.md"
+
+    results: List[MultiwfnGridResult] = []
+
+    def current_result() -> MultiwfnGridBatchResult:
+        success = len(results) == len(normalized_orbitals) and all(
+            item.success for item in results
+        )
+        cli_returncode = 0 if success else next(
+            (item.cli_returncode for item in results if not item.success),
+            GRID_PROCESSING_FAILED_CODE,
+        )
+        return MultiwfnGridBatchResult(
+            wavefunction=wavefunction,
+            output_dir=output_dir,
+            function=function,
+            orbitals=normalized_orbitals,
+            results=tuple(results),
+            recipe_path=recipe_path,
+            success=success,
+            cli_returncode=cli_returncode,
+        )
+
+    _write_batch_recipe(recipe_path, current_result())
+    for index, orbital in enumerate(normalized_orbitals, start=1):
+        safe = _safe_orbital_label(orbital)
+        run_dir = output_dir / f"{index:03d}_{function.name}_{safe}"
+        sub_vesta_output_dir = None
+        if vesta_output_dir is not None:
+            sub_vesta_output_dir = Path(vesta_output_dir) / run_dir.name
+        result = run_multiwfn_grid(
+            wavefunction,
+            run_dir,
+            function_name=function.name,
+            orbital=orbital,
+            multiwfn_path=multiwfn_path,
+            timeout=timeout,
+            nthreads=nthreads,
+            stem=f"{batch_stem}_{safe}",
+            grid_mode=grid_mode,
+            grid_points=grid_points,
+            grid_spacing=grid_spacing,
+            grid_cube=grid_cube,
+            grid_extension=grid_extension,
+            pbc_origin=pbc_origin,
+            pbc_lengths=pbc_lengths,
+            keep_raw_cube=keep_raw_cube,
+            make_vesta=make_vesta,
+            vesta_output_dir=sub_vesta_output_dir,
+            preset=preset,
+            isosurface=isosurface,
+            structure=structure,
+            boundary=boundary,
+            copy_cubes=copy_cubes,
+        )
+        results.append(result)
+        _write_batch_recipe(recipe_path, current_result())
+        if not result.success and not keep_going:
+            break
+
+    batch_result = current_result()
+    _write_batch_recipe(recipe_path, batch_result)
+    return batch_result
+
+
 def _int_triple(values: Optional[Sequence[int]]) -> Tuple[int, int, int]:
     if values is None:
         return 40, 40, 40
@@ -529,22 +732,60 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     )
     parser.add_argument("wavefunction", type=Path, nargs="?", help="Wavefunction file accepted by Multiwfn")
     parser.add_argument("output_dir", type=Path, nargs="?")
-    parser.add_argument("--function", default="density", help="Function name/alias or numeric Multiwfn function index")
-    parser.add_argument("--function-index", type=int, help="Explicit numeric Multiwfn real-space function index")
+    parser.add_argument(
+        "--function",
+        help=(
+            "Function name/alias or numeric Multiwfn function index; defaults "
+            "to density, or orbital when --orbitals is used"
+        ),
+    )
+    parser.add_argument(
+        "--function-index",
+        type=int,
+        help="Explicit numeric Multiwfn real-space function index",
+    )
     parser.add_argument("--orbital", help="Orbital index/label for orbital or orbital-density functions")
+    parser.add_argument(
+        "--orbitals",
+        nargs="+",
+        help="Batch orbital labels/indices for orbital or orbital-density functions",
+    )
+    parser.add_argument(
+        "--keep-going",
+        action="store_true",
+        help="Continue batch orbital export after a failed orbital",
+    )
     parser.add_argument("--list-functions", action="store_true")
     parser.add_argument("--multiwfn", "--multiwfn-path", dest="multiwfn_path")
     parser.add_argument("--commands-file", type=Path, help="Override the generated Multiwfn command stream")
-    parser.add_argument("--expected-cube", type=Path, help="Expected cube name/path when using a custom command stream")
+    parser.add_argument(
+        "--expected-cube",
+        type=Path,
+        help="Expected cube name/path when using a custom command stream",
+    )
     parser.add_argument("--timeout", type=int)
     parser.add_argument("--nthreads", type=int)
     parser.add_argument("--stem")
     parser.add_argument("--raw-dir", type=Path)
-    parser.add_argument("--grid-mode", choices=["low", "medium", "high", "points", "spacing", "cube", "pbc-cell"], default="points")
-    parser.add_argument("--grid-points", nargs=3, type=int, metavar=("NX", "NY", "NZ"), default=(40, 40, 40))
+    parser.add_argument(
+        "--grid-mode",
+        choices=["low", "medium", "high", "points", "spacing", "cube", "pbc-cell"],
+        default="points",
+    )
+    parser.add_argument(
+        "--grid-points",
+        nargs=3,
+        type=int,
+        metavar=("NX", "NY", "NZ"),
+        default=(40, 40, 40),
+    )
     parser.add_argument("--grid-spacing", type=float)
     parser.add_argument("--grid-cube", type=Path)
-    parser.add_argument("--grid-extension", type=float, help="Non-PBC extension distance in Bohr before selecting grid mode")
+    parser.add_argument(
+        "--grid-extension",
+        type=float,
+        help="Non-PBC extension distance in Bohr before selecting grid mode",
+    )
     parser.add_argument("--pbc-origin", nargs=3, type=float, metavar=("X", "Y", "Z"))
     parser.add_argument("--pbc-lengths", nargs=3, type=float, metavar=("A", "B", "C"))
     parser.add_argument("--move-raw-cube", action="store_true")
@@ -553,7 +794,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser.add_argument("--preset", default="auto", help="Cube preset for VESTA output; default auto from function")
     parser.add_argument("--isosurface", type=float)
     parser.add_argument("--structure", choices=["auto", "none", "molecule", "crystal"])
-    parser.add_argument("--boundary", nargs=6, type=float, metavar=("XMIN", "XMAX", "YMIN", "YMAX", "ZMIN", "ZMAX"))
+    parser.add_argument(
+        "--boundary",
+        nargs=6,
+        type=float,
+        metavar=("XMIN", "XMAX", "YMIN", "YMAX", "ZMIN", "ZMAX"),
+    )
     parser.add_argument("--no-copy-cubes", action="store_true")
     args = parser.parse_args(argv)
 
@@ -564,10 +810,61 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         parser.error("wavefunction and output_dir are required unless --list-functions is used")
 
     try:
+        if args.orbitals:
+            if args.orbital:
+                raise ValueError("--orbital and --orbitals cannot be used together")
+            if args.commands_file is not None or args.expected_cube is not None:
+                raise ValueError(
+                    "--commands-file and --expected-cube are not supported "
+                    "with --orbitals"
+                )
+            if args.raw_dir is not None:
+                raise ValueError("--raw-dir is not supported with --orbitals")
+            result = run_multiwfn_grid_batch(
+                args.wavefunction,
+                args.output_dir,
+                orbitals=args.orbitals,
+                function_name=args.function or "orbital",
+                function_index=args.function_index,
+                multiwfn_path=args.multiwfn_path,
+                timeout=args.timeout,
+                nthreads=args.nthreads,
+                stem=args.stem,
+                grid_mode=args.grid_mode,
+                grid_points=_int_triple(args.grid_points),
+                grid_spacing=args.grid_spacing,
+                grid_cube=args.grid_cube,
+                grid_extension=args.grid_extension,
+                pbc_origin=_float_triple(args.pbc_origin),
+                pbc_lengths=_float_triple(args.pbc_lengths),
+                keep_raw_cube=not args.move_raw_cube,
+                make_vesta=not args.no_vesta,
+                vesta_output_dir=args.vesta_output_dir,
+                preset=args.preset,
+                isosurface=args.isosurface,
+                structure=args.structure,
+                boundary=args.boundary,
+                copy_cubes=not args.no_copy_cubes,
+                keep_going=args.keep_going,
+            )
+            print(result.recipe_path)
+            for item in result.results:
+                print(item.output_dir)
+                if item.cube is not None and item.cube.exists():
+                    print(item.cube)
+                if item.vesta_result is not None:
+                    print(item.vesta_result.vesta_path)
+                if item.error:
+                    print(f"ERROR: {item.error}", file=sys.stderr)
+            return result.cli_returncode
+
+        if args.keep_going:
+            raise ValueError("--keep-going is only supported with --orbitals")
+
         result = run_multiwfn_grid(
             args.wavefunction,
             args.output_dir,
-            function_name=args.function,
+            function_name=args.function or "density",
             function_index=args.function_index,
             orbital=args.orbital,
             multiwfn_path=args.multiwfn_path,

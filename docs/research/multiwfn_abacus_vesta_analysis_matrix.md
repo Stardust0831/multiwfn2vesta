@@ -79,7 +79,7 @@ occupations, and density derivatives from the wavefunction representation.
 | Analysis | Multiwfn input | ABACUS feasibility | Multiwfn output | VESTA representation | Project action |
 | --- | --- | --- | --- | --- | --- |
 | Generic cube visualizer | Any `.cub` from Multiwfn or ABACUS | Strong: `out_chg`, `out_pot`, `out_pchg`, `out_wfc_*`, `out_elf` | Cube | Density/texture import, isosurface, section off by default | Implemented as `multiwfn2vesta cube-vesta`; `cube-preset` adds common analysis defaults |
-| Molecular orbitals and band wavefunctions | Full wavefunction Molden/FCH/WFN, or ABACUS real-space `get_wf` cubes | Strong for Gamma LCAO Molden; direct cube route for selected bands | `orb*.cub`, `MOvalue.cub`, `orbdens.cub`, or ABACUS `wfi*.cube` | Positive/negative isosurfaces; magnitude as single surface | `cube-preset orbital` implemented; `grid-run --function orbital --orbital ...` now covers single MO cubes |
+| Molecular orbitals and band wavefunctions | Full wavefunction Molden/FCH/WFN, or ABACUS real-space `get_wf` cubes | Strong for Gamma LCAO Molden; direct cube route for selected bands | `orb*.cub`, `MOvalue.cub`, `orbdens.cub`, or ABACUS `wfi*.cube` | Positive/negative isosurfaces; magnitude as single surface | `cube-preset orbital` implemented; `grid-run --function orbital --orbital ...` covers one MO cube and `grid-run --orbitals ...` covers isolated batch orbital export |
 | Electron density, spin density, Laplacian, kinetic density | Full wavefunction, or ABACUS density cubes for density only | Strong for density cube; Molden route for derivatives | `density.cub`, `spindensity.cub`, `laplacian.cub`, `K(r).cub`, `G(r).cub` | Single/positive-negative isosurfaces or slices | `grid-run` now covers density, spin density, and Laplacian single cubes; kinetic-density variants remain future function-table extensions |
 | ELF/LOL | Full wavefunction; ABACUS direct `out_elf` for ELF | Strong for ELF direct; Molden route for Multiwfn ELF/LOL | `ELF.cub`, `LOL.cub`, ABACUS `elf*.cube` | Isosurfaces around localized regions | `grid-run` now covers Multiwfn ELF/LOL; `cube-preset elf/lol` remains the VESTA writer |
 | AIM/QTAIM topology | Full wavefunction Molden/FCH/WFN/WFX | Feasible for Gamma LCAO Molden with `[Nval]`; validated on Ag(111)+benzene | `CPs.pdb`, `paths.pdb`, `CPprop.txt`, `mol.pdb` | Atoms-only pseudo-sites, no AIM bonds, optional labels | Already partly implemented; add ABACUS-aware recipes |
@@ -169,11 +169,12 @@ Known limitations:
 4. Add more atom-scalar parsers.  ABACUS `mulliken.txt` now feeds VESTA atom
    coloring directly; Multiwfn atom tables remain future work.
 5. Extend `grid-run` beyond the initial main-function-5 table where useful:
-   kinetic density variants, custom function indices, batch orbital cubes via
-   main function `200`, end-to-end Fukui/dual-descriptor cube generation on
-   shared grids, and IGMH fragment command streams.  The cube arithmetic
-   foundation for density-difference/Fukui/dual-descriptor maps now exists as
-   `multiwfn2vesta cube-arith`.
+   kinetic density variants, more real-system orbital batch smokes, possible
+   future Multiwfn main function `200` integration if it proves more reliable
+   than repeated isolated runs, end-to-end Fukui/dual-descriptor cube
+   generation on shared grids, and IGMH fragment command streams.  The cube
+   arithmetic foundation for density-difference/Fukui/dual-descriptor maps
+   now exists as `multiwfn2vesta cube-arith`.
 6. Keep headless/no-focus VESTA rendering as a separate backend concern.
    Visualization products should remain useful as `.vesta` even when rendering
    is skipped.
@@ -208,9 +209,10 @@ Main gaps:
   coverage and tighter integration with downstream Multiwfn command streams.
 - No Multiwfn atom table parser yet.
 - Maintained Multiwfn command streams now exist for AIM, IRI/RDG, and
-  main-function-5 single grid cubes as `multiwfn2vesta grid-run`.  Remaining
-  gaps are batch orbital export, Fukui/dual-descriptor, IGMH fragment
-  automation, and more real-system templates.
+  main-function-5 grid cubes as `multiwfn2vesta grid-run`, including repeated
+  isolated batch orbital/orbital-density export through `--orbitals`.
+  Remaining gaps are higher-level Fukui/dual-descriptor generation, IGMH
+  fragment automation, and more real-system templates.
 - Dual-cube surface texture workflows now have a preset entry point for
   IRI/RDG/NCI and ESP/MEP, but still need more real smoke cases and cleaner
   end-to-end templates.

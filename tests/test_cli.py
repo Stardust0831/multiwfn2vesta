@@ -396,8 +396,8 @@ class TestUnifiedCli(unittest.TestCase):
                 "10",
                 "input.molden",
                 "grid_products",
-                "orbital",
                 "h",
+                "",
                 "/opt/Multiwfn",
                 "4",
                 "180",
@@ -446,6 +446,45 @@ class TestUnifiedCli(unittest.TestCase):
                 "--structure",
                 "molecule",
                 "--no-copy-cubes",
+            ]
+        )
+
+    def test_interactive_grid_run_builds_batch_orbitals_args(self):
+        answers = iter(
+            [
+                "10",
+                "input.molden",
+                "grid_products",
+                "h l+1",
+                "",
+                "",
+                "",
+                "",
+                "case",
+                "low",
+                "y",
+            ]
+        )
+        with patch("builtins.input", lambda _prompt: next(answers)):
+            with patch("sys.stdout", io.StringIO()):
+                with patch("multiwfn2vesta.cli.multiwfn_grid.main", return_value=0) as mocked:
+                    code = cli.main([])
+
+        self.assertEqual(code, 0)
+        mocked.assert_called_once_with(
+            [
+                "input.molden",
+                "grid_products",
+                "--function",
+                "orbital",
+                "--orbitals",
+                "h",
+                "l+1",
+                "--stem",
+                "case",
+                "--grid-mode",
+                "low",
+                "--no-vesta",
             ]
         )
 

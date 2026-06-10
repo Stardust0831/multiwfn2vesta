@@ -1,7 +1,8 @@
 # Skill: Multiwfn real-space grid runner
 
 Use this when a Multiwfn-readable wavefunction file should become one
-real-space function cube, optionally followed by a VESTA `.vesta` file.
+real-space function cube, or several isolated orbital/orbital-density cubes,
+optionally followed by VESTA `.vesta` files.
 
 ## Command
 
@@ -31,7 +32,8 @@ multiwfn2vesta grid-run --list-functions
 - `laplacian`, aliases `lap`, `laplacian-rho`: function `3`, raw
   `laplacian.cub`, preset `signed`.
 - `orbital`, aliases `mo`, `wavefunction`, `mo-value`: function `4`, raw
-  `MOvalue.cub`, preset `signed`, requires `--orbital`.
+  `MOvalue.cub`, preset `signed`, requires `--orbital` for one orbital or
+  `--orbitals` for batch export.
 - `spin-density`: function `5`, raw `spindensity.cub`, preset `signed`.
 - `nuclear-esp`: function `8`, raw `nucleiesp.cub`, preset `signed`.
 - `elf`: function `9`, raw `ELF.cub`, preset `elf`.
@@ -45,10 +47,37 @@ multiwfn2vesta grid-run --list-functions
 - `iri`: function `24`, raw `IRI.cub`, preset `density`.
 - `vdw-potential`: function `25`, raw `vdWpot.cub`, preset `signed`.
 - `orbital-density`: function `44`, raw `orbdens.cub`, preset `density`,
-  requires `--orbital`.
+  requires `--orbital` for one orbital or `--orbitals` for batch export.
 
 Use `--function-index N --expected-cube name.cub` for an unlisted function or
 custom command stream.
+
+## Batch Orbital Export
+
+```bash
+multiwfn2vesta grid-run input.fch orbital_products \
+  --orbitals h l l+1 \
+  --grid-mode points \
+  --grid-points 80 80 80 \
+  --no-vesta
+```
+
+When `--orbitals` is present and `--function` is omitted, the function defaults
+to `orbital`.  Use `--function orbital-density --orbitals h l` for orbital
+density cubes.
+
+Batch mode is repeated isolated single-orbital execution, not a single
+Multiwfn batch menu.  Each orbital gets a child directory such as
+`001_orbital_h/`, `002_orbital_l/`, or `003_orbital_lplus1/`, with its own
+command stream, stdout/stderr logs, raw cube directory, processed cube, and
+optional VESTA output.  The top-level `multiwfn_grid_batch_recipe.md` records
+requested orbitals, safe labels, status, failed/skipped counts, and child
+paths.
+
+Default behavior stops after the first failed orbital.  Add `--keep-going` to
+continue later orbitals.  Batch mode rejects `--orbital`, `--commands-file`,
+`--expected-cube`, and `--raw-dir` because those options would make the child
+run ownership ambiguous.
 
 ## Grid Modes
 
@@ -90,6 +119,8 @@ multiwfn2vesta grid-run input.fch grid_products \
 
 ## Outputs
 
+Single-run outputs:
+
 - `multiwfn_grid_input.txt`
 - `multiwfn_grid.stdout.txt`
 - `multiwfn_grid.stderr.txt`
@@ -98,6 +129,12 @@ multiwfn2vesta grid-run input.fch grid_products \
 - `multiwfn_grid_recipe.md`
 - optional `<stem>_<function>_<preset>_cube.vesta`
 - optional `<stem>_<function>_<preset>_cube_vesta_recipe.md`
+
+Batch outputs:
+
+- `multiwfn_grid_batch_recipe.md`
+- one child directory per orbital, each containing the single-run outputs
+  above
 
 The runner sets `Multiwfnpath`, `MULTIWFNPATH`, and `MultiwfnPATH` to the
 selected Multiwfn executable directory.
@@ -112,6 +149,7 @@ Examples:
 ```bash
 multiwfn2vesta grid-run input.fch products --function density
 multiwfn2vesta grid-run input.fch products --function orbital --orbital h
+multiwfn2vesta grid-run input.fch products --orbitals h l l+1 --no-vesta
 multiwfn2vesta grid-run input.fch products --function elf
 multiwfn2vesta grid-run input.fch products --function esp --no-vesta
 ```

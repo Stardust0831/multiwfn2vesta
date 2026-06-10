@@ -12,6 +12,7 @@ from multiwfn2vesta.multiwfn_grid import (
     available_functions_text,
     build_grid_commands,
     resolve_grid_function,
+    run_multiwfn_grid_batch,
     run_multiwfn_grid,
 )
 
@@ -157,6 +158,215 @@ class TestMultiwfnGridRunner(unittest.TestCase):
             self.assertTrue(result.success)
             self.assertEqual(result.raw_cube, root / "products" / "multiwfn_grid_raw" / "nested" / "custom.cub")
             self.assertTrue(result.cube.exists())
+
+    def test_run_multiwfn_grid_batch_writes_isolated_orbital_runs(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            wavefunction = root / "h2o.fch"
+            wavefunction.write_text("wavefunction", encoding="utf-8")
+            candidate = self.make_candidate(root)
+
+            def fake_run(command, **kwargs):
+                cwd = Path(kwargs["cwd"])
+                (cwd / "MOvalue.cub").write_text(DENSITY_CUBE, encoding="utf-8")
+                return subprocess.CompletedProcess(command, 0, stdout="ok", stderr="")
+
+            with patch("multiwfn2vesta.multiwfn_grid.find_multiwfn", return_value=candidate):
+                with patch("multiwfn2vesta.multiwfn_grid.subprocess.run", side_effect=fake_run) as mocked_run:
+                    result = run_multiwfn_grid_batch(
+                        wavefunction,
+                        root / "batch",
+                        orbitals=["h", "l+1"],
+                        grid_points=(6, 7, 8),
+                        stem="case",
+                        make_vesta=False,
+                    )
+
+            self.assertTrue(result.success)
+            self.assertEqual(result.cli_returncode, 0)
+            self.assertEqual(len(result.results), 2)
+            self.assertEqual(mocked_run.call_count, 2)
+            first, second = result.results
+            self.assertEqual(first.command_file.read_text(encoding="utf-8"), "5\n4\nh\n4\n6,7,8\n2\n0\nq\n")
+            self.assertEqual(second.command_file.read_text(encoding="utf-8"), "5\n4\nl+1\n4\n6,7,8\n2\n0\nq\n")
+            self.assertEqual(first.output_dir.name, "001_orbital_h")
+            self.assertEqual(second.output_dir.name, "002_orbital_lplus1")
+            self.assertEqual(first.cube.name, "case_h_orbital.cub")
+            self.assertEqual(second.cube.name, "case_lplus1_orbital.cub")
+            manifest = result.recipe_path.read_text(encoding="utf-8")
+            self.assertIn("orbitals: `h, l+1`", manifest)
+            self.assertIn("completed_runs: `2`", manifest)
+            self.assertIn("requested_orbital: `l+1`", manifest)
+            self.assertIn("safe_label: `lplus1`", manifest)
+            self.assertIn("status: `success`", manifest)
+
+    def test_run_multiwfn_grid_batch_stops_after_failure_by_default(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            wavefunction = root / "h2o.fch"
+            wavefunction.write_text("wavefunction", encoding="utf-8")
+            candidate = self.make_candidate(root)
+
+            with patch("multiwfn2vesta.multiwfn_grid.find_multiwfn", return_value=candidate):
+                with patch(
+                    "multiwfn2vesta.multiwfn_grid.subprocess.run",
+                    return_value=subprocess.CompletedProcess([str(candidate.path)], 7, stdout="", stderr="bad"),
+                ) as mocked_run:
+                    result = run_multiwfn_grid_batch(
+                        wavefunction,
+                        root / "batch",
+                        orbitals=["h", "l"],
+                        make_vesta=False,
+                    )
+
+            self.assertFalse(result.success)
+            self.assertEqual(result.cli_returncode, 7)
+            self.assertEqual(len(result.results), 1)
+            self.assertEqual(mocked_run.call_count, 1)
+            manifest = result.recipe_path.read_text(encoding="utf-8")
+            self.assertIn("failed_runs: `1`", manifest)
+            self.assertIn("skipped_runs: `1`", manifest)
+            self.assertIn("status: `failed`", manifest)
+            self.assertIn("status: `skipped`", manifest)
+
+    def test_run_multiwfn_grid_batch_keep_going_after_failure(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            wavefunction = root / "h2o.fch"
+            wavefunction.write_text("wavefunction", encoding="utf-8")
+            candidate = self.make_candidate(root)
+            calls = {"count": 0}
+
+            def fake_run(command, **kwargs):
+                calls["count"] += 1
+                if calls["count"] == 1:
+                    return subprocess.CompletedProcess(command, 7, stdout="", stderr="bad")
+                Path(kwargs["cwd"], "MOvalue.cub").write_text(DENSITY_CUBE, encoding="utf-8")
+                return subprocess.CompletedProcess(command, 0, stdout="ok", stderr="")
+
+            with patch("multiwfn2vesta.multiwfn_grid.find_multiwfn", return_value=candidate):
+                with patch("multiwfn2vesta.multiwfn_grid.subprocess.run", side_effect=fake_run):
+                    result = run_multiwfn_grid_batch(
+                        wavefunction,
+                        root / "batch",
+                        orbitals=["h", "l"],
+                        make_vesta=False,
+                        keep_going=True,
+                    )
+
+            self.assertFalse(result.success)
+            self.assertEqual(result.cli_returncode, 7)
+            self.assertEqual(len(result.results), 2)
+            self.assertFalse(result.results[0].success)
+            self.assertTrue(result.results[1].success)
+
+    def test_run_multiwfn_grid_batch_rejects_non_orbital_function(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            with self.assertRaisesRegex(ValueError, "requires an orbital function"):
+                run_multiwfn_grid_batch(
+                    Path(tmp) / "h2o.fch",
+                    Path(tmp) / "batch",
+                    function_name="density",
+                    orbitals=["h"],
+                )
+
+    def test_main_batch_orbitals_defaults_to_orbital_function(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            wavefunction = root / "h2o.fch"
+            wavefunction.write_text("wavefunction", encoding="utf-8")
+            candidate = self.make_candidate(root)
+
+            def fake_run(command, **kwargs):
+                Path(kwargs["cwd"], "MOvalue.cub").write_text(DENSITY_CUBE, encoding="utf-8")
+                return subprocess.CompletedProcess(command, 0, stdout="ok", stderr="")
+
+            with patch("multiwfn2vesta.multiwfn_grid.find_multiwfn", return_value=candidate):
+                with patch("multiwfn2vesta.multiwfn_grid.subprocess.run", side_effect=fake_run):
+                    with patch("sys.stdout", io.StringIO()):
+                        code = __import__("multiwfn2vesta.multiwfn_grid", fromlist=["main"]).main(
+                            [
+                                str(wavefunction),
+                                str(root / "batch"),
+                                "--orbitals",
+                                "h",
+                                "l",
+                                "--grid-mode",
+                                "low",
+                                "--no-vesta",
+                            ]
+                        )
+
+            self.assertEqual(code, 0)
+            first = root / "batch" / "001_orbital_h" / "multiwfn_grid_input.txt"
+            second = root / "batch" / "002_orbital_l" / "multiwfn_grid_input.txt"
+            self.assertEqual(first.read_text(encoding="utf-8"), "5\n4\nh\n1\n2\n0\nq\n")
+            self.assertEqual(second.read_text(encoding="utf-8"), "5\n4\nl\n1\n2\n0\nq\n")
+
+    def test_main_rejects_batch_single_orbital_conflict(self):
+        stderr = io.StringIO()
+        with patch("sys.stderr", stderr):
+            code = __import__("multiwfn2vesta.multiwfn_grid", fromlist=["main"]).main(
+                [
+                    "input.fch",
+                    "products",
+                    "--orbital",
+                    "h",
+                    "--orbitals",
+                    "l",
+                ]
+            )
+
+        self.assertEqual(code, 2)
+        self.assertIn("--orbital and --orbitals cannot be used together", stderr.getvalue())
+
+    def test_main_rejects_batch_custom_command_stream_options(self):
+        stderr = io.StringIO()
+        with patch("sys.stderr", stderr):
+            code = __import__("multiwfn2vesta.multiwfn_grid", fromlist=["main"]).main(
+                [
+                    "input.fch",
+                    "products",
+                    "--orbitals",
+                    "h",
+                    "l",
+                    "--commands-file",
+                    "commands.txt",
+                ]
+            )
+
+        self.assertEqual(code, 2)
+        self.assertIn("--commands-file and --expected-cube", stderr.getvalue())
+
+    def test_main_rejects_batch_raw_dir_override(self):
+        stderr = io.StringIO()
+        with patch("sys.stderr", stderr):
+            code = __import__("multiwfn2vesta.multiwfn_grid", fromlist=["main"]).main(
+                [
+                    "input.fch",
+                    "products",
+                    "--function",
+                    "orbital",
+                    "--orbitals",
+                    "h",
+                    "l",
+                    "--raw-dir",
+                    "shared_raw",
+                ]
+            )
+
+        self.assertEqual(code, 2)
+        self.assertIn("--raw-dir is not supported with --orbitals", stderr.getvalue())
+
+    def test_main_rejects_keep_going_without_batch(self):
+        stderr = io.StringIO()
+        with patch("sys.stderr", stderr):
+            code = __import__("multiwfn2vesta.multiwfn_grid", fromlist=["main"]).main(
+                ["input.fch", "products", "--keep-going"]
+            )
+
+        self.assertEqual(code, 2)
+        self.assertIn("--keep-going is only supported with --orbitals", stderr.getvalue())
 
     def test_run_multiwfn_grid_reports_missing_cube(self):
         with tempfile.TemporaryDirectory() as tmp:

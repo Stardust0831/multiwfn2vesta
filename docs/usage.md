@@ -286,10 +286,10 @@ multiwfn2vesta grid-run --list-functions
 
 - `density` / `rho`：Multiwfn 函数 `1`，原始输出 `density.cub`，默认接
   `cube-preset density`
-- `orbital` / `mo`：函数 `4`，原始输出 `MOvalue.cub`，默认接 `signed`，
-  需要 `--orbital h` 或轨道序号
+- `orbital` / `mo`：函数 `4`，原始输出 `MOvalue.cub`，默认接 `signed`；
+  单轨道用 `--orbital h`，多轨道批量用 `--orbitals h l l+1`
 - `orbital-density` / `orbdens`：函数 `44`，原始输出 `orbdens.cub`，
-  需要 `--orbital`
+  单轨道用 `--orbital`，多轨道批量用 `--orbitals`
 - `laplacian`、`spin-density`、`esp`、`nuclear-esp`、
   `signlambda2rho`、`vdw-potential`：默认按 signed scalar 处理
 - `elf` / `lol`：局域化函数等值面
@@ -305,6 +305,36 @@ multiwfn2vesta grid-run input.fch grid_products \
   --grid-mode points \
   --grid-points 80 80 80
 ```
+
+批量导出多个轨道：
+
+```bash
+multiwfn2vesta grid-run input.fch orbital_products \
+  --orbitals h l l+1 \
+  --grid-mode points \
+  --grid-points 80 80 80 \
+  --no-vesta
+```
+
+批量模式未显式给 `--function` 时默认等价于 `--function orbital`。若要导出
+轨道密度，用 `--function orbital-density --orbitals h l`。这个批量功能不是
+Multiwfn 内部一次性批处理，而是多次隔离的单轨道运行：每个轨道都有独立子目录、
+命令流、stdout/stderr、raw cube 目录、处理后的 cube 和可选 VESTA 文件。
+
+批量默认输出：
+
+- `multiwfn_grid_batch_recipe.md`：顶层 manifest，记录 requested orbital、
+  safe label、status、失败数和 skipped 数
+- `001_orbital_h/`、`002_orbital_l/`、`003_orbital_lplus1/` 等子目录
+- 每个子目录内仍是单次 `grid-run` 输出：`multiwfn_grid_input.txt`、
+  `multiwfn_grid.stdout.txt`、`multiwfn_grid.stderr.txt`、
+  `multiwfn_grid_raw/<Multiwfn默认文件名>.cub`、`<stem>_<orbital>_<function>.cub`
+  和可选 VESTA recipe
+
+默认遇到第一个失败轨道就停止，后续轨道在 batch recipe 中标为 `skipped`。
+如果希望继续尝试后续轨道，加 `--keep-going`。批量模式会拒绝 `--orbital`、
+`--commands-file`、`--expected-cube` 和 `--raw-dir`，因为每个子任务需要独立的
+命令流和 raw 目录。
 
 复用已有 cube 的格点，便于后续做双 cube 或多图层叠加：
 
@@ -343,10 +373,10 @@ bin/multiwfn2vesta grid-run \
 `--function elf --no-vesta` 生成 raw `ELF.cub` 和 `h2o_elf.cub`：
 `/mnt/g/work/multiwfn2vesta/smoke/multiwfn_grid_run_smoke_20260610_h2o_elf/products/`。
 
-注意：`grid-run` 是单 cube runner。ESP-on-density、IRI/RDG/NCI mapped
-surface、IGMH 这类需要 surface cube + texture cube 或 fragment 定义的图，
-仍然要通过 `cube-preset`/`cube-vesta` 组合，或使用专门的 `iri-run`、
-`aim-igmh` 流程。
+注意：`grid-run` 的每个子任务仍然只生成一个 scalar cube。ESP-on-density、
+IRI/RDG/NCI mapped surface、IGMH 这类需要 surface cube + texture cube 或
+fragment 定义的图，仍然要通过 `cube-preset`/`cube-vesta` 组合，或使用专门的
+`iri-run`、`aim-igmh` 流程。
 
 ## 波函数文件到 IRI/RDG VESTA
 

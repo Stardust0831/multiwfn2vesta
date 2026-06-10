@@ -1,5 +1,47 @@
 # Worklog
 
+## 2026-06-10: Batch orbital grid export and README branch refresh
+
+- User asked to refresh README, simplify the branch state if needed, and keep
+  commits under identity `Stardust0831`.  Rechecked the project state before
+  editing: local `main` tracks `origin/main`, `origin/HEAD` points to
+  `origin/main`, and the remote exposes only `refs/heads/main`, so there is
+  no extra feature branch to merge in this pass.
+- Continued the existing `grid-run` roadmap by adding batch
+  `orbital`/`orbital-density` export.  Batch mode is implemented as repeated
+  isolated single-orbital Multiwfn main-function-5 runs, not as a new
+  Multiwfn menu stream.
+- Added `run_multiwfn_grid_batch`, `MultiwfnGridBatchResult`, safe orbital
+  labels such as `l+1 -> lplus1`, per-orbital child directories, and a
+  top-level `multiwfn_grid_batch_recipe.md`.
+- Batch child runs write their own command stream, stdout/stderr logs, raw
+  cube directory, processed cube, single-run recipe, and optional VESTA output.
+  The batch recipe records requested orbitals, safe labels, status,
+  failed/skipped counts, and child paths.  It is written before the first
+  child run and refreshed after each child run.
+- Integrated the feature into `grid-run --orbitals`.  If `--orbitals` is used
+  without `--function`, the CLI now defaults to `orbital`; use
+  `--function orbital-density --orbitals ...` for orbital-density batches.
+  `--keep-going` continues after failed orbitals; the default stops after the
+  first failure and marks later orbitals as `skipped`.
+- Hardened invalid CLI combinations after read-only sub-agent review:
+  `--orbitals` rejects `--orbital`, `--commands-file`, `--expected-cube`, and
+  `--raw-dir`; `--keep-going` without `--orbitals` is rejected instead of
+  being silently ignored.
+- Adjusted the interactive launcher so entering one or more orbital selectors
+  defaults the function prompt to `orbital`; multiple selectors build
+  `--orbitals`.
+- Added focused tests for isolated batch output, default stop-on-failure,
+  `--keep-going`, batch recipe status/skipped records, direct
+  `grid-run --orbitals` CLI behavior, invalid argument combinations, and the
+  interactive launcher.
+- Synced README, usage docs, CLI/grid/ABACUS skill notes, the ABACUS/Multiwfn
+  analysis matrix, and project/root work records with the maintained batch
+  orbital workflow and the verified single-branch repository state.
+- Focused validation already passed before full regression:
+  `py_compile` for touched Python files and 52 tests across
+  `tests.test_multiwfn_grid` and `tests.test_cli`.
+
 ## 2026-06-10: Cube arithmetic foundation
 
 - Continued the long-running Multiwfn/ABACUS/VESTA roadmap by implementing

@@ -22,21 +22,15 @@ point.
   feature branch to merge back, so no merge action is required.  The
   apparently strange branch history is already represented as commits on
   `main`.
-- Latest maintained feature push on 2026-06-10: `cube-arith` was committed and
-  pushed as `4123d00ae051a710c954ed3c3712aa8b012c4bc0`
-  (`Add cube arithmetic workflow`).  It added compatible-cube arithmetic for
-  density differences, Fukui functions, and dual descriptors, with CLI/docs,
-  tests, smoke evidence, and the unit-convention guard for mixed Bohr/Angstrom
-  cube headers.
-- The first documentation closure for that feature was pushed as
-  `4800cf4b2dbab559d64023852cc3579e7696ad15`
-  (`Record cube arithmetic push`).  Later docs-only commits may advance
-  `main`, but they do not introduce extra branches.
-- Previous maintained feature push on 2026-06-10: `grid-run` was committed as
-  `3d192dc7ae9696dd433aae04e1a3bdb488b95482`
-  (`Add Multiwfn grid runner`) and closed with documentation commit
-  `9c9a43b402164044f32d94ad2c49f018d13e2b6f`
-  (`Record grid runner push`).
+- Current 2026-06-10 cleanup pass: the branch state is already consolidated
+  to `main`; the useful experiment history is represented as normal commits
+  on `main`.  The active maintained increment extends `grid-run` with batch
+  `orbital`/`orbital-density` export through repeated isolated single-orbital
+  Multiwfn runs.
+- Recent maintained feature pushes on 2026-06-10 include `grid-run`
+  (`3d192dc7ae9696dd433aae04e1a3bdb488b95482`) and `cube-arith`
+  (`4123d00ae051a710c954ed3c3712aa8b012c4bc0`).  Later documentation commits
+  may advance `main`, but they do not introduce extra branches.
 - Previous experiment branches should be treated as short-lived workspaces:
   merge or fast-forward the useful commits into `main`, then remove the
   experiment branch once `origin/main` contains the maintained result.
@@ -92,8 +86,9 @@ then delete the temporary branch.
   mapped-surface `.vesta` through `cube-preset iri`.
 - Run Multiwfn main function `5` real-space grid generation from a
   wavefunction file, export density, orbital/MO, Laplacian, ELF, LOL,
-  ESP/MEP, RDG/IRI-like, and related scalar cubes, and optionally write a
-  VESTA file through `cube-preset`.
+  ESP/MEP, RDG/IRI-like, and related scalar cubes, export multiple orbitals
+  through isolated batch runs, and optionally write VESTA files through
+  `cube-preset`.
 - Color VESTA atom/site styles from ABACUS `mulliken.txt` charge or
   magnetism values produced by `out_mul 1`.
 - Run Multiwfn AIM topology analysis from a wavefunction file such as
@@ -307,9 +302,10 @@ Common functions:
 - `density` / `rho`: Multiwfn function `1`, raw `density.cub`, preset
   `density`.
 - `orbital` / `mo`: function `4`, raw `MOvalue.cub`, preset `signed`, requires
-  `--orbital`.
+  `--orbital` for one orbital or `--orbitals` for batch export.
 - `orbital-density` / `orbdens`: function `44`, raw `orbdens.cub`, preset
-  `density`, requires `--orbital`.
+  `density`, requires `--orbital` for one orbital or `--orbitals` for batch
+  export.
 - `laplacian`, `spin-density`, `esp`, `nuclear-esp`, `signlambda2rho`, and
   `vdw-potential`: signed scalar fields, defaulting to the `signed` preset.
 - `elf` and `lol`: localization cubes, defaulting to `cube-preset elf/lol`.
@@ -336,6 +332,38 @@ multiwfn2vesta grid-run input.fch grid_products \
   --no-vesta
 ```
 
+For frontier-orbital batches, use `--orbitals`.  If `--function` is omitted in
+batch mode, it defaults to `orbital`; use `--function orbital-density` for
+orbital-density cubes:
+
+```bash
+multiwfn2vesta grid-run input.molden orbital_products \
+  --orbitals h l l+1 \
+  --grid-mode points \
+  --grid-points 80 80 80 \
+  --no-vesta
+```
+
+Batch mode is intentionally implemented as repeated single-orbital runs, not
+as a single Multiwfn batch menu.  Each orbital gets its own output directory,
+command stream, logs, raw cube directory, processed cube, and optional VESTA
+file.  The top-level `multiwfn_grid_batch_recipe.md` records requested
+orbitals, safe labels, run status, skipped orbitals, and child paths.
+
+Default batch outputs in `orbital_products/`:
+
+- `multiwfn_grid_batch_recipe.md`.
+- `001_orbital_h/`, `002_orbital_l/`, `003_orbital_lplus1/`, etc.
+- inside each child directory: `multiwfn_grid_input.txt`, stdout/stderr logs,
+  `multiwfn_grid_raw/<Multiwfn-default>.cub`, processed
+  `<stem>_<orbital>_<function>.cub`, and optional VESTA files.
+
+The batch command stops after the first failed orbital by default.  Add
+`--keep-going` to continue later orbitals and record failed/skipped states in
+the batch manifest.  Batch mode rejects `--orbital`, `--commands-file`,
+`--expected-cube`, and `--raw-dir`, because each child run owns its own command
+stream and raw output directory.
+
 Default outputs in `grid_products/`:
 
 - `multiwfn_grid_input.txt`: exact command stream sent to Multiwfn.
@@ -354,7 +382,7 @@ Validated H2O noGUI smokes:
 - `smoke/multiwfn_grid_run_smoke_20260610_h2o_elf/products/`: function `elf`,
   grid `12 x 12 x 12`, generated `h2o_elf.cub` with `--no-vesta`.
 
-`grid-run` is for single-cube real-space functions.  ESP-on-density,
+Each `grid-run` child run still produces one scalar cube.  ESP-on-density,
 IRI/RDG/NCI color-mapped surfaces, and other two-cube texture figures still
 need an explicit surface cube plus texture cube combination through
 `cube-preset`/`cube-vesta`, or a workflow-specific runner such as `iri-run`.
