@@ -21,6 +21,11 @@ point.
   feature branch to merge back, so no merge action is required.  The
   apparently strange branch history is already represented as commits on
   `main`.
+- Latest maintained feature push on 2026-06-10: `grid-run` was committed and
+  pushed as `3d192dc7ae9696dd433aae04e1a3bdb488b95482`
+  (`Add Multiwfn grid runner`).  After `git fetch --prune`, `HEAD`,
+  `origin/main`, and `origin/HEAD` all pointed at that commit, and the remote
+  still exposed only `refs/heads/main`.
 - Previous experiment branches should be treated as short-lived workspaces:
   merge or fast-forward the useful commits into `main`, then remove the
   experiment branch once `origin/main` contains the maintained result.

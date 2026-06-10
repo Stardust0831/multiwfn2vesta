@@ -43,6 +43,16 @@
 - Final pre-commit validation passed: `py_compile`, 140-test no-GUI
   regression, `grid-run --list-functions`, `grid-run --help`, top-level
   `multiwfn2vesta --help`, and `git diff --check`.
+- Feature implementation commit was pushed to GitHub `main` at
+  `3d192dc7ae9696dd433aae04e1a3bdb488b95482`
+  (`Add Multiwfn grid runner`).  The commit explicitly included the new
+  runner, CLI/package integration, README/usage/skill docs, the updated
+  analysis matrix, the new tests, and the cleanup of stale legacy test
+  imports.
+- Post-push verification after `git fetch --prune`: `HEAD`, `origin/main`,
+  and `origin/HEAD` all pointed at `3d192dc`; `git ls-remote --heads origin`
+  returned only `refs/heads/main`; repository-local identity remained
+  `Stardust0831 <13862180016@163.com>`.
 
 ## 2026-06-10: README branch follow-up audit
 
