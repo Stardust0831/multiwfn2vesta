@@ -21,17 +21,16 @@ point.
 - Working checkout: `/mnt/g/work/multiwfn2vesta/project`.  The workspace-level
   `/mnt/g/work/multiwfn2vesta/.git` is an empty metadata stub and is not used
   for project commits.
-- Branch audit on 2026-06-10 23:10 CST found local `main`, `origin/main`, and
-  `origin/HEAD` aligned at
-  `9169e611a3ea3818b7f65d90ade6e45518322bde`
-  (`Add Hirshfeld weight cube preset`) before this Hirshfeld Delta-g
-  feature/status closeout.
+- Branch audit on 2026-06-10 23:28 CST, after `git fetch --prune origin`,
+  found local `main`, `origin/main`, and `origin/HEAD` aligned at
+  `028a7caae9af6f10de3fa1639ce6fce6f136787d`
+  (`Add Hirshfeld Delta-g grid preset`).
 - `git ls-remote --heads origin` currently returns only `refs/heads/main`; no
   merge-back was needed in this pass because there is no extra local or remote
   feature branch to consolidate.
 - This README/status refresh is being kept on the same maintained `main`
-  branch; there is no side branch or remote feature head to merge back in
-  this pass.
+  branch; there is still no side branch or remote feature head to merge back
+  in this pass.
 - Local untracked probe files such as `domain.cub` and `domain.pdb` are not
   part of the maintained branch state and should stay uncommitted unless they
   are explicitly promoted into documented fixtures.

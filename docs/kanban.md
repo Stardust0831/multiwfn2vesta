@@ -1,6 +1,50 @@
 # Project Kanban
 
-Updated: 2026-06-10 23:23 CST
+Updated: 2026-06-10 23:28 CST
+
+## Current Request: 2026-06-10 README Refresh And Main Branch Consolidation At Delta-g Tip
+
+- [x] Record user request before editing: update README, inspect the
+  unusual-looking branch state, merge/converge back to one maintained branch
+  if needed, and keep git identity as `Stardust0831`.
+- [x] Confirm repository-local git identity is
+  `Stardust0831 <13862180016@163.com>`.
+- [x] Recheck current branch state after `git fetch --prune origin`: local
+  `main`, `origin/main`, and `origin/HEAD` are aligned at
+  `028a7caae9af6f10de3fa1639ce6fce6f136787d`; `git ls-remote --heads
+  origin` exposes only `refs/heads/main`.
+- [x] Decide whether a merge-back is needed: no merge is needed because
+  there is no extra local branch or remote feature branch to consolidate.
+- [x] Refresh README and worklog with the current single-branch state,
+  branch audit, git identity, and untracked probe-file handling.
+- [x] Sync root docs mirror, validate, and complete read-only review before
+  explicit staging.  Validation passed: root docs checksum mirror dry-run,
+  `bin/multiwfn2vesta --help`, and `git diff --check`.  Review found no
+  High/Medium/Low blocker and confirmed the README/worklog/kanban branch
+  state is consistent, only `main` is exposed by the remote, and local
+  `domain.cub`/`domain.pdb` probes remain untracked.  Final commit hash and
+  post-push alignment are reported in the assistant response to avoid a
+  self-referential docs loop.
+
+## Active Goal Continuation: 2026-06-10 Next Reference-Point Grid Increment
+
+- [x] Record automatic continuation of the long-running objective: keep
+  enriching Multiwfn wavefunction analyses that can become VESTA products,
+  prioritizing workflows fed by ABACUS LCAO Molden files or direct cube
+  outputs.
+- [x] Recheck current repository state before new edits: local `main`,
+  `origin/main`, and `origin/HEAD` are aligned at
+  `028a7caae9af6f10de3fa1639ce6fce6f136787d`; only local untracked probes
+  `domain.cub` and `domain.pdb` remain outside version control.
+- [ ] Deferred during the README/branch closeout so this pass remains a
+  documentation-only maintenance update.
+- [ ] Inspect local Multiwfn 2026.6.2 source for the next bounded,
+  source-backed reference-point or real-space function increment.
+- [ ] Implement the selected increment with focused tests and documentation,
+  preserving existing standalone-cube, mapped-surface, and fragment-route
+  separation.
+- [ ] Sync root docs mirror, validate, review, commit, push, and verify
+  branch alignment; keep `domain.cub` and `domain.pdb` untracked.
 
 ## Active Goal Continuation: 2026-06-10 Hirshfeld Delta-g And README Closeout
 

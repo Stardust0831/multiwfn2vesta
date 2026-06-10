@@ -1,5 +1,23 @@
 # Worklog
 
+## 2026-06-10: README branch consolidation at Hirshfeld Delta-g tip
+
+- User requested a README update, an audit of the unusual-looking branch
+  state, possible merge-back to a single branch, and use of git identity
+  `Stardust0831`.
+- Rechecked repository state after `git fetch --prune origin`: local `main`,
+  `origin/main`, and `origin/HEAD` are aligned at
+  `028a7caae9af6f10de3fa1639ce6fce6f136787d` (`Add Hirshfeld Delta-g grid
+  preset`), and `git ls-remote --heads origin` exposes only
+  `refs/heads/main`.
+- Repository-local identity is `Stardust0831 <13862180016@163.com>`.
+- No branch merge is needed in this pass because no extra local branch or
+  remote feature branch exists; the closeout remains on maintained `main`.
+- Local untracked probes `domain.cub` and `domain.pdb` remain uncommitted.
+- The automatically opened reference-point grid-function investigation is
+  deferred to keep this README/branch closeout as a documentation-only
+  maintenance pass.
+
 ## 2026-06-10: Hirshfeld-partition Delta-g and README branch closeout
 
 - User requested a README refresh, an audit of the unusual-looking branch
