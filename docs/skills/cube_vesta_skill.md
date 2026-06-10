@@ -52,6 +52,7 @@ multiwfn2vesta cube-preset lagrangian-ked 'G(r).cub' cube_products
 multiwfn2vesta cube-preset local-information-entropy infoentro.cub cube_products
 multiwfn2vesta cube-preset electron-delocalization-range EDR.cub cube_products
 multiwfn2vesta cube-preset orbital-overlap-distance EDRDmax.cub cube_products
+multiwfn2vesta cube-preset source-function srcfunc.cub cube_products
 multiwfn2vesta cube-preset becke-weight Becke.cub cube_products
 multiwfn2vesta cube-preset hirshfeld-weight Hirshfeld.cub cube_products
 multiwfn2vesta cube-preset rdg-scalar RDG.cub cube_products
@@ -234,6 +235,13 @@ passes it back through `cube-preset`.
   `21` `EDRDmax.cub`, default isosurface `0.05`.  `grid-run` uses
   Multiwfn's default exponent set unless `--edr-exponents COUNT START
   INCREMENT` is supplied.
+- `source-function` aliases: `source`, `srcfunc`, `source-func`;
+  positive/negative surfaces for Multiwfn function `19` `srcfunc.cub`,
+  default magnitude `0.05`.  When generating the cube with `grid-run`, pass
+  `--reference-point X Y Z`; `--reference-unit angstrom` is available for
+  Angstrom input coordinates, and `--source-function-mode` is patched into a
+  run-local settings file copied from the selected Multiwfn `settings.ini`
+  when available and passed with `-set`.
 - `becke-weight` aliases: `becke`, `becke-overlap-weight`,
   `becke-atomic-weight`, `beckewei`; single positive surface for Multiwfn
   function `111` `Becke.cub`, default isosurface `0.5`.  When generating the

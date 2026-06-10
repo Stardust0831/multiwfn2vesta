@@ -68,6 +68,14 @@ multiwfn2vesta grid-run --list-functions
 - `alie`, aliases `average-local-ionization-energy`, `avglocion`: function
   `18`, raw `avglocion.cub`, preset `density`; mapped preset `alie` with
   `--surface-cube`.
+- `source-function`, aliases `source`, `srcfunc`, `source-func`: function
+  `19`, raw `srcfunc.cub`, preset `source-function` with signed
+  positive/negative isosurfaces.  Pass `--reference-point X Y Z`; coordinates
+  are Bohr by default, or Angstrom with `--reference-unit angstrom`.
+  `--source-function-mode` controls Multiwfn `srcfuncmode` through a
+  run-local `multiwfn_grid_settings.ini`, copied from the selected Multiwfn
+  `settings.ini` when available and passed with `-set`, so global Multiwfn
+  settings are not modified.
 - `electron-delocalization-range`, aliases `edr`, `edr-r-d`,
   `electron-delocalization-range-function`: function `20`, raw `EDR.cub`,
   preset `electron-delocalization-range` with a single positive isosurface.
@@ -140,8 +148,9 @@ paths.
 
 Default behavior stops after the first failed orbital.  Add `--keep-going` to
 continue later orbitals.  Batch mode rejects `--orbital`, `--commands-file`,
-`--expected-cube`, and `--raw-dir` because those options would make the child
-run ownership ambiguous.
+`--expected-cube`, `--raw-dir`, reference-point/source-function options, and
+other function-specific non-orbital options because those options would make
+the child run ownership ambiguous.
 
 ## Grid Modes
 
@@ -235,6 +244,7 @@ multiwfn2vesta grid-run input.fch products --function esp --no-vesta
 multiwfn2vesta grid-run input.fch products --function esp --surface-cube density.cub --grid-mode cube --grid-cube density.cub
 multiwfn2vesta grid-run input.fch products --function hamiltonian-ked --no-vesta
 multiwfn2vesta grid-run input.fch products --function alie --no-vesta
+multiwfn2vesta grid-run input.fch products --function source-function --reference-point 0 0 0 --source-function-mode 1
 multiwfn2vesta grid-run input.fch products --function edr --edr-length 0.85
 multiwfn2vesta grid-run input.fch products --function edrdmax --edr-exponents 12 3.0 1.2
 multiwfn2vesta grid-run input.fch products --function becke --becke-atoms 1 4

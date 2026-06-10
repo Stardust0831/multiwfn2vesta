@@ -110,6 +110,7 @@ class TestCubePreset(unittest.TestCase):
         self.assertIn("local-information-entropy", text)
         self.assertIn("electron-delocalization-range", text)
         self.assertIn("orbital-overlap-distance", text)
+        self.assertIn("source-function", text)
         self.assertIn("becke-weight", text)
         self.assertIn("hirshfeld-weight", text)
         self.assertIn("iri", text)
@@ -353,6 +354,28 @@ basin type two
             self.assertIn("requested_preset: `infoentro`", manifest)
             self.assertIn("infoentro.cub", manifest)
             self.assertIn("-rho/N*ln(rho/N)", manifest)
+
+    def test_source_function_preset_writes_signed_surfaces(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            cube = self.write_tmp(root, "srcfunc.cub", SIGNED_CUBE)
+
+            result = run_preset("srcfunc", cube, root / "products")
+
+            text = result.vesta_path.read_text(encoding="utf-8")
+            manifest = result.manifest_path.read_text(encoding="utf-8")
+
+            self.assertRegex(
+                text,
+                r"ISURF\n  1   1\s+0\.05\s+255\s+210\s+80\s+135\s+255\n  1   1\s+-0\.05\s+70\s+130\s+255\s+135\s+255",
+            )
+            self.assertIn("canonical_preset: `source-function`", manifest)
+            self.assertIn("requested_preset: `srcfunc`", manifest)
+            self.assertIn("srcfunc.cub", manifest)
+            self.assertIn("reference point", manifest)
+            self.assertIn("srcfuncmode", manifest)
+            self.assertIn("-set", manifest)
+            self.assertIn("sur_value=0.05", manifest)
 
     def test_electron_delocalization_range_preset_writes_single_positive_surface(self):
         with tempfile.TemporaryDirectory() as tmp:

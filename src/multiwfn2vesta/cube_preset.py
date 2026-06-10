@@ -254,6 +254,25 @@ PRESETS: Tuple[CubePreset, ...] = (
         ),
     ),
     CubePreset(
+        name="source-function",
+        aliases=("source", "srcfunc", "source-func"),
+        description="Positive/negative isosurfaces for Multiwfn source function cubes.",
+        surface_mode="signed",
+        isosurface=0.05,
+        positive_rgb=(255, 210, 80),
+        negative_rgb=(70, 130, 255),
+        surface_opacity=(135, 255),
+        notes=(
+            "Use for Multiwfn srcfunc.cub from real-space function 19. "
+            "The source function depends on a reference point and srcfuncmode; "
+            "grid-run sets the reference point through main menu 1000 -> 1, "
+            "copies the selected Multiwfn settings.ini when available, patches "
+            "srcfuncmode, and passes the run-local settings file with -set. "
+            "Multiwfn does not reset sur_value for this function, so the default follows "
+            "the global main-function-5 sur_value=0.05."
+        ),
+    ),
+    CubePreset(
         name="becke-weight",
         aliases=("becke", "becke-overlap-weight", "becke-atomic-weight", "beckewei"),
         description="Single positive isosurface for Multiwfn Becke atomic/overlap weight cubes.",

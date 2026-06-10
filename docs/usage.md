@@ -225,6 +225,7 @@ multiwfn2vesta cube-preset lagrangian-ked 'G(r).cub' cube_products
 multiwfn2vesta cube-preset local-information-entropy infoentro.cub cube_products
 multiwfn2vesta cube-preset electron-delocalization-range EDR.cub cube_products
 multiwfn2vesta cube-preset orbital-overlap-distance EDRDmax.cub cube_products
+multiwfn2vesta cube-preset source-function srcfunc.cub cube_products
 multiwfn2vesta cube-preset becke-weight Becke.cub cube_products
 multiwfn2vesta cube-preset hirshfeld-weight Hirshfeld.cub cube_products
 multiwfn2vesta cube-preset rdg-scalar RDG.cub cube_products
@@ -290,6 +291,14 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
   Multiwfn 函数 `21` 的 `EDRDmax.cub`；不传 `--edr-exponents` 时使用
   Multiwfn 默认指数集合 `20, 2.50, 1.50`，也可传
   `--edr-exponents COUNT START INCREMENT` 手动控制
+- `source-function`：正/负等值面，别名包括 `source`、`srcfunc`、
+  `source-func`，用于 Multiwfn 函数 `19` 的 `srcfunc.cub`；`grid-run`
+  需要 `--reference-point X Y Z`，默认 Bohr，若坐标为 Angstrom 则加
+  `--reference-unit angstrom`；`--source-function-mode` 会让 runner 优先复制
+  所选 Multiwfn 同目录的 `settings.ini`，patch `srcfuncmode` 后写入
+  run-local `multiwfn_grid_settings.ini` 并通过 `-set` 传给 Multiwfn；
+  找不到 base settings 时才写最小 settings 文件，不修改全局
+  `settings.ini`；默认幅值沿用全局 `sur_value=0.05`
 - `becke-weight`：单正值等值面，别名包括 `becke`、
   `becke-overlap-weight`、`becke-atomic-weight`，用于 Multiwfn 函数
   `111` 的 `Becke.cub`；`grid-run` 需要 `--becke-atoms I J`，其中
@@ -557,6 +566,12 @@ multiwfn2vesta grid-run --list-functions
 - `local-information-entropy` / `information-entropy`：函数 `11`，原始
   输出 `infoentro.cub`，默认接 `cube-preset local-information-entropy`，
   按正/负等值面显示，默认幅值 `0.05`
+- `source-function` / `source` / `srcfunc`：函数 `19`，原始输出
+  `srcfunc.cub`，默认接 `cube-preset source-function`，按正/负等值面显示；
+  必须传 `--reference-point X Y Z`，默认 Bohr，Angstrom 坐标用
+  `--reference-unit angstrom`；`--source-function-mode` 通过本次运行目录里的
+  run-local settings 文件和 Multiwfn `-set` 控制 `srcfuncmode`，该文件优先
+  从所选 Multiwfn 的 `settings.ini` 复制后 patch
 - `electron-delocalization-range` / `edr`：函数 `20`，原始输出
   `EDR.cub`，默认接 `cube-preset electron-delocalization-range`，按单正值
   等值面显示；必须传 `--edr-length D_BOHR`
@@ -620,6 +635,13 @@ multiwfn2vesta grid-run input.fch grid_products \
 multiwfn2vesta grid-run input.fch grid_products \
   --function edrdmax \
   --edr-exponents 12 3.0 1.2 \
+  --grid-mode points \
+  --grid-points 120 120 120
+
+multiwfn2vesta grid-run input.fch grid_products \
+  --function source-function \
+  --reference-point 0 0 0 \
+  --source-function-mode 1 \
   --grid-mode points \
   --grid-points 120 120 120
 

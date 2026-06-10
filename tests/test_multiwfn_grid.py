@@ -137,6 +137,18 @@ hirshfeld comment two
 """
 
 
+SOURCE_FUNCTION_CUBE = """source function comment one
+source function comment two
+    2    -1.000000    -2.000000     0.500000
+    2     0.500000     0.000000     0.000000
+    2     0.000000     0.500000     0.000000
+    2     0.000000     0.000000     0.500000
+    8     8.000000    -1.000000    -2.000000     0.500000
+    1     1.000000    -0.500000    -2.000000     0.500000
+ -0.20 -0.10 -0.05 0.00 0.05 0.10 0.15 0.20
+"""
+
+
 class TestMultiwfnGridRunner(unittest.TestCase):
     def make_candidate(self, root):
         fake_exe = Path(root) / "Multiwfn_noGUI"
@@ -164,6 +176,7 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertIn("preset=vdw-potential", text)
         self.assertIn("preset=electron-delocalization-range", text)
         self.assertIn("preset=orbital-overlap-distance", text)
+        self.assertIn("preset=source-function", text)
         self.assertIn("preset=becke-weight", text)
         self.assertIn("preset=hirshfeld-weight", text)
         self.assertIn("promolecular-rdg", text)
@@ -206,6 +219,9 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertEqual(resolve_grid_function("edrdmax").index, 21)
         self.assertEqual(resolve_grid_function("edrdmax").output_filename, "EDRDmax.cub")
         self.assertEqual(resolve_grid_function("d(r)").preset, "orbital-overlap-distance")
+        self.assertEqual(resolve_grid_function("source-function").index, 19)
+        self.assertEqual(resolve_grid_function("srcfunc").output_filename, "srcfunc.cub")
+        self.assertEqual(resolve_grid_function("source").preset, "source-function")
         self.assertEqual(resolve_grid_function("becke").index, 111)
         self.assertEqual(resolve_grid_function("becke").output_filename, "Becke.cub")
         self.assertEqual(resolve_grid_function("becke-overlap-weight").preset, "becke-weight")
@@ -249,6 +265,43 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         commands = build_grid_commands(function, grid_mode="medium")
 
         self.assertEqual(commands, ["5", "18", "2", "2", "0", "q"])
+
+    def test_build_source_function_command_stream_sets_reference_point(self):
+        function = resolve_grid_function("source-function")
+
+        with self.assertRaisesRegex(ValueError, "requires --reference-point"):
+            build_grid_commands(function)
+        with self.assertRaisesRegex(ValueError, "--source-function-mode must be 1 or 2"):
+            build_grid_commands(function, reference_point=(1.0, 2.0, 3.0), source_function_mode=3)
+
+        self.assertEqual(
+            build_grid_commands(
+                function,
+                reference_point=(1.0, 2.0, 3.0),
+                source_function_mode=2,
+                grid_points=(10, 11, 12),
+            ),
+            ["1000", "1", "1.0,2.0,3.0", "5", "19", "4", "10,11,12", "2", "0", "q"],
+        )
+        self.assertEqual(
+            build_grid_commands(
+                function,
+                reference_point=(1.0, 2.0, 3.0),
+                reference_unit="angstrom",
+                grid_mode="low",
+            ),
+            ["1000", "1", "1.0,2.0,3.0 A", "5", "19", "1", "2", "0", "q"],
+        )
+        with self.assertRaisesRegex(ValueError, "--reference-point is only valid"):
+            build_grid_commands(resolve_grid_function("density"), reference_point=(1.0, 2.0, 3.0))
+        with self.assertRaisesRegex(ValueError, "--source-function-mode is only valid"):
+            build_grid_commands(resolve_grid_function("density"), source_function_mode=2)
+        self.assertEqual(
+            build_grid_commands(resolve_grid_function("density"), reference_unit="au", grid_mode="low"),
+            ["5", "1", "1", "2", "0", "q"],
+        )
+        with self.assertRaisesRegex(ValueError, "--reference-unit is only valid"):
+            build_grid_commands(resolve_grid_function("density"), reference_unit="angstrom")
 
     def test_build_edr_command_stream_requires_length_scale(self):
         function = resolve_grid_function("edr")
@@ -456,6 +509,79 @@ class TestMultiwfnGridRunner(unittest.TestCase):
             manifest = result.vesta_result.manifest_path.read_text(encoding="utf-8")
             self.assertIn("canonical_preset: `local-information-entropy`", manifest)
             self.assertIn("effective_isosurface: `0.05`", manifest)
+
+    def test_run_multiwfn_grid_source_function_uses_reference_point_and_local_settings(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            wavefunction = root / "h2o.fch"
+            wavefunction.write_text("wavefunction", encoding="utf-8")
+            candidate = self.make_candidate(root)
+            (candidate.path.parent / "settings.ini").write_text(
+                "laplfac= 6\nsrcfuncmode= 1\nother_setting= keep\n",
+                encoding="utf-8",
+            )
+
+            def fake_run(command, **kwargs):
+                cwd = Path(kwargs["cwd"])
+                (cwd / "srcfunc.cub").write_text(SOURCE_FUNCTION_CUBE, encoding="utf-8")
+                return subprocess.CompletedProcess(command, 0, stdout="ok", stderr="")
+
+            with patch("multiwfn2vesta.multiwfn_grid.find_multiwfn", return_value=candidate):
+                with patch("multiwfn2vesta.multiwfn_grid.subprocess.run", side_effect=fake_run) as mocked_run:
+                    result = run_multiwfn_grid(
+                        wavefunction,
+                        root / "products",
+                        function_name="source-function",
+                        reference_point=(1.0, 2.0, 3.0),
+                        reference_unit="angstrom",
+                        source_function_mode=2,
+                        stem="case",
+                        grid_points=(10, 11, 12),
+                    )
+
+            self.assertTrue(result.success)
+            self.assertEqual(result.reference_point, (1.0, 2.0, 3.0))
+            self.assertEqual(result.reference_unit, "angstrom")
+            self.assertEqual(result.source_function_mode, 2)
+            self.assertEqual(
+                result.command_file.read_text(encoding="utf-8"),
+                "1000\n1\n1.0,2.0,3.0 A\n5\n19\n4\n10,11,12\n2\n0\nq\n",
+            )
+            self.assertEqual(
+                mocked_run.call_args.args[0],
+                [
+                    str(candidate.path),
+                    str(wavefunction.resolve()),
+                    "-set",
+                    str((root / "products" / "multiwfn_grid_raw" / "multiwfn_grid_settings.ini").resolve()),
+                ],
+            )
+            self.assertIsNotNone(result.settings_override)
+            self.assertEqual(result.settings_override.name, "multiwfn_grid_settings.ini")
+            settings_text = result.settings_override.read_text(encoding="utf-8")
+            self.assertIn("laplfac= 6", settings_text)
+            self.assertIn("srcfuncmode= 2", settings_text)
+            self.assertNotIn("srcfuncmode= 1", settings_text)
+            self.assertIn("other_setting= keep", settings_text)
+            self.assertEqual(result.raw_cube.name, "srcfunc.cub")
+            self.assertEqual(result.cube.name, "case_source-function.cub")
+            self.assertIsNotNone(result.vesta_result)
+            self.assertEqual(
+                result.vesta_result.vesta_path.name,
+                "case_source-function_source-function_cube.vesta",
+            )
+            recipe = result.recipe_path.read_text(encoding="utf-8")
+            self.assertIn("function_index: `19`", recipe)
+            self.assertIn("reference_point: `(1.0, 2.0, 3.0)`", recipe)
+            self.assertIn("reference_unit: `angstrom`", recipe)
+            self.assertIn("source_function_mode: `2`", recipe)
+            self.assertIn("local_settings_file:", recipe)
+            manifest = result.vesta_result.manifest_path.read_text(encoding="utf-8")
+            self.assertIn("canonical_preset: `source-function`", manifest)
+            self.assertIn("effective_surface_mode: `signed`", manifest)
+            self.assertIn("srcfunc.cub", manifest)
+            self.assertIn("srcfuncmode", manifest)
+            self.assertIn("-set", manifest)
 
     def test_run_multiwfn_grid_iri_uses_standalone_iri_scalar_preset(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -1058,6 +1184,46 @@ class TestMultiwfnGridRunner(unittest.TestCase):
             self.assertEqual(first.read_text(encoding="utf-8"), "5\n4\nh\n1\n2\n0\nq\n")
             self.assertEqual(second.read_text(encoding="utf-8"), "5\n4\nl\n1\n2\n0\nq\n")
 
+    def test_main_source_function_accepts_reference_options(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            wavefunction = root / "h2o.fch"
+            wavefunction.write_text("wavefunction", encoding="utf-8")
+            candidate = self.make_candidate(root)
+
+            def fake_run(command, **kwargs):
+                Path(kwargs["cwd"], "srcfunc.cub").write_text(SOURCE_FUNCTION_CUBE, encoding="utf-8")
+                return subprocess.CompletedProcess(command, 0, stdout="ok", stderr="")
+
+            with patch("multiwfn2vesta.multiwfn_grid.find_multiwfn", return_value=candidate):
+                with patch("multiwfn2vesta.multiwfn_grid.subprocess.run", side_effect=fake_run):
+                    with patch("sys.stdout", io.StringIO()):
+                        code = __import__("multiwfn2vesta.multiwfn_grid", fromlist=["main"]).main(
+                            [
+                                str(wavefunction),
+                                str(root / "products"),
+                                "--function",
+                                "srcfunc",
+                                "--reference-point",
+                                "1",
+                                "2",
+                                "3",
+                                "--source-function-mode",
+                                "2",
+                                "--grid-mode",
+                                "low",
+                                "--no-vesta",
+                            ]
+                        )
+
+            self.assertEqual(code, 0)
+            self.assertEqual(
+                (root / "products" / "multiwfn_grid_input.txt").read_text(encoding="utf-8"),
+                "1000\n1\n1.0,2.0,3.0\n5\n19\n1\n2\n0\nq\n",
+            )
+            settings = root / "products" / "multiwfn_grid_raw" / "multiwfn_grid_settings.ini"
+            self.assertIn("srcfuncmode= 2", settings.read_text(encoding="utf-8"))
+
     def test_main_rejects_batch_single_orbital_conflict(self):
         stderr = io.StringIO()
         with patch("sys.stderr", stderr):
@@ -1132,6 +1298,26 @@ class TestMultiwfnGridRunner(unittest.TestCase):
 
         self.assertEqual(code, 2)
         self.assertIn("--surface-cube is not supported with --orbitals", stderr.getvalue())
+
+    def test_main_rejects_batch_source_function_options(self):
+        stderr = io.StringIO()
+        with patch("sys.stderr", stderr):
+            code = __import__("multiwfn2vesta.multiwfn_grid", fromlist=["main"]).main(
+                [
+                    "input.fch",
+                    "products",
+                    "--orbitals",
+                    "h",
+                    "l",
+                    "--reference-point",
+                    "1",
+                    "2",
+                    "3",
+                ]
+            )
+
+        self.assertEqual(code, 2)
+        self.assertIn("--reference-point", stderr.getvalue())
 
     def test_main_rejects_keep_going_without_batch(self):
         stderr = io.StringIO()

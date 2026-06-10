@@ -1,6 +1,86 @@
 # Project Kanban
 
-Updated: 2026-06-10 23:28 CST
+Updated: 2026-06-11 00:13 CST
+
+## Current Request: 2026-06-10 README Refresh, Branch Check, Source Function Closeout
+
+- [x] Record user request: update README, inspect unusual-looking branch
+  state, converge back to one maintained branch if needed, and keep git
+  identity as `Stardust0831`.
+- [x] Confirm repository-local identity is
+  `Stardust0831 <13862180016@163.com>`.
+- [x] Recheck branch state after `git fetch --prune origin`: local `main`,
+  `origin/main`, and `origin/HEAD` are aligned at
+  `49a350619601fdff76c0e993b55b2c9c26024ccc`; `git ls-remote --heads
+  origin` exposes only `refs/heads/main`.
+- [x] Decide merge action: no merge-back is needed because there is no extra
+  local branch or remote feature branch to consolidate.
+- [x] Refresh README branch-status text to the current single-branch state.
+- [x] Preserve local untracked probes `domain.cub` and `domain.pdb` outside
+  version control.
+- [x] Run validation before review: focused `py_compile`; full
+  `python3 -m unittest discover -s tests -v` with 302 tests; `cube-preset
+  --list-presets`; `grid-run --list-functions`; `grid-run --help`;
+  `bin/multiwfn2vesta --help`; and `git diff --check`.
+- [x] Complete read-only subagent review.  No commit-blocking issue was
+  found; the only non-blocking caveat was that a minimal `-set` file may
+  bypass user-customized Multiwfn settings, so the implementation now copies
+  and patches a base `settings.ini` when available.
+- [x] Patch source-function settings generation to preserve base Multiwfn
+  settings when possible.
+- [x] Re-run validation after the settings-file patch: focused
+  `py_compile`, 86 focused tests across `tests.test_cube_preset` and
+  `tests.test_multiwfn_grid`, full 302-test no-GUI regression,
+  `cube-preset --list-presets`, `grid-run --list-functions`,
+  `grid-run --help`, `bin/multiwfn2vesta --help`, stale settings-wording
+  scan, and `git diff --check`.
+- [x] Complete final read-only review.  No commit-blocking issue was found;
+  the only low item was this historical caveat wording, now cleaned up.
+- [x] Prepare explicit staging/commit/push closeout.  Final commit hash and
+  post-push branch alignment are reported in the assistant response to avoid
+  a self-referential docs loop.
+
+## Active Goal Continuation: 2026-06-10 Reference-Point Grid Function Resume
+
+- [x] Record automatic continuation of the long-running objective: research
+  and implement valuable Multiwfn wavefunction/grid analyses that can become
+  VESTA products, especially workflows fed by ABACUS LCAO Molden files or
+  direct ABACUS cube outputs.
+- [x] Keep the previous README/branch closeout separated from this feature
+  work: `main`, `origin/main`, and `origin/HEAD` were aligned at
+  `49a350619601fdff76c0e993b55b2c9c26024ccc` after that documentation
+  commit; local `domain.cub` and `domain.pdb` probes remain outside version
+  control.
+- [x] Inspect local Multiwfn 2026.6.2 source for reference-point dependent
+  main-function-5 grid functions and choose the next bounded increment.
+- [x] Implement the selected increment with focused tests and documentation,
+  preserving existing standalone-cube, mapped-surface, and fragment-route
+  separation.
+- [x] Selected increment: Multiwfn function `19` source function.  Source
+  evidence: `function.f90` calls `srcfunc(x,y,z,srcfuncmode)`, `srcfunc`
+  depends on global `refx,refy,refz`, `0123dim.f90` exports `srcfunc.cub`,
+  and main menu `1000 -> 1` sets the reference point.  Implementation uses
+  run-local `multiwfn_grid_settings.ini` with `-set` for `srcfuncmode` and
+  does not edit global Multiwfn settings.
+- [x] Focused validation passed before full regression: `py_compile` for the
+  edited modules/tests and `tests.test_cube_preset tests.test_multiwfn_grid`
+  with 86 tests.
+- [x] Validate implementation and CLI help before review.
+- [x] Address subagent settings-file caveat by copying the selected
+  Multiwfn `settings.ini` when available, patching `srcfuncmode` into a
+  run-local `multiwfn_grid_settings.ini`, and keeping global settings
+  untouched.
+- [x] Re-run validation after the settings-file patch: focused
+  `py_compile`, 86 focused tests across `tests.test_cube_preset` and
+  `tests.test_multiwfn_grid`, full 302-test no-GUI regression, CLI smoke
+  checks, stale settings-wording scan, and `git diff --check`.
+- [x] Complete final read-only review.  No commit-blocking issue was found;
+  the only low item was stale historical caveat wording in the kanban, now
+  cleaned up.
+- [x] Prepare explicit staging/commit/push closeout; keep `domain.cub` and
+  `domain.pdb` untracked.  Final commit hash and post-push branch alignment
+  are reported in the assistant response to avoid a self-referential docs
+  loop.
 
 ## Current Request: 2026-06-10 README Refresh And Main Branch Consolidation At Delta-g Tip
 

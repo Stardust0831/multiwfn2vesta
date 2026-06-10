@@ -1,5 +1,42 @@
 # Worklog
 
+## 2026-06-10: Source function grid preset and README branch refresh
+
+- User requested README refresh, branch-state cleanup toward one maintained
+  branch, and git identity `Stardust0831`.
+- Rechecked repository state after `git fetch --prune origin`: local `main`,
+  `origin/main`, and `origin/HEAD` are aligned at
+  `49a350619601fdff76c0e993b55b2c9c26024ccc` (`Refresh README branch status
+  at Delta-g tip`), and `git ls-remote --heads origin` exposes only
+  `refs/heads/main`.  No merge-back is needed because no extra local or
+  remote feature branch exists.
+- Repository-local identity is `Stardust0831 <13862180016@163.com>`.
+- Rechecked local Multiwfn 2026.6.2 source evidence for source function:
+  function `19` calls `srcfunc(x,y,z,srcfuncmode)`, `srcfunc` depends on
+  global `refx,refy,refz`, `0123dim.f90` exports `srcfunc.cub`, and main
+  menu `1000 -> 1` sets the reference point.
+- Added `grid-run --function source-function` with aliases `source` and
+  `srcfunc`, required `--reference-point X Y Z`, optional
+  `--reference-unit bohr|angstrom`, and optional `--source-function-mode 1|2`.
+  The runner copies the selected Multiwfn executable's sibling
+  `settings.ini` when available, patches only `srcfuncmode` into the
+  run-local `multiwfn_grid_settings.ini`, and passes it with `-set`; if no
+  base settings file is found, it writes a minimal run-local file.  Global
+  Multiwfn `settings.ini` is not touched.
+- Added `cube-preset source-function` for `srcfunc.cub` with signed
+  positive/negative `0.05` isosurfaces, plus focused fake-Multiwfn tests,
+  CLI tests, README/usage/skill/research matrix updates, and kanban updates.
+- Local untracked probes `domain.cub` and `domain.pdb` remain uncommitted.
+- Focused validation already passed before full closeout: `py_compile` for
+  edited modules/tests and 86 tests across `tests.test_cube_preset` and
+  `tests.test_multiwfn_grid`.
+- After the settings-file preservation patch, validation was re-run:
+  focused `py_compile`, the 86 focused cube/grid tests, the full 302-test
+  no-GUI regression, `cube-preset --list-presets`,
+  `grid-run --list-functions`, `grid-run --help`,
+  `bin/multiwfn2vesta --help`, stale settings-wording scan, and
+  `git diff --check` all passed.
+
 ## 2026-06-10: README branch consolidation at Hirshfeld Delta-g tip
 
 - User requested a README update, an audit of the unusual-looking branch
@@ -287,8 +324,9 @@
 - At that time, Fermi hole/source function and EDR/D(r) cube routes were
   deferred because they needed reference points or extra prompt parameters;
   EDR/D(r) was later implemented as the dedicated 2026-06-10 EDR and
-  orbital-overlap distance increment above, while reference-point functions
-  remain deferred.
+  orbital-overlap distance increment above, and source function was later
+  implemented as the dedicated 2026-06-10 source function increment above.
+  Fermi hole and pair/correlation-hole functions remain deferred.
 - Added focused tests for preset listing, signed `ISURF` defaults, manifest
   notes, function alias resolution, and a fake Multiwfn
   `grid-run --function information-entropy` run that verifies the recipe and
