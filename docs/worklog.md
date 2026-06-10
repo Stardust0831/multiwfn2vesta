@@ -47,6 +47,10 @@
   all pointed at `4123d00`; `git ls-remote --heads origin` returned only
   `refs/heads/main`; repository-local identity remained
   `Stardust0831 <13862180016@163.com>`.
+- The first documentation closure was pushed as
+  `4800cf4b2dbab559d64023852cc3579e7696ad15`
+  (`Record cube arithmetic push`).  This docs-only commit preserves the same
+  single-branch layout.
 
 ## 2026-06-10: Multiwfn real-space grid runner
 

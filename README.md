@@ -14,10 +14,10 @@ point.
 - Maintained branch: `main`.
 - GitHub remote: `origin` points to `Github:Stardust0831/multiwfn2vesta.git`,
   with `origin/HEAD -> origin/main`.
-- Latest local/remote branch audit on 2026-06-10 after the cube arithmetic
-  push: local `main`, `origin/main`, and `origin/HEAD` all point at
-  `4123d00ae051a710c954ed3c3712aa8b012c4bc0`, and
-  `git ls-remote --heads origin` returns only `refs/heads/main`.
+- Latest local/remote branch audits on 2026-06-10 confirmed the same branch
+  layout: local `main` tracks `origin/main`, `origin/HEAD` points to
+  `origin/main`, and `git ls-remote --heads origin` returns only
+  `refs/heads/main`.
 - Current cleanup result on 2026-06-10: there is no extra local or remote
   feature branch to merge back, so no merge action is required.  The
   apparently strange branch history is already represented as commits on
@@ -28,6 +28,10 @@ point.
   density differences, Fukui functions, and dual descriptors, with CLI/docs,
   tests, smoke evidence, and the unit-convention guard for mixed Bohr/Angstrom
   cube headers.
+- The first documentation closure for that feature was pushed as
+  `4800cf4b2dbab559d64023852cc3579e7696ad15`
+  (`Record cube arithmetic push`).  Later docs-only commits may advance
+  `main`, but they do not introduce extra branches.
 - Previous maintained feature push on 2026-06-10: `grid-run` was committed as
   `3d192dc7ae9696dd433aae04e1a3bdb488b95482`
   (`Add Multiwfn grid runner`) and closed with documentation commit

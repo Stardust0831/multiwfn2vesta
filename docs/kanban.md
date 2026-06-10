@@ -60,6 +60,10 @@ Updated: 2026-06-10
   all pointed at `4123d00`; `git ls-remote --heads origin` returned only
   `refs/heads/main`; repository-local identity remained
   `Stardust0831 <13862180016@163.com>`.
+- Pushed the first documentation closure as
+  `4800cf4b2dbab559d64023852cc3579e7696ad15`
+  (`Record cube arithmetic push`).  This docs-only commit preserves the same
+  single-branch layout.
 - Added `multiwfn2vesta grid-run`, a maintained Multiwfn main-function-5
   (`study3dim`) real-space grid runner.  It discovers Multiwfn, writes the
   exact command stream, stdout/stderr logs, raw cube directory, processed
