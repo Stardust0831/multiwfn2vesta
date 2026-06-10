@@ -1,8 +1,8 @@
-# Skill: Multiwfn IGMH command-stream runner
+# Skill: Multiwfn IGM/mIGM/IGMH command-stream runner
 
 Use this workflow when the input is a Multiwfn-readable wavefunction file and
-the goal is to generate IGMH interfragment cubes, then prepare a VESTA
-mapped-surface file.
+the goal is to generate IGM, mIGM, or IGMH interfragment cubes, then prepare
+a VESTA mapped-surface file.
 
 ## Command
 
@@ -13,10 +13,32 @@ multiwfn2vesta igmh-run input.molden igmh_products \
   --grid-mode spacing \
   --grid-spacing 0.25 \
   --timeout 600
+
+multiwfn2vesta igm-run input.molden igm_products \
+  --fragment 1-48 \
+  --fragment 49-60 \
+  --sl2r-source actual \
+  --grid-mode spacing \
+  --grid-spacing 0.25
+
+multiwfn2vesta migm-run input.molden migm_products \
+  --fragment 1-48 \
+  --fragment 49-60 \
+  --sl2r-source actual \
+  --grid-mode spacing \
+  --grid-spacing 0.25
 ```
 
 Accepted wavefunction inputs are whatever the local Multiwfn executable can
 read, typically `.molden`, `.fch`, `.fchk`, `.wfn`, or `.wfx`.
+
+## Method Selection
+
+Use `igmh-run` for the default IGMH stream.  Use `igm-run` or `migm-run` when
+the command name should fix the method; these wrappers reject an extra
+`--method` argument so the method cannot be silently overridden.  Use
+`igmh-run --method igm|migm|igmh` only when a single generic command needs to
+choose the method explicitly.
 
 ## Fragment Rules
 
@@ -35,7 +57,7 @@ needs to be replaced.
 ## Command Stream
 
 For two fragments and an explicit finite-molecule point grid, the generated
-stream is:
+IGMH stream is:
 
 ```text
 20
@@ -56,6 +78,29 @@ post-processing step exports cube files, and the final zeros unwind the menus.
 The runner writes this stream to `multiwfn_igmh_input.txt` before launching
 Multiwfn.
 
+For IGM and mIGM, the method line changes and a sign(lambda2)rho source prompt
+appears when wavefunction information is present:
+
+```text
+20
+10
+2
+<fragment_1>
+<fragment_2>
+1
+4
+NX,NY,NZ
+3
+0
+0
+q
+```
+
+Use `10` for IGM and `-10` for mIGM.  The `1` after the fragments means
+actual-density sign(lambda2)rho; use `2` for promolecular sign(lambda2)rho.
+The CLI exposes this as `--sl2r-source actual|promolecular`.  IGMH always
+uses actual density in Multiwfn and rejects `--sl2r-source promolecular`.
+
 Supported grid modes:
 
 - `low`, `medium`, `high`: Multiwfn built-in grid levels
@@ -73,22 +118,24 @@ spacing.
 
 ## Outputs
 
-The runner writes:
+The runner writes these files, replacing `<method>` with `igmh`, `igm`, or
+`migm`:
 
-- `multiwfn_igmh_input.txt`
-- `multiwfn_igmh.stdout.txt`
-- `multiwfn_igmh.stderr.txt`
-- `multiwfn_igmh_raw/dg_inter.cub`
-- `multiwfn_igmh_raw/sl2r.cub`
+- `multiwfn_<method>_input.txt`
+- `multiwfn_<method>.stdout.txt`
+- `multiwfn_<method>.stderr.txt`
+- `multiwfn_<method>_raw/dg_inter.cub`
+- `multiwfn_<method>_raw/sl2r.cub`
 - `<stem>_dg_inter.cub`
 - `<stem>_sl2r.cub`
 - `<stem>_dg_intra.cub` and `<stem>_dg.cub` when Multiwfn writes them
-- `<stem>_igmh_cube.vesta` unless `--no-vesta` is used
-- `<stem>_igmh_cube_vesta_recipe.md`
-- `multiwfn_igmh_recipe.md`
+- `<stem>_<method>_cube.vesta` unless `--no-vesta` is used
+- `<stem>_<method>_cube_vesta_recipe.md`
+- `multiwfn_<method>_recipe.md`
 
-The VESTA layer uses `cube-preset igmh`: surface `dg_inter.cub`, texture
-`sl2r.cub`, isosurface `0.01`, and texture physical range `-0.05` to `0.05`.
+The VESTA layer uses `cube-preset igmh` for IGMH and `cube-preset igm` for
+IGM/mIGM: surface `dg_inter.cub`, texture `sl2r.cub`, isosurface `0.01`,
+and texture physical range `-0.05` to `0.05`.
 
 ## Discovery
 
@@ -117,7 +164,7 @@ analysis.
 
 ## Smoke
 
-Real noGUI H2O smoke:
+Real noGUI H2O IGMH smoke:
 
 ```text
 /mnt/g/work/multiwfn2vesta/smoke/multiwfn_igmh_run_smoke_20260610/h2o/
@@ -141,10 +188,21 @@ The run returned 0 and generated `h2o_dg_inter.cub`, `h2o_sl2r.cub`,
 `h2o_dg_intra.cub`, `h2o_dg.cub`, and `h2o_igmh_cube.vesta` without
 launching the VESTA UI.
 
+Real noGUI H2O IGM and mIGM smokes:
+
+```text
+/mnt/g/work/multiwfn2vesta/smoke/multiwfn_igm_migm_run_smoke_20260610_review_fix/
+```
+
+The `h2o_igm/` and `h2o_migm/` runs used fragments `1` and `2-3`, grid
+`8 x 8 x 8`, and generated `h2o_igm_cube.vesta` plus
+`h2o_migm_cube.vesta` without launching the VESTA UI.  Their VESTA recipes
+record method-specific titles, not the shared canonical preset name.
+
 ## Boundaries
 
-- This runner automates standard IGMH.  IGM, mIGM, and aIGM command streams
-  remain separate future increments.
+- This runner automates standard IGM, mIGM, and IGMH.  aIGM/amIGM command
+  streams remain separate future increments.
 - AIM path/BCP overlays are handled after the cube layer by
   `multiwfn2vesta aim-igmh`.
 - If VESTA rendering is needed, keep it as an explicit later step because the

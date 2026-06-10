@@ -35,6 +35,8 @@ multiwfn2vesta surface-extrema --help
 multiwfn2vesta cube-arith --help
 multiwfn2vesta iri-run --help
 multiwfn2vesta igmh-run --help
+multiwfn2vesta igm-run --help
+multiwfn2vesta migm-run --help
 multiwfn2vesta grid-run --help
 multiwfn2vesta multiwfn-atom-color --help
 multiwfn2vesta aim-run --help
@@ -58,6 +60,10 @@ Aliases:
   aliases for `iri-run`.
 - `multiwfn2vesta multiwfn-igmh ...` and
   `multiwfn2vesta multiwfn-igmh-run ...` are aliases for `igmh-run`.
+- `multiwfn2vesta multiwfn-igm ...` and
+  `multiwfn2vesta multiwfn-igm-run ...` are aliases for `igm-run`.
+- `multiwfn2vesta multiwfn-migm ...` and
+  `multiwfn2vesta multiwfn-migm-run ...` are aliases for `migm-run`.
 - `multiwfn2vesta multiwfn-grid ...`,
   `multiwfn2vesta scalar-cube-run ...`, and
   `multiwfn2vesta function-cube ...` are aliases for `grid-run`.
@@ -70,8 +76,9 @@ Aliases:
 - `multiwfn2vesta aim-vesta ...` is the same as `aim-pdb`.
 - `multiwfn2vesta igmh ...` is the same as `aim-igmh`; this top-level alias
   styles an already saved AIM+IGMH overlay.  The IGMH cube display preset is
-  invoked as `multiwfn2vesta cube-preset igmh ...`, while the automated
-  Multiwfn fragment run is `multiwfn2vesta igmh-run ...`.
+  invoked as `multiwfn2vesta cube-preset igmh ...`, while automated
+  Multiwfn fragment runs are `multiwfn2vesta igmh-run ...`,
+  `multiwfn2vesta igm-run ...`, and `multiwfn2vesta migm-run ...`.
 
 ## Maintained workflows
 
@@ -202,7 +209,7 @@ Use `--commands-file commands.txt` to replace the default weak-interaction
 menu stream.  The runner sets `Multiwfnpath`, `MULTIWFNPATH`, and
 `MultiwfnPATH` to the selected executable directory for the subprocess.
 
-### Wavefunction to Multiwfn IGMH to VESTA
+### Wavefunction to Multiwfn IGM/IGMH to VESTA
 
 ```bash
 multiwfn2vesta igmh-run \
@@ -213,19 +220,34 @@ multiwfn2vesta igmh-run \
   --grid-mode spacing \
   --grid-spacing 0.25 \
   --timeout 600
+
+multiwfn2vesta migm-run \
+  input.molden \
+  migm_products \
+  --fragment 1-48 \
+  --fragment 49-60 \
+  --sl2r-source actual \
+  --grid-mode spacing \
+  --grid-spacing 0.25
 ```
 
 Inputs can be any wavefunction file Multiwfn accepts.  The command writes the
 exact Multiwfn input stream and stdout/stderr logs, preserves raw
-`dg_inter.cub` and `sl2r.cub` under `multiwfn_igmh_raw/`, copies them to
+`dg_inter.cub` and `sl2r.cub` under `multiwfn_<method>_raw/`, copies them to
 `<stem>_dg_inter.cub` and `<stem>_sl2r.cub`, preserves optional
-`dg_intra.cub`/`dg.cub`, then calls `cube-preset igmh` to create a
-mapped-surface `.vesta` unless `--no-vesta` is supplied.
+`dg_intra.cub`/`dg.cub`, then calls `cube-preset igmh` for IGMH or
+`cube-preset igm` for IGM/mIGM unless `--no-vesta` is supplied.
 
 Fragments are passed directly to Multiwfn, so use the same atom-index syntax
 you would type interactively.  At least two `--fragment` entries are required
 for the default stream; `--commands-file commands.txt` can replace the entire
 stream for special cases.
+
+IGM/mIGM have an extra sign(lambda2)rho prompt when wavefunction information
+is present.  Use `--sl2r-source actual` or `--sl2r-source promolecular`.
+IGMH is fixed to actual density by Multiwfn.  `igm-run` and `migm-run` fix
+their method from the command name and reject an extra `--method`; use
+`igmh-run --method igm|migm|igmh` for an explicitly selected generic route.
 
 For periodic ABACUS Molden files with `[Cell]`, do not use `--grid-mode
 points`.  Multiwfn's PBC grid option `4` reads a spacing value in that case,

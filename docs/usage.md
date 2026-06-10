@@ -30,6 +30,8 @@ multiwfn2vesta surface-extrema --help
 multiwfn2vesta cube-arith --help
 multiwfn2vesta iri-run --help
 multiwfn2vesta igmh-run --help
+multiwfn2vesta igm-run --help
+multiwfn2vesta migm-run --help
 multiwfn2vesta grid-run --help
 multiwfn2vesta abacus-mulliken-color --help
 multiwfn2vesta multiwfn-atom-color --help
@@ -58,9 +60,9 @@ multiwfn2vesta aim-igmh --help
 - `iri-run`: 从 Multiwfn 可读波函数文件调用 IRI/RDG 弱相互作用菜单，
   生成 `func1.cub`/`func2.cub`，处理成 VESTA 可用的 `IRI1`/`IRI2` cube，
   再通过 `cube-preset iri` 写 mapped-surface `.vesta`
-- `igmh-run`: 从 Multiwfn 可读波函数文件和片段定义调用 IGMH 菜单，
+- `igmh-run` / `igm-run` / `migm-run`: 从 Multiwfn 可读波函数文件和片段定义调用 IGMH、IGM 或 mIGM 菜单，
   导出 `dg_inter.cub`/`sl2r.cub`，保留可选 `dg_intra.cub`/`dg.cub`，
-  再通过 `cube-preset igmh` 写 mapped-surface `.vesta`
+  再通过 `cube-preset igmh` 或 `cube-preset igm` 写 mapped-surface `.vesta`
 - `grid-run`: 从 Multiwfn 可读波函数文件调用主菜单 `5` 的 real-space
   function grid，导出 density、MO/orbital、Laplacian、K(r)/G(r)、ELF、LOL、
   ESP/MEP、ALIE、RDG/IRI-like、promolecular RDG/sign(lambda2)rho 等单 cube，
@@ -442,7 +444,7 @@ bin/multiwfn2vesta grid-run \
 
 注意：`grid-run` 的每个子任务仍然只生成一个 scalar cube。ESP-on-density
 这类 surface cube + texture cube 图仍然要通过 `cube-preset`/`cube-vesta`
-组合；IRI/RDG/NCI 和 IGMH 已有专门的 `iri-run`、`igmh-run` 流程。
+组合；IRI/RDG/NCI 和 IGM/IGMH 已有专门的 `iri-run`、`igmh-run`/`igm-run` 流程。
 `cube-preset igmh` 仍可单独用于把已有 `dg_inter.cub`/`sl2r.cub` 写成
 VESTA。
 
@@ -490,10 +492,14 @@ multiwfn2vesta iri-run input.fch iri_products --no-vesta
 超时、或返回 0 但缺 `func1.cub`/`func2.cub` 时，CLI 会保留 stdout/stderr
 日志并返回非零码。
 
-## 波函数文件到 IGMH VESTA
+## 波函数文件到 IGM/IGMH VESTA
 
 如果起点是 Molden/FCHK/WFN/WFX 等 Multiwfn 可读波函数文件，并且已经知道
-片段的原子序号，可以直接调用 Multiwfn IGMH 菜单并把输出接到 VESTA：
+片段的原子序号，可以直接调用 Multiwfn IGMH、IGM 或 mIGM 菜单并把输出接到 VESTA。
+`igmh-run` 默认跑 IGMH，`igm-run` 和 `migm-run` 会分别自动注入
+`--method igm` 和 `--method migm`。`igm-run`/`migm-run` 不接受用户再传
+`--method` 覆盖，避免命令名和实际 Multiwfn 命令流不一致；需要显式选方法时用
+`igmh-run --method igm|migm|igmh`：
 
 ```bash
 multiwfn2vesta igmh-run \
@@ -504,16 +510,26 @@ multiwfn2vesta igmh-run \
   --grid-mode spacing \
   --grid-spacing 0.25 \
   --timeout 600
+
+multiwfn2vesta igm-run \
+  input.molden \
+  igm_products \
+  --fragment 1-48 \
+  --fragment 49-60 \
+  --sl2r-source actual \
+  --grid-mode spacing \
+  --grid-spacing 0.25
 ```
 
 默认流程：
 
 - 自动发现 Multiwfn；也可用 `--multiwfn /path/to/Multiwfn_noGUI` 显式指定
-- 写 `multiwfn_igmh_input.txt`，记录实际喂给 Multiwfn 的命令流
-- 在 `multiwfn_igmh_raw/` 保存 Multiwfn 原始 `dg_inter.cub` 和 `sl2r.cub`
+- 写 `multiwfn_<method>_input.txt`，记录实际喂给 Multiwfn 的命令流
+- 在 `multiwfn_<method>_raw/` 保存 Multiwfn 原始 `dg_inter.cub` 和 `sl2r.cub`
 - 如果 Multiwfn 同时写出 `dg_intra.cub`、`dg.cub`、`output.txt`，也会复制到输出目录
 - 把 `dg_inter.cub` 作为表面 cube、`sl2r.cub` 作为染色 cube
-- 默认调用 `cube-preset igmh` 生成 `<stem>_igmh_cube.vesta` 和 recipe
+- IGMH 默认调用 `cube-preset igmh`，IGM/mIGM 默认调用 `cube-preset igm`
+  生成 `<stem>_<method>_cube.vesta` 和 recipe
 
 片段参数直接使用 Multiwfn 片段提示可接受的字符串，例如 `1-48`、
 `1,4,9`、`49-60` 或补集 `c`。至少需要传两个 `--fragment`，除非用
@@ -524,6 +540,10 @@ Molden，Multiwfn PBC 菜单会把选项 `4` 读成 grid spacing，而不是 `NX
 因此 `igmh-run` 会在启动 Multiwfn 前拒绝这种组合。周期体系请用
 `--grid-mode spacing --grid-spacing 数值`，或用 `--grid-mode pbc-cell` 显式
 设置 origin、box length 和 spacing。
+
+IGM/mIGM 在有波函数时会多问一次 sign(lambda2)rho 来源；默认
+`--sl2r-source actual`，也可以传 `--sl2r-source promolecular`。IGMH 按
+Multiwfn 源码固定使用 actual density，不接受 promolecular。
 
 常用参数：
 
@@ -547,11 +567,11 @@ multiwfn2vesta igmh-run input.fch igmh_products \
   --no-vesta
 ```
 
-`igmh-run` 启动 Multiwfn 时会同步设置 `Multiwfnpath`、`MULTIWFNPATH`
+`igmh-run`/`igm-run`/`migm-run` 启动 Multiwfn 时会同步设置 `Multiwfnpath`、`MULTIWFNPATH`
 和 `MultiwfnPATH`。Multiwfn 非零退出、超时、或返回 0 但缺
 `dg_inter.cub`/`sl2r.cub` 时，CLI 会保留 stdout/stderr 日志并返回非零码。
 顶层 `multiwfn2vesta igmh` 仍是 AIM+IGMH overlay 的历史别名；脚本化跑
-Multiwfn IGMH 请用 `igmh-run` 或 `multiwfn-igmh`。
+Multiwfn IGM/IGMH 请用 `igmh-run`、`igm-run` 或 `migm-run`。
 
 ## ABACUS Mulliken 原子着色
 

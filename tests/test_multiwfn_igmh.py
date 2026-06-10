@@ -55,6 +55,31 @@ class TestMultiwfnIgmhRunner(unittest.TestCase):
 
         self.assertEqual(commands, ["20", "11", "2", "1-48", "c", "4", "0.6", "3", "0", "0", "q"])
 
+    def test_build_igm_command_stream_uses_actual_density_prompt(self):
+        commands = build_igmh_commands(
+            ["1-48", "49-60"],
+            method="igm",
+            sl2r_source="actual",
+            grid_mode="medium",
+        )
+
+        self.assertEqual(commands, ["20", "10", "2", "1-48", "49-60", "1", "2", "3", "0", "0", "q"])
+
+    def test_build_migm_command_stream_can_use_promolecular_sl2r(self):
+        commands = build_igmh_commands(
+            ["1-48", "c"],
+            method="migm",
+            sl2r_source="promolecular",
+            grid_mode="spacing",
+            grid_spacing=0.25,
+        )
+
+        self.assertEqual(commands, ["20", "-10", "2", "1-48", "c", "2", "4", "0.25", "3", "0", "0", "q"])
+
+    def test_igmh_rejects_promolecular_sl2r_source(self):
+        with self.assertRaisesRegex(ValueError, "IGMH always uses actual"):
+            build_igmh_commands(["1-48", "c"], method="igmh", sl2r_source="promolecular")
+
     def test_build_igmh_rejects_points_grid_for_periodic_inputs(self):
         with self.assertRaisesRegex(ValueError, "periodic Molden"):
             build_igmh_commands(["1-48", "c"], grid_mode="points", periodic=True)
@@ -109,6 +134,8 @@ class TestMultiwfnIgmhRunner(unittest.TestCase):
                         nthreads=2,
                         timeout=30,
                         stem="case",
+                        method="igm",
+                        sl2r_source="actual",
                         grid_mode="spacing",
                         grid_spacing=0.6,
                     )
@@ -116,12 +143,12 @@ class TestMultiwfnIgmhRunner(unittest.TestCase):
             self.assertTrue(result.success)
             self.assertEqual(result.cli_returncode, 0)
             self.assertEqual(mocked_run.call_args.args[0], [str(candidate.path), str(wavefunction.resolve()), "-nt", "2"])
-            self.assertEqual(mocked_run.call_args.kwargs["cwd"], str(root / "products" / "multiwfn_igmh_raw"))
+            self.assertEqual(mocked_run.call_args.kwargs["cwd"], str(root / "products" / "multiwfn_igm_raw"))
             self.assertEqual(mocked_run.call_args.kwargs["timeout"], 30)
             self.assertEqual(mocked_run.call_args.kwargs["env"]["Multiwfnpath"], str(candidate.path.parent))
             self.assertEqual(
                 result.command_file.read_text(encoding="utf-8"),
-                "20\n11\n2\n1-3\n4-6\n4\n0.6\n3\n0\n0\nq\n",
+                "20\n10\n2\n1-3\n4-6\n1\n4\n0.6\n3\n0\n0\nq\n",
             )
             self.assertEqual(result.stdout_log.read_text(encoding="utf-8"), "ok")
             self.assertEqual(result.stderr_log.read_text(encoding="utf-8"), "warn")
@@ -133,10 +160,14 @@ class TestMultiwfnIgmhRunner(unittest.TestCase):
             self.assertEqual(result.dg_cube.name, "case_dg.cub")
             self.assertIsNotNone(result.vesta_result)
             self.assertTrue(result.vesta_result.vesta_path.exists())
+            self.assertEqual(result.vesta_result.vesta_path.name, "case_igm_cube.vesta")
             self.assertIn("IMPORT_TEXTURE", result.vesta_result.vesta_path.read_text(encoding="utf-8"))
             manifest = result.vesta_result.manifest_path.read_text(encoding="utf-8")
             self.assertIn("canonical_preset: `igmh`", manifest)
+            self.assertIn("title: `case_dg_inter (igm)`", manifest)
             recipe = result.recipe_path.read_text(encoding="utf-8")
+            self.assertIn("method: `igm`", recipe)
+            self.assertIn("sl2r_source: `actual`", recipe)
             self.assertIn("fragments: `1-3; 4-6`", recipe)
             self.assertIn("grid_spacing: `0.6`", recipe)
 
@@ -196,7 +227,19 @@ class TestMultiwfnIgmhRunner(unittest.TestCase):
                     )
 
         self.assertEqual(code, 2)
+        self.assertIn("igmh-run:", stderr.getvalue())
         self.assertIn("at least two", stderr.getvalue())
+
+    def test_main_igm_rejects_method_override(self):
+        stderr = io.StringIO()
+        with patch("sys.stderr", stderr):
+            code = __import__("multiwfn2vesta.multiwfn_igmh", fromlist=["main_igm"]).main_igm(
+                ["input.molden", "products", "--method", "igmh"]
+            )
+
+        self.assertEqual(code, 2)
+        self.assertIn("igm-run:", stderr.getvalue())
+        self.assertIn("--method is fixed", stderr.getvalue())
 
     def test_main_rejects_points_grid_for_periodic_molden_before_launching_multiwfn(self):
         stderr = io.StringIO()

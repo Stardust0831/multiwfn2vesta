@@ -1,5 +1,45 @@
 # Worklog
 
+## 2026-06-10: IGM and mIGM command streams
+
+- Continued the long-running Multiwfn/ABACUS/VESTA analysis-expansion goal by
+  closing the next weak-interaction command-stream gap after IGMH.
+- Rechecked local Multiwfn source evidence: `visweak.f90` menu options `10`,
+  `-10`, and `11` dispatch to IGM, mIGM, and IGMH; IGM/mIGM ask for
+  sign(lambda2)rho source when wavefunction information is present, while
+  IGMH forces actual-density sign(lambda2)rho.
+- Extended the maintained runner with `--method igmh|igm|migm` and
+  `--sl2r-source actual|promolecular`.  `igmh-run` remains the default IGMH
+  route; `igm-run` and `migm-run` are unified CLI convenience commands that
+  inject the corresponding method.
+- Output logs and raw directories are now method-aware:
+  `multiwfn_igmh_*`, `multiwfn_igm_*`, or `multiwfn_migm_*`.  VESTA files are
+  named `<stem>_<method>_cube.vesta`.
+- Kept the periodic Molden `[Cell]` guard from the IGMH increment: `points`
+  grid mode is still rejected for PBC inputs before Multiwfn launch.
+- Added focused tests for IGM/mIGM command streams, IGMH rejection of
+  promolecular sign(lambda2)rho, method-aware VESTA output naming, and unified
+  CLI dispatch for `igmh-run`, `igm-run`, and `migm-run`.
+- Read-only pre-commit review found a real wrapper risk: `igm-run --method
+  igmh` or `migm-run --method igmh` could silently override the command name.
+  The wrappers now reject any user-supplied `--method`; the generic
+  `igmh-run --method igm|migm|igmh` route remains available for explicit
+  method selection.
+- The VESTA preset layer now receives a method-specific title such as
+  `<stem>_dg_inter (igm)` so `igm`/`migm` recipes are not labeled as `igmh`
+  just because the display preset resolves to the shared canonical `igmh`
+  preset.
+- Rechecked the repository after `git fetch --prune origin` for this closeout:
+  local `main`, `origin/main`, and `origin/HEAD` are aligned at the pre-commit
+  tip, `git ls-remote --heads origin` exposes only `refs/heads/main`, and the
+  repository-local identity is `Stardust0831 <13862180016@163.com>`.
+- Real noGUI H2O smokes passed for both new methods under
+  `/mnt/g/work/multiwfn2vesta/smoke/multiwfn_igm_migm_run_smoke_20260610_review_fix/`,
+  generating `h2o_igm_cube.vesta` and `h2o_migm_cube.vesta` with
+  method-specific recipe titles and without launching the VESTA UI.
+- Synced README, usage docs, CLI/IGM skills, research matrix, kanban, and root
+  docs with the updated IGM/mIGM boundary.
+
 ## 2026-06-10: IGMH command-stream runner and README refresh
 
 - User asked to update README, make the branch state less confusing, merge

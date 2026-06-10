@@ -1,4 +1,4 @@
-"""Run Multiwfn IGMH cube generation and prepare VESTA files."""
+"""Run Multiwfn IGM/IGMH cube generation and prepare VESTA files."""
 
 from __future__ import annotations
 
@@ -19,6 +19,29 @@ from .multiwfn_aim import read_command_file
 
 IGMH_OUTPUT_MISSING_CODE = 3
 IGMH_PROCESSING_FAILED_CODE = 4
+
+IGM_METHOD_MENU = {
+    "igm": "10",
+    "migm": "-10",
+    "igmh": "11",
+}
+
+IGM_METHOD_ALIASES = {
+    "igm": "igm",
+    "inter": "igm",
+    "migm": "migm",
+    "modified-igm": "migm",
+    "modified_igm": "migm",
+    "igmh": "igmh",
+}
+
+SL2R_SOURCE_ALIASES = {
+    "actual": "actual",
+    "density": "actual",
+    "wavefunction": "actual",
+    "promolecular": "promolecular",
+    "pro": "promolecular",
+}
 
 
 class MultiwfnIgmhResult(NamedTuple):
@@ -103,9 +126,25 @@ def wavefunction_has_molden_cell(path: Path, *, max_lines: int = 2000) -> bool:
     return False
 
 
+def normalize_igm_method(method: str) -> str:
+    key = str(method).strip().lower()
+    if key not in IGM_METHOD_ALIASES:
+        raise ValueError("Unknown IGM method: {}".format(method))
+    return IGM_METHOD_ALIASES[key]
+
+
+def normalize_sl2r_source(source: str) -> str:
+    key = str(source).strip().lower()
+    if key not in SL2R_SOURCE_ALIASES:
+        raise ValueError("Unknown sign(lambda2)rho source: {}".format(source))
+    return SL2R_SOURCE_ALIASES[key]
+
+
 def build_igmh_commands(
     fragments: Sequence[str],
     *,
+    method: str = "igmh",
+    sl2r_source: str = "actual",
     grid_mode: str = "points",
     grid_points: Sequence[int] = (40, 40, 40),
     grid_spacing: Optional[float] = None,
@@ -115,12 +154,19 @@ def build_igmh_commands(
     pbc_lengths: Optional[Sequence[float]] = None,
     periodic: bool = False,
 ) -> List[str]:
+    method_key = normalize_igm_method(method)
+    sl2r_key = normalize_sl2r_source(sl2r_source)
+    if method_key == "igmh" and sl2r_key != "actual":
+        raise ValueError("IGMH always uses actual-density sign(lambda2)rho; --sl2r-source applies only to IGM/mIGM")
+
     fragment_list = [str(fragment).strip() for fragment in fragments if str(fragment).strip()]
     if len(fragment_list) < 2:
-        raise ValueError("IGMH runner requires at least two --fragment entries for interfragment analysis")
+        raise ValueError("IGM/IGMH runner requires at least two --fragment entries for interfragment analysis")
 
-    commands: List[str] = ["20", "11", str(len(fragment_list))]
+    commands: List[str] = ["20", IGM_METHOD_MENU[method_key], str(len(fragment_list))]
     commands.extend(fragment_list)
+    if method_key in {"igm", "migm"}:
+        commands.append("1" if sl2r_key == "actual" else "2")
 
     mode = grid_mode.lower()
     if periodic and mode == "points":
@@ -165,6 +211,8 @@ def _write_recipe(
     *,
     wavefunction: Path,
     raw_dir: Path,
+    method: str,
+    sl2r_source: str,
     fragments: Sequence[str],
     commands: Sequence[str],
     grid_mode: str,
@@ -179,13 +227,15 @@ def _write_recipe(
     error: Optional[str],
 ) -> None:
     lines = [
-        "# Multiwfn IGMH Recipe",
+        "# Multiwfn IGM/IGMH Recipe",
         "",
         "## Generated",
         "",
         f"- time: `{_datetime.datetime.now().isoformat(timespec='seconds')}`",
         f"- wavefunction: `{wavefunction}`",
         f"- raw_dir: `{raw_dir}`",
+        f"- method: `{method}`",
+        f"- sl2r_source: `{sl2r_source}`",
         f"- fragments: `{'; '.join(fragments)}`",
         f"- grid_mode: `{grid_mode}`",
         f"- grid_points: `{_format_int_triple(grid_points)}`",
@@ -217,6 +267,8 @@ def run_multiwfn_igmh(
     wavefunction: Path,
     output_dir: Path,
     *,
+    method: str = "igmh",
+    sl2r_source: str = "actual",
     fragments: Optional[Sequence[str]] = None,
     multiwfn_path: Optional[str] = None,
     commands: Optional[Sequence[str]] = None,
@@ -234,7 +286,7 @@ def run_multiwfn_igmh(
     pbc_lengths: Optional[Sequence[float]] = None,
     make_vesta: bool = True,
     vesta_output_dir: Optional[Path] = None,
-    preset: str = "igmh",
+    preset: Optional[str] = None,
     isosurface: Optional[float] = None,
     tex_physical: Optional[Tuple[float, float]] = None,
     structure: Optional[str] = None,
@@ -252,10 +304,14 @@ def run_multiwfn_igmh(
     if not wavefunction.exists():
         raise FileNotFoundError("Wavefunction file not found: {}".format(wavefunction))
 
+    method_key = normalize_igm_method(method)
+    sl2r_key = normalize_sl2r_source(sl2r_source)
+    effective_preset = preset or ("igmh" if method_key == "igmh" else "igm")
+
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     if raw_dir is None:
-        raw_dir = output_dir / "multiwfn_igmh_raw"
+        raw_dir = output_dir / f"multiwfn_{method_key}_raw"
     else:
         raw_dir = Path(raw_dir)
         if not raw_dir.is_absolute():
@@ -270,6 +326,8 @@ def run_multiwfn_igmh(
     else:
         command_list = build_igmh_commands(
             fragment_tuple,
+            method=method_key,
+            sl2r_source=sl2r_key,
             grid_mode=grid_mode,
             grid_points=grid_points,
             grid_spacing=grid_spacing,
@@ -281,10 +339,11 @@ def run_multiwfn_igmh(
         )
 
     output_stem = stem or wavefunction.stem
-    command_file = output_dir / "multiwfn_igmh_input.txt"
-    stdout_log = output_dir / "multiwfn_igmh.stdout.txt"
-    stderr_log = output_dir / "multiwfn_igmh.stderr.txt"
-    recipe_path = output_dir / "multiwfn_igmh_recipe.md"
+    run_prefix = f"multiwfn_{method_key}"
+    command_file = output_dir / f"{run_prefix}_input.txt"
+    stdout_log = output_dir / f"{run_prefix}.stdout.txt"
+    stderr_log = output_dir / f"{run_prefix}.stderr.txt"
+    recipe_path = output_dir / f"{run_prefix}_recipe.md"
     command_file.write_text(_command_text(command_list), encoding="utf-8")
 
     raw_dg_inter = raw_dir / "dg_inter.cub"
@@ -314,13 +373,15 @@ def run_multiwfn_igmh(
     except subprocess.TimeoutExpired as exc:
         stdout_text = _timeout_text(getattr(exc, "stdout", None) or getattr(exc, "output", None))
         stderr_text = _timeout_text(getattr(exc, "stderr", None))
-        error = f"Multiwfn IGMH run timed out after {timeout} seconds; inspect {stdout_log} and {stderr_log}"
+        error = f"Multiwfn {method_key.upper()} run timed out after {timeout} seconds; inspect {stdout_log} and {stderr_log}"
         stdout_log.write_text(stdout_text, encoding="utf-8")
         stderr_log.write_text((stderr_text + "\n" if stderr_text else "") + error + "\n", encoding="utf-8")
         _write_recipe(
             recipe_path,
             wavefunction=wavefunction,
             raw_dir=raw_dir,
+            method=method_key,
+            sl2r_source=sl2r_key,
             fragments=fragment_tuple,
             commands=command_list,
             grid_mode=grid_mode,
@@ -358,13 +419,15 @@ def run_multiwfn_igmh(
             error,
         )
     except OSError as exc:
-        error = f"Failed to launch Multiwfn IGMH run: {exc}; inspect {stdout_log} and {stderr_log}"
+        error = f"Failed to launch Multiwfn {method_key.upper()} run: {exc}; inspect {stdout_log} and {stderr_log}"
         stdout_log.write_text("", encoding="utf-8")
         stderr_log.write_text(error + "\n", encoding="utf-8")
         _write_recipe(
             recipe_path,
             wavefunction=wavefunction,
             raw_dir=raw_dir,
+            method=method_key,
+            sl2r_source=sl2r_key,
             fragments=fragment_tuple,
             commands=command_list,
             grid_mode=grid_mode,
@@ -421,7 +484,8 @@ def run_multiwfn_igmh(
     else:
         missing = [str(path) for path in (raw_dg_inter, raw_sl2r) if not path.exists()]
         if missing:
-            error = "Multiwfn finished with return code 0, but required IGMH cube output is missing: {}".format(
+            error = "Multiwfn finished with return code 0, but required {} cube output is missing: {}".format(
+                method_key.upper(),
                 ", ".join(missing)
             )
             cli_returncode = IGMH_OUTPUT_MISSING_CODE
@@ -439,10 +503,10 @@ def run_multiwfn_igmh(
                 dg_cube = output_dir / f"{output_stem}_dg.cub"
                 _copy_or_move(raw_dg, dg_cube)
             if raw_output_txt.exists():
-                output_txt = output_dir / f"{output_stem}_multiwfn_igmh_output.txt"
+                output_txt = output_dir / f"{output_stem}_{run_prefix}_output.txt"
                 _copy_or_move(raw_output_txt, output_txt)
         except Exception as exc:
-            error = "Failed to process Multiwfn IGMH cubes: {}".format(exc)
+            error = "Failed to process Multiwfn {} cubes: {}".format(method_key.upper(), exc)
             cli_returncode = IGMH_PROCESSING_FAILED_CODE
             dg_inter_cube = None
             sl2r_cube = None
@@ -453,11 +517,12 @@ def run_multiwfn_igmh(
     if completed.returncode == 0 and cli_returncode == 0 and make_vesta and dg_inter_cube is not None and sl2r_cube is not None:
         try:
             vesta_result = run_preset(
-                preset,
+                effective_preset,
                 dg_inter_cube,
                 Path(vesta_output_dir) if vesta_output_dir is not None else output_dir,
                 texture_cube=sl2r_cube,
-                stem=f"{output_stem}_{preset}",
+                stem=f"{output_stem}_{method_key}",
+                title=f"{dg_inter_cube.stem} ({method_key})",
                 isosurface=isosurface,
                 tex_physical=tex_physical,
                 structure=structure,
@@ -465,7 +530,7 @@ def run_multiwfn_igmh(
                 copy_cubes=copy_cubes,
             )
         except Exception as exc:
-            error = "Failed to generate VESTA file from IGMH cubes: {}".format(exc)
+            error = "Failed to generate VESTA file from Multiwfn {} cubes: {}".format(method_key.upper(), exc)
             cli_returncode = IGMH_PROCESSING_FAILED_CODE
             vesta_result = None
 
@@ -473,6 +538,8 @@ def run_multiwfn_igmh(
         recipe_path,
         wavefunction=wavefunction,
         raw_dir=raw_dir,
+        method=method_key,
+        sl2r_source=sl2r_key,
         fragments=fragment_tuple,
         commands=command_list,
         grid_mode=grid_mode,
@@ -520,20 +587,41 @@ def _float_pair(values: Optional[Sequence[float]]) -> Optional[Tuple[float, floa
     return float(values[0]), float(values[1])
 
 
-def main(argv: Optional[Sequence[str]] = None) -> int:
+def _has_method_override(args: Sequence[str]) -> bool:
+    return any(arg == "--method" or arg.startswith("--method=") for arg in args)
+
+
+def main(
+    argv: Optional[Sequence[str]] = None,
+    *,
+    program_name: str = "igmh-run",
+    fixed_method: Optional[str] = None,
+) -> int:
+    method_default = normalize_igm_method(fixed_method) if fixed_method is not None else "igmh"
     parser = argparse.ArgumentParser(
-        description="Run Multiwfn IGMH cube generation and optionally prepare a VESTA mapped-surface file.",
+        prog=program_name,
+        description="Run Multiwfn IGM, mIGM, or IGMH cube generation and optionally prepare a VESTA mapped-surface file.",
         epilog=(
-            "Default command stream: main function 20, IGMH option 11, user fragments, "
-            "grid selection, post-processing option 3 to export sl2r.cub and dg_inter.cub, "
-            "then cube-preset igmh unless --no-vesta is used."
+            "Default command stream: main function 20, method option 10/-10/11, user fragments, "
+            "optional IGM/mIGM sign(lambda2)rho source, grid selection, post-processing option 3 "
+            "to export sl2r.cub and dg_inter.cub, then cube-preset igmh/igm unless --no-vesta is used."
         ),
     )
     parser.add_argument("wavefunction", type=Path, help="Wavefunction file accepted by Multiwfn, e.g. .molden/.fch/.wfn")
     parser.add_argument("output_dir", type=Path)
     parser.add_argument("--fragment", action="append", help="Atom indices for one fragment, e.g. 1-48 or 49-60; repeat")
+    if fixed_method is None:
+        parser.add_argument("--method", choices=["igmh", "igm", "migm"], default=method_default, help="Weak-interaction method to run")
+    else:
+        parser.set_defaults(method=method_default)
+    parser.add_argument(
+        "--sl2r-source",
+        choices=["actual", "promolecular"],
+        default="actual",
+        help="sign(lambda2)rho source for IGM/mIGM; IGMH always uses actual density",
+    )
     parser.add_argument("--multiwfn", "--multiwfn-path", dest="multiwfn_path")
-    parser.add_argument("--commands-file", type=Path, help="Override the generated Multiwfn IGMH command stream")
+    parser.add_argument("--commands-file", type=Path, help="Override the generated Multiwfn IGM/IGMH command stream")
     parser.add_argument("--timeout", type=int)
     parser.add_argument("--nthreads", type=int)
     parser.add_argument("--stem")
@@ -552,7 +640,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser.add_argument("--pbc-lengths", nargs=3, type=float, metavar=("LX", "LY", "LZ"))
     parser.add_argument("--no-vesta", action="store_true")
     parser.add_argument("--vesta-output-dir", type=Path)
-    parser.add_argument("--preset", default="igmh", help="Cube preset name or alias for VESTA output, default: igmh")
+    parser.add_argument("--preset", help="Cube preset name or alias for VESTA output; default is igmh for IGMH and igm for IGM/mIGM")
     parser.add_argument("--isosurface", type=float)
     parser.add_argument("--tex-physical", nargs=2, type=float, metavar=("MIN", "MAX"))
     parser.add_argument("--structure", choices=["auto", "none", "molecule", "crystal"])
@@ -565,6 +653,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         result = run_multiwfn_igmh(
             args.wavefunction,
             args.output_dir,
+            method=args.method,
+            sl2r_source=args.sl2r_source,
             fragments=args.fragment,
             multiwfn_path=args.multiwfn_path,
             commands_file=args.commands_file,
@@ -589,10 +679,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             copy_cubes=not args.no_copy_cubes,
         )
     except (FileNotFoundError, OSError, ValueError, subprocess.TimeoutExpired) as exc:
-        print(f"igmh-run: {exc}", file=sys.stderr)
+        print(f"{program_name}: {exc}", file=sys.stderr)
         return 2
 
     print("Multiwfn: {}".format(result.multiwfn.path))
+    print("method: {}".format(normalize_igm_method(args.method)))
     print("returncode: {}".format(result.returncode))
     if result.cli_returncode != result.returncode:
         print("cli_returncode: {}".format(result.cli_returncode))
@@ -611,6 +702,28 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if result.error:
         print("ERROR: {}".format(result.error), file=sys.stderr)
     return result.cli_returncode
+
+
+def main_fixed_method(method: str, argv: Optional[Sequence[str]] = None, *, program_name: Optional[str] = None) -> int:
+    method_key = normalize_igm_method(method)
+    label = program_name or f"{method_key}-run"
+    args = list(sys.argv[1:] if argv is None else argv)
+    if _has_method_override(args):
+        print(
+            f"{label}: --method is fixed by this command; use igmh-run --method {method_key} "
+            "or another explicit method when you need the generic runner.",
+            file=sys.stderr,
+        )
+        return 2
+    return main(args, program_name=label, fixed_method=method_key)
+
+
+def main_igm(argv: Optional[Sequence[str]] = None) -> int:
+    return main_fixed_method("igm", argv, program_name="igm-run")
+
+
+def main_migm(argv: Optional[Sequence[str]] = None) -> int:
+    return main_fixed_method("migm", argv, program_name="migm-run")
 
 
 if __name__ == "__main__":

@@ -21,6 +21,9 @@ class TestUnifiedCli(unittest.TestCase):
         self.assertIn("surface-extrema", text)
         self.assertIn("cube-arith", text)
         self.assertIn("iri-run", text)
+        self.assertIn("igmh-run", text)
+        self.assertIn("igm-run", text)
+        self.assertIn("migm-run", text)
         self.assertIn("grid-run", text)
         self.assertIn("abacus-mulliken-color", text)
         self.assertIn("multiwfn-atom-color", text)
@@ -135,6 +138,27 @@ class TestUnifiedCli(unittest.TestCase):
 
         self.assertEqual(code, 0)
         mocked.assert_called_once_with(["input.molden", "products", "--timeout", "300"])
+
+    def test_dispatches_igmh_run_command(self):
+        with patch("multiwfn2vesta.cli.multiwfn_igmh.main", return_value=0) as mocked:
+            code = cli.main(["igmh-run", "input.molden", "products", "--fragment", "1", "--fragment", "2"])
+
+        self.assertEqual(code, 0)
+        mocked.assert_called_once_with(["input.molden", "products", "--fragment", "1", "--fragment", "2"])
+
+    def test_dispatches_igm_run_with_method_injection(self):
+        with patch("multiwfn2vesta.cli.multiwfn_igmh.main_igm", return_value=0) as mocked:
+            code = cli.main(["igm-run", "input.molden", "products", "--fragment", "1", "--fragment", "2"])
+
+        self.assertEqual(code, 0)
+        mocked.assert_called_once_with(["input.molden", "products", "--fragment", "1", "--fragment", "2"])
+
+    def test_dispatches_migm_alias_with_method_injection(self):
+        with patch("multiwfn2vesta.cli.multiwfn_igmh.main_migm", return_value=0) as mocked:
+            code = cli.main(["multiwfn-migm", "input.molden", "products", "--fragment", "1", "--fragment", "2"])
+
+        self.assertEqual(code, 0)
+        mocked.assert_called_once_with(["input.molden", "products", "--fragment", "1", "--fragment", "2"])
 
     def test_dispatches_grid_run_command(self):
         with patch("multiwfn2vesta.cli.multiwfn_grid.main", return_value=0) as mocked:

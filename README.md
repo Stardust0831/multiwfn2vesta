@@ -3,7 +3,7 @@
 `multiwfn2vesta` is a workspace-local Python interface for running selected
 Multiwfn workflows and preparing VESTA visualization files.  The currently
 maintained path covers ABACUS Molden handoff, cube-to-VESTA files, Multiwfn
-real-space grid, AIM, IRI/RDG, and IGMH command streams, atoms-only topology
+real-space grid, AIM, IRI/RDG, and IGM/IGMH command streams, atoms-only topology
 overlays, surface extrema overlays, and AIM+IGMH multi-phase VESTA figures.
 
 The project is still experimental, but the CLI below is the maintained entry
@@ -15,7 +15,7 @@ point.
   GitHub remote.
 - GitHub remote: `origin` points to `Github:Stardust0831/multiwfn2vesta.git`,
   with `origin/HEAD -> origin/main`.
-- Branch audit on 2026-06-10 12:20 CST, after `git fetch --prune origin`,
+- Branch audit on 2026-06-10 13:15 CST, after `git fetch --prune origin`,
   found local `main`, `origin/main`, and `origin/HEAD` aligned.
 - `git ls-remote --heads origin` currently returns only
   `refs/heads/main`; no merge-back was needed in this pass because there is no
@@ -23,7 +23,7 @@ point.
 - The apparently unusual branch history is a normal linear `main` history
   containing feature commits and documentation closure commits, not active
   competing branches.
-- Recent maintained feature work includes IGMH command-stream automation,
+- Recent maintained feature work includes IGM/mIGM/IGMH command-stream automation,
   IGMH/aIGM VESTA cube presets, surface extrema overlays for
   `surfanalysis.pdb`, surface-map/grid expansion, generic Multiwfn atom table
   coloring, batch orbital export, `cube-arith`, and `grid-run`.
@@ -84,10 +84,10 @@ then delete the temporary branch.
 - Run Multiwfn IRI/RDG cube generation from a wavefunction file, process
   `func1.cub`/`func2.cub` into VESTA-ready `IRI1`/`IRI2` cubes, and write a
   mapped-surface `.vesta` through `cube-preset iri`.
-- Run Multiwfn IGMH fragment analysis from a wavefunction file and fragment
-  definitions, export `dg_inter.cub` plus `sl2r.cub`, preserve optional
-  `dg_intra.cub`/`dg.cub`, and write a mapped-surface `.vesta` through
-  `cube-preset igmh`.
+- Run Multiwfn IGM, mIGM, or IGMH fragment analysis from a wavefunction file
+  and fragment definitions, export `dg_inter.cub` plus `sl2r.cub`, preserve
+  optional `dg_intra.cub`/`dg.cub`, and write a mapped-surface `.vesta`
+  through `cube-preset igm`/`igmh`.
 - Run Multiwfn main function `5` real-space grid generation from a
   wavefunction file, export density, orbital/MO, Laplacian, K(r)/G(r)
   kinetic-energy-density cubes, ELF, LOL, ESP/MEP, ALIE, RDG/IRI-like,
@@ -146,6 +146,9 @@ multiwfn2vesta surface-extrema input.vesta surfanalysis.pdb output.vesta \
   --surface-cube density.cub
 multiwfn2vesta iri-run input.molden iri_products --timeout 300
 multiwfn2vesta igmh-run input.molden igmh_products \
+  --fragment 1-48 --fragment 49-60 \
+  --grid-mode spacing --grid-spacing 0.25
+multiwfn2vesta igm-run input.molden igm_products \
   --fragment 1-48 --fragment 49-60 \
   --grid-mode spacing --grid-spacing 0.25
 multiwfn2vesta grid-run input.molden grid_products --function density
@@ -462,11 +465,15 @@ weak-interaction menu path.  `iri-run` discovers Multiwfn the same way as
 `aim-run`, sets `Multiwfnpath`/`MULTIWFNPATH`/`MultiwfnPATH`, and does not
 launch VESTA.  Pass `--no-vesta` if only the processed cubes are needed.
 
-## Wavefunction to IGMH VESTA
+## Wavefunction to IGM/IGMH VESTA
 
 For wavefunction inputs accepted by Multiwfn, `igmh-run` drives main function
-`20`, IGMH option `11`, records the fragment command stream, and then reuses
-the maintained `cube-preset igmh` writer:
+`20`, records the fragment command stream, and then reuses the maintained
+`cube-preset igmh`/`igm` writer.  The default method is IGMH.  Use the fixed
+wrapper commands `igm-run` and `migm-run` for those methods, or use the
+generic `igmh-run --method igm|migm|igmh` form when the method must be chosen
+explicitly.  The wrapper commands reject an extra `--method` so the command
+name cannot silently disagree with the generated Multiwfn stream:
 
 ```bash
 multiwfn2vesta igmh-run input.molden igmh_products \
@@ -475,9 +482,17 @@ multiwfn2vesta igmh-run input.molden igmh_products \
   --grid-mode spacing \
   --grid-spacing 0.25 \
   --timeout 600
+
+multiwfn2vesta migm-run input.molden migm_products \
+  --fragment 1-48 \
+  --fragment 49-60 \
+  --sl2r-source actual \
+  --grid-mode spacing \
+  --grid-spacing 0.25
 ```
 
-Default outputs in `igmh_products/`:
+Default outputs in `igmh_products/`, with `igmh` replaced by `igm` or `migm`
+for those methods:
 
 - `multiwfn_igmh_input.txt`
 - `multiwfn_igmh.stdout.txt`
@@ -487,8 +502,8 @@ Default outputs in `igmh_products/`:
 - `<stem>_dg_inter.cub`
 - `<stem>_sl2r.cub`
 - `<stem>_dg_intra.cub` and `<stem>_dg.cub` when Multiwfn writes them
-- `<stem>_igmh_cube.vesta`
-- `<stem>_igmh_cube_vesta_recipe.md`
+- `<stem>_<method>_cube.vesta`
+- `<stem>_<method>_cube_vesta_recipe.md`
 
 Fragments are passed as Multiwfn atom-index strings, so ranges such as
 `1-48`, lists such as `1,4,9`, and complement-style inputs such as `c` can be
@@ -504,7 +519,7 @@ ABACUS periodic Molden files.
 `Multiwfnpath`/`MULTIWFNPATH`/`MultiwfnPATH`, and does not launch VESTA.  Pass
 `--no-vesta` if only the Multiwfn cubes are needed.  The top-level alias
 `multiwfn2vesta igmh` intentionally remains the AIM+IGMH overlay styler;
-use `igmh-run` or `multiwfn-igmh` for the Multiwfn fragment run.
+use `igmh-run`, `igm-run`, or `migm-run` for the Multiwfn fragment run.
 
 ## ABACUS Calculation to Molden
 
@@ -827,6 +842,16 @@ This H2O run used fragments `1` and `2-3`, grid `8 x 8 x 8`, produced raw
 `dg_inter.cub`/`sl2r.cub` plus optional `dg_intra.cub`/`dg.cub`, and wrote
 `h2o_igmh_cube.vesta` plus a recipe without launching VESTA.
 
+Smoke-tested Multiwfn noGUI IGM and mIGM runs:
+
+```text
+/mnt/g/work/multiwfn2vesta/smoke/multiwfn_igm_migm_run_smoke_20260610_review_fix/
+```
+
+The H2O IGM and mIGM runs used fragments `1` and `2-3`, grid `8 x 8 x 8`,
+produced `h2o_igm_cube.vesta` and `h2o_migm_cube.vesta`, confirmed
+method-specific recipe titles, and did not launch the VESTA UI.
+
 Smoke-tested Multiwfn noGUI IRI/RDG run:
 
 ```text
@@ -855,7 +880,7 @@ and `aim_atoms_only.vesta` without launching VESTA.
   VESTA mapped-surface notes.
 - `docs/skills/igmh_vesta_preset_skill.md`: Multiwfn IGM/IGMH/aIGM cube
   preset notes.
-- `docs/skills/multiwfn_igmh_run_skill.md`: Multiwfn IGMH command-stream
+- `docs/skills/multiwfn_igmh_run_skill.md`: Multiwfn IGM/mIGM/IGMH command-stream
   runner notes.
 - `docs/skills/aim_paths_to_vesta_skill.md`: AIM topology to VESTA workflow.
 - `docs/skills/aim_igmh_vesta_skill.md`: reusable AIM+IGMH overlay workflow.

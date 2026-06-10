@@ -1,6 +1,50 @@
 # Project Kanban
 
-Updated: 2026-06-10 12:20 CST
+Updated: 2026-06-10 13:31 CST
+
+## Current Request: 2026-06-10 README and Single-Branch Closure for IGM/mIGM
+
+- [x] Record the user's request before continuing: update README, inspect the
+  odd-looking branch state, merge/consolidate back to one branch if needed,
+  and keep Git identity as `Stardust0831`.
+- [x] Recheck local/remote branch state and repository identity without
+  discarding the in-progress IGM/mIGM runner work: local `main`,
+  `origin/main`, and `origin/HEAD` are aligned at `440feec`; remote exposes
+  only `refs/heads/main`; identity is `Stardust0831 <13862180016@163.com>`.
+- [x] Wait for the read-only pre-commit subagent review of the current
+  IGM/mIGM diff, then fix real blockers: fixed wrapper `--method` override
+  rejection, method-specific VESTA titles, and method-specific error prefixes.
+- [x] Finalize README/docs so they describe the actual maintained CLI surface
+  and branch state after this increment.
+- [x] Run focused/full validation and real smoke checks again after the review
+  code changes: `py_compile`, 55 focused tests, 210-test full regression,
+  `git diff --check`, top-level/IGMH help, fixed-wrapper help/override checks,
+  and real H2O noGUI IGM/mIGM smokes passed under
+  `smoke/multiwfn_igm_migm_run_smoke_20260610_review_fix/`.
+- [x] Run final read-only pre-commit review after the fixes: no code blocker;
+  only root-doc synchronization remained, which is handled before commit.
+- [ ] Commit and push on `main` with identity `Stardust0831`; report the final
+  commit hash and post-push branch check.
+
+## Current Continuation: 2026-06-10 IGM and mIGM Command Streams
+
+- [x] Record the continued long-running objective: keep expanding maintained
+  Multiwfn wavefunction-analysis workflows that can feed VESTA, especially
+  ABACUS-compatible Molden routes.
+- [x] Choose the next concrete increment from the current roadmap: extend the
+  weak-interaction runner beyond standard IGMH to cover Multiwfn IGM and mIGM
+  command streams where the source prompts are stable.
+- [x] Re-read current `igmh-run`, unified CLI, tests, docs, and local
+  Multiwfn `visweak.f90`/`grid.f90` evidence before editing.
+- [x] Implement the smallest reliable method-selection extension with focused
+  tests, preserving the just-added PBC grid guard.
+- [x] Real noGUI H2O smokes passed for `igm-run` and `migm-run`, generating
+  `h2o_igm_cube.vesta` and `h2o_migm_cube.vesta`.
+- [x] Update README, usage, skill, research, worklog, and root docs with the
+  new IGM/mIGM boundary.
+- [x] Validate and review after the fixed-method wrapper changes.
+- [ ] Commit and push when stable.
+
 ## Current Request: 2026-06-10 README and Branch Consolidation After IGMH Runner Draft
 
 - [x] Record the user's request: update README, inspect the unusual branch state, consolidate back to one branch if needed, and keep Git identity as `Stardust0831`.
