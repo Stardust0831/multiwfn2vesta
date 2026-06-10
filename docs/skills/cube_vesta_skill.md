@@ -149,6 +149,21 @@ passes it back through `cube-preset`.
 - `esp` aliases: `mep`, `electrostatic-potential`, `density-esp`; requires
   `--texture-cube`, defaults to density isosurface `0.001`; pass
   `--tex-physical` for comparable figures.
+- `surface-map` aliases: `molsurfmap`, `mapped-surface`,
+  `density-surface-map`; requires `--texture-cube` and uses a generic
+  density/surface cube plus mapped-property cube.  Defaults follow the
+  bundled `molsurfmap.vmd` template: isosurface `0.01` and texture range
+  `0.0 0.002`.
+- `alie` aliases: `average-local-ionization-energy`, `avglocion`; requires
+  `--texture-cube`, defaults to density isosurface `0.0005` and physical
+  texture range `0.32 0.36` a.u. for `density.cub + avglocion.cub`.
+- `lea` and `leae`; require `--texture-cube`, use `density.cub +
+  userfunc.cub`, and default to density isosurfaces `0.01` and `0.004`,
+  respectively.
+- `vdw-map` aliases: `vdw-surface`, `vdw-density-surface`,
+  `vdw-potential-map`; requires `--texture-cube`, defaults to density
+  isosurface `0.0001` and physical texture range `-0.3 0.3` kcal/mol for
+  `density.cub + vdW.cub`/`vdWpot.cub`.
 
 ## Current Limits
 
@@ -158,15 +173,16 @@ passes it back through `cube-preset`.
   cube linear combinations such as density difference, Fukui functions, and
   dual descriptors.
   Multiwfn main-function-5 single-cube generation now exists as
-  `multiwfn2vesta grid-run` for density, orbital/MO, Laplacian, ELF, LOL,
-  ESP/MEP, RDG/IRI-like, and related scalar cubes.  IRI/RDG mapped surfaces
-  with two coupled cubes have a separate maintained runner as
-  `multiwfn2vesta iri-run`; this cube workflow remains the lower-level VESTA
-  writer both runners call.
+  `multiwfn2vesta grid-run` for density, orbital/MO, Laplacian, K(r)/G(r),
+  ELF, LOL, ESP/MEP, ALIE, RDG/IRI-like, promolecular RDG/sign(lambda2)rho,
+  and related scalar cubes.  IRI/RDG mapped surfaces with two coupled cubes
+  have a separate maintained runner as `multiwfn2vesta iri-run`; this cube
+  workflow remains the lower-level VESTA writer both runners call.
 - Surface-band sampling uses grid-point values, not interpolation exactly on
   the triangulated VESTA isosurface.
 - AIM/BCP pseudo-site overlays remain in the AIM/AIM+IGMH workflows, not this
-  generic cube generator.
+  generic cube generator.  Multiwfn `surfanalysis.pdb` extrema overlays for
+  ALIE/LEA/LEAE/molecular-surface maps are a separate future layer.
 
 ## Validation
 

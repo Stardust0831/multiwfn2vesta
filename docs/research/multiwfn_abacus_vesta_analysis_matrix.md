@@ -15,6 +15,10 @@ Multiwfn evidence:
 - Real-space function menu in `function.f90` lists electron density,
   gradient norm, Laplacian, orbital wavefunction, orbital density, ELF, LOL,
   ESP, RDG, promolecular RDG, IRI, vdW potential, and other grid functions.
+- Multiwfn `function.f90`/`0123dim.f90` explicitly list Hamiltonian and
+  Lagrangian kinetic energy densities as functions `6` and `7`, exporting
+  `K(r).cub` and `G(r).cub`; ALIE is function `18`, exporting
+  `avglocion.cub`.
 - Weak-interaction module `visweak.f90` exports `sl2r.cub`, `dg_inter.cub`,
   `dg_intra.cub`, `dg.cub`, `avgRDG.cub`, `avgsl2r.cub`, and related scatter
   data.
@@ -23,6 +27,9 @@ Multiwfn evidence:
 - Bundled scripts show intended visual products: `showorb.vmd`,
   `showcub.vmd`, `AIM.vmd`, `ALIE.vmd`, `molsurfmap.vmd`,
   `local_EA/*.vmd`, and `vdWpot/vdWpot.vmd`.
+- Bundled ALIE/LEA/LEAE/vdW surface scripts use the same VESTA-compatible
+  pattern: a density/surface cube plus a mapped-property texture cube, with
+  optional `surfanalysis.pdb` extrema points.
 
 ABACUS evidence:
 
@@ -80,7 +87,7 @@ occupations, and density derivatives from the wavefunction representation.
 | --- | --- | --- | --- | --- | --- |
 | Generic cube visualizer | Any `.cub` from Multiwfn or ABACUS | Strong: `out_chg`, `out_pot`, `out_pchg`, `out_wfc_*`, `out_elf` | Cube | Density/texture import, isosurface, section off by default | Implemented as `multiwfn2vesta cube-vesta`; `cube-preset` adds common analysis defaults |
 | Molecular orbitals and band wavefunctions | Full wavefunction Molden/FCH/WFN, or ABACUS real-space `get_wf` cubes | Strong for Gamma LCAO Molden; direct cube route for selected bands | `orb*.cub`, `MOvalue.cub`, `orbdens.cub`, or ABACUS `wfi*.cube` | Positive/negative isosurfaces; magnitude as single surface | `cube-preset orbital` implemented; `grid-run --function orbital --orbital ...` covers one MO cube and `grid-run --orbitals ...` covers isolated batch orbital export |
-| Electron density, spin density, Laplacian, kinetic density | Full wavefunction, or ABACUS density cubes for density only | Strong for density cube; Molden route for derivatives | `density.cub`, `spindensity.cub`, `laplacian.cub`, `K(r).cub`, `G(r).cub` | Single/positive-negative isosurfaces or slices | `grid-run` now covers density, spin density, and Laplacian single cubes; kinetic-density variants remain future function-table extensions |
+| Electron density, spin density, Laplacian, kinetic density | Full wavefunction, or ABACUS density cubes for density only | Strong for density cube; Molden route for derivatives | `density.cub`, `spindensity.cub`, `laplacian.cub`, `K(r).cub`, `G(r).cub` | Single/positive-negative isosurfaces or slices | `grid-run` now covers density, spin density, Laplacian, and K(r)/G(r) single cubes |
 | ELF/LOL | Full wavefunction; ABACUS direct `out_elf` for ELF | Strong for ELF direct; Molden route for Multiwfn ELF/LOL | `ELF.cub`, `LOL.cub`, ABACUS `elf*.cube` | Isosurfaces around localized regions | `grid-run` now covers Multiwfn ELF/LOL; `cube-preset elf/lol` remains the VESTA writer |
 | AIM/QTAIM topology | Full wavefunction Molden/FCH/WFN/WFX | Feasible for Gamma LCAO Molden with `[Nval]`; validated on Ag(111)+benzene | `CPs.pdb`, `paths.pdb`, `CPprop.txt`, `mol.pdb` | Atoms-only pseudo-sites, no AIM bonds, optional labels | Already partly implemented; add ABACUS-aware recipes |
 | IGMH + AIM overlay | Full wavefunction and fragment definitions | Feasible for Gamma LCAO Molden; validated on Ag(111)+benzene | `dg_inter.cub`, `sl2r.cub`, AIM PDBs | Multi-phase VESTA density/texture plus AIM pseudo-sites | Already implemented for saved overlays; automate Multiwfn command streams next |
@@ -91,9 +98,9 @@ occupations, and density derivatives from the wavefunction representation.
 | --- | --- | --- | --- | --- | --- |
 | IRI/NCI/RDG | Full wavefunction, or promolecular approximation from structure | Molden route feasible; promolecular route can avoid wavefunction | `IRI.cub`, `RDG.cub`, `sl2r.cub`, `func1.cub`, `func2.cub` | Isosurface plus texture cube; section planes off | `multiwfn2vesta iri-run` implemented for the two-cube weak-interaction stream; `grid-run` can also export single RDG/IRI/sign(lambda2)rho cubes |
 | ESP/MEP on density surface | Full wavefunction or ABACUS `out_pot` plus density cube | Strong direct cube route; Molden route for Multiwfn ESP | `density.cub`, `totesp.cub`, `pot_es.cube`, `pots*.cube` | Density isosurface colored by potential texture | `grid-run --function esp` can export Multiwfn ESP; `cube-preset esp` still combines density surface plus potential texture |
-| Molecular surface mapped properties | Full wavefunction or cube pair | Feasible through Molden; ABACUS can provide density/potential cubes | `surf.cub`, `mapfunc.cub`, `density.cub`, `avglocion.cub`, `surfanalysis.pdb` | Surface cube plus texture; extrema as pseudo-sites | Extend VESTA texture and point overlay code |
-| ALIE / LEA / LEAE | Full wavefunction, occupied/virtual orbitals | Feasible only if ABACUS Molden orbitals/energies are adequate; virtual levels in metals risky | `avglocion.cub`, `userfunc.cub`, `surfanalysis.pdb` | Colored density surface plus extrema points | Prototype on molecules/insulators first |
-| vdW/repulsion/dispersion potential | Structure and/or wavefunction depending option | Feasible, often structure driven | `vdW.cub`, `repul.cub`, `disp.cub`, `density.cub` | Potential surfaces/slices, density surface context | Add low-risk cube preset |
+| Molecular surface mapped properties | Full wavefunction or cube pair | Feasible through Molden; ABACUS can provide density/potential cubes | `surf.cub`, `mapfunc.cub`, `density.cub`, `avglocion.cub`, `surfanalysis.pdb` | Surface cube plus texture; extrema as pseudo-sites | `cube-preset surface-map` now covers surface+texture display using `molsurfmap.vmd` defaults; extrema PDB overlay remains future |
+| ALIE / LEA / LEAE | Full wavefunction, occupied/virtual orbitals | Feasible only if ABACUS Molden orbitals/energies are adequate; virtual levels in metals risky | `avglocion.cub`, `userfunc.cub`, `surfanalysis.pdb` | Colored density surface plus extrema points | `cube-preset alie/lea/leae` now covers density-surface texture maps; extrema PDB overlay remains future |
+| vdW/repulsion/dispersion potential | Structure and/or wavefunction depending option | Feasible, often structure driven | `vdW.cub`, `repul.cub`, `disp.cub`, `density.cub`, `vdWpot.cub` | Potential surfaces/slices, density surface context | `grid-run --function vdw-potential` covers single vdW potential cubes; `cube-preset vdw-map` covers density-surface texture maps |
 | Atom scalar coloring | Per-atom values from Multiwfn or ABACUS `mulliken.txt` | Strong for ABACUS `out_mul`; also charges/Fukui from Multiwfn | CSV/table, `mulliken.txt` | Patch `SITET` RGB values | ABACUS Mulliken parser implemented; generic Multiwfn atom table parser implemented as `multiwfn2vesta multiwfn-atom-color` |
 
 ### P2: Specialized, Useful Later
@@ -159,7 +166,9 @@ Known limitations:
 
 1. Extend the generic `cube-vesta`/`cube-preset` CLI with more real-system
    templates and optional render hooks.  Core analysis display presets now
-   exist; the remaining work is coverage and automation around them.
+   exist, including ALIE/LEA/LEAE/vdW surface-map presets; the remaining work
+   is coverage, optional render hooks, and `surfanalysis.pdb` extrema
+   overlays.
 2. Extend the implemented `abacus-molden` wrapper with more real-calculation
    smoke coverage and optional copy-to-scratch handling for converter
    side-products.
@@ -172,12 +181,13 @@ Known limitations:
    more specialized parsers for raw Multiwfn menu transcripts when they prove
    stable enough to support directly.
 5. Extend `grid-run` beyond the initial main-function-5 table where useful:
-   kinetic density variants, more real-system orbital batch smokes, possible
-   future Multiwfn main function `200` integration if it proves more reliable
-   than repeated isolated runs, end-to-end Fukui/dual-descriptor cube
-   generation on shared grids, and IGMH fragment command streams.  The cube
-   arithmetic foundation for density-difference/Fukui/dual-descriptor maps
-   now exists as `multiwfn2vesta cube-arith`.
+   more real-system orbital batch smokes, possible future Multiwfn main
+   function `200` integration if it proves more reliable than repeated
+   isolated runs, end-to-end Fukui/dual-descriptor cube generation on shared
+   grids, and IGMH fragment command streams.  K(r)/G(r), ALIE, and
+   promolecular RDG/sign(lambda2)rho table entries are now maintained.  The
+   cube arithmetic foundation for density-difference/Fukui/dual-descriptor
+   maps now exists as `multiwfn2vesta cube-arith`.
 6. Keep headless/no-focus VESTA rendering as a separate backend concern.
    Visualization products should remain useful as `.vesta` even when rendering
    is skipped.
@@ -198,6 +208,10 @@ Implemented or partly implemented:
 - `multiwfn2vesta aim-igmh`
 - IRI color cube scalar remapping helpers and the maintained Multiwfn
   IRI/RDG runner
+- K(r)/G(r), ALIE, and promolecular RDG/sign(lambda2)rho entries in the
+  maintained `grid-run` function table
+- ALIE/LEA/LEAE, generic molecular surface-map, and vdW density-surface
+  texture presets in `cube-preset`
 - VESTA atom scalar RGB patching
 - ABACUS `mulliken.txt` charge/magnetism atom coloring
 - Generic Multiwfn atom scalar table coloring
@@ -218,10 +232,11 @@ Main gaps:
   main-function-5 grid cubes as `multiwfn2vesta grid-run`, including repeated
   isolated batch orbital/orbital-density export through `--orbitals`.
   Remaining gaps are higher-level Fukui/dual-descriptor generation, IGMH
-  fragment automation, and more real-system templates.
+  fragment automation, molecular-surface extrema overlays, and more
+  real-system templates.
 - Dual-cube surface texture workflows now have a preset entry point for
-  IRI/RDG/NCI and ESP/MEP, but still need more real smoke cases and cleaner
-  end-to-end templates.
+  IRI/RDG/NCI, ESP/MEP, ALIE/LEA/LEAE, generic surface maps, and vdW maps,
+  but still need more real smoke cases and cleaner end-to-end templates.
 - Fukui/dual-descriptor visualization now has the cube-arithmetic bottom
   layer, but still needs higher-level charged-state generation templates and
   real chemistry smoke cases.

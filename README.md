@@ -81,8 +81,8 @@ then delete the temporary branch.
   files, with optional texture/color cube support, surface-band texture
   scaling, and signed positive/negative isosurface presets.
 - Apply analysis-oriented cube presets for common ABACUS/Multiwfn products
-  such as density, orbitals/wavefunctions, ELF/LOL, IRI/RDG/NCI, and ESP/MEP
-  mapped surfaces.
+  such as density, orbitals/wavefunctions, ELF/LOL, IRI/RDG/NCI, ESP/MEP,
+  ALIE/LEA/LEAE, and vdW-potential mapped surfaces.
 - Combine compatible cube files with linear arithmetic for density
   differences, Fukui functions, and dual descriptors, then optionally write a
   VESTA file through `cube-preset`.
@@ -90,10 +90,11 @@ then delete the temporary branch.
   `func1.cub`/`func2.cub` into VESTA-ready `IRI1`/`IRI2` cubes, and write a
   mapped-surface `.vesta` through `cube-preset iri`.
 - Run Multiwfn main function `5` real-space grid generation from a
-  wavefunction file, export density, orbital/MO, Laplacian, ELF, LOL,
-  ESP/MEP, RDG/IRI-like, and related scalar cubes, export multiple orbitals
-  through isolated batch runs, and optionally write VESTA files through
-  `cube-preset`.
+  wavefunction file, export density, orbital/MO, Laplacian, K(r)/G(r)
+  kinetic-energy-density cubes, ELF, LOL, ESP/MEP, ALIE, RDG/IRI-like,
+  promolecular RDG/sign(lambda2)rho, and related scalar cubes, export
+  multiple orbitals through isolated batch runs, and optionally write VESTA
+  files through `cube-preset`.
 - Color VESTA atom/site styles from ABACUS `mulliken.txt` charge or
   magnetism values produced by `out_mul 1`, or from generic Multiwfn-style
   atom scalar tables such as charges, Fukui-like atom values, or atom
@@ -221,14 +222,21 @@ multiwfn2vesta cube-preset rdg IRI2_surface.cub cube_products \
 multiwfn2vesta cube-preset esp density.cub cube_products \
   --texture-cube esp.cub \
   --tex-physical -0.05 0.05
+multiwfn2vesta cube-preset alie density.cub cube_products \
+  --texture-cube avglocion.cub
+multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
+  --texture-cube vdW.cub
 ```
 
 Available presets can be listed with `multiwfn2vesta cube-preset
 --list-presets`.  Current presets cover density-like scalar cubes, signed
 orbital/wavefunction/density-difference cubes, ELF/LOL cubes, IRI/RDG/NCI
-mapped surfaces, and ESP/MEP mapped density surfaces.  The recipe records the
-requested preset, canonical preset, effective isosurface, texture scaling
-source, and explicit texture percentage overrides when they are used.
+mapped surfaces, ESP/MEP mapped density surfaces, generic molecular surface
+maps, ALIE/LEA/LEAE density-surface maps, and vdW-potential density-surface
+maps.  The recipe records the requested preset, canonical preset, effective
+isosurface, texture scaling source, and explicit texture percentage overrides
+when they are used.  The `surface-map`/`molsurfmap` defaults follow the
+bundled Multiwfn `molsurfmap.vmd` template.
 
 ## Cube Arithmetic
 
@@ -313,12 +321,19 @@ Common functions:
 - `orbital-density` / `orbdens`: function `44`, raw `orbdens.cub`, preset
   `density`, requires `--orbital` for one orbital or `--orbitals` for batch
   export.
+- `hamiltonian-ked` / `k(r)`: function `6`, raw `K(r).cub`, signed by
+  default.  `lagrangian-ked` / `g(r)`: function `7`, raw `G(r).cub`, density
+  style by default.
 - `laplacian`, `spin-density`, `esp`, `nuclear-esp`, `signlambda2rho`, and
   `vdw-potential`: signed scalar fields, defaulting to the `signed` preset.
 - `elf` and `lol`: localization cubes, defaulting to `cube-preset elf/lol`.
-- `rdg`, `iri`, and `delta-g`: single scalar cubes; IRI/RDG mapped surfaces
-  that need two coupled cubes should still use `iri-run` or explicit
-  `cube-preset iri`.
+- `alie` / `avglocion`: function `18`, raw `avglocion.cub`.  For the
+  conventional ALIE surface map, combine it with `density.cub` via
+  `cube-preset alie`.
+- `rdg`, `promolecular-rdg`, `signlambda2rho`,
+  `promolecular-signlambda2rho`, `iri`, and `delta-g`: single scalar cubes;
+  IRI/RDG mapped surfaces that need two coupled cubes should still use
+  `iri-run` or explicit `cube-preset iri`.
 
 Grid setup defaults to explicit point counts:
 

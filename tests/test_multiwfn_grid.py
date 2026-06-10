@@ -40,10 +40,17 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         text = available_functions_text()
         self.assertIn("density", text)
         self.assertIn("orbital", text)
+        self.assertIn("hamiltonian-ked", text)
+        self.assertIn("promolecular-rdg", text)
+        self.assertIn("alie", text)
         self.assertIn("requires --orbital", text)
         self.assertEqual(resolve_grid_function("rho").name, "density")
         self.assertEqual(resolve_grid_function("12").name, "esp")
         self.assertEqual(resolve_grid_function(None, 9).name, "elf")
+        self.assertEqual(resolve_grid_function("k(r)").output_filename, "K(r).cub")
+        self.assertEqual(resolve_grid_function("lagrangian-kinetic-density").index, 7)
+        self.assertEqual(resolve_grid_function(None, 18).name, "alie")
+        self.assertEqual(resolve_grid_function("sl2r-pro").index, 16)
         custom = resolve_grid_function(None, 99)
         self.assertEqual(custom.index, 99)
         self.assertEqual(custom.output_filename, "griddata.cub")
@@ -72,6 +79,12 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertEqual(commands[:3], ["5", "9", "8"])
         self.assertTrue(commands[3].endswith("ref.cub"))
         self.assertEqual(commands[-3:], ["2", "0", "q"])
+
+    def test_build_alie_command_stream_uses_function_18(self):
+        function = resolve_grid_function("alie")
+        commands = build_grid_commands(function, grid_mode="medium")
+
+        self.assertEqual(commands, ["5", "18", "2", "2", "0", "q"])
 
     def test_run_multiwfn_grid_writes_cube_vesta_and_recipe(self):
         with tempfile.TemporaryDirectory() as tmp:

@@ -35,14 +35,27 @@ multiwfn2vesta grid-run --list-functions
   `MOvalue.cub`, preset `signed`, requires `--orbital` for one orbital or
   `--orbitals` for batch export.
 - `spin-density`: function `5`, raw `spindensity.cub`, preset `signed`.
+- `hamiltonian-ked`, aliases `k-r`, `k(r)`, `kinetic-k`,
+  `hamiltonian-kinetic-density`: function `6`, raw `K(r).cub`, preset
+  `signed`.
+- `lagrangian-ked`, aliases `g-r`, `g(r)`, `kinetic-g`,
+  `lagrangian-kinetic-density`: function `7`, raw `G(r).cub`, preset
+  `density`.
 - `nuclear-esp`: function `8`, raw `nucleiesp.cub`, preset `signed`.
 - `elf`: function `9`, raw `ELF.cub`, preset `elf`.
 - `lol`: function `10`, raw `LOL.cub`, preset `lol`.
 - `esp`, aliases `mep`, `total-esp`, `electrostatic-potential`: function
   `12`, raw `totesp.cub`, preset `signed`.
 - `rdg`: function `13`, raw `RDG.cub`, preset `density`.
+- `promolecular-rdg`: function `14`, raw `RDGprodens.cub`, preset
+  `density`.
 - `signlambda2rho`: function `15`, raw `signlambda2rho.cub`, preset
   `signed`.
+- `promolecular-signlambda2rho`: function `16`, raw
+  `signlambda2rhoprodens.cub`, preset `signed`.
+- `alie`, aliases `average-local-ionization-energy`, `avglocion`: function
+  `18`, raw `avglocion.cub`, preset `density`.  For conventional ALIE
+  figures, combine this with `density.cub` using `cube-preset alie`.
 - `delta-g`: function `22`, raw `Delta_g.cub`, preset `density`.
 - `iri`: function `24`, raw `IRI.cub`, preset `density`.
 - `vdw-potential`: function `25`, raw `vdWpot.cub`, preset `signed`.
@@ -152,11 +165,15 @@ multiwfn2vesta grid-run input.fch products --function orbital --orbital h
 multiwfn2vesta grid-run input.fch products --orbitals h l l+1 --no-vesta
 multiwfn2vesta grid-run input.fch products --function elf
 multiwfn2vesta grid-run input.fch products --function esp --no-vesta
+multiwfn2vesta grid-run input.fch products --function hamiltonian-ked --no-vesta
+multiwfn2vesta grid-run input.fch products --function alie --no-vesta
 ```
 
 For two-cube mapped surfaces, generate the component cubes first, then call
 `cube-preset` manually.  Examples include ESP on density and IRI/RDG/NCI
-surface+texture figures.
+surface+texture figures.  For ALIE, export `density.cub` and `avglocion.cub`
+on the same grid, then call `cube-preset alie density.cub ... --texture-cube
+avglocion.cub`.
 
 ## Validation
 

@@ -55,6 +55,10 @@ multiwfn2vesta cube-preset rdg IRI2_surface.cub cube_products \
 multiwfn2vesta cube-preset esp density.cub cube_products \
   --texture-cube esp.cub \
   --tex-physical -0.05 0.05
+multiwfn2vesta cube-preset alie density.cub cube_products \
+  --texture-cube avglocion.cub
+multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
+  --texture-cube vdW.cub
 ```
 
 For signed ABACUS/Multiwfn scalar cubes such as real wavefunction amplitudes,
@@ -196,16 +200,19 @@ multiwfn2vesta grid-run ABACUS_Multiwfn.molden orbital_products \
 The batch route repeats isolated single-orbital Multiwfn runs and writes a
 top-level manifest plus one child directory per orbital.  Use
 `--function orbital-density --orbitals ...` for density-like orbital maps.
-For aligned potential-on-density or multi-layer VESTA products, generate the
-component cubes with `--grid-mode cube --grid-cube reference.cub --no-vesta`,
-then call `cube-preset`/`cube-vesta` explicitly.
+For aligned potential-on-density, ALIE/LEA/LEAE, vdW-map, or multi-layer
+VESTA products, generate the component cubes with `--grid-mode cube
+--grid-cube reference.cub --no-vesta`, then call `cube-preset`/`cube-vesta`
+explicitly.
 
 ## Priority Rules
 
 - P0: generic cube VESTA, orbital cubes, density-derived cubes, ELF/LOL, AIM,
   IGMH+AIM.
 - P1: IRI/RDG/NCI, ESP/MEP mapped surfaces, ALIE/LEA/LEAE, vdW potential,
-  ABACUS/Multiwfn atom scalar coloring.
+  ABACUS/Multiwfn atom scalar coloring.  ALIE/LEA/LEAE/vdW surface-map
+  display presets now exist; `surfanalysis.pdb` extrema overlays remain a
+  future surface-map overlay layer.
 - P2: basins, excited-state hole/electron/CDD, ETS-NOCV, AdNDP, Fukui/dual
   descriptor, NICS/current arrows.
 

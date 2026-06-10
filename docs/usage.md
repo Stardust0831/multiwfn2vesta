@@ -47,15 +47,16 @@ multiwfn2vesta aim-igmh --help
 - `cube-vesta`: 从 ABACUS/Multiwfn scalar cube 直接生成 `.vesta`，可选
   texture/color cube，默认关闭 section plane
 - `cube-preset`: 在 `cube-vesta` 后端上套用常见分析默认值，例如 density、
-  orbital/signed、ELF/LOL、IRI/RDG/NCI、ESP/MEP
+  orbital/signed、ELF/LOL、IRI/RDG/NCI、ESP/MEP、ALIE/LEA/LEAE、vdW map
 - `cube-arith`: 对兼容 cube 做线性组合，用于 density difference、Fukui
   function、dual descriptor 等后处理，并可直接接 `cube-preset` 写 `.vesta`
 - `iri-run`: 从 Multiwfn 可读波函数文件调用 IRI/RDG 弱相互作用菜单，
   生成 `func1.cub`/`func2.cub`，处理成 VESTA 可用的 `IRI1`/`IRI2` cube，
   再通过 `cube-preset iri` 写 mapped-surface `.vesta`
 - `grid-run`: 从 Multiwfn 可读波函数文件调用主菜单 `5` 的 real-space
-  function grid，导出 density、MO/orbital、Laplacian、ELF、LOL、ESP/MEP、
-  RDG/IRI-like 等单 cube，并可自动接 `cube-preset` 写 `.vesta`
+  function grid，导出 density、MO/orbital、Laplacian、K(r)/G(r)、ELF、LOL、
+  ESP/MEP、ALIE、RDG/IRI-like、promolecular RDG/sign(lambda2)rho 等单 cube，
+  并可自动接 `cube-preset` 写 `.vesta`
 - `abacus-mulliken-color`: 读取 ABACUS `out_mul 1` 生成的 `mulliken.txt`，
   按原子 Mulliken 电荷或磁矩给 VESTA `SITET` 原子颜色赋值
 - `multiwfn-atom-color`: 读取 Multiwfn 复制/导出的原子标量表，或手工整理
@@ -189,6 +190,10 @@ multiwfn2vesta cube-preset rdg IRI2_surface.cub cube_products \
 multiwfn2vesta cube-preset esp density.cub cube_products \
   --texture-cube esp.cub \
   --tex-physical -0.05 0.05
+multiwfn2vesta cube-preset alie density.cub cube_products \
+  --texture-cube avglocion.cub
+multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
+  --texture-cube vdW.cub
 ```
 
 `cube-preset` 只负责选择默认值，实际写 `.vesta` 的逻辑仍走
@@ -202,6 +207,15 @@ multiwfn2vesta cube-preset esp density.cub cube_products \
   `--tex-physical -0.04 0.04` 和 `--tex-range-source surface-band`
 - `esp`：别名 `mep`，需要 `--texture-cube`，建议为可比较图显式给
   `--tex-physical`
+- `surface-map`：通用 density/surface cube 加 mapped-property texture cube，
+  默认等值面 `0.01`，默认染色范围 `0.0` 到 `0.002`，对齐 Multiwfn
+  `molsurfmap.vmd`
+- `alie`：density.cub 加 avglocion.cub，默认等值面 `0.0005`，默认染色范围
+  `0.32` 到 `0.36` a.u.
+- `lea` / `leae`：density.cub 加 userfunc.cub，默认等值面分别为 `0.01` 和
+  `0.004`
+- `vdw-map`：别名 `vdw-surface`，density.cub 加 vdW.cub/vdWpot.cub，默认
+  等值面 `0.0001`，默认染色范围 `-0.3` 到 `0.3` kcal/mol
 
 生成的 recipe 会追加 `Cube Preset` 段，记录请求的预设名、规范预设名、
 有效等值面、surface mode、texture 缩放来源和用户覆盖参数。
@@ -294,11 +308,17 @@ multiwfn2vesta grid-run --list-functions
   单轨道用 `--orbital h`，多轨道批量用 `--orbitals h l l+1`
 - `orbital-density` / `orbdens`：函数 `44`，原始输出 `orbdens.cub`，
   单轨道用 `--orbital`，多轨道批量用 `--orbitals`
+- `hamiltonian-ked` / `k(r)`：函数 `6`，原始输出 `K(r).cub`；
+  `lagrangian-ked` / `g(r)`：函数 `7`，原始输出 `G(r).cub`
 - `laplacian`、`spin-density`、`esp`、`nuclear-esp`、
   `signlambda2rho`、`vdw-potential`：默认按 signed scalar 处理
+- `alie` / `avglocion`：函数 `18`，原始输出 `avglocion.cub`；常规 ALIE
+  表面图要再和 `density.cub` 通过 `cube-preset alie` 组合
 - `elf` / `lol`：局域化函数等值面
-- `rdg` / `iri` / `delta-g`：单标量 cube；如果要 IRI/RDG/NCI 那种
-  surface+texture 双 cube 图，优先用 `iri-run` 或显式 `cube-preset iri`
+- `rdg` / `promolecular-rdg` / `signlambda2rho` /
+  `promolecular-signlambda2rho` / `iri` / `delta-g`：单标量 cube；如果要
+  IRI/RDG/NCI 那种 surface+texture 双 cube 图，优先用 `iri-run` 或显式
+  `cube-preset iri`
 
 轨道例子：
 

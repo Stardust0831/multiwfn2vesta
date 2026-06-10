@@ -116,13 +116,20 @@ multiwfn2vesta cube-preset --list-presets
 multiwfn2vesta cube-preset orbital orbital.cub cube_products
 multiwfn2vesta cube-preset rdg IRI2_surface.cub cube_products \
   --texture-cube IRI1_color.cub
+multiwfn2vesta cube-preset alie density.cub cube_products \
+  --texture-cube avglocion.cub
+multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
+  --texture-cube vdW.cub
 ```
 
 Use this when the file is a common ABACUS/Multiwfn cube product and the
 default style is enough to start.  Presets cover density-like scalar cubes,
 signed orbital/wavefunction/density-difference cubes, ELF/LOL, IRI/RDG/NCI
-mapped surfaces, and ESP/MEP mapped density surfaces.  All VESTA writing still
-goes through the maintained `cube-vesta` backend.
+mapped surfaces, ESP/MEP mapped density surfaces, generic molecular surface
+maps, ALIE/LEA/LEAE density-surface maps, and vdW-potential density-surface
+maps.  All VESTA writing still goes through the maintained `cube-vesta`
+backend.  `surface-map`/`molsurfmap` defaults follow the bundled Multiwfn
+`molsurfmap.vmd` template.
 
 ### Cube arithmetic to density-difference/Fukui VESTA
 
@@ -197,7 +204,9 @@ multiwfn2vesta grid-run --list-functions
 ```
 
 Common functions include `density`, `orbital --orbital h`, `orbital-density`,
-`laplacian`, `elf`, `lol`, `esp`, `rdg`, `iri`, and `signlambda2rho`.
+`laplacian`, `hamiltonian-ked`, `lagrangian-ked`, `elf`, `lol`, `esp`,
+`alie`, `rdg`, `promolecular-rdg`, `iri`, `signlambda2rho`, and
+`promolecular-signlambda2rho`.
 
 Batch frontier orbital export:
 

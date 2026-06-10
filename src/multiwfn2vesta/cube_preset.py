@@ -87,6 +87,71 @@ PRESETS: Tuple[CubePreset, ...] = (
         texture_required=True,
         notes="Use density as surface cube and ESP/MEP/potential as texture cube; set --tex-physical for comparable figures.",
     ),
+    CubePreset(
+        name="surface-map",
+        aliases=("molsurfmap", "mapped-surface", "density-surface-map"),
+        description="Generic density surface colored by a compatible mapped-property cube.",
+        surface_mode="single",
+        isosurface=0.01,
+        tex_physical=(0.0, 0.002),
+        texture_required=True,
+        notes=(
+            "Use density/surface cube as the surface and a mapped-property cube as texture; "
+            "defaults follow the bundled molsurfmap.vmd template."
+        ),
+    ),
+    CubePreset(
+        name="alie",
+        aliases=("average-local-ionization-energy", "avglocion"),
+        description="Density surface colored by Multiwfn average local ionization energy (ALIE).",
+        surface_mode="single",
+        isosurface=0.0005,
+        tex_physical=(0.32, 0.36),
+        texture_required=True,
+        notes=(
+            "Use Multiwfn density.cub as surface cube and avglocion.cub as texture cube; "
+            "default color range follows the bundled ALIE.vmd example in a.u."
+        ),
+    ),
+    CubePreset(
+        name="lea",
+        aliases=("local-electron-affinity",),
+        description="Density surface colored by Multiwfn local electron affinity (LEA).",
+        surface_mode="single",
+        isosurface=0.01,
+        tex_physical=(-0.8, -0.3),
+        texture_required=True,
+        notes=(
+            "Use Multiwfn density.cub as surface cube and userfunc.cub as texture cube; "
+            "default color range follows the bundled LEA VMD example in a.u."
+        ),
+    ),
+    CubePreset(
+        name="leae",
+        aliases=("local-electron-attachment-energy",),
+        description="Density surface colored by Multiwfn local electron attachment energy (LEAE).",
+        surface_mode="single",
+        isosurface=0.004,
+        tex_physical=(-0.03, 0.0),
+        texture_required=True,
+        notes=(
+            "Use Multiwfn density.cub as surface cube and userfunc.cub as texture cube; "
+            "default color range follows the bundled LEAE VMD example in a.u."
+        ),
+    ),
+    CubePreset(
+        name="vdw-map",
+        aliases=("vdw-surface", "vdw-density-surface", "vdw-potential-map"),
+        description="Density surface colored by Multiwfn van der Waals potential.",
+        surface_mode="single",
+        isosurface=0.0001,
+        tex_physical=(-0.3, 0.3),
+        texture_required=True,
+        notes=(
+            "Use Multiwfn density.cub as surface cube and vdW.cub/vdWpot.cub as texture cube; "
+            "default color range follows the bundled vdWpot.vmd example in kcal/mol."
+        ),
+    ),
 )
 
 

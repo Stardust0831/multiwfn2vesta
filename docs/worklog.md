@@ -1,5 +1,51 @@
 # Worklog
 
+## 2026-06-10: Surface-map presets and expanded Multiwfn grid table
+
+- Continued the long-running Multiwfn/ABACUS/VESTA roadmap by targeting two
+  closely related gaps: more Multiwfn main-function-5 real-space functions
+  from ABACUS-compatible wavefunction files, and VESTA presets for
+  density-surface mapped-property figures.
+- Rechecked local Multiwfn source/examples.  Evidence used:
+  `function.f90` lists K(r), G(r), ALIE, promolecular RDG/sign(lambda2)rho,
+  and vdW potential in the real-space function menu; `0123dim.f90` records
+  default cube filenames `K(r).cub`, `G(r).cub`, `avglocion.cub`,
+  `RDGprodens.cub`, and `signlambda2rhoprodens.cub`; bundled VMD scripts
+  show ALIE/LEA/LEAE/vdW as density/surface cube plus mapped texture cube.
+- Added `cube-preset` entries for `surface-map`, `alie`, `lea`, `leae`, and
+  `vdw-map`.  These write density/surface + texture VESTA files through the
+  existing `cube-vesta` backend.  Default surface-map/ALIE/LEA/LEAE/vdW
+  isosurfaces and texture ranges follow the bundled Multiwfn VMD examples.
+- Added `grid-run` function-table entries for Hamiltonian KED `K(r)`,
+  Lagrangian KED `G(r)`, promolecular RDG, promolecular
+  sign(lambda2)rho, and ALIE `avglocion.cub`.
+- Updated tests for preset listing/default manifests and grid function
+  resolution/command streams.
+- Synced README, usage docs, cube/grid/ABACUS/CLI skill notes, the
+  Multiwfn/ABACUS/VESTA analysis matrix, and project/root kanban/worklog.
+- Focused validation passed: `py_compile`, 33 tests across
+  `tests.test_cube_preset` and `tests.test_multiwfn_grid`,
+  `bin/multiwfn2vesta cube-preset --list-presets`, and
+  `bin/multiwfn2vesta grid-run --list-functions`.
+- Real H2O noGUI smokes passed under
+  `/mnt/g/work/multiwfn2vesta/smoke/multiwfn_grid_surface_map_20260610/`.
+  Multiwfn exported raw `K(r).cub` for `hamiltonian-ked`, raw
+  `avglocion.cub` for `alie`, a matching `density.cub`, and
+  `cube-preset alie` wrote `h2o_alie_surface_cube.vesta` plus its recipe.
+- Read-only pre-commit review found no blocker, but caught that the
+  `surface-map`/`molsurfmap` default should match Multiwfn `molsurfmap.vmd`.
+  The main thread fixed the preset to use density isosurface `0.01` and
+  default texture range `0.0` to `0.002`, then added a unit test for that
+  default.
+- Final pre-commit validation passed: `py_compile`, 68 focused tests across
+  `tests.test_cube_preset`, `tests.test_multiwfn_grid`, and `tests.test_cli`,
+  full 182-test no-GUI regression, `git diff --check`,
+  `bin/multiwfn2vesta cube-preset --list-presets`, and
+  `bin/multiwfn2vesta grid-run --list-functions`.
+- Deliberately left Multiwfn `surfanalysis.pdb` extrema overlays as the next
+  surface-map layer rather than mixing phase appending into this preset-table
+  increment.
+
 ## 2026-06-10: README single-branch refresh
 
 - User asked to update README, noted that the branch state still looked odd,

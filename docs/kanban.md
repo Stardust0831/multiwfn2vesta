@@ -1,6 +1,35 @@
 # Project Kanban
 
-Updated: 2026-06-10 10:00 CST
+Updated: 2026-06-10 10:19 CST
+
+## Current Continuation: 2026-06-10 Multiwfn Analysis Expansion
+
+- [x] Record the resumed long-running objective: research valuable
+  Multiwfn wavefunction analyses that can be visualized in VESTA, especially
+  routes starting from ABACUS-compatible wavefunction/cube outputs.
+- [x] Re-read the current roadmap, maintained CLI surface, and relevant
+  Multiwfn source/examples before choosing the next concrete increment.
+- [x] Implement one maintained increment that makes the requested final state
+  more true, with tests and docs scaled to the change.
+- [x] Sync README/usage/skill/research docs plus project/root work records.
+- [x] Focused validation passed for the implementation draft: `py_compile`,
+  33 tests across `tests.test_cube_preset` and `tests.test_multiwfn_grid`,
+  `cube-preset --list-presets`, and `grid-run --list-functions`.
+- [x] Real H2O noGUI smokes passed under
+  `/mnt/g/work/multiwfn2vesta/smoke/multiwfn_grid_surface_map_20260610/`:
+  `grid-run --function hamiltonian-ked`, `grid-run --function alie`,
+  aligned density export, and `cube-preset alie` VESTA generation.
+- [x] Read-only pre-commit review found one non-blocking default mismatch:
+  `surface-map`/`molsurfmap` originally used isosurface `0.001`.  The main
+  thread fixed it to match Multiwfn `molsurfmap.vmd`: isosurface `0.01` and
+  texture range `0.0` to `0.002`.
+- [x] Final pre-commit validation passed: `py_compile`, 68 focused tests
+  across cube/grid/CLI, full 182-test no-GUI regression, `git diff --check`,
+  `cube-preset --list-presets`, and `grid-run --list-functions`.
+- [x] Prepared this closure record for the final implementation/docs push.
+  The final commit hash and post-push branch check are reported in the
+  assistant response to avoid an infinite chain of "record the record"
+  commits.
 
 ## Current Request: 2026-06-10 README Single-Branch Refresh
 
