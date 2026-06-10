@@ -1,6 +1,45 @@
 # Project Kanban
 
-Updated: 2026-06-10 19:31 CST
+Updated: 2026-06-10 20:10 CST
+
+## Current Request: 2026-06-10 README Refresh And Branch Convergence
+
+- [x] Record user request: update README, inspect the unusual branch state,
+  converge the maintained work back to a single branch if needed, and use
+  `Stardust0831` identity for commits.
+- [x] Inspect local/remote branches, repository identity, and current
+  uncommitted work without touching unrelated local probes: local `main`,
+  `origin/main`, and `origin/HEAD` are aligned at
+  `77c134e2d7cd844e6cc9c4dce59f316a90700192`; `origin` exposes only
+  `refs/heads/main`; untracked `domain.cub` and `domain.pdb` remain local
+  probes and must stay uncommitted.
+- [x] Refresh README so current usage, maintained CLI entry points, docs
+  locations, and branch policy are accurate.
+- [x] Decide whether any branch merge is needed; no merge is needed because
+  there is no extra local or remote feature branch to consolidate.
+- [x] Sync root docs mirror, validate the documentation-only change, and run
+  read-only subagent review: `git diff --check` and
+  `bin/multiwfn2vesta --help` passed; subagent found no branch-status
+  blockers.
+- [ ] Commit and push with `Stardust0831` identity; report the final hash and
+  post-push branch check in the assistant response.
+
+## Current Continuation: 2026-06-10 Spin-Density Cube Arithmetic
+
+- [x] Record resumed objective: keep expanding VESTA-ready Multiwfn/ABACUS
+  wavefunction and cube analyses, especially where ABACUS can provide
+  compatible cube inputs directly or through Molden.
+- [x] Inspect current branch state: local `main` is aligned with
+  `origin/main`; only untracked local probes `domain.cub` and `domain.pdb`
+  are present and must stay uncommitted.
+- [x] Choose the next bounded increment from the prior review: add an
+  explicit `cube-arith` spin-density operation for alpha/beta or
+  spin-up/spin-down density cubes, then route the result to
+  `cube-preset spin-density`.
+- [ ] Implement CLI/tests/docs for `cube-arith --operation spin-density`
+  without changing the existing generic `density-difference` behavior.
+- [ ] Sync root docs, validate, review, then commit and push on `main` if
+  stable.
 
 ## Current Continuation: 2026-06-10 Grid Function Display Presets
 

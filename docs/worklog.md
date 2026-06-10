@@ -1,5 +1,19 @@
 # Worklog
 
+## 2026-06-10: README branch convergence refresh
+
+- Rechecked the branch state for the user's README/branch-convergence request.
+  Local `main`, `origin/main`, and `origin/HEAD` all point at
+  `77c134e2d7cd844e6cc9c4dce59f316a90700192`; the SSH remote
+  `Github:Stardust0831/multiwfn2vesta.git` exposes only `refs/heads/main`.
+- Confirmed the repository-local commit identity is
+  `Stardust0831 <13862180016@163.com>`.
+- Refreshed README repository-status wording so the current single-branch
+  state is explicit and the prior pre-increment branch-audit hash no longer
+  reads like a pending final commit claim.
+- Left local probe files `domain.cub` and `domain.pdb` untracked and
+  uncommitted.
+
 ## 2026-06-10: Grid-function display presets
 
 - Continued the Multiwfn/ABACUS/VESTA analysis-expansion sweep by tightening
