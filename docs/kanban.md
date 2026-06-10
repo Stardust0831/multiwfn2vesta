@@ -1,6 +1,50 @@
 # Project Kanban
 
-Updated: 2026-06-10 20:39 CST
+Updated: 2026-06-10 20:56 CST
+
+## Current Request: 2026-06-10 README Refresh And One-Branch Closeout
+
+- [x] Record user request before editing: update README, inspect the
+  unusual-looking branch state, merge or converge back to one maintained
+  branch if needed, and use `Stardust0831` identity for git work.
+- [x] Recheck branch and identity state without destructive operations:
+  after `git fetch --prune origin`, local `main`, `origin/main`, and
+  `origin/HEAD` are aligned at
+  `764382c01698111f9d8b41932759a480233a272b`; `git ls-remote --heads
+  origin` exposes only `refs/heads/main`; repository-local identity is
+  `Stardust0831 <13862180016@163.com>`.
+- [x] Decide whether a branch merge is needed: no merge is needed in this
+  pass because there is no extra local branch or remote feature branch to
+  consolidate.
+- [x] Refresh README and project docs so the current branch audit, single
+  maintained `main` branch policy, and untracked local probe-file handling are
+  explicit.
+- [x] Sync root docs mirror, validate, and run read-only review: root docs
+  mirror dry-run is clean; `git diff --check` and
+  `bin/multiwfn2vesta --help` passed; the reviewer found no branch-status
+  blocker and confirmed Promolecular Delta-g remains unfinished.
+- [x] Prepare explicit staging, commit, push, and post-push verification with
+  `Stardust0831` identity.  Final commit hash and branch-alignment check are
+  reported in the assistant response to avoid a self-referential docs loop.
+
+## Active Goal Continuation: 2026-06-10 Promolecular Delta-g Cube
+
+- [x] Record continuation objective: keep expanding useful Multiwfn
+  wavefunction/grid analyses that can become VESTA products, especially
+  analyses ABACUS can feed through LCAO Molden or direct cube routes.
+- [x] Recheck current state: local `main` is aligned with `origin/main` at
+  `764382c01698111f9d8b41932759a480233a272b`; untracked local probes
+  `domain.cub` and `domain.pdb` remain uncommitted.
+- [x] Choose the next source-backed stable gap: Multiwfn 2026.6.2
+  `function.f90` lists function `22` as Delta-g with promolecular
+  approximation and `0123dim.f90` exports it as `Delta_g.cub`; the current
+  project still routes `grid-run --function delta-g` through generic
+  `density`.
+- [ ] Recheck source/template defaults, then add a maintained `cube-preset`
+  and `grid-run` mapping for promolecular `Delta_g.cub` without changing
+  IGM/IGMH fragment `dg_inter.cub` mapped-surface routes.
+- [ ] Sync root docs, validate, review, commit, push, and verify `main`
+  remains aligned with `origin/main`.
 
 ## Active Goal Continuation: 2026-06-10 Local Information Entropy Cube
 

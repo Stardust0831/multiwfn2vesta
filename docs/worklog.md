@@ -1,5 +1,22 @@
 # Worklog
 
+## 2026-06-10: README branch closeout after local information entropy preset
+
+- User requested another README refresh, branch-state audit, possible
+  one-branch merge-back, and git identity `Stardust0831`.
+- Rechecked the repository after `git fetch --prune origin`: local `main`,
+  `origin/main`, and `origin/HEAD` are aligned at
+  `764382c01698111f9d8b41932759a480233a272b` (`Add local information entropy
+  cube preset`), and `git ls-remote --heads origin` exposes only
+  `refs/heads/main`.
+- Repository-local identity is `Stardust0831 <13862180016@163.com>`.
+- No merge-back is needed in this pass because there is no extra local or
+  remote feature branch to consolidate.
+- README now records the current branch-audit baseline and explicitly notes
+  that local untracked probes such as `domain.cub` and `domain.pdb` are not
+  part of the maintained branch state unless promoted into documented
+  fixtures.
+
 ## 2026-06-10: Local information entropy cube display preset
 
 - Added `cube-preset local-information-entropy` for Multiwfn

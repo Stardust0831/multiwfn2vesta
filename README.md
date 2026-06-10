@@ -18,17 +18,20 @@ point.
   GitHub remote.
 - GitHub remote: `origin` points to `Github:Stardust0831/multiwfn2vesta.git`,
   with `origin/HEAD -> origin/main`.
-- Branch audit on 2026-06-10 20:39 CST found local `main`, `origin/main`, and
+- Branch audit on 2026-06-10 20:56 CST found local `main`, `origin/main`, and
   `origin/HEAD` aligned at
-  `287974cdd66db52b8f0f3581b63537d221980da1`
-  (`Add standalone IRI cube preset`) before the local-information-entropy
-  preset update.
+  `764382c01698111f9d8b41932759a480233a272b`
+  (`Add local information entropy cube preset`) before this README/status
+  closeout.
 - `git ls-remote --heads origin` currently returns only `refs/heads/main`; no
   merge-back was needed in this pass because there is no extra local or remote
   feature branch to consolidate.
 - This README/status refresh is being kept on the same maintained `main`
   branch; there is no side branch or remote feature head to merge back in
   this pass.
+- Local untracked probe files such as `domain.cub` and `domain.pdb` are not
+  part of the maintained branch state and should stay uncommitted unless they
+  are explicitly promoted into documented fixtures.
 - The apparently unusual branch history is a normal linear `main` history
   containing feature commits and documentation closure commits, not active
   competing branches.
