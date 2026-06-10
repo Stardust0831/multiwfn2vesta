@@ -166,6 +166,7 @@ multiwfn2vesta cube-preset hirshfeld-weight Hirshfeld.cub cube_products
 multiwfn2vesta cube-preset rdg-scalar RDG.cub cube_products
 multiwfn2vesta cube-preset promolecular-rdg RDGprodens.cub cube_products
 multiwfn2vesta cube-preset promolecular-delta-g Delta_g.cub cube_products
+multiwfn2vesta cube-preset hirshfeld-delta-g griddata.cub cube_products
 multiwfn2vesta cube-preset iri-scalar IRI.cub cube_products
 multiwfn2vesta cube-preset vdw-potential vdWpot.cub cube_products
 multiwfn2vesta cube-preset potential pot_es.cube cube_products
@@ -419,8 +420,8 @@ Common functions include `density`, `gradient`, `orbital --orbital h`,
 `orbital-density`, `spin-density`, `laplacian`, `hamiltonian-ked`,
 `lagrangian-ked`, `local-information-entropy`, `elf`, `lol`, `esp`, `alie`,
 `edr`, `edrdmax`, `becke`, `hirshfeld`, `rdg`, `promolecular-rdg`,
-`delta-g`, `iri`, `signlambda2rho`, `promolecular-signlambda2rho`, and
-`vdw-potential`.
+`delta-g`, `hirshfeld-delta-g`, `iri`, `signlambda2rho`,
+`promolecular-signlambda2rho`, and `vdw-potential`.
 The scalar display defaults are
 function-specific where possible: `gradient.cub` uses `gradient-norm`,
 `spindensity.cub` uses `cube-preset spin-density`, `orbdens.cub` uses
@@ -430,7 +431,8 @@ function-specific where possible: `gradient.cub` uses `gradient-norm`,
 `EDRDmax.cub` uses `orbital-overlap-distance`, `Becke.cub` uses
 `becke-weight`, `Hirshfeld.cub` uses `hirshfeld-weight`, `RDG.cub` uses
 `rdg-scalar`, `RDGprodens.cub` uses `promolecular-rdg`, `Delta_g.cub` uses
-`promolecular-delta-g`, `IRI.cub` uses `iri-scalar`, and `vdWpot.cub` uses
+`promolecular-delta-g`, Multiwfn function `23` generic `griddata.cub` uses
+`hirshfeld-delta-g`, `IRI.cub` uses `iri-scalar`, and `vdWpot.cub` uses
 `vdw-potential` with `+/-1.0`
 kcal/mol signed surfaces.  `grid-run --function becke` requires
 `--becke-atoms I J`; `I J` requests Becke overlap weight and `I 0` requests

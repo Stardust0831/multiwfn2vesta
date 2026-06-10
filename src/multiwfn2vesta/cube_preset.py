@@ -325,6 +325,22 @@ PRESETS: Tuple[CubePreset, ...] = (
         ),
     ),
     CubePreset(
+        name="hirshfeld-delta-g",
+        aliases=("delta-g-hirshfeld", "deltag-hirshfeld", "delta_g_hirshfeld", "igmh-scalar"),
+        description="Single positive isosurface for standalone Hirshfeld-partition Delta-g cubes.",
+        surface_mode="single",
+        isosurface=0.05,
+        positive_rgb=(255, 135, 80),
+        surface_opacity=(145, 255),
+        notes=(
+            "Use for Multiwfn function 23 Delta-g (Hirshfeld partition). "
+            "In main-function-5 3D export, Multiwfn writes this as the generic griddata.cub "
+            "rather than a dedicated filename; grid-run renames the processed product. "
+            "This is a standalone full-system scalar cube and is distinct from IGM/IGMH "
+            "fragment dg_inter.cub mapped-surface routes."
+        ),
+    ),
+    CubePreset(
         name="iri-scalar",
         aliases=("iri-cube", "standalone-iri", "interaction-region-indicator"),
         description="Single positive isosurface for standalone IRI scalar cubes.",

@@ -104,6 +104,13 @@ GRID_FUNCTIONS: Tuple[GridFunction, ...] = (
         "promolecular-delta-g",
         ("deltag", "delta_g", "promolecular-deltag", "delta-g-promol"),
     ),
+    GridFunction(
+        "hirshfeld-delta-g",
+        23,
+        "griddata.cub",
+        "hirshfeld-delta-g",
+        ("delta-g-hirshfeld", "deltag-hirshfeld", "delta_g_hirshfeld", "igmh-scalar"),
+    ),
     GridFunction("iri", 24, "IRI.cub", "iri-scalar", ("interaction-region-indicator",)),
     GridFunction(
         "vdw-potential",
@@ -540,6 +547,7 @@ def _write_recipe(
             "- Function `21` D(r) can use Multiwfn's default EDR exponent set `20, 2.50, 1.50` or a manual count/start/increment set and exports `EDRDmax.cub`.",
             "- Function `111` Becke weight asks for atom indices `I,J` before grid setup and exports `Becke.cub`; `J=0` means atomic weight and two positive indices mean overlap weight.",
             "- Function `112` Hirshfeld weight asks for an atom selection string and an atomic-density source before grid setup; the maintained command stream uses built-in atomic densities and exports `Hirshfeld.cub`.",
+            "- Function `23` Delta-g (Hirshfeld partition) exports the generic `griddata.cub` in the inspected Multiwfn 2026.6.2 source; this project renames the processed cube to a stable `hirshfeld-delta-g` product.",
         ]
     )
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")

@@ -65,6 +65,18 @@ delta g comment two
 """
 
 
+HIRSHFELD_DELTA_G_CUBE = """hirshfeld delta g comment one
+hirshfeld delta g comment two
+    2    -1.000000    -2.000000     0.500000
+    2     0.500000     0.000000     0.000000
+    2     0.000000     0.500000     0.000000
+    2     0.000000     0.000000     0.500000
+    8     8.000000    -1.000000    -2.000000     0.500000
+    1     1.000000    -0.500000    -2.000000     0.500000
+ 0.00 0.01 0.02 0.04 0.05 0.06 0.08 0.10
+"""
+
+
 VDW_POTENTIAL_CUBE = """vdw potential comment one
 vdw potential comment two
     2    -1.000000    -2.000000     0.500000
@@ -147,6 +159,7 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertIn("preset=rdg-scalar", text)
         self.assertIn("preset=promolecular-rdg", text)
         self.assertIn("preset=promolecular-delta-g", text)
+        self.assertIn("preset=hirshfeld-delta-g", text)
         self.assertIn("preset=iri-scalar", text)
         self.assertIn("preset=vdw-potential", text)
         self.assertIn("preset=electron-delocalization-range", text)
@@ -179,6 +192,10 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertEqual(resolve_grid_function("deltag").output_filename, "Delta_g.cub")
         self.assertEqual(resolve_grid_function("delta_g").index, 22)
         self.assertEqual(resolve_grid_function("delta-g-promol").preset, "promolecular-delta-g")
+        self.assertEqual(resolve_grid_function("hirshfeld-delta-g").index, 23)
+        self.assertEqual(resolve_grid_function("delta-g-hirshfeld").output_filename, "griddata.cub")
+        self.assertEqual(resolve_grid_function("deltag-hirshfeld").preset, "hirshfeld-delta-g")
+        self.assertEqual(resolve_grid_function("igmh-scalar").name, "hirshfeld-delta-g")
         self.assertEqual(resolve_grid_function("iri").preset, "iri-scalar")
         self.assertEqual(resolve_grid_function("interaction-region-indicator").output_filename, "IRI.cub")
         self.assertEqual(resolve_grid_function("vdw").preset, "vdw-potential")
@@ -316,6 +333,14 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         )
         with self.assertRaisesRegex(ValueError, "only valid for Hirshfeld"):
             build_grid_commands(resolve_grid_function("density"), hirshfeld_atoms="2,3")
+
+    def test_build_hirshfeld_delta_g_command_stream_has_no_extra_prompt(self):
+        function = resolve_grid_function("hirshfeld-delta-g")
+
+        self.assertEqual(
+            build_grid_commands(function, grid_points=(10, 11, 12)),
+            ["5", "23", "4", "10,11,12", "2", "0", "q"],
+        )
 
     def test_run_multiwfn_grid_writes_cube_vesta_and_recipe(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -506,6 +531,49 @@ class TestMultiwfnGridRunner(unittest.TestCase):
             manifest = result.vesta_result.manifest_path.read_text(encoding="utf-8")
             self.assertIn("canonical_preset: `promolecular-delta-g`", manifest)
             self.assertIn("effective_isosurface: `0.05`", manifest)
+            self.assertIn("dg_inter.cub", manifest)
+
+    def test_run_multiwfn_grid_hirshfeld_delta_g_uses_griddata_and_dedicated_preset(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            wavefunction = root / "h2o.fch"
+            wavefunction.write_text("wavefunction", encoding="utf-8")
+            candidate = self.make_candidate(root)
+
+            def fake_run(command, **kwargs):
+                cwd = Path(kwargs["cwd"])
+                (cwd / "griddata.cub").write_text(HIRSHFELD_DELTA_G_CUBE, encoding="utf-8")
+                return subprocess.CompletedProcess(command, 0, stdout="ok", stderr="")
+
+            with patch("multiwfn2vesta.multiwfn_grid.find_multiwfn", return_value=candidate):
+                with patch("multiwfn2vesta.multiwfn_grid.subprocess.run", side_effect=fake_run):
+                    result = run_multiwfn_grid(
+                        wavefunction,
+                        root / "products",
+                        function_name="hirshfeld-delta-g",
+                        stem="case",
+                        grid_points=(10, 11, 12),
+                    )
+
+            self.assertTrue(result.success)
+            self.assertEqual(result.command_file.read_text(encoding="utf-8"), "5\n23\n4\n10,11,12\n2\n0\nq\n")
+            self.assertEqual(result.raw_cube.name, "griddata.cub")
+            self.assertEqual(result.cube.name, "case_hirshfeld-delta-g.cub")
+            self.assertIsNotNone(result.vesta_result)
+            self.assertEqual(
+                result.vesta_result.vesta_path.name,
+                "case_hirshfeld-delta-g_hirshfeld-delta-g_cube.vesta",
+            )
+            recipe = result.recipe_path.read_text(encoding="utf-8")
+            self.assertIn("function_name: `hirshfeld-delta-g`", recipe)
+            self.assertIn("function_index: `23`", recipe)
+            self.assertIn("multiwfn_default_cube: `griddata.cub`", recipe)
+            self.assertIn("auto_vesta_preset: `hirshfeld-delta-g`", recipe)
+            manifest = result.vesta_result.manifest_path.read_text(encoding="utf-8")
+            self.assertIn("canonical_preset: `hirshfeld-delta-g`", manifest)
+            self.assertIn("effective_isosurface: `0.05`", manifest)
+            self.assertIn("function 23", manifest)
+            self.assertIn("griddata.cub", manifest)
             self.assertIn("dg_inter.cub", manifest)
 
     def test_run_multiwfn_grid_vdw_uses_standalone_vdw_potential_preset(self):

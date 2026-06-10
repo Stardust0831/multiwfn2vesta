@@ -116,6 +116,7 @@ class TestCubePreset(unittest.TestCase):
         self.assertIn("rdg-scalar", text)
         self.assertIn("promolecular-rdg", text)
         self.assertIn("promolecular-delta-g", text)
+        self.assertIn("hirshfeld-delta-g", text)
         self.assertIn("iri-scalar", text)
         self.assertIn("stm", text)
         self.assertIn("domain", text)
@@ -478,6 +479,26 @@ basin type two
             self.assertIn("function 22", manifest)
             self.assertIn("distinct from IGM/IGMH fragment dg_inter.cub", manifest)
             self.assertIn("sur_value=0.05", manifest)
+
+    def test_hirshfeld_delta_g_preset_writes_single_positive_surface(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            cube = self.write_tmp(root, "griddata.cub", SURFACE_CUBE)
+
+            result = run_preset("delta-g-hirshfeld", cube, root / "products")
+
+            text = result.vesta_path.read_text(encoding="utf-8")
+            manifest = result.manifest_path.read_text(encoding="utf-8")
+
+            self.assertRegex(text, r"ISURF\n  1   1\s+0\.05\s+255\s+135\s+80\s+145\s+255")
+            self.assertNotRegex(text, r"\n  1   1\s+-0\.05")
+            self.assertNotIn("IMPORT_TEXTURE", text)
+            self.assertIn("canonical_preset: `hirshfeld-delta-g`", manifest)
+            self.assertIn("requested_preset: `delta-g-hirshfeld`", manifest)
+            self.assertIn("griddata.cub", manifest)
+            self.assertIn("function 23", manifest)
+            self.assertIn("Hirshfeld partition", manifest)
+            self.assertIn("fragment dg_inter.cub", manifest)
 
     def test_standalone_iri_scalar_preset_keeps_texture_route_available(self):
         with tempfile.TemporaryDirectory() as tmp:

@@ -94,6 +94,12 @@ multiwfn2vesta grid-run --list-functions
   `promolecular-delta-g` with a single positive isosurface.  This is
   Multiwfn's promolecular approximation and is distinct from IGM/IGMH
   fragment `dg_inter.cub` mapped-surface routes.
+- `hirshfeld-delta-g`, aliases `delta-g-hirshfeld`,
+  `deltag-hirshfeld`, `delta_g_hirshfeld`, `igmh-scalar`: function `23`,
+  raw `griddata.cub`, preset `hirshfeld-delta-g` with a single positive
+  isosurface.  Multiwfn 2026.6.2 does not assign a dedicated cube filename
+  for this export, so `grid-run` keeps the raw `griddata.cub` and writes a
+  stable processed `<stem>_hirshfeld-delta-g.cub`.
 - `iri`, alias `interaction-region-indicator`: function `24`, raw
   `IRI.cub`, preset `iri-scalar` with a single positive isosurface.  Use the
   separate two-cube `cube-preset iri` route when coloring IRI/RDG/NCI surfaces
@@ -234,6 +240,7 @@ multiwfn2vesta grid-run input.fch products --function edrdmax --edr-exponents 12
 multiwfn2vesta grid-run input.fch products --function becke --becke-atoms 1 4
 multiwfn2vesta grid-run input.fch products --function hirshfeld --hirshfeld-atoms '2,3,7-10'
 multiwfn2vesta grid-run input.fch products --function delta-g
+multiwfn2vesta grid-run input.fch products --function hirshfeld-delta-g
 multiwfn2vesta grid-run input.fch products --function vdw-potential
 ```
 

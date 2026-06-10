@@ -57,6 +57,7 @@ multiwfn2vesta cube-preset hirshfeld-weight Hirshfeld.cub cube_products
 multiwfn2vesta cube-preset rdg-scalar RDG.cub cube_products
 multiwfn2vesta cube-preset promolecular-rdg RDGprodens.cub cube_products
 multiwfn2vesta cube-preset promolecular-delta-g Delta_g.cub cube_products
+multiwfn2vesta cube-preset hirshfeld-delta-g griddata.cub cube_products
 multiwfn2vesta cube-preset iri-scalar IRI.cub cube_products
 multiwfn2vesta cube-preset vdw-potential vdWpot.cub cube_products
 multiwfn2vesta cube-preset potential pot_es.cube cube_products
@@ -257,6 +258,14 @@ passes it back through `cube-preset`.
   This is the standalone promolecular Delta-g cube; do not use it for
   IGM/IGMH fragment `dg_inter.cub`, which remains a texture route via
   `cube-preset igmh`/`igm`.
+- `hirshfeld-delta-g` aliases: `delta-g-hirshfeld`,
+  `deltag-hirshfeld`, `delta_g_hirshfeld`, `igmh-scalar`; single positive
+  surface for Multiwfn function `23` Delta-g with Hirshfeld partition,
+  default isosurface `0.05`.  Multiwfn 2026.6.2 exports this route as the
+  generic `griddata.cub`; `grid-run` renames the processed product to a
+  stable `<stem>_hirshfeld-delta-g.cub`.  Keep this standalone full-system
+  scalar separate from IGM/IGMH fragment `dg_inter.cub` mapped-surface
+  routes.
 - `iri-scalar` aliases: `iri-cube`, `standalone-iri`,
   `interaction-region-indicator`; single positive surface for standalone
   Multiwfn `IRI.cub`, default isosurface `1.0`.  Use `iri` with

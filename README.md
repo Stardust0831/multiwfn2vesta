@@ -21,10 +21,10 @@ point.
 - Working checkout: `/mnt/g/work/multiwfn2vesta/project`.  The workspace-level
   `/mnt/g/work/multiwfn2vesta/.git` is an empty metadata stub and is not used
   for project commits.
-- Branch audit on 2026-06-10 22:51 CST found local `main`, `origin/main`, and
+- Branch audit on 2026-06-10 23:10 CST found local `main`, `origin/main`, and
   `origin/HEAD` aligned at
-  `e68ace19a4d2b155d8817cb3094dc9bba065ecb8`
-  (`Refresh README branch status at Becke tip`) before this Hirshfeld
+  `9169e611a3ea3818b7f65d90ade6e45518322bde`
+  (`Add Hirshfeld weight cube preset`) before this Hirshfeld Delta-g
   feature/status closeout.
 - `git ls-remote --heads origin` currently returns only `refs/heads/main`; no
   merge-back was needed in this pass because there is no extra local or remote
@@ -42,8 +42,9 @@ point.
   Multiwfn gradient norm, spin-density, orbital-density, Laplacian, K(r),
   G(r), local information entropy, electron delocalization range EDR(r;d),
   orbital-overlap distance D(r), Becke atomic/overlap weight, Hirshfeld
-  weight, standalone RDG, promolecular RDG, promolecular Delta-g, standalone
-  IRI scalar, and standalone vdW potential cubes, ABACUS direct cube presets for potential,
+  weight, standalone RDG, promolecular RDG, promolecular Delta-g,
+  Hirshfeld-partition Delta-g, standalone IRI scalar, and standalone vdW
+  potential cubes, ABACUS direct cube presets for potential,
   partial-charge, and wavefunction-norm cubes,
   charged-state `fukui-run` orchestration, aIGM/amIGM trajectory-average
   weak-interaction generation, cube/grid domain extraction, basin cube VESTA
@@ -102,9 +103,10 @@ then delete the temporary branch.
 - Apply analysis-oriented cube presets for common ABACUS/Multiwfn products
   such as density, orbitals/wavefunctions, orbital density, spin density,
   Laplacian, K(r)/G(r) kinetic-density cubes, standalone RDG/promolecular
-  RDG, promolecular Delta-g, local information entropy, EDR(r;d),
+  RDG, local information entropy, EDR(r;d),
   orbital-overlap distance D(r), Becke atomic/overlap weight, Hirshfeld
-  weight, standalone IRI scalar, standalone vdW potential, ABACUS direct potential, partial charge,
+  weight, promolecular Delta-g, Hirshfeld-partition Delta-g, standalone IRI
+  scalar, standalone vdW potential, ABACUS direct potential, partial charge,
   wavefunction norm cubes, ELF/LOL, IRI/RDG/NCI, ESP/MEP,
   IGM/IGMH/aIGM weak-interaction maps, ALIE/LEA/LEAE, and vdW-potential
   mapped surfaces.
@@ -134,7 +136,8 @@ then delete the temporary branch.
   kinetic-energy-density cubes, ELF, LOL, ESP/MEP, ALIE, RDG/IRI-like,
   promolecular RDG/sign(lambda2)rho, local information entropy, EDR(r;d),
   orbital-overlap distance D(r), Becke atomic/overlap weight, Hirshfeld
-  weight, promolecular Delta-g, and related scalar cubes, export multiple orbitals through
+  weight, promolecular Delta-g, Hirshfeld-partition Delta-g, and related
+  scalar cubes, export multiple orbitals through
   isolated batch runs, optionally write VESTA files through `cube-preset`,
   and map generated ESP/ALIE/vdW/sign(lambda2)rho cubes as textures on a
   provided density/surface cube.
@@ -231,6 +234,8 @@ multiwfn2vesta grid-run input.molden grid_products \
 multiwfn2vesta grid-run input.molden grid_products \
   --function hirshfeld \
   --hirshfeld-atoms '2,3,7-10'
+multiwfn2vesta grid-run input.molden grid_products \
+  --function hirshfeld-delta-g
 multiwfn2vesta grid-run input.molden esp_map \
   --function esp \
   --surface-cube density.cub \
@@ -323,6 +328,7 @@ multiwfn2vesta cube-preset hirshfeld-weight Hirshfeld.cub cube_products
 multiwfn2vesta cube-preset rdg-scalar RDG.cub cube_products
 multiwfn2vesta cube-preset promolecular-rdg RDGprodens.cub cube_products
 multiwfn2vesta cube-preset promolecular-delta-g Delta_g.cub cube_products
+multiwfn2vesta cube-preset hirshfeld-delta-g griddata.cub cube_products
 multiwfn2vesta cube-preset iri-scalar IRI.cub cube_products
 multiwfn2vesta cube-preset vdw-potential vdWpot.cub cube_products
 multiwfn2vesta cube-preset potential pot_es.cube cube_products
@@ -353,7 +359,8 @@ orbital/wavefunction/density-difference cubes, Multiwfn gradient norm,
 orbital-density, spin-density, Laplacian, K(r), G(r), local information
 entropy, electron delocalization range, orbital-overlap distance, standalone
 Becke atomic/overlap weight, Hirshfeld weight, RDG, promolecular RDG, and
-standalone IRI scalar cubes, standalone vdW potential cubes, direct ABACUS potential cubes, ABACUS
+promolecular Delta-g, Hirshfeld-partition Delta-g, standalone IRI scalar
+cubes, standalone vdW potential cubes, direct ABACUS potential cubes, ABACUS
 partial-charge/state-density cubes, nonnegative ABACUS wavefunction norm
 cubes, ELF/LOL cubes, IRI/RDG/NCI mapped surfaces, STM/LDOS
 tunneling-current surfaces, binary domain isosurfaces, binary basin
@@ -394,6 +401,13 @@ maintained command stream currently selects Multiwfn's built-in atomic
 density mode (`2`) and intentionally defers the separate atomic `.wfn` file
 prompt path.  The preset shows a single positive dimensionless `0.5`
 isosurface for the normal `0..1` weight range.
+
+Use `hirshfeld-delta-g`/`delta-g-hirshfeld` for Multiwfn function `23`
+Delta-g with Hirshfeld partition.  In the inspected Multiwfn 2026.6.2
+source, this route exports the generic `griddata.cub`; `grid-run` keeps that
+raw file and copies it to a stable `<stem>_hirshfeld-delta-g.cub` processed
+product.  This is a standalone full-system scalar and remains separate from
+IGM/IGMH fragment `dg_inter.cub` mapped-surface routes.
 
 When Multiwfn main function `12` has exported `surfanalysis.pdb`,
 `cube-preset --surfanalysis-pdb` embeds surface maxima/minima as an extra
@@ -609,6 +623,11 @@ Common functions:
   `promolecular-delta-g`, single positive surface by default.  This is the
   standalone promolecular approximation and is separate from IGM/IGMH
   `dg_inter.cub` mapped surfaces.
+- `hirshfeld-delta-g` / `delta-g-hirshfeld`: function `23`, raw
+  `griddata.cub`, preset `hirshfeld-delta-g`, single positive surface by
+  default.  Multiwfn does not give this export a dedicated filename in
+  `0123dim.f90`, so `grid-run` renames the processed cube to a stable
+  `<stem>_hirshfeld-delta-g.cub`.
 - `iri` / `interaction-region-indicator`: function `24`, raw `IRI.cub`,
   preset `iri-scalar`, single positive surface by default.  The default
   isosurface follows Multiwfn's main-function-5 `sur_value=1.0`.
@@ -645,6 +664,11 @@ multiwfn2vesta grid-run input.fch grid_products \
 multiwfn2vesta grid-run input.fch grid_products \
   --function hirshfeld \
   --hirshfeld-atoms '2,3,7-10' \
+  --grid-mode points \
+  --grid-points 120 120 120
+
+multiwfn2vesta grid-run input.fch grid_products \
+  --function hirshfeld-delta-g \
   --grid-mode points \
   --grid-points 120 120 120
 ```

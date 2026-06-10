@@ -1,6 +1,48 @@
 # Project Kanban
 
-Updated: 2026-06-10 23:04 CST
+Updated: 2026-06-10 23:23 CST
+
+## Active Goal Continuation: 2026-06-10 Hirshfeld Delta-g And README Closeout
+
+- [x] Record automatic continuation of the long-running objective: keep
+  researching and implementing valuable Multiwfn wavefunction analyses that
+  can be visualized in VESTA, prioritizing routes that ABACUS can feed via
+  LCAO Molden wavefunction files or direct cube outputs.
+- [x] Record user request: update README, inspect the unusual-looking branch
+  state, converge back to one maintained branch if needed, and keep git
+  identity as `Stardust0831`.
+- [x] Recheck current repository state before new edits: local `main`,
+  `origin/main`, and `origin/HEAD` are aligned at
+  `9169e611a3ea3818b7f65d90ade6e45518322bde`; remote-visible branch state is
+  only `refs/heads/main`, so no branch merge is needed; local untracked
+  probes `domain.cub` and `domain.pdb` remain outside version control.
+- [x] Inspect current `grid-run`/`cube-preset` coverage, local Multiwfn
+  2026.6.2 source, and the analysis matrix.  Selected increment: Multiwfn
+  main-function-5 function `23`, Delta-g with Hirshfeld partition, because
+  `function.f90` calls `delta_g_Hirsh` and `0123dim.f90` leaves its cube
+  export at generic `griddata.cub`.
+- [x] Implement `cube-preset hirshfeld-delta-g` plus
+  `grid-run --function hirshfeld-delta-g`, keeping function `22`
+  `delta-g` aliases mapped to promolecular `Delta_g.cub` and keeping
+  IGM/IGMH fragment `dg_inter.cub` mapped-surface routes separate.
+- [x] Update focused tests, README, usage docs, skills, research matrix, and
+  worklog with the `griddata.cub` raw-output behavior and single-branch
+  closeout status.
+- [x] Sync root docs mirror and validate before review.  Validation passed:
+  root docs checksum mirror dry-run, focused `py_compile`, 81 focused tests
+  across `tests.test_cube_preset` and `tests.test_multiwfn_grid`,
+  `cube-preset --list-presets`, `grid-run --list-functions`,
+  `grid-run --help`, `bin/multiwfn2vesta --help`, `git diff --check`, and
+  full 297-test no-GUI regression.
+- [x] Complete read-only review and prepare explicit staging/commit/push
+  closeout; keep `domain.cub` and `domain.pdb` untracked.  Review found no
+  High/Medium blocker and confirmed README branch status, function `22`
+  promolecular `Delta_g.cub` separation, function `23` generic
+  `griddata.cub` handling, docs/skills/worklog/kanban sync, and root docs
+  mirror sync.  The only Low finding is to avoid `git add .` / `git add -A`
+  because `domain.cub` and `domain.pdb` are local probes.  Final commit hash
+  and post-push branch alignment are reported in the assistant response to
+  avoid a self-referential docs loop.
 
 ## Active Goal Continuation: 2026-06-10 Hirshfeld Weight Grid Cube
 

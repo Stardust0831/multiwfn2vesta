@@ -230,6 +230,7 @@ multiwfn2vesta cube-preset hirshfeld-weight Hirshfeld.cub cube_products
 multiwfn2vesta cube-preset rdg-scalar RDG.cub cube_products
 multiwfn2vesta cube-preset promolecular-rdg RDGprodens.cub cube_products
 multiwfn2vesta cube-preset promolecular-delta-g Delta_g.cub cube_products
+multiwfn2vesta cube-preset hirshfeld-delta-g griddata.cub cube_products
 multiwfn2vesta cube-preset iri-scalar IRI.cub cube_products
 multiwfn2vesta cube-preset vdw-potential vdWpot.cub cube_products
 multiwfn2vesta cube-preset potential pot_es.cube cube_products
@@ -309,6 +310,12 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
   promolecular approximation 的 standalone Delta-g，不是 IGM/IGMH 里的
   `dg_inter.cub` surface+texture 路线；源码没有重设等值面，因此默认沿用
   全局 `sur_value=0.05`
+- `hirshfeld-delta-g`：单正值等值面，别名包括 `delta-g-hirshfeld`、
+  `deltag-hirshfeld`、`delta_g_hirshfeld`、`igmh-scalar`，用于 Multiwfn
+  函数 `23` 的 Hirshfeld partition Delta-g；Multiwfn 2026.6.2 源码中
+  此函数导出通用 `griddata.cub`，`grid-run` 会把处理后文件稳定命名为
+  `<stem>_hirshfeld-delta-g.cub`；它是 standalone 全体系标量，不是
+  IGM/IGMH 的 `dg_inter.cub` mapped-surface 路线
 - `iri-scalar`：单正值等值面，别名包括 `iri-cube`、`standalone-iri`，
   用于单 cube 的 Multiwfn `IRI.cub`，默认等值面 `1.0`；双 cube 的
   IRI/RDG/NCI 染色图仍用 `cube-preset iri`
@@ -584,6 +591,10 @@ multiwfn2vesta grid-run --list-functions
   `cube-preset promolecular-delta-g`，按单正值等值面显示；它是
   promolecular approximation 的单 cube Delta-g，和 IGM/IGMH 的
   `dg_inter.cub` mapped-surface 文件分开维护
+- `hirshfeld-delta-g` / `delta-g-hirshfeld`：函数 `23`，原始输出
+  `griddata.cub`，默认接 `cube-preset hirshfeld-delta-g`，按单正值
+  等值面显示；Multiwfn 没有为此导出路径设置专名，项目侧给处理后 cube
+  使用稳定 `<stem>_hirshfeld-delta-g.cub` 命名
 - `iri` / `interaction-region-indicator`：函数 `24`，原始输出 `IRI.cub`，
   默认接 `cube-preset iri-scalar`，按单正值等值面显示，默认等值面
   `1.0`
@@ -621,6 +632,11 @@ multiwfn2vesta grid-run input.fch grid_products \
 multiwfn2vesta grid-run input.fch grid_products \
   --function hirshfeld \
   --hirshfeld-atoms '2,3,7-10' \
+  --grid-mode points \
+  --grid-points 120 120 120
+
+multiwfn2vesta grid-run input.fch grid_products \
+  --function hirshfeld-delta-g \
   --grid-mode points \
   --grid-points 120 120 120
 ```

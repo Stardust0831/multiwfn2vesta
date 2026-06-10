@@ -1,5 +1,35 @@
 # Worklog
 
+## 2026-06-10: Hirshfeld-partition Delta-g and README branch closeout
+
+- User requested a README refresh, an audit of the unusual-looking branch
+  state, possible convergence back to one branch, and continued use of the
+  `Stardust0831` git identity.
+- Rechecked repository state: local `main`, `origin/main`, and `origin/HEAD`
+  were aligned at `9169e611a3ea3818b7f65d90ade6e45518322bde` (`Add
+  Hirshfeld weight cube preset`) before this pass; `git ls-remote --heads
+  origin` exposes only `refs/heads/main`, so no branch merge-back is needed.
+  Repository-local identity is `Stardust0831 <13862180016@163.com>`.
+- Rechecked local Multiwfn 2026.6.2 source evidence: function `23` is
+  Delta-g with Hirshfeld partition and `calcfuncall` calls
+  `delta_g_Hirsh(x,y,z)`.  The inspected `0123dim.f90` cube export block
+  does not assign a dedicated filename for function `23`, so Multiwfn writes
+  the generic `griddata.cub`.
+- Added `cube-preset hirshfeld-delta-g` with aliases
+  `delta-g-hirshfeld`, `deltag-hirshfeld`, `delta_g_hirshfeld`, and
+  `igmh-scalar`.  The preset uses a single positive `0.05` isosurface and
+  explicitly stays separate from IGM/IGMH fragment `dg_inter.cub`
+  mapped-surface routes.
+- Added `grid-run --function hirshfeld-delta-g`, mapped to Multiwfn
+  function `23`, raw `griddata.cub`, and stable processed
+  `<stem>_hirshfeld-delta-g.cub` output.  Function `22` aliases such as
+  `delta-g` remain promolecular `Delta_g.cub` routes.
+- Updated README, usage docs, cube/grid/CLI/ABACUS skills, research matrix,
+  worklog, and kanban.  Local untracked probes `domain.cub` and `domain.pdb`
+  remain uncommitted.
+- Validation and final commit/push details are recorded in the active kanban
+  item and assistant response after the closeout finishes.
+
 ## 2026-06-10: Hirshfeld weight cube preset and branch refresh
 
 - Continued the long-running Multiwfn/ABACUS/VESTA analysis objective with

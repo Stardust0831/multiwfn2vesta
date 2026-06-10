@@ -29,6 +29,12 @@ Multiwfn evidence:
   approximation, and `0123dim.f90` exports it as `Delta_g.cub` while leaving
   the global `sur_value=0.05`; this standalone cube is separate from
   weak-interaction `dg_inter.cub` fragment outputs.
+- Multiwfn `function.f90` lists function `23` as Delta-g with Hirshfeld
+  partition and `calcfuncall` calls `delta_g_Hirsh(x,y,z)`.  The inspected
+  `0123dim.f90` export-name block does not assign a dedicated filename for
+  function `23`, so post-processing option `2` writes the generic
+  `griddata.cub`; the project therefore uses a stable processed
+  `hirshfeld-delta-g` name.
 - Multiwfn `function.f90` lists function `11` as local information entropy,
   evaluates it as `-rho/N*ln(rho/N)`, and `0123dim.f90` exports the cube as
   `infoentro.cub` while leaving the global `sur_value=0.05`.
@@ -157,7 +163,7 @@ occupations, and density derivatives from the wavefunction representation.
 
 | Analysis | Multiwfn input | ABACUS feasibility | Multiwfn output | VESTA representation | Project action |
 | --- | --- | --- | --- | --- | --- |
-| IRI/NCI/RDG/Delta-g | Full wavefunction, or promolecular approximation from structure | Molden route feasible; promolecular route can avoid wavefunction | `IRI.cub`, `RDG.cub`, `RDGprodens.cub`, `Delta_g.cub`, `sl2r.cub`, `func1.cub`, `func2.cub` | Standalone scalar isosurfaces, or isosurface plus texture cube; section planes off | `multiwfn2vesta iri-run` implemented for the two-cube weak-interaction stream; `grid-run --surface-cube` can use sign(lambda2)rho cubes as texture on an existing RDG/IRI surface; `cube-preset rdg-scalar`, `promolecular-rdg`, `promolecular-delta-g`, and `iri-scalar` cover standalone `RDG.cub`/`RDGprodens.cub`/`Delta_g.cub`/`IRI.cub` without stealing the existing `rdg -> iri` texture alias or the IGM/IGMH `dg_inter.cub` route |
+| IRI/NCI/RDG/Delta-g | Full wavefunction, or promolecular approximation from structure | Molden route feasible; promolecular route can avoid wavefunction | `IRI.cub`, `RDG.cub`, `RDGprodens.cub`, `Delta_g.cub`, function-23 `griddata.cub`, `sl2r.cub`, `func1.cub`, `func2.cub` | Standalone scalar isosurfaces, or isosurface plus texture cube; section planes off | `multiwfn2vesta iri-run` implemented for the two-cube weak-interaction stream; `grid-run --surface-cube` can use sign(lambda2)rho cubes as texture on an existing RDG/IRI surface; `cube-preset rdg-scalar`, `promolecular-rdg`, `promolecular-delta-g`, `hirshfeld-delta-g`, and `iri-scalar` cover standalone `RDG.cub`/`RDGprodens.cub`/`Delta_g.cub`/function-23 `griddata.cub`/`IRI.cub` without stealing the existing `rdg -> iri` texture alias or the IGM/IGMH `dg_inter.cub` route |
 | ESP/MEP on density surface | Full wavefunction or ABACUS `out_pot` plus density cube | Strong direct cube route; Molden route for Multiwfn ESP | `density.cub`, `totesp.cub`, `pot_es.cube`, `pots*.cube` | Density isosurface colored by potential texture | `grid-run --function esp --surface-cube density.cub --grid-mode cube --grid-cube density.cub` now generates the ESP texture and writes the mapped-surface VESTA file directly |
 | STM/LDOS | Full wavefunction with GTF information | Good candidate for Gamma LCAO Molden; metals and Fermi-level choices need care | `STM.cub` | Single positive LDOS/current isosurface or slices | `stm-run` now automates Multiwfn `300 -> 4`, switches to constant-current mode, exports `STM.cub`, and calls `cube-preset stm` |
 | Molecular surface mapped properties | Full wavefunction or cube pair | Feasible through Molden; ABACUS can provide density/potential cubes | `surf.cub`, `mapfunc.cub`, `density.cub`, `avglocion.cub`, `surfanalysis.pdb` | Surface cube plus texture; extrema as atoms-only overlay phase | `cube-preset surface-map` covers surface+texture display using `molsurfmap.vmd` defaults; `--surfanalysis-pdb` and `surface-extrema` overlay surface extrema |
@@ -378,3 +384,8 @@ Main gaps:
   Multiwfn function `22` `Delta_g.cub`.  This is a single-cube promolecular
   scalar display and should not be confused with IGM/IGMH fragment
   `dg_inter.cub` surfaces, which remain mapped-surface texture workflows.
+- Hirshfeld-partition Delta-g now has `cube-preset hirshfeld-delta-g` and
+  `grid-run --function hirshfeld-delta-g`; local Multiwfn source shows
+  function `23` calls `delta_g_Hirsh`, while the 3D cube export falls back to
+  generic `griddata.cub`.  The project keeps that raw cube name and copies the
+  processed product to `<stem>_hirshfeld-delta-g.cub`.
