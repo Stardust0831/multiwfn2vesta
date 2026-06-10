@@ -53,6 +53,18 @@ info entropy comment two
 """
 
 
+DELTA_G_CUBE = """delta g comment one
+delta g comment two
+    2    -1.000000    -2.000000     0.500000
+    2     0.500000     0.000000     0.000000
+    2     0.000000     0.500000     0.000000
+    2     0.000000     0.000000     0.500000
+    8     8.000000    -1.000000    -2.000000     0.500000
+    1     1.000000    -0.500000    -2.000000     0.500000
+ 0.00 0.01 0.02 0.04 0.05 0.06 0.08 0.10
+"""
+
+
 class TestMultiwfnGridRunner(unittest.TestCase):
     def make_candidate(self, root):
         fake_exe = Path(root) / "Multiwfn_noGUI"
@@ -74,6 +86,7 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertIn("preset=orbital-density", text)
         self.assertIn("preset=rdg-scalar", text)
         self.assertIn("preset=promolecular-rdg", text)
+        self.assertIn("preset=promolecular-delta-g", text)
         self.assertIn("preset=iri-scalar", text)
         self.assertIn("promolecular-rdg", text)
         self.assertIn("alie", text)
@@ -97,6 +110,10 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertEqual(resolve_grid_function("orbdens").preset, "orbital-density")
         self.assertEqual(resolve_grid_function("rdg").preset, "rdg-scalar")
         self.assertEqual(resolve_grid_function("rdg-pro").preset, "promolecular-rdg")
+        self.assertEqual(resolve_grid_function("delta-g").preset, "promolecular-delta-g")
+        self.assertEqual(resolve_grid_function("deltag").output_filename, "Delta_g.cub")
+        self.assertEqual(resolve_grid_function("delta_g").index, 22)
+        self.assertEqual(resolve_grid_function("delta-g-promol").preset, "promolecular-delta-g")
         self.assertEqual(resolve_grid_function("iri").preset, "iri-scalar")
         self.assertEqual(resolve_grid_function("interaction-region-indicator").output_filename, "IRI.cub")
         self.assertEqual(resolve_grid_function(None, 18).name, "alie")
@@ -286,6 +303,46 @@ class TestMultiwfnGridRunner(unittest.TestCase):
             manifest = result.vesta_result.manifest_path.read_text(encoding="utf-8")
             self.assertIn("canonical_preset: `iri-scalar`", manifest)
             self.assertIn("effective_isosurface: `1.0`", manifest)
+
+    def test_run_multiwfn_grid_delta_g_uses_promolecular_delta_g_preset(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            wavefunction = root / "h2o.fch"
+            wavefunction.write_text("wavefunction", encoding="utf-8")
+            candidate = self.make_candidate(root)
+
+            def fake_run(command, **kwargs):
+                cwd = Path(kwargs["cwd"])
+                (cwd / "Delta_g.cub").write_text(DELTA_G_CUBE, encoding="utf-8")
+                return subprocess.CompletedProcess(command, 0, stdout="ok", stderr="")
+
+            with patch("multiwfn2vesta.multiwfn_grid.find_multiwfn", return_value=candidate):
+                with patch("multiwfn2vesta.multiwfn_grid.subprocess.run", side_effect=fake_run):
+                    result = run_multiwfn_grid(
+                        wavefunction,
+                        root / "products",
+                        function_name="delta-g",
+                        stem="case",
+                        grid_points=(10, 11, 12),
+                    )
+
+            self.assertTrue(result.success)
+            self.assertEqual(result.command_file.read_text(encoding="utf-8"), "5\n22\n4\n10,11,12\n2\n0\nq\n")
+            self.assertEqual(result.raw_cube.name, "Delta_g.cub")
+            self.assertEqual(result.cube.name, "case_delta-g.cub")
+            self.assertIsNotNone(result.vesta_result)
+            self.assertEqual(
+                result.vesta_result.vesta_path.name,
+                "case_delta-g_promolecular-delta-g_cube.vesta",
+            )
+            recipe = result.recipe_path.read_text(encoding="utf-8")
+            self.assertIn("function_name: `delta-g`", recipe)
+            self.assertIn("function_index: `22`", recipe)
+            self.assertIn("auto_vesta_preset: `promolecular-delta-g`", recipe)
+            manifest = result.vesta_result.manifest_path.read_text(encoding="utf-8")
+            self.assertIn("canonical_preset: `promolecular-delta-g`", manifest)
+            self.assertIn("effective_isosurface: `0.05`", manifest)
+            self.assertIn("dg_inter.cub", manifest)
 
     def test_run_multiwfn_grid_can_map_generated_texture_on_surface_cube(self):
         with tempfile.TemporaryDirectory() as tmp:

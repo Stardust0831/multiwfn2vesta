@@ -68,7 +68,11 @@ multiwfn2vesta grid-run --list-functions
 - `alie`, aliases `average-local-ionization-energy`, `avglocion`: function
   `18`, raw `avglocion.cub`, preset `density`; mapped preset `alie` with
   `--surface-cube`.
-- `delta-g`: function `22`, raw `Delta_g.cub`, preset `density`.
+- `delta-g`, aliases `deltag`, `delta_g`, `promolecular-deltag`,
+  `delta-g-promol`: function `22`, raw `Delta_g.cub`, preset
+  `promolecular-delta-g` with a single positive isosurface.  This is
+  Multiwfn's promolecular approximation and is distinct from IGM/IGMH
+  fragment `dg_inter.cub` mapped-surface routes.
 - `iri`, alias `interaction-region-indicator`: function `24`, raw
   `IRI.cub`, preset `iri-scalar` with a single positive isosurface.  Use the
   separate two-cube `cube-preset iri` route when coloring IRI/RDG/NCI surfaces
@@ -201,6 +205,7 @@ multiwfn2vesta grid-run input.fch products --function esp --no-vesta
 multiwfn2vesta grid-run input.fch products --function esp --surface-cube density.cub --grid-mode cube --grid-cube density.cub
 multiwfn2vesta grid-run input.fch products --function hamiltonian-ked --no-vesta
 multiwfn2vesta grid-run input.fch products --function alie --no-vesta
+multiwfn2vesta grid-run input.fch products --function delta-g
 ```
 
 For two-cube mapped surfaces, use `--surface-cube` when the new grid cube

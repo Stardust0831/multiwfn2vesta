@@ -14,7 +14,8 @@ Multiwfn evidence:
 - Local version: `tools/Multiwfn_2026.6.2_*`.
 - Real-space function menu in `function.f90` lists electron density,
   gradient norm, Laplacian, orbital wavefunction, orbital density, ELF, LOL,
-  ESP, RDG, promolecular RDG, IRI, vdW potential, and other grid functions.
+  ESP, RDG, promolecular RDG, promolecular Delta-g, IRI, vdW potential, and
+  other grid functions.
 - Multiwfn `function.f90`/`0123dim.f90` explicitly list Hamiltonian and
   Lagrangian kinetic energy densities as functions `6` and `7`, exporting
   `K(r).cub` and `G(r).cub`; ALIE is function `18`, exporting
@@ -24,6 +25,10 @@ Multiwfn evidence:
   global `define.f90` default `0.05`, `spindensity.cub` uses `0.02`,
   `RDG.cub` uses `0.5`, `RDGprodens.cub` uses `0.4`, `IRI.cub` uses `1.0`,
   and `orbdens.cub` uses `0.005`.
+- Multiwfn `function.f90` lists function `22` as Delta-g with promolecular
+  approximation, and `0123dim.f90` exports it as `Delta_g.cub` while leaving
+  the global `sur_value=0.05`; this standalone cube is separate from
+  weak-interaction `dg_inter.cub` fragment outputs.
 - Multiwfn `function.f90` lists function `11` as local information entropy,
   evaluates it as `-rho/N*ln(rho/N)`, and `0123dim.f90` exports the cube as
   `infoentro.cub` while leaving the global `sur_value=0.05`.
@@ -142,7 +147,7 @@ occupations, and density derivatives from the wavefunction representation.
 
 | Analysis | Multiwfn input | ABACUS feasibility | Multiwfn output | VESTA representation | Project action |
 | --- | --- | --- | --- | --- | --- |
-| IRI/NCI/RDG | Full wavefunction, or promolecular approximation from structure | Molden route feasible; promolecular route can avoid wavefunction | `IRI.cub`, `RDG.cub`, `RDGprodens.cub`, `sl2r.cub`, `func1.cub`, `func2.cub` | Standalone scalar isosurfaces, or isosurface plus texture cube; section planes off | `multiwfn2vesta iri-run` implemented for the two-cube weak-interaction stream; `grid-run --surface-cube` can use sign(lambda2)rho cubes as texture on an existing RDG/IRI surface; `cube-preset rdg-scalar`, `promolecular-rdg`, and `iri-scalar` cover standalone `RDG.cub`/`RDGprodens.cub`/`IRI.cub` without stealing the existing `rdg -> iri` texture alias |
+| IRI/NCI/RDG/Delta-g | Full wavefunction, or promolecular approximation from structure | Molden route feasible; promolecular route can avoid wavefunction | `IRI.cub`, `RDG.cub`, `RDGprodens.cub`, `Delta_g.cub`, `sl2r.cub`, `func1.cub`, `func2.cub` | Standalone scalar isosurfaces, or isosurface plus texture cube; section planes off | `multiwfn2vesta iri-run` implemented for the two-cube weak-interaction stream; `grid-run --surface-cube` can use sign(lambda2)rho cubes as texture on an existing RDG/IRI surface; `cube-preset rdg-scalar`, `promolecular-rdg`, `promolecular-delta-g`, and `iri-scalar` cover standalone `RDG.cub`/`RDGprodens.cub`/`Delta_g.cub`/`IRI.cub` without stealing the existing `rdg -> iri` texture alias or the IGM/IGMH `dg_inter.cub` route |
 | ESP/MEP on density surface | Full wavefunction or ABACUS `out_pot` plus density cube | Strong direct cube route; Molden route for Multiwfn ESP | `density.cub`, `totesp.cub`, `pot_es.cube`, `pots*.cube` | Density isosurface colored by potential texture | `grid-run --function esp --surface-cube density.cub --grid-mode cube --grid-cube density.cub` now generates the ESP texture and writes the mapped-surface VESTA file directly |
 | STM/LDOS | Full wavefunction with GTF information | Good candidate for Gamma LCAO Molden; metals and Fermi-level choices need care | `STM.cub` | Single positive LDOS/current isosurface or slices | `stm-run` now automates Multiwfn `300 -> 4`, switches to constant-current mode, exports `STM.cub`, and calls `cube-preset stm` |
 | Molecular surface mapped properties | Full wavefunction or cube pair | Feasible through Molden; ABACUS can provide density/potential cubes | `surf.cub`, `mapfunc.cub`, `density.cub`, `avglocion.cub`, `surfanalysis.pdb` | Surface cube plus texture; extrema as atoms-only overlay phase | `cube-preset surface-map` covers surface+texture display using `molsurfmap.vmd` defaults; `--surfanalysis-pdb` and `surface-extrema` overlay surface extrema |
@@ -341,3 +346,8 @@ Main gaps:
   Reference-point functions such as Fermi hole and source function, and
   extra-parameter functions such as EDR/D(r), remain deferred until their
   prompt streams are bounded.
+- Promolecular Delta-g now has a distinct `cube-preset
+  promolecular-delta-g` route and `grid-run --function delta-g` maps to
+  Multiwfn function `22` `Delta_g.cub`.  This is a single-cube promolecular
+  scalar display and should not be confused with IGM/IGMH fragment
+  `dg_inter.cub` surfaces, which remain mapped-surface texture workflows.

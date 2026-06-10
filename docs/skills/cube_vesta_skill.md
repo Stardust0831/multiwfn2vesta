@@ -52,6 +52,7 @@ multiwfn2vesta cube-preset lagrangian-ked 'G(r).cub' cube_products
 multiwfn2vesta cube-preset local-information-entropy infoentro.cub cube_products
 multiwfn2vesta cube-preset rdg-scalar RDG.cub cube_products
 multiwfn2vesta cube-preset promolecular-rdg RDGprodens.cub cube_products
+multiwfn2vesta cube-preset promolecular-delta-g Delta_g.cub cube_products
 multiwfn2vesta cube-preset iri-scalar IRI.cub cube_products
 multiwfn2vesta cube-preset potential pot_es.cube cube_products
 multiwfn2vesta cube-preset partial-charge pchg.cube cube_products
@@ -223,6 +224,12 @@ passes it back through `cube-preset`.
 - `promolecular-rdg` aliases: `rdg-pro`, `prodens-rdg`,
   `promolecular-rdg-scalar`; single positive surface for Multiwfn
   `RDGprodens.cub`, default isosurface `0.4`.
+- `promolecular-delta-g` aliases: `delta-g`, `deltag`, `delta_g`,
+  `promolecular-deltag`, `delta-g-promol`; single positive surface for
+  Multiwfn function `22` `Delta_g.cub`, default isosurface `0.05`.
+  This is the standalone promolecular Delta-g cube; do not use it for
+  IGM/IGMH fragment `dg_inter.cub`, which remains a texture route via
+  `cube-preset igmh`/`igm`.
 - `iri-scalar` aliases: `iri-cube`, `standalone-iri`,
   `interaction-region-indicator`; single positive surface for standalone
   Multiwfn `IRI.cub`, default isosurface `1.0`.  Use `iri` with

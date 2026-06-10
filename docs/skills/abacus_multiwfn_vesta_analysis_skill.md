@@ -58,6 +58,7 @@ multiwfn2vesta cube-preset lagrangian-ked 'G(r).cub' cube_products
 multiwfn2vesta cube-preset local-information-entropy infoentro.cub cube_products
 multiwfn2vesta cube-preset rdg-scalar RDG.cub cube_products
 multiwfn2vesta cube-preset promolecular-rdg RDGprodens.cub cube_products
+multiwfn2vesta cube-preset promolecular-delta-g Delta_g.cub cube_products
 multiwfn2vesta cube-preset iri-scalar IRI.cub cube_products
 multiwfn2vesta cube-preset potential pot_es.cube cube_products
 multiwfn2vesta cube-preset partial-charge pchg.cube cube_products
@@ -216,15 +217,18 @@ Useful `grid-run` functions for ABACUS-compatible Molden files include
 `density`, `gradient`, `orbital --orbital h`, `orbital-density --orbital h`,
 `spin-density`, `laplacian`, `hamiltonian-ked`, `lagrangian-ked`, `elf`,
 `lol`, `local-information-entropy`, `esp`, `rdg`, `promolecular-rdg`,
-`iri`, and `signlambda2rho`.
+`delta-g`, `iri`, and `signlambda2rho`.
 The single-cube display presets for `gradient.cub`, `spindensity.cub`,
-`orbdens.cub`, `infoentro.cub`, `RDG.cub`, `RDGprodens.cub`, and `IRI.cub`
-follow Multiwfn main-function-5 `sur_value` defaults where the source defines
-them.  For `gradient.cub` and `infoentro.cub`, Multiwfn leaves the function
-at the global `sur_value=0.05`, so tune the VESTA isosurface per system.
-`infoentro.cub` uses signed `local-information-entropy`; `IRI.cub` uses
-standalone `iri-scalar`; use the existing two-cube `cube-preset iri` route
-when a sign(lambda2)rho-like texture cube is available.
+`orbdens.cub`, `infoentro.cub`, `RDG.cub`, `RDGprodens.cub`, `Delta_g.cub`,
+and `IRI.cub` follow Multiwfn main-function-5 `sur_value` defaults where the
+source defines them.  For `gradient.cub`, `infoentro.cub`, and
+`Delta_g.cub`, Multiwfn leaves the function at the global `sur_value=0.05`,
+so tune the VESTA isosurface per system.  `infoentro.cub` uses signed
+`local-information-entropy`, `Delta_g.cub` uses standalone
+`promolecular-delta-g`, and `IRI.cub` uses standalone `iri-scalar`; use the
+existing two-cube `cube-preset iri` route when a sign(lambda2)rho-like
+texture cube is available.  IGM/IGMH fragment `dg_inter.cub` remains a
+separate mapped-surface workflow through `cube-preset igmh`/`igm`.
 
 For ABACUS LCAO Molden frontier orbital inspection, batch export is now the
 maintained route:

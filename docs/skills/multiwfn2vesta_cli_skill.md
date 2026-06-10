@@ -161,6 +161,7 @@ multiwfn2vesta cube-preset lagrangian-ked 'G(r).cub' cube_products
 multiwfn2vesta cube-preset local-information-entropy infoentro.cub cube_products
 multiwfn2vesta cube-preset rdg-scalar RDG.cub cube_products
 multiwfn2vesta cube-preset promolecular-rdg RDGprodens.cub cube_products
+multiwfn2vesta cube-preset promolecular-delta-g Delta_g.cub cube_products
 multiwfn2vesta cube-preset iri-scalar IRI.cub cube_products
 multiwfn2vesta cube-preset potential pot_es.cube cube_products
 multiwfn2vesta cube-preset partial-charge pchg.cube cube_products
@@ -410,15 +411,17 @@ multiwfn2vesta grid-run --list-functions
 Common functions include `density`, `gradient`, `orbital --orbital h`,
 `orbital-density`, `spin-density`, `laplacian`, `hamiltonian-ked`,
 `lagrangian-ked`, `local-information-entropy`, `elf`, `lol`, `esp`, `alie`,
-`rdg`, `promolecular-rdg`, `iri`, `signlambda2rho`, and
+`rdg`, `promolecular-rdg`, `delta-g`, `iri`, `signlambda2rho`, and
 `promolecular-signlambda2rho`.  The scalar display defaults are
 function-specific where possible: `gradient.cub` uses `gradient-norm`,
 `spindensity.cub` uses `cube-preset spin-density`, `orbdens.cub` uses
 `orbital-density`, `laplacian.cub` uses `laplacian`, `K(r).cub` uses
 `hamiltonian-ked`, `G(r).cub` uses `lagrangian-ked`, `infoentro.cub` uses
 `local-information-entropy`, `RDG.cub` uses `rdg-scalar`, `RDGprodens.cub`
-uses `promolecular-rdg`, and `IRI.cub` uses `iri-scalar`.  The existing
-`cube-preset iri` name remains the two-cube surface+texture route.
+uses `promolecular-rdg`, `Delta_g.cub` uses `promolecular-delta-g`, and
+`IRI.cub` uses `iri-scalar`.  The existing `cube-preset iri` name remains
+the two-cube surface+texture route, and IGM/IGMH `dg_inter.cub` still uses
+the `igmh`/`igm` texture route.
 
 Batch frontier orbital export:
 

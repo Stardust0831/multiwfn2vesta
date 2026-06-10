@@ -1,6 +1,34 @@
 # Project Kanban
 
-Updated: 2026-06-10 20:56 CST
+Updated: 2026-06-10 21:13 CST
+
+## Active Implementation: 2026-06-10 Promolecular Delta-g Cube Preset
+
+- [x] Record continuation request: keep enriching useful Multiwfn
+  wavefunction/grid analyses that can be visualized in VESTA, especially
+  workflows that ABACUS can feed through Molden or direct cube routes.
+- [x] Recheck current state after README branch closeout: local `main` is
+  aligned with `origin/main` at
+  `4af3bec35b85fb9a5d1b49ab6770361de528ce16`; untracked local probes
+  `domain.cub` and `domain.pdb` remain uncommitted.
+- [x] Select this bounded increment: implement a dedicated VESTA preset for
+  Multiwfn function `22` promolecular `Delta_g.cub`, keeping it separate
+  from IGM/IGMH fragment `dg_inter.cub` mapped-surface routes.
+- [x] Update source and focused tests for `cube-preset
+  promolecular-delta-g` and `grid-run --function delta-g`.
+- [x] Update README, usage docs, skills, research matrix, and worklog with
+  the standalone `Delta_g.cub` route and the distinction from IGM/IGMH
+  `dg_inter.cub`.
+- [x] Sync root docs mirror.
+- [x] Validate and review: focused `py_compile`, 63 focused tests across
+  `tests.test_cube_preset tests.test_multiwfn_grid`, full 279-test no-GUI
+  regression, `cube-preset --list-presets`, `grid-run --list-functions`,
+  `bin/multiwfn2vesta --help`, and `git diff --check` passed; read-only
+  review found no source/test blocker and confirmed IGM/IGMH plus IRI/RDG
+  texture routes are not overwritten.
+- [x] Prepare explicit staging, commit, push, and post-push verification with
+  `Stardust0831` identity.  Final commit hash and branch-alignment check are
+  reported in the assistant response to avoid a self-referential docs loop.
 
 ## Current Request: 2026-06-10 README Refresh And One-Branch Closeout
 
@@ -37,14 +65,17 @@ Updated: 2026-06-10 20:56 CST
   `domain.cub` and `domain.pdb` remain uncommitted.
 - [x] Choose the next source-backed stable gap: Multiwfn 2026.6.2
   `function.f90` lists function `22` as Delta-g with promolecular
-  approximation and `0123dim.f90` exports it as `Delta_g.cub`; the current
-  project still routes `grid-run --function delta-g` through generic
-  `density`.
-- [ ] Recheck source/template defaults, then add a maintained `cube-preset`
+  approximation and `0123dim.f90` exports it as `Delta_g.cub`; at selection
+  time, the project still routed `grid-run --function delta-g` through
+  generic `density`.
+- [x] Recheck source/template defaults, then add a maintained `cube-preset`
   and `grid-run` mapping for promolecular `Delta_g.cub` without changing
   IGM/IGMH fragment `dg_inter.cub` mapped-surface routes.
-- [ ] Sync root docs, validate, review, commit, push, and verify `main`
-  remains aligned with `origin/main`.
+- [x] Sync root docs for the active implementation.
+- [x] Validate, review, commit, push, and verify `main`
+  remains aligned with `origin/main`; this is being completed by the active
+  implementation section above, with final commit hash reported in the
+  assistant response.
 
 ## Active Goal Continuation: 2026-06-10 Local Information Entropy Cube
 

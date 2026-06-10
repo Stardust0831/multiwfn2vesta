@@ -234,6 +234,22 @@ PRESETS: Tuple[CubePreset, ...] = (
         ),
     ),
     CubePreset(
+        name="promolecular-delta-g",
+        aliases=("delta-g", "deltag", "delta_g", "promolecular-deltag", "delta-g-promol"),
+        description="Single positive isosurface for standalone promolecular Delta-g cubes.",
+        surface_mode="single",
+        isosurface=0.05,
+        positive_rgb=(255, 185, 70),
+        surface_opacity=(145, 255),
+        notes=(
+            "Use for Multiwfn Delta_g.cub from real-space function 22 "
+            "Delta-g (promolecular approximation). "
+            "This standalone cube is distinct from IGM/IGMH fragment dg_inter.cub mapped-surface routes. "
+            "Multiwfn does not reset sur_value for function 22, so the default follows "
+            "the global main-function-5 sur_value=0.05."
+        ),
+    ),
+    CubePreset(
         name="iri-scalar",
         aliases=("iri-cube", "standalone-iri", "interaction-region-indicator"),
         description="Single positive isosurface for standalone IRI scalar cubes.",

@@ -37,11 +37,12 @@ point.
   competing branches.
 - Recent maintained feature work includes dedicated VESTA presets for
   Multiwfn gradient norm, spin-density, orbital-density, Laplacian, K(r),
-  G(r), local information entropy, standalone RDG, promolecular RDG, and
-  standalone IRI scalar cubes, ABACUS direct cube presets for potential,
-  partial-charge, and wavefunction-norm cubes, charged-state `fukui-run`
-  orchestration, aIGM/amIGM trajectory-average weak-interaction generation,
-  cube/grid domain extraction, basin cube VESTA presets,
+  G(r), local information entropy, standalone RDG, promolecular RDG,
+  promolecular Delta-g, and standalone IRI scalar cubes, ABACUS direct cube
+  presets for potential, partial-charge, and wavefunction-norm cubes,
+  charged-state `fukui-run` orchestration, aIGM/amIGM trajectory-average
+  weak-interaction generation, cube/grid domain extraction, basin cube VESTA
+  presets,
   IGM/mIGM/IGMH command-stream automation, IGMH/aIGM VESTA cube presets,
   surface extrema overlays for
   `surfanalysis.pdb`, surface-map/grid expansion, generic Multiwfn atom table
@@ -96,9 +97,9 @@ then delete the temporary branch.
 - Apply analysis-oriented cube presets for common ABACUS/Multiwfn products
   such as density, orbitals/wavefunctions, orbital density, spin density,
   Laplacian, K(r)/G(r) kinetic-density cubes, standalone RDG/promolecular
-  RDG, ABACUS direct potential, partial charge, wavefunction norm cubes,
-  ELF/LOL, IRI/RDG/NCI, ESP/MEP, IGM/IGMH/aIGM weak-interaction maps,
-  ALIE/LEA/LEAE, and vdW-potential mapped surfaces.
+  RDG, promolecular Delta-g, ABACUS direct potential, partial charge,
+  wavefunction norm cubes, ELF/LOL, IRI/RDG/NCI, ESP/MEP, IGM/IGMH/aIGM
+  weak-interaction maps, ALIE/LEA/LEAE, and vdW-potential mapped surfaces.
 - Overlay Multiwfn molecular-surface extrema from `surfanalysis.pdb` onto
   mapped-surface VESTA files as an extra atoms-only phase, with automatic
   minima/maxima selection for ALIE/LEA/LEAE presets.
@@ -123,10 +124,11 @@ then delete the temporary branch.
 - Run Multiwfn main function `5` real-space grid generation from a
   wavefunction file, export density, orbital/MO, Laplacian, K(r)/G(r)
   kinetic-energy-density cubes, ELF, LOL, ESP/MEP, ALIE, RDG/IRI-like,
-  promolecular RDG/sign(lambda2)rho, and related scalar cubes, export
-  multiple orbitals through isolated batch runs, optionally write VESTA files
-  through `cube-preset`, and map generated ESP/ALIE/vdW/sign(lambda2)rho
-  cubes as textures on a provided density/surface cube.
+  promolecular RDG/sign(lambda2)rho, promolecular Delta-g, and related
+  scalar cubes, export multiple orbitals through isolated batch runs,
+  optionally write VESTA files through `cube-preset`, and map generated
+  ESP/ALIE/vdW/sign(lambda2)rho cubes as textures on a provided
+  density/surface cube.
 - Run Multiwfn main function `300` subfunction `4` STM simulation in
   constant-current mode, export raw `STM.cub`, copy it to a stable
   `<stem>_stm.cub`, and write a VESTA isosurface through `cube-preset stm`.
@@ -294,6 +296,7 @@ multiwfn2vesta cube-preset lagrangian-ked 'G(r).cub' cube_products
 multiwfn2vesta cube-preset local-information-entropy infoentro.cub cube_products
 multiwfn2vesta cube-preset rdg-scalar RDG.cub cube_products
 multiwfn2vesta cube-preset promolecular-rdg RDGprodens.cub cube_products
+multiwfn2vesta cube-preset promolecular-delta-g Delta_g.cub cube_products
 multiwfn2vesta cube-preset iri-scalar IRI.cub cube_products
 multiwfn2vesta cube-preset potential pot_es.cube cube_products
 multiwfn2vesta cube-preset partial-charge pchg.cube cube_products
@@ -527,12 +530,16 @@ Common functions:
   `RDGprodens.cub`, presets `rdg-scalar` and `promolecular-rdg`.
   IRI/RDG mapped surfaces that need two coupled cubes should still use
   `iri-run` or explicit `cube-preset iri`.
+- `delta-g` / `deltag`: function `22`, raw `Delta_g.cub`, preset
+  `promolecular-delta-g`, single positive surface by default.  This is the
+  standalone promolecular approximation and is separate from IGM/IGMH
+  `dg_inter.cub` mapped surfaces.
 - `iri` / `interaction-region-indicator`: function `24`, raw `IRI.cub`,
   preset `iri-scalar`, single positive surface by default.  The default
   isosurface follows Multiwfn's main-function-5 `sur_value=1.0`.
-- `signlambda2rho`, `promolecular-signlambda2rho`, and `delta-g`: other
-  single scalar cubes; sign(lambda2)rho can become the texture in a mapped
-  `cube-preset iri` workflow.
+- `signlambda2rho` and `promolecular-signlambda2rho`: single scalar cubes;
+  sign(lambda2)rho can become the texture in a mapped `cube-preset iri`
+  workflow.
 
 Grid setup defaults to explicit point counts:
 

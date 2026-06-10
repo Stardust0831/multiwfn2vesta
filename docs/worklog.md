@@ -1,5 +1,33 @@
 # Worklog
 
+## 2026-06-10: Promolecular Delta-g cube display preset
+
+- Added `cube-preset promolecular-delta-g` for Multiwfn `Delta_g.cub` from
+  main-function-5 function `22` (`Delta-g (promolecular approximation)`).
+  It writes a single positive VESTA isosurface with default value `0.05`.
+- Updated `grid-run --function delta-g` and aliases `deltag`, `delta_g`,
+  `promolecular-deltag`, and `delta-g-promol` so generated `Delta_g.cub`
+  products route to the dedicated preset instead of generic `density`.
+- Rechecked local Multiwfn 2026.6.2 source evidence: `function.f90` lists
+  function `22` as promolecular Delta-g and calls `delta_g_promol`;
+  `0123dim.f90` exports `Delta_g.cub`; `define.f90` initializes the global
+  main-function-5 `sur_value=0.05`, and function `22` does not reset it.
+- Preserved the IGM/IGMH fragment route: `dg_inter.cub` plus `sl2r.cub`
+  still belongs to `cube-preset igmh`/`igm` and the automated
+  `igmh-run`/`igm-run`/`migm-run` workflows.
+- Added focused tests for preset listing, single-positive `ISURF` output,
+  manifest notes, alias resolution, and a fake Multiwfn
+  `grid-run --function delta-g` run that verifies the command stream,
+  `Delta_g.cub` handling, recipe, and VESTA manifest.
+- Validation passed: focused `py_compile`, 63 focused tests across
+  `tests.test_cube_preset` and `tests.test_multiwfn_grid`, the full 279-test
+  no-GUI regression, `bin/multiwfn2vesta cube-preset --list-presets`,
+  `bin/multiwfn2vesta grid-run --list-functions`,
+  `bin/multiwfn2vesta --help`, and `git diff --check`.
+- Read-only review found no source/test blocker: IGM/IGMH
+  `dg_inter.cub + sl2r.cub` routes and IRI/RDG texture routes are not
+  overwritten, and the new aliases do not collide with existing routes.
+
 ## 2026-06-10: README branch closeout after local information entropy preset
 
 - User requested another README refresh, branch-state audit, possible
