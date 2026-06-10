@@ -40,6 +40,13 @@
   matrix, and project/root work records.  This is documented as a cube
   post-processing foundation, not as automatic generation of charged-state
   wavefunctions.
+- Feature implementation commit was pushed to GitHub `main` at
+  `4123d00ae051a710c954ed3c3712aa8b012c4bc0`
+  (`Add cube arithmetic workflow`).  Post-push verification after
+  `git fetch --prune origin`: local `main`, `origin/main`, and `origin/HEAD`
+  all pointed at `4123d00`; `git ls-remote --heads origin` returned only
+  `refs/heads/main`; repository-local identity remained
+  `Stardust0831 <13862180016@163.com>`.
 
 ## 2026-06-10: Multiwfn real-space grid runner
 

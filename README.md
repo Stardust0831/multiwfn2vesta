@@ -14,19 +14,25 @@ point.
 - Maintained branch: `main`.
 - GitHub remote: `origin` points to `Github:Stardust0831/multiwfn2vesta.git`,
   with `origin/HEAD -> origin/main`.
-- Latest local/remote branch audit on 2026-06-10 before this README refresh:
-  local `main` tracks `origin/main`, `origin/HEAD` points to `origin/main`,
-  and `git ls-remote --heads origin` returns only `refs/heads/main`.
+- Latest local/remote branch audit on 2026-06-10 after the cube arithmetic
+  push: local `main`, `origin/main`, and `origin/HEAD` all point at
+  `4123d00ae051a710c954ed3c3712aa8b012c4bc0`, and
+  `git ls-remote --heads origin` returns only `refs/heads/main`.
 - Current cleanup result on 2026-06-10: there is no extra local or remote
   feature branch to merge back, so no merge action is required.  The
   apparently strange branch history is already represented as commits on
   `main`.
+- Latest maintained feature push on 2026-06-10: `cube-arith` was committed and
+  pushed as `4123d00ae051a710c954ed3c3712aa8b012c4bc0`
+  (`Add cube arithmetic workflow`).  It added compatible-cube arithmetic for
+  density differences, Fukui functions, and dual descriptors, with CLI/docs,
+  tests, smoke evidence, and the unit-convention guard for mixed Bohr/Angstrom
+  cube headers.
 - Previous maintained feature push on 2026-06-10: `grid-run` was committed as
   `3d192dc7ae9696dd433aae04e1a3bdb488b95482`
   (`Add Multiwfn grid runner`) and closed with documentation commit
   `9c9a43b402164044f32d94ad2c49f018d13e2b6f`
-  (`Record grid runner push`).  The current maintained increment is
-  `cube-arith`.
+  (`Record grid runner push`).
 - Previous experiment branches should be treated as short-lived workspaces:
   merge or fast-forward the useful commits into `main`, then remove the
   experiment branch once `origin/main` contains the maintained result.

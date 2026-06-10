@@ -6,11 +6,10 @@ Updated: 2026-06-10
 
 - Continue the long-running objective: research and turn valuable
   Multiwfn wavefunction analyses into maintained VESTA workflows, especially
-  routes that can start from ABACUS LCAO Molden files.  The current increment
-  is `cube-arith`, a cube arithmetic bottom layer for density-difference,
-  Fukui, and dual-descriptor visualization; next likely targets after this are
-  batch orbital export, higher-level charged-state cube templates, IGMH
-  fragment command streams, and more real ABACUS Molden smokes.
+  routes that can start from ABACUS LCAO Molden files.  The latest maintained
+  increment is `cube-arith`; next likely targets are batch orbital export,
+  higher-level charged-state cube templates, IGMH fragment command streams,
+  and more real ABACUS Molden smokes.
 - Turn the 2026-06-10 Multiwfn/ABACUS/VESTA research into the next
   maintainable features: IGMH command streams, real-system `abacus-molden`
   smoke coverage, Multiwfn atom scalar parsers, and more real IRI/RDG
@@ -54,6 +53,13 @@ Updated: 2026-06-10
   conventions by default.
 - Full no-GUI regression passed for the cube arithmetic increment: 153 tests
   across the project test suite.
+- Committed and pushed the cube arithmetic workflow to GitHub `main` as
+  `4123d00ae051a710c954ed3c3712aa8b012c4bc0`
+  (`Add cube arithmetic workflow`).  Post-push verification after
+  `git fetch --prune origin`: local `main`, `origin/main`, and `origin/HEAD`
+  all pointed at `4123d00`; `git ls-remote --heads origin` returned only
+  `refs/heads/main`; repository-local identity remained
+  `Stardust0831 <13862180016@163.com>`.
 - Added `multiwfn2vesta grid-run`, a maintained Multiwfn main-function-5
   (`study3dim`) real-space grid runner.  It discovers Multiwfn, writes the
   exact command stream, stdout/stderr logs, raw cube directory, processed
