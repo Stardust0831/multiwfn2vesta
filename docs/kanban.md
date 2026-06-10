@@ -1,6 +1,27 @@
 # Project Kanban
 
-Updated: 2026-06-10 19:54 CST
+Updated: 2026-06-10 20:06 CST
+
+## Current Request: 2026-06-10 README Refresh At Spin-Density Tip
+
+- [x] Record user request: update README, inspect the unusual-looking branch
+  state, consolidate back to one maintained branch if needed, and use the
+  `Stardust0831` git identity.
+- [x] Inspect local/remote branches and repository identity without touching
+  unrelated local probes: local `main`, `origin/main`, and `origin/HEAD` are
+  aligned at `1a8bbc63cc785ec07b4b177078909971b8ac127b`
+  (`Add spin-density cube arithmetic`); `git ls-remote --heads origin`
+  exposes only `refs/heads/main`; repository-local identity is
+  `Stardust0831 <13862180016@163.com>`.
+- [x] Decide whether a branch merge is needed: no merge is needed because
+  there is no extra local branch or remote feature branch to consolidate.
+- [x] Refresh README repository-status wording so the single-branch state,
+  SSH remote, commit identity, and branch-audit baseline are current.
+- [x] Sync root docs mirror, validate the docs-only refresh, and run a
+  read-only review: root docs mirror is clean; `git diff --check` and
+  `bin/multiwfn2vesta --help` passed; read-only subagent review found no
+  blocker.  Commit/push and post-push branch verification are reported in the
+  assistant response to avoid another self-referential hash loop.
 
 ## Current Request: 2026-06-10 README Refresh And Branch Convergence
 
@@ -57,8 +78,27 @@ Updated: 2026-06-10 19:54 CST
   full 271-test no-GUI regression, `bin/multiwfn2vesta cube-arith --help`,
   `bin/multiwfn2vesta --help`, `git diff --check`, and read-only subagent
   review all passed.
-- [ ] Commit and push on `main` with `Stardust0831` identity; report the
-  final hash and post-push branch check in the assistant response.
+- [x] Commit and push on `main` with `Stardust0831` identity as
+  `1a8bbc63cc785ec07b4b177078909971b8ac127b`; post-push verification showed
+  local `main`, `origin/main`, and `origin/HEAD` aligned at that commit with
+  only `refs/heads/main` exposed by the remote.  This follow-up records the
+  completed push before starting the next increment.
+
+## Current Continuation: 2026-06-10 Gradient-Norm Cube Display
+
+- [x] Record resumed objective: keep expanding maintained VESTA-ready
+  Multiwfn/ABACUS wavefunction and cube analyses, prioritizing products that
+  ABACUS can feed through Molden or direct cube routes.
+- [x] Recheck current state: `main` is aligned with `origin/main` at
+  `1a8bbc63cc785ec07b4b177078909971b8ac127b`; untracked local probes
+  `domain.cub` and `domain.pdb` remain uncommitted.
+- [ ] Inspect current `grid-run` and `cube-preset` coverage for real-space
+  function `2` gradient norm, then decide whether to add a maintained
+  gradient-norm display preset.
+- [ ] If useful, implement tests/docs for the new preset/function mapping
+  without changing existing density or signed presets.
+- [ ] Sync root docs, validate, review, then commit and push on `main` if
+  stable.
 
 ## Current Continuation: 2026-06-10 Grid Function Display Presets
 

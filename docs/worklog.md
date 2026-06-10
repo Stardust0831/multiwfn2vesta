@@ -1,5 +1,22 @@
 # Worklog
 
+## 2026-06-10: README branch audit at spin-density tip
+
+- Rechecked the branch state for the user's README/branch-convergence request
+  after the spin-density cube arithmetic increment.  Local `main`,
+  `origin/main`, and `origin/HEAD` all point at
+  `1a8bbc63cc785ec07b4b177078909971b8ac127b`; the SSH remote
+  `Github:Stardust0831/multiwfn2vesta.git` exposes only `refs/heads/main`.
+- Confirmed the repository-local commit identity remains
+  `Stardust0831 <13862180016@163.com>`.
+- Refreshed README repository-status wording so the current single-branch
+  state and branch-audit baseline reflect the latest pushed feature tip.
+- No branch merge was needed in this pass.  Local probe files `domain.cub` and
+  `domain.pdb` remain untracked and uncommitted.
+- Validation for the docs-only refresh passed: root docs mirror clean,
+  `git diff --check`, `bin/multiwfn2vesta --help`, and read-only subagent
+  review with no blockers.
+
 ## 2026-06-10: Spin-density cube arithmetic
 
 - Added a named `cube-arith --operation spin-density` shortcut for compatible
