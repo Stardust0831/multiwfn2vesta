@@ -26,6 +26,7 @@ class TestUnifiedCli(unittest.TestCase):
         self.assertIn("migm-run", text)
         self.assertIn("grid-run", text)
         self.assertIn("stm-run", text)
+        self.assertIn("domain-run", text)
         self.assertIn("abacus-mulliken-color", text)
         self.assertIn("multiwfn-atom-color", text)
         self.assertIn("aim-run", text)
@@ -174,6 +175,20 @@ class TestUnifiedCli(unittest.TestCase):
 
         self.assertEqual(code, 0)
         mocked.assert_called_once_with(["input.molden", "products", "--grid-points", "10", "10", "6"])
+
+    def test_dispatches_domain_run_command(self):
+        with patch("multiwfn2vesta.cli.multiwfn_domain.main", return_value=0) as mocked:
+            code = cli.main(["domain-run", "density.cub", "products", "--criterion", "<0.5"])
+
+        self.assertEqual(code, 0)
+        mocked.assert_called_once_with(["density.cub", "products", "--criterion", "<0.5"])
+
+    def test_dispatches_domain_run_alias(self):
+        with patch("multiwfn2vesta.cli.multiwfn_domain.main", return_value=0) as mocked:
+            code = cli.main(["cube-domain", "density.cub", "products"])
+
+        self.assertEqual(code, 0)
+        mocked.assert_called_once_with(["density.cub", "products"])
 
     def test_dispatches_abacus_mulliken_color_command(self):
         with patch("multiwfn2vesta.cli.abacus_mulliken.main", return_value=0) as mocked:

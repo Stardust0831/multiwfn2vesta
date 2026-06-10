@@ -39,6 +39,7 @@ multiwfn2vesta igm-run --help
 multiwfn2vesta migm-run --help
 multiwfn2vesta grid-run --help
 multiwfn2vesta stm-run --help
+multiwfn2vesta domain-run --help
 multiwfn2vesta multiwfn-atom-color --help
 multiwfn2vesta aim-run --help
 multiwfn2vesta aim-pdb --help
@@ -71,6 +72,9 @@ Aliases:
 - `multiwfn2vesta multiwfn-stm ...`,
   `multiwfn2vesta multiwfn-stm-run ...`, and
   `multiwfn2vesta ldos-run ...` are aliases for `stm-run`.
+- `multiwfn2vesta multiwfn-domain ...`,
+  `multiwfn2vesta multiwfn-domain-run ...`, and
+  `multiwfn2vesta cube-domain ...` are aliases for `domain-run`.
 - `multiwfn2vesta multiwfn-table-color ...` and
   `multiwfn2vesta atom-table-color ...` are aliases for
   `multiwfn-atom-color`.
@@ -136,6 +140,7 @@ multiwfn2vesta cube-preset --list-presets
 multiwfn2vesta cube-preset orbital orbital.cub cube_products
 multiwfn2vesta cube-preset rdg IRI2_surface.cub cube_products \
   --texture-cube IRI1_color.cub
+multiwfn2vesta cube-preset domain domain.cub cube_products
 multiwfn2vesta cube-preset igmh dg_inter.cub cube_products \
   --texture-cube sl2r.cub
 multiwfn2vesta cube-preset alie density.cub cube_products \
@@ -148,10 +153,11 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
 Use this when the file is a common ABACUS/Multiwfn cube product and the
 default style is enough to start.  Presets cover density-like scalar cubes,
 signed orbital/wavefunction/density-difference cubes, ELF/LOL, IRI/RDG/NCI
-mapped surfaces, IGM/IGMH/aIGM weak-interaction mapped surfaces, ESP/MEP
-mapped density surfaces, generic molecular surface maps, ALIE/LEA/LEAE
-density-surface maps, and vdW-potential density-surface maps.  All VESTA
-writing still goes through the maintained `cube-vesta` backend.
+mapped surfaces, binary domain isosurfaces, IGM/IGMH/aIGM weak-interaction
+mapped surfaces, ESP/MEP mapped density surfaces, generic molecular surface
+maps, ALIE/LEA/LEAE density-surface maps, and vdW-potential density-surface
+maps.  All VESTA writing still goes through the maintained `cube-vesta`
+backend.
 `igmh`/`igm-intra`/`aigm` defaults follow bundled Multiwfn IGM VMD templates,
 while `surface-map`/`molsurfmap` defaults follow the bundled Multiwfn
 `molsurfmap.vmd` template.
@@ -355,6 +361,21 @@ occupations, try `--prepare-fermi-temperature TEMP_K` to insert the Multiwfn
 The wavefunction must contain GTO/GTF information.  The maintained output is a
 3D `STM.cub` isosurface, not Multiwfn's GUI 2D STM plane plot.
 
+### Cube/Grid to Multiwfn Domain to VESTA
+
+```bash
+multiwfn2vesta domain-run density.cub domain_products \
+  --criterion '<0.5' \
+  --domain-index 1 \
+  --timeout 300
+```
+
+Use this for Multiwfn main function `200`, subfunction `14`, when an existing
+cube/grid file should be clustered into connected domains.  The runner
+exports raw `domain.cub`/`domain.pdb`, copies them to
+`<stem>_domain.cub`/`<stem>_domain.pdb`, and calls `cube-preset domain`
+unless `--no-vesta` is supplied.
+
 ### Wavefunction to Multiwfn AIM to VESTA
 
 ```bash
@@ -423,10 +444,11 @@ bin/multiwfn2vesta cube-preset --list-presets
 bin/multiwfn2vesta iri-run --help
 bin/multiwfn2vesta grid-run --help
 bin/multiwfn2vesta stm-run --help
+bin/multiwfn2vesta domain-run --help
 bin/multiwfn2vesta aim-run --help
 bin/multiwfn2vesta aim-igmh --help
 printf 'q\n' | bin/multiwfn2vesta
-PYTHONPATH=src python3 -m unittest tests.test_cli tests.test_cube_preset tests.test_executables tests.test_multiwfn_aim tests.test_multiwfn_iri tests.test_multiwfn_stm
+PYTHONPATH=src python3 -m unittest tests.test_cli tests.test_cube_preset tests.test_executables tests.test_multiwfn_aim tests.test_multiwfn_iri tests.test_multiwfn_stm tests.test_multiwfn_domain
 ```
 
 Real H2O Multiwfn noGUI smoke:

@@ -34,6 +34,7 @@ multiwfn2vesta igm-run --help
 multiwfn2vesta migm-run --help
 multiwfn2vesta grid-run --help
 multiwfn2vesta stm-run --help
+multiwfn2vesta domain-run --help
 multiwfn2vesta abacus-mulliken-color --help
 multiwfn2vesta multiwfn-atom-color --help
 multiwfn2vesta aim-run --help
@@ -71,6 +72,9 @@ multiwfn2vesta aim-igmh --help
 - `stm-run`: 从含 GTO/GTF 信息的 Multiwfn 可读波函数文件调用主菜单 `300`
   的 STM 功能，切到 constant-current 模式，导出 `STM.cub`，并可自动接
   `cube-preset stm` 写 `.vesta`
+- `domain-run`: 从已有 cube/grid 文件调用 Multiwfn 主菜单 `200` 的
+  domain analysis，按 `<0.5` 这类判据导出 `domain.cub`/`domain.pdb`，
+  并可自动接 `cube-preset domain` 写二值域等值面 `.vesta`
 - `abacus-mulliken-color`: 读取 ABACUS `out_mul 1` 生成的 `mulliken.txt`，
   按原子 Mulliken 电荷或磁矩给 VESTA `SITET` 原子颜色赋值
 - `multiwfn-atom-color`: 读取 Multiwfn 复制/导出的原子标量表，或手工整理
@@ -118,7 +122,7 @@ VESTA 查找顺序：
 3. 工作区内 VESTA：`tools/VESTA-win64/VESTA.exe` 和 Linux VESTA
 4. shell 的 `PATH`
 
-`aim-run`、`iri-run`、`igmh-run`、`grid-run` 和 `stm-run` 本身只启动 Multiwfn，不启动 VESTA；
+`aim-run`、`iri-run`、`igmh-run`、`grid-run`、`stm-run` 和 `domain-run` 本身只启动 Multiwfn，不启动 VESTA；
 VESTA 只在 `aim-igmh --render-three-views` 这种显式渲染命令里被调用。
 
 ## Cube 文件到 VESTA
@@ -202,6 +206,7 @@ multiwfn2vesta cube-preset elf ELF.cub cube_products
 multiwfn2vesta cube-preset rdg IRI2_surface.cub cube_products \
   --texture-cube IRI1_color.cub
 multiwfn2vesta cube-preset stm STM.cub cube_products
+multiwfn2vesta cube-preset domain domain.cub cube_products
 multiwfn2vesta cube-preset igmh dg_inter.cub cube_products \
   --texture-cube sl2r.cub
 multiwfn2vesta cube-preset esp density.cub cube_products \
@@ -223,6 +228,9 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
 - `elf` / `lol`：局域化函数等值面
 - `stm`：别名包括 `ldos`、`stm-ldos`、`tunneling-current`，用于
   Multiwfn 常电流 STM 导出的 `STM.cub`，默认等值面 `0.001`
+- `domain`：别名包括 `domain-cube`、`domain-analysis`、`binary-domain`，
+  用于 Multiwfn domain analysis 导出的二值 `domain.cub`，默认等值面
+  `0.5`
 - `iri`：别名 `rdg`、`nci`，需要 `--texture-cube`，默认
   `--tex-physical -0.04 0.04` 和 `--tex-range-source surface-band`
 - `igmh`：别名包括 `igm`、`igm-inter`、`igmh-inter`，用 `dg_inter.cub`
@@ -532,6 +540,69 @@ bin/multiwfn2vesta stm-run \
 该 smoke 返回 `0`，生成 `h2o_stm.cub`、`h2o_stm_cube.vesta` 和 recipe。
 `h2o_stm.cub` 有 600 个格点，数值范围是 `3.7332e-13` 到 `0.0151741`；
 默认 `cube-preset stm` 等值面 `0.001` 落在数据范围内。
+
+## Cube/Grid 到 Domain VESTA
+
+如果起点已经是 ABACUS、Multiwfn `grid-run` 或其他程序给出的 scalar
+cube，可以用 `domain-run` 调 Multiwfn 主菜单 `200`、子功能 `14`，按阈值
+把当前 grid data 聚成 domain：
+
+```bash
+multiwfn2vesta domain-run density.cub domain_products \
+  --criterion '<0.5' \
+  --domain-index 1 \
+  --timeout 300
+```
+
+默认命令流：
+
+```text
+200
+14
+3
+<criterion>
+-1
+10
+<domain_index>
+11
+<domain_index>
+0
+0
+q
+```
+
+其中 `3` 设置 `<0.5` 或 `>0.001` 这类 domain 判据，`-1` 表示基于输入
+cube 已在内存中的 grid data 聚类，`10` 导出 `domain.cub`，`11` 导出
+边界格点 `domain.pdb`。导出的 `domain.cub` 是二值 cube：选中 domain 内为
+`1`，外部为 `0`，所以 `cube-preset domain` 默认用 `0.5` 等值面。
+
+默认输出：
+
+- `multiwfn_domain_input.txt`
+- `multiwfn_domain.stdout.txt`
+- `multiwfn_domain.stderr.txt`
+- `multiwfn_domain_raw/domain.cub`
+- `multiwfn_domain_raw/domain.pdb`
+- `<stem>_domain.cub`
+- `<stem>_domain.pdb`
+- `multiwfn_domain_recipe.md`
+- `<stem>_domain_cube.vesta`
+- `<stem>_domain_cube_vesta_recipe.md`
+
+真实 H2O density-cube noGUI smoke：
+
+```bash
+bin/multiwfn2vesta domain-run \
+  /mnt/g/work/multiwfn2vesta/smoke/multiwfn_grid_run_smoke_20260610_h2o_density/products/h2o_density.cub \
+  /mnt/g/work/multiwfn2vesta/smoke/multiwfn_domain_run_smoke_20260610/h2o_density \
+  --criterion '<0.5' \
+  --domain-index 1 \
+  --stem h2o_density \
+  --timeout 300
+```
+
+该 smoke 返回 `0`，生成 `h2o_density_domain.cub`、
+`h2o_density_domain.pdb`、`h2o_density_domain_cube.vesta` 和 recipe。
 
 ## 波函数文件到 IRI/RDG VESTA
 

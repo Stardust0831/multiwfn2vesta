@@ -88,6 +88,11 @@ Local smoke evidence:
   `h2o_stm_cube.vesta` under
   `smoke/multiwfn_stm_run_smoke_20260610/h2o/`.  The cube range was
   `3.7332e-13` to `0.0151741`.
+- Multiwfn noGUI domain analysis smoke used `domain-run` on the H2O density
+  cube from the grid-run smoke, criterion `<0.5`, and domain index `1`,
+  exporting `h2o_density_domain.cub`, `h2o_density_domain.pdb`, and
+  `h2o_density_domain_cube.vesta` under
+  `smoke/multiwfn_domain_run_smoke_20260610/h2o_density/`.
 
 ## ABACUS Input Routes
 
@@ -137,7 +142,7 @@ occupations, and density derivatives from the wavefunction representation.
 | Analysis | Multiwfn input | ABACUS feasibility | Multiwfn output | VESTA representation | Project action |
 | --- | --- | --- | --- | --- | --- |
 | Basin analysis | Wavefunction or grid data | Molden route possible; accuracy depends on NAO2GTO fit | `basin.cub`, `basin0001.cub`, `basinsel.cub`, attractor PDB/PQR | Separate colored basin isosurfaces | Needs cube splitting/color strategy |
-| Domain extraction from cube/grid | Any current grid/cube data | Strong for ABACUS/Multiwfn cubes; mostly cube post-processing | `domain.cub`, `domain.pdb`, `domain.txt` | Binary domain isosurfaces and boundary-grid atoms-only layer | Good later candidate: start with cube input and threshold criteria before full basin/domain integration |
+| Domain extraction from cube/grid | Any current grid/cube data | Strong for ABACUS/Multiwfn cubes; mostly cube post-processing | `domain.cub`, `domain.pdb`, `domain.txt` | Binary domain isosurfaces and boundary-grid atoms-only layer | Implemented as `domain-run` for existing cube input plus `cube-preset domain` for binary `domain.cub` isosurfaces; `domain.pdb` is retained as boundary-grid evidence |
 | Excited-state hole/electron/CDD/transition density | Wavefunction plus excited-state information | Not a primary ABACUS ground-state route; LR-TDDFT outputs need separate study | `hole.cub`, `electron.cub`, `CDD.cub`, `transdens.cub` | Positive/negative isosurfaces | Defer until ABACUS excited-state interface is clear |
 | ETS-NOCV / AdNDP / EDA-related orbitals | Specialized wavefunctions/fragments | Weak for ABACUS periodic slabs; possible for molecule-like cases | `NOCV_*.cub`, `NOCVpair.cub`, `AdNDPorb*.cub` | Orbital-like positive/negative surfaces | Defer |
 | Fukui / dual descriptor | Multiple charge-state wavefunctions or orbital-weighted approximation | Possible for finite molecules or charged supercells; periodic charged systems risky | `userfunc.cub`, density-difference cubes | Positive/negative surfaces and atom scalar coloring | Cube arithmetic bottom layer implemented as `multiwfn2vesta cube-arith`; charged-state cube generation remains separate |
@@ -227,9 +232,10 @@ Known limitations:
    bias/Fermi presets.  The first implementation now automates Multiwfn main
    function `300`, subfunction `4`, exports `STM.cub`, and writes VESTA through
    `cube-preset stm`.
-8. Consider domain extraction from cube/grid data as a later post-processing
-   route: Multiwfn main function `200`, subfunction `14`, can export
-   `domain.cub` and `domain.pdb`.
+8. Extend the implemented domain extraction route with more real-system cube
+   smokes and optional boundary-grid overlay utilities.  The first maintained
+   path is `domain-run` on existing cube data, exporting `domain.cub` and
+   `domain.pdb`, then writing VESTA through `cube-preset domain`.
 9. Keep headless/no-focus VESTA rendering as a separate backend concern.
    Visualization products should remain useful as `.vesta` even when rendering
    is skipped.
@@ -248,6 +254,8 @@ Implemented or partly implemented:
 - `multiwfn2vesta igm-run`
 - `multiwfn2vesta migm-run`
 - `multiwfn2vesta grid-run`
+- `multiwfn2vesta stm-run`
+- `multiwfn2vesta domain-run`
 - `multiwfn2vesta aim-run`
 - `multiwfn2vesta aim-pdb`
 - `multiwfn2vesta aim-igmh`

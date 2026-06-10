@@ -87,12 +87,35 @@ class TestCubePreset(unittest.TestCase):
         self.assertIn("signed", text)
         self.assertIn("iri", text)
         self.assertIn("stm", text)
+        self.assertIn("domain", text)
         self.assertIn("igmh", text)
         self.assertIn("aigm", text)
         self.assertIn("esp", text)
         self.assertIn("alie", text)
         self.assertIn("surface-map", text)
         self.assertIn("vdw-map", text)
+
+    def test_domain_preset_uses_binary_isosurface_default(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            cube = self.write_tmp(root, "domain.cub", """domain one
+domain two
+    2    -1.000000    -2.000000     0.500000
+    2     0.500000     0.000000     0.000000
+    2     0.000000     0.500000     0.000000
+    2     0.000000     0.000000     0.500000
+    8     8.000000    -1.000000    -2.000000     0.500000
+    1     1.000000    -0.500000    -2.000000     0.500000
+ 0.0 0.0 0.0 1.0 1.0 1.0 0.0 0.0
+""")
+
+            result = run_preset("domain", cube, root / "products")
+
+            manifest = result.manifest_path.read_text(encoding="utf-8")
+
+            self.assertIn("canonical_preset: `domain`", manifest)
+            self.assertIn("effective_isosurface: `0.5`", manifest)
+            self.assertIn("Binary Multiwfn domain.cub isosurface", manifest)
 
     def test_orbital_alias_writes_signed_surfaces_and_preset_manifest(self):
         with tempfile.TemporaryDirectory() as tmp:

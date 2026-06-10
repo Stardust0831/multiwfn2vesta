@@ -1,5 +1,54 @@
 # Worklog
 
+## 2026-06-10: README branch refresh after domain runner
+
+- User asked to update README, noted that the branch state looked unusual,
+  suggested consolidating back to one branch if useful, and requested Git
+  identity `Stardust0831`.
+- Rechecked `/mnt/g/work/multiwfn2vesta/project` after
+  `git fetch --prune origin`: local `main`, `origin/main`, and `origin/HEAD`
+  are aligned at
+  `da7d4b759c663d7a1b53ec8cb71e5d96db28d68d`
+  (`Close README branch refresh board`).
+- Rechecked remote heads with `git ls-remote --heads origin`: the remote
+  exposes only `refs/heads/main`, also at `da7d4b7`, so no branch merge-back
+  is needed in this pass.
+- Confirmed repository-local identity is
+  `Stardust0831 <13862180016@163.com>`.
+- Refreshed README Repository Status while closing the in-progress
+  `domain-run` feature increment on `main`.
+
+## 2026-06-10: Multiwfn domain analysis runner from cube data
+
+- Continued the long-running Multiwfn/ABACUS/VESTA analysis-expansion goal by
+  turning the confirmed Multiwfn `200 -> 14` domain-analysis prompt stream
+  into a maintained cube post-processing runner.
+- Added `multiwfn2vesta domain-run`, backed by
+  `src/multiwfn2vesta/multiwfn_domain.py`.  The default stream enters
+  Multiwfn main function `200`, subfunction `14`, uses menu option `3` to set
+  a `<`/`>` domain criterion, sends `-1` to yield domains from current grid
+  data in memory, then exports `domain.cub` and `domain.pdb` with menu
+  options `10` and `11`.
+- Added `cube-preset domain` plus aliases `domain-cube`, `domain-analysis`,
+  and `binary-domain`; the preset uses a single isosurface at `0.5` because
+  Multiwfn writes binary `domain.cub` values, `1` inside the selected domain
+  and `0` outside.
+- Integrated `domain-run` into the unified CLI, aliases `multiwfn-domain`,
+  `multiwfn-domain-run`, and `cube-domain`, the interactive chooser, and
+  package console scripts.
+- Added focused tests in `tests/test_multiwfn_domain.py` plus CLI/preset
+  coverage.  Focused validation passed:
+  `PYTHONPATH=src python3 -m unittest tests.test_multiwfn_domain
+  tests.test_cube_preset tests.test_cli` (67 tests).  Full no-GUI regression
+  passed with `PYTHONPATH=src python3 -m unittest discover -s tests`
+  (230 tests).
+- Real H2O density-cube noGUI smoke passed under
+  `/mnt/g/work/multiwfn2vesta/smoke/multiwfn_domain_run_smoke_20260610/h2o_density/`:
+  `domain-run --criterion '<0.5' --domain-index 1 --stem h2o_density
+  --timeout 300` generated raw `domain.cub`/`domain.pdb`, processed
+  `h2o_density_domain.cub`/`h2o_density_domain.pdb`, and
+  `h2o_density_domain_cube.vesta`.
+
 ## 2026-06-10: README branch refresh at STM runner tip
 
 - User asked to update README again, noted that the branch state looked

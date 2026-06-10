@@ -18,6 +18,7 @@ from . import (
     multiwfn_atom_table,
     multiwfn_aim,
     multiwfn_grid,
+    multiwfn_domain,
     multiwfn_igmh,
     multiwfn_iri,
     multiwfn_stm,
@@ -40,6 +41,7 @@ COMMANDS: Dict[str, Tuple[str, str]] = {
     "migm-run": ("Run Multiwfn mIGM cube generation, then prepare VESTA", "multiwfn_igmh"),
     "grid-run": ("Run Multiwfn real-space function cube generation, then prepare VESTA", "multiwfn_grid"),
     "stm-run": ("Run Multiwfn constant-current STM/LDOS cube generation, then prepare VESTA", "multiwfn_stm"),
+    "domain-run": ("Run Multiwfn domain analysis from an existing cube, then prepare VESTA", "multiwfn_domain"),
     "abacus-mulliken-color": ("Color VESTA atoms from ABACUS mulliken.txt", "abacus_mulliken"),
     "multiwfn-atom-color": ("Color VESTA atoms from a Multiwfn atom scalar table", "multiwfn_atom_table"),
     "aim-run": ("Run Multiwfn AIM on a wavefunction file, then convert PDB to VESTA", "multiwfn_aim"),
@@ -77,6 +79,9 @@ ALIASES = {
     "multiwfn-stm": "stm-run",
     "multiwfn-stm-run": "stm-run",
     "ldos-run": "stm-run",
+    "multiwfn-domain": "domain-run",
+    "multiwfn-domain-run": "domain-run",
+    "cube-domain": "domain-run",
     "mulliken-color": "abacus-mulliken-color",
     "atom-color": "abacus-mulliken-color",
     "multiwfn-table-color": "multiwfn-atom-color",
@@ -118,6 +123,8 @@ Commands:
   migm-run   Run Multiwfn mIGM cube generation and prepare a VESTA mapped surface.
   grid-run   Run Multiwfn real-space function cube generation and prepare VESTA.
   stm-run    Run Multiwfn constant-current STM/LDOS cube generation and prepare VESTA.
+  domain-run
+             Run Multiwfn domain analysis from a cube and prepare VESTA.
   abacus-mulliken-color
              Color VESTA atoms from ABACUS mulliken.txt charge/magnetism.
   multiwfn-atom-color
@@ -149,6 +156,8 @@ Aliases:
              Aliases for grid-run.
   multiwfn-stm, multiwfn-stm-run, ldos-run
              Aliases for stm-run.
+  multiwfn-domain, multiwfn-domain-run, cube-domain
+             Aliases for domain-run.
   multiwfn-table-color, atom-table-color
              Aliases for multiwfn-atom-color.
   atom-color  Backward-compatible alias for abacus-mulliken-color.
@@ -168,6 +177,7 @@ Examples:
   multiwfn2vesta igm-run input.molden igm_products --fragment 1-48 --fragment 49-60
   multiwfn2vesta grid-run input.molden grid_products --function density
   multiwfn2vesta stm-run input.molden stm_products --grid-points 80 80 40
+  multiwfn2vesta domain-run density.cub domain_products --criterion '<0.5'
   multiwfn2vesta abacus-mulliken-color input.vesta mulliken.txt colored.vesta
   multiwfn2vesta multiwfn-atom-color input.vesta atom_values.csv colored.vesta --value-column charge
   multiwfn2vesta aim-run input.molden aim_out
@@ -733,6 +743,51 @@ def interactive_stm_run() -> int:
     return multiwfn_stm.main(argv)
 
 
+def interactive_domain_run() -> int:
+    print("\nCube -> Multiwfn domain analysis -> VESTA")
+    cube = _prompt("cube/grid file", required=True)
+    output_dir = _prompt("output directory", default=_default_output_dir(cube, "multiwfn_domain"))
+    argv: List[str] = [cube, output_dir]
+
+    multiwfn = _prompt("Multiwfn executable or directory (empty for auto-discovery)")
+    if multiwfn:
+        argv.extend(["--multiwfn", multiwfn])
+
+    nthreads = _prompt("Multiwfn -nt threads (empty for default)")
+    if nthreads:
+        argv.extend(["--nthreads", nthreads])
+
+    timeout = _prompt("timeout seconds (empty for no timeout)")
+    if timeout:
+        argv.extend(["--timeout", timeout])
+
+    stem = _prompt("output stem (empty for cube stem)")
+    if stem:
+        argv.extend(["--stem", stem])
+
+    criterion = _prompt("domain criterion", default="<0.5")
+    argv.extend(["--criterion", criterion])
+
+    domain_index = _prompt("domain index to export", default="1")
+    argv.extend(["--domain-index", domain_index])
+
+    if _yes_no("skip VESTA generation", default=False):
+        argv.append("--no-vesta")
+    else:
+        preset = _prompt("VESTA cube preset", default="domain")
+        argv.extend(["--preset", preset])
+        isosurface = _prompt("override isosurface value (empty for preset default)")
+        if isosurface:
+            argv.extend(["--isosurface", isosurface])
+        structure = _prompt("structure phase (empty for preset default)")
+        if structure:
+            argv.extend(["--structure", structure])
+        if _yes_no("copy cube files beside VESTA", default=True) is False:
+            argv.append("--no-copy-cubes")
+
+    return multiwfn_domain.main(argv)
+
+
 def interactive_abacus_mulliken_color() -> int:
     print("\nABACUS Mulliken -> VESTA atom colors")
     input_vesta = _prompt("input .vesta", required=True)
@@ -828,6 +883,7 @@ def interactive_main() -> int:
     print("13) surfanalysis.pdb extrema -> VESTA overlay")
     print("14) Wavefunction -> Multiwfn IGM/IGMH cubes -> VESTA")
     print("15) Wavefunction -> Multiwfn STM/LDOS cube -> VESTA")
+    print("16) Cube -> Multiwfn domain analysis -> VESTA")
     print("q) Quit")
     choice = _prompt("choice", default="3").lower()
     if choice in {"0", "discover", "where", "env"}:
@@ -857,6 +913,8 @@ def interactive_main() -> int:
         return interactive_igmh_run()
     if choice in {"15", "stm-run", "multiwfn-stm", "multiwfn-stm-run", "ldos-run"}:
         return interactive_stm_run()
+    if choice in {"16", "domain-run", "multiwfn-domain", "multiwfn-domain-run", "cube-domain"}:
+        return interactive_domain_run()
     if choice in {"8", "abacus-mulliken-color", "mulliken-color", "atom-color"}:
         return interactive_abacus_mulliken_color()
     if choice in {"9", "abacus-molden", "molden", "abacus-multiwfn-molden"}:
@@ -901,6 +959,8 @@ def run_command(command: str, args: Sequence[str]) -> int:
         return multiwfn_grid.main(args)
     if command == "stm-run":
         return multiwfn_stm.main(args)
+    if command == "domain-run":
+        return multiwfn_domain.main(args)
     if command == "abacus-mulliken-color":
         return abacus_mulliken.main(args)
     if command == "multiwfn-atom-color":

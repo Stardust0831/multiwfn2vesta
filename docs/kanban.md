@@ -1,6 +1,51 @@
 # Project Kanban
 
-Updated: 2026-06-10 15:34 CST
+Updated: 2026-06-10 16:25 CST
+
+## Current Request: 2026-06-10 README Refresh And Branch Consolidation After Domain Runner
+
+- [x] Record the user's request before editing: update README, inspect the
+  odd-looking branch state, consolidate back to one branch if needed, and keep
+  Git identity as `Stardust0831`.
+- [x] Fetch/prune and recheck local/remote branches before deciding whether a
+  merge-back is required: local `main`, `origin/main`, and `origin/HEAD` are
+  aligned at `da7d4b7`, and `git ls-remote --heads origin` exposes only
+  `refs/heads/main`.
+- [x] Confirm repository-local identity is
+  `Stardust0831 <13862180016@163.com>`.
+- [x] Review the in-progress `domain-run` README/docs/code diff so the README
+  reflects the actual maintained CLI surface.
+- [x] Sync `project/docs/` to the root docs mirror after documentation edits.
+- [x] Run validation: `py_compile`, 67 focused tests, 230-test full no-GUI
+  regression, top-level help, `domain-run --help`,
+  `cube-preset --list-presets`, docs mirror checksum checks, and
+  `git diff --check` passed.
+- [x] Run read-only review: no blocker; residual risks were limited to keeping
+  local `domain.cub`/`domain.pdb` unstaged and Multiwfn menu-version drift.
+- [ ] Commit/push on `main` if the branch state is stable.
+
+## Current Continuation: 2026-06-10 Domain Analysis Runner From Cube Data
+
+- [x] Continue the broad Multiwfn/ABACUS/VESTA analysis-expansion objective by
+  taking the confirmed domain-analysis candidate to a maintained runner.
+- [x] Re-read Multiwfn `otherfunc2.f90` evidence: main function `200`,
+  subfunction `14`, menu option `3` sets `<`/`>` domain criteria, `-1`
+  yields domains from current grid data in memory, `10` exports
+  `domain.cub`, and `11` exports `domain.pdb`.
+- [x] Implement `multiwfn2vesta domain-run` for existing cube/grid input,
+  plus `cube-preset domain`, unified CLI/interactive wiring, and console
+  script entries.
+- [x] Add focused tests for command streams, output copying, VESTA preset
+  chaining, missing-output errors, and CLI dispatch.
+- [x] Run real H2O density-cube noGUI smoke:
+  `smoke/multiwfn_domain_run_smoke_20260610/h2o_density/`, generating
+  `h2o_density_domain.cub`, `h2o_density_domain.pdb`, and
+  `h2o_density_domain_cube.vesta`.
+- [x] Update README, usage docs, research matrix, skill note, kanban, and
+  worklog for the new domain route.
+- [x] Sync project/root docs and run final validation.
+- [x] Run final read-only review: no blocker.
+- [ ] Commit and push on `main` if stable.
 
 ## Current Request: 2026-06-10 README Refresh at STM Runner Tip
 
@@ -21,16 +66,6 @@ Updated: 2026-06-10 15:34 CST
 - [x] Sync project/root docs, run documentation validation, review, then
   commit and push on `main`: `1493c80` (`Refresh README branch status at STM
   tip`).
-
-## Current Continuation: 2026-06-10 Domain Extraction Candidate After STM/LDOS
-
-- [x] Confirm the domain-analysis prompt stream is stable enough for a
-  dedicated runner: Multiwfn `200 -> 14`, using current grid data in memory,
-  supports `<0.5`-style criteria and exports `domain.cub`/`domain.pdb`.
-- [ ] Implement a maintained cube/domain runner and VESTA preset if the
-  prompt stream remains reproducible.
-- [ ] Add focused tests, docs, and a small noGUI smoke if implemented.
-- [ ] Sync project/root docs, review, commit, and push if stable.
 
 ## Current Continuation: 2026-06-10 STM/LDOS Runner
 

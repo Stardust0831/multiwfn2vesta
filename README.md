@@ -3,9 +3,9 @@
 `multiwfn2vesta` is a workspace-local Python interface for running selected
 Multiwfn workflows and preparing VESTA visualization files.  The currently
 maintained path covers ABACUS Molden handoff, cube-to-VESTA files, Multiwfn
-real-space grid, STM/LDOS, AIM, IRI/RDG, and IGM/IGMH command streams,
-atoms-only topology overlays, surface extrema overlays, and AIM+IGMH
-multi-phase VESTA figures.
+real-space grid, STM/LDOS, cube-domain extraction, AIM, IRI/RDG, and
+IGM/IGMH command streams, atoms-only topology overlays, surface extrema
+overlays, and AIM+IGMH multi-phase VESTA figures.
 
 The project is still experimental, but the CLI below is the maintained entry
 point.
@@ -16,11 +16,11 @@ point.
   GitHub remote.
 - GitHub remote: `origin` points to `Github:Stardust0831/multiwfn2vesta.git`,
   with `origin/HEAD -> origin/main`.
-- Branch audit on 2026-06-10 14:05 CST, after `git fetch --prune origin`,
+- Branch audit on 2026-06-10 16:30 CST, after `git fetch --prune origin`,
   found local `main`, `origin/main`, and `origin/HEAD` aligned at
-  `fdf85863ccb01c5783ce912163f1ec4a34060dd7`.
+  `da7d4b759c663d7a1b53ec8cb71e5d96db28d68d`.
 - `git ls-remote --heads origin` currently returns only
-  `refs/heads/main`, also at `fdf8586`; no merge-back was needed in this pass
+  `refs/heads/main`, also at `da7d4b7`; no merge-back was needed in this pass
   because there is no extra local or remote feature branch to consolidate.
 - The apparently unusual branch history is a normal linear `main` history
   containing feature commits and documentation closure commits, not active
@@ -29,8 +29,9 @@ point.
   IGMH/aIGM VESTA cube presets, surface extrema overlays for
   `surfanalysis.pdb`, surface-map/grid expansion, generic Multiwfn atom table
   coloring, batch orbital export, `cube-arith`, `grid-run`,
-  `grid-run --surface-cube` mapped-surface handoff, and `stm-run`
-  constant-current STM/LDOS cube export.
+  `grid-run --surface-cube` mapped-surface handoff, `stm-run`
+  constant-current STM/LDOS cube export, and `domain-run` cube/grid domain
+  extraction.
 - Future experiment branches should be short-lived: merge or fast-forward the
   useful commits into `main`, then remove the experiment branch once
   `origin/main` contains the maintained result.
@@ -102,6 +103,10 @@ then delete the temporary branch.
 - Run Multiwfn main function `300` subfunction `4` STM simulation in
   constant-current mode, export raw `STM.cub`, copy it to a stable
   `<stem>_stm.cub`, and write a VESTA isosurface through `cube-preset stm`.
+- Run Multiwfn main function `200` subfunction `14` domain analysis from an
+  existing cube/grid file, export raw `domain.cub` and `domain.pdb`, copy them
+  to stable `<stem>_domain.*` products, and write a binary domain isosurface
+  through `cube-preset domain`.
 - Color VESTA atom/site styles from ABACUS `mulliken.txt` charge or
   magnetism values produced by `out_mul 1`, or from generic Multiwfn-style
   atom scalar tables such as charges, Fukui-like atom values, or atom
@@ -166,6 +171,7 @@ multiwfn2vesta grid-run input.molden esp_map \
   --grid-mode cube \
   --grid-cube density.cub
 multiwfn2vesta stm-run input.molden stm_products --grid-points 80 80 40
+multiwfn2vesta domain-run density.cub domain_products --criterion '<0.5'
 ```
 
 Multiwfn discovery checks, in order:
@@ -241,6 +247,7 @@ multiwfn2vesta cube-preset elf ELF.cub cube_products
 multiwfn2vesta cube-preset rdg IRI2_surface.cub cube_products \
   --texture-cube IRI1_color.cub
 multiwfn2vesta cube-preset stm STM.cub cube_products
+multiwfn2vesta cube-preset domain domain.cub cube_products
 multiwfn2vesta cube-preset igmh dg_inter.cub cube_products \
   --texture-cube sl2r.cub
 multiwfn2vesta cube-preset esp density.cub cube_products \
@@ -256,10 +263,10 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
 Available presets can be listed with `multiwfn2vesta cube-preset
 --list-presets`.  Current presets cover density-like scalar cubes, signed
 orbital/wavefunction/density-difference cubes, ELF/LOL cubes, IRI/RDG/NCI
-mapped surfaces, STM/LDOS tunneling-current surfaces, IGM/IGMH/aIGM
-weak-interaction mapped surfaces, ESP/MEP mapped density surfaces, generic
-molecular surface maps, ALIE/LEA/LEAE density-surface maps, and
-vdW-potential density-surface maps.  The recipe
+mapped surfaces, STM/LDOS tunneling-current surfaces, binary domain
+isosurfaces, IGM/IGMH/aIGM weak-interaction mapped surfaces, ESP/MEP mapped
+density surfaces, generic molecular surface maps, ALIE/LEA/LEAE
+density-surface maps, and vdW-potential density-surface maps.  The recipe
 records the requested preset, canonical preset, effective
 isosurface, texture scaling source, and explicit texture percentage overrides
 when they are used.  The `surface-map`/`molsurfmap` defaults follow the
@@ -522,6 +529,47 @@ Validated H2O noGUI smoke:
 This run used grid `10 x 10 x 6`, produced `h2o_stm.cub`, measured data range
 `3.7332e-13` to `0.0151741`, and wrote `h2o_stm_cube.vesta` with default STM
 isosurface `0.001`, without launching VESTA.
+
+## Cube/Grid to Domain VESTA
+
+For existing scalar cube data from ABACUS, Multiwfn `grid-run`, or another
+compatible source, `domain-run` drives Multiwfn main function `200`,
+subfunction `14`, sets a domain criterion, yields domains from the current
+grid data in memory, exports `domain.cub` and `domain.pdb`, and then writes a
+VESTA isosurface through `cube-preset domain`:
+
+```bash
+multiwfn2vesta domain-run density.cub domain_products \
+  --criterion '<0.5' \
+  --domain-index 1 \
+  --timeout 300
+```
+
+Default outputs in `domain_products/`:
+
+- `multiwfn_domain_input.txt`: exact command stream sent to Multiwfn.
+- `multiwfn_domain.stdout.txt` and `multiwfn_domain.stderr.txt`.
+- `multiwfn_domain_raw/domain.cub`.
+- `multiwfn_domain_raw/domain.pdb`.
+- `<stem>_domain.cub`.
+- `<stem>_domain.pdb`.
+- `multiwfn_domain_recipe.md`.
+- `<stem>_domain_cube.vesta` and `<stem>_domain_cube_vesta_recipe.md`, unless
+  `--no-vesta` is used.
+
+`domain.cub` is binary: Multiwfn writes `1` inside the selected domain and
+`0` outside, so the maintained VESTA preset uses isosurface `0.5`.  The
+companion `domain.pdb` stores boundary grid points for the selected domain.
+
+Validated H2O density-cube noGUI smoke:
+
+```text
+/mnt/g/work/multiwfn2vesta/smoke/multiwfn_domain_run_smoke_20260610/h2o_density/
+```
+
+This run used criterion `<0.5`, exported domain index `1`, produced
+`h2o_density_domain.cub`, `h2o_density_domain.pdb`, and
+`h2o_density_domain_cube.vesta`, without launching VESTA.
 
 ## Wavefunction to IRI/RDG VESTA
 
@@ -832,7 +880,7 @@ views by VESTA CLI rotations, rather than writing persistent front/right/top
 
 ## Validation
 
-Current no-GUI regression passed as a 221-test suite after the STM/LDOS
+Current no-GUI regression passed as a 230-test suite after the domain-analysis
 runner increment:
 
 ```bash

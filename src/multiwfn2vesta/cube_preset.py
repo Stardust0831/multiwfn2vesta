@@ -77,6 +77,16 @@ PRESETS: Tuple[CubePreset, ...] = (
         notes="Use for Multiwfn STM.cub exported by the constant-current STM workflow; tune the isosurface for each bias/system.",
     ),
     CubePreset(
+        name="domain",
+        aliases=("domain-cube", "domain-analysis", "binary-domain"),
+        description="Binary Multiwfn domain.cub isosurface.",
+        surface_mode="single",
+        isosurface=0.5,
+        positive_rgb=(255, 170, 0),
+        surface_opacity=(160, 255),
+        notes="Use for Multiwfn domain.cub from main function 200/14; values are 1 inside the selected domain and 0 outside.",
+    ),
+    CubePreset(
         name="iri",
         aliases=("rdg", "nci", "weak-interaction"),
         description="IRI/RDG/NCI surface colored by sign(lambda2)rho-like texture cube.",
