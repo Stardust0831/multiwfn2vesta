@@ -54,6 +54,7 @@ multiwfn2vesta cube-preset rdg-scalar RDG.cub cube_products
 multiwfn2vesta cube-preset promolecular-rdg RDGprodens.cub cube_products
 multiwfn2vesta cube-preset promolecular-delta-g Delta_g.cub cube_products
 multiwfn2vesta cube-preset iri-scalar IRI.cub cube_products
+multiwfn2vesta cube-preset vdw-potential vdWpot.cub cube_products
 multiwfn2vesta cube-preset potential pot_es.cube cube_products
 multiwfn2vesta cube-preset partial-charge pchg.cube cube_products
 multiwfn2vesta cube-preset wavefunction-norm wfc_norm.cube cube_products
@@ -68,6 +69,8 @@ multiwfn2vesta cube-preset esp density.cub cube_products \
 multiwfn2vesta cube-preset alie density.cub cube_products \
   --texture-cube avglocion.cub \
   --surfanalysis-pdb surfanalysis.pdb
+multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
+  --texture-cube vdW.cub
 ```
 
 `cube-preset` is a thin layer over `cube-vesta`; it selects maintained
@@ -234,6 +237,12 @@ passes it back through `cube-preset`.
   `interaction-region-indicator`; single positive surface for standalone
   Multiwfn `IRI.cub`, default isosurface `1.0`.  Use `iri` with
   `--texture-cube` for IRI/RDG/NCI surfaces colored by sign(lambda2)rho.
+- `vdw-potential` aliases: `vdw`, `vdwpot`, `vdw-potential-cube`,
+  `van-der-waals-potential`; positive/negative surfaces for standalone
+  Multiwfn function `25` `vdWpot.cub`, default magnitude `1.0` kcal/mol.
+  Multiwfn evaluates this UFF vdW potential and sets main-function-5
+  `sur_value=1.0`.  Use `vdw-map` instead when the vdW potential cube should
+  color a density/surface cube.
 - `potential` aliases: `abacus-potential`, `out-pot`, `local-potential`,
   `pot-es`; signed direct potential cube isosurfaces, default magnitude
   `0.05`.  Use `esp` instead for density-surface potential coloring.

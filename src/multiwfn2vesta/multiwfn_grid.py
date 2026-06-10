@@ -90,7 +90,14 @@ GRID_FUNCTIONS: Tuple[GridFunction, ...] = (
         ("deltag", "delta_g", "promolecular-deltag", "delta-g-promol"),
     ),
     GridFunction("iri", 24, "IRI.cub", "iri-scalar", ("interaction-region-indicator",)),
-    GridFunction("vdw-potential", 25, "vdWpot.cub", "signed", ("vdw", "vdwpot"), mapped_preset="vdw-map"),
+    GridFunction(
+        "vdw-potential",
+        25,
+        "vdWpot.cub",
+        "vdw-potential",
+        ("vdw", "vdwpot", "van-der-waals-potential"),
+        mapped_preset="vdw-map",
+    ),
     GridFunction("orbital-density", 44, "orbdens.cub", "orbital-density", ("orbdens", "mo-density"), True),
 )
 

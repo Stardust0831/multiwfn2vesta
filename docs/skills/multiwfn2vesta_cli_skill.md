@@ -163,6 +163,7 @@ multiwfn2vesta cube-preset rdg-scalar RDG.cub cube_products
 multiwfn2vesta cube-preset promolecular-rdg RDGprodens.cub cube_products
 multiwfn2vesta cube-preset promolecular-delta-g Delta_g.cub cube_products
 multiwfn2vesta cube-preset iri-scalar IRI.cub cube_products
+multiwfn2vesta cube-preset vdw-potential vdWpot.cub cube_products
 multiwfn2vesta cube-preset potential pot_es.cube cube_products
 multiwfn2vesta cube-preset partial-charge pchg.cube cube_products
 multiwfn2vesta cube-preset wavefunction-norm wfc_norm.cube cube_products
@@ -184,10 +185,11 @@ Use this when the file is a common ABACUS/Multiwfn cube product and the
 default style is enough to start.  Presets cover density-like scalar cubes,
 signed orbital/wavefunction/density-difference cubes, Multiwfn
 orbital-density, spin-density, Laplacian, K(r), G(r), standalone RDG, and
-promolecular RDG cubes, direct ABACUS potential cubes, ABACUS
-partial-charge/state-density cubes, nonnegative ABACUS wavefunction-norm
-cubes, ELF/LOL, IRI/RDG/NCI mapped surfaces, binary domain isosurfaces,
-binary basin isosurfaces, signed basin-type maps,
+promolecular RDG cubes, standalone IRI and vdW potential cubes, direct
+ABACUS potential cubes, ABACUS partial-charge/state-density cubes,
+nonnegative ABACUS wavefunction-norm cubes, ELF/LOL, IRI/RDG/NCI mapped
+surfaces, binary domain isosurfaces, binary basin isosurfaces, signed
+basin-type maps,
 IGM/IGMH/aIGM weak-interaction mapped surfaces, ESP/MEP mapped density
 surfaces, generic molecular surface maps, ALIE/LEA/LEAE density-surface maps,
 and vdW-potential density-surface maps.
@@ -411,17 +413,19 @@ multiwfn2vesta grid-run --list-functions
 Common functions include `density`, `gradient`, `orbital --orbital h`,
 `orbital-density`, `spin-density`, `laplacian`, `hamiltonian-ked`,
 `lagrangian-ked`, `local-information-entropy`, `elf`, `lol`, `esp`, `alie`,
-`rdg`, `promolecular-rdg`, `delta-g`, `iri`, `signlambda2rho`, and
-`promolecular-signlambda2rho`.  The scalar display defaults are
+`rdg`, `promolecular-rdg`, `delta-g`, `iri`, `signlambda2rho`,
+`promolecular-signlambda2rho`, and `vdw-potential`.  The scalar display defaults are
 function-specific where possible: `gradient.cub` uses `gradient-norm`,
 `spindensity.cub` uses `cube-preset spin-density`, `orbdens.cub` uses
 `orbital-density`, `laplacian.cub` uses `laplacian`, `K(r).cub` uses
 `hamiltonian-ked`, `G(r).cub` uses `lagrangian-ked`, `infoentro.cub` uses
 `local-information-entropy`, `RDG.cub` uses `rdg-scalar`, `RDGprodens.cub`
-uses `promolecular-rdg`, `Delta_g.cub` uses `promolecular-delta-g`, and
-`IRI.cub` uses `iri-scalar`.  The existing `cube-preset iri` name remains
-the two-cube surface+texture route, and IGM/IGMH `dg_inter.cub` still uses
-the `igmh`/`igm` texture route.
+uses `promolecular-rdg`, `Delta_g.cub` uses `promolecular-delta-g`,
+`IRI.cub` uses `iri-scalar`, and `vdWpot.cub` uses `vdw-potential` with
+`+/-1.0` kcal/mol signed surfaces.  The existing `cube-preset iri` name
+remains the two-cube surface+texture route, `vdw-map` remains the
+density/surface plus vdW-potential texture route, and IGM/IGMH
+`dg_inter.cub` still uses the `igmh`/`igm` texture route.
 
 Batch frontier orbital export:
 

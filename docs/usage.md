@@ -58,7 +58,7 @@ multiwfn2vesta aim-igmh --help
 - `cube-preset`: 在 `cube-vesta` 后端上套用常见分析默认值，例如 density、
   orbital/signed、spin density、Laplacian、K(r)/G(r)、ABACUS direct
   potential、partial charge、wavefunction norm、ELF/LOL、IRI/RDG/NCI、
-  IGM/IGMH/aIGM、ESP/MEP、ALIE/LEA/LEAE、vdW map
+  IGM/IGMH/aIGM、ESP/MEP、ALIE/LEA/LEAE、standalone vdW potential、vdW map
 - `surface-extrema`: 把 Multiwfn `surfanalysis.pdb` 的分子表面极值点作为
   atoms-only phase 叠加到已有 `.vesta` 文件中
 - `cube-arith`: 对兼容 cube 做线性组合，用于 density difference、
@@ -225,6 +225,7 @@ multiwfn2vesta cube-preset rdg-scalar RDG.cub cube_products
 multiwfn2vesta cube-preset promolecular-rdg RDGprodens.cub cube_products
 multiwfn2vesta cube-preset promolecular-delta-g Delta_g.cub cube_products
 multiwfn2vesta cube-preset iri-scalar IRI.cub cube_products
+multiwfn2vesta cube-preset vdw-potential vdWpot.cub cube_products
 multiwfn2vesta cube-preset potential pot_es.cube cube_products
 multiwfn2vesta cube-preset partial-charge pchg.cube cube_products
 multiwfn2vesta cube-preset wavefunction-norm wfc_norm.cube cube_products
@@ -285,6 +286,12 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
 - `iri-scalar`：单正值等值面，别名包括 `iri-cube`、`standalone-iri`，
   用于单 cube 的 Multiwfn `IRI.cub`，默认等值面 `1.0`；双 cube 的
   IRI/RDG/NCI 染色图仍用 `cube-preset iri`
+- `vdw-potential`：正/负等值面，别名包括 `vdw`、`vdwpot`、
+  `vdw-potential-cube`、`van-der-waals-potential`，用于 Multiwfn 函数
+  `25` 的 `vdWpot.cub`；Multiwfn 源码中此函数按 UFF 参数计算 vdW
+  potential，单位 kcal/mol，并把 main-function-5 `sur_value` 设为
+  `1.0`；如果是把 vdW potential 染色到 density/surface cube 上，用
+  `vdw-map`
 - `potential`：正/负等值面，别名包括 `abacus-potential`、`out-pot`、
   `pot-es`，用于 ABACUS `out_pot` 直接势场 cube；如果是密度表面按电势染色，
   用 `esp`
@@ -517,11 +524,13 @@ multiwfn2vesta grid-run --list-functions
 - `local-information-entropy` / `information-entropy`：函数 `11`，原始
   输出 `infoentro.cub`，默认接 `cube-preset local-information-entropy`，
   按正/负等值面显示，默认幅值 `0.05`
-- `esp`、`nuclear-esp`、`signlambda2rho`、`vdw-potential`：默认按 signed
-  scalar 处理；配合
+- `esp`、`nuclear-esp`、`signlambda2rho`：默认按 signed scalar 处理；配合
   `--surface-cube` 时，ESP/nuclear ESP 默认走 `cube-preset esp`，
-  sign(lambda2)rho 默认走 `cube-preset iri`，vdW potential 默认走
-  `cube-preset vdw-map`
+  sign(lambda2)rho 默认走 `cube-preset iri`
+- `vdw-potential` / `vdw`：函数 `25`，原始输出 `vdWpot.cub`，默认接
+  `cube-preset vdw-potential`，按正/负 `1.0` kcal/mol 等值面显示；配合
+  `--surface-cube` 时默认走 `cube-preset vdw-map`，把生成的 vdW potential
+  cube 作为已有 density/surface cube 的 texture
 - `alie` / `avglocion`：函数 `18`，原始输出 `avglocion.cub`；常规 ALIE
   表面图可以用 `--surface-cube density.cub` 自动把生成的 ALIE cube 作为
   `cube-preset alie` 的 texture

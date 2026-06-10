@@ -147,6 +147,22 @@ PRESETS: Tuple[CubePreset, ...] = (
         ),
     ),
     CubePreset(
+        name="vdw-potential",
+        aliases=("vdw", "vdwpot", "vdw-potential-cube", "van-der-waals-potential"),
+        description="Positive/negative isosurfaces for standalone van der Waals potential cubes.",
+        surface_mode="signed",
+        isosurface=1.0,
+        positive_rgb=(255, 120, 60),
+        negative_rgb=(70, 150, 255),
+        surface_opacity=(130, 255),
+        notes=(
+            "Use for Multiwfn vdWpot.cub from real-space function 25. "
+            "Multiwfn evaluates the UFF van der Waals potential in kcal/mol and sets "
+            "main-function-5 sur_value=1.0 for this function. "
+            "For vdW potential mapped on a density/surface cube, use preset `vdw-map`."
+        ),
+    ),
+    CubePreset(
         name="partial-charge",
         aliases=("pchg", "abacus-pchg", "out-pchg", "band-density", "state-density", "partial-density"),
         description="Single positive isosurface for ABACUS partial charge/state density cubes.",

@@ -65,6 +65,18 @@ delta g comment two
 """
 
 
+VDW_POTENTIAL_CUBE = """vdw potential comment one
+vdw potential comment two
+    2    -1.000000    -2.000000     0.500000
+    2     0.500000     0.000000     0.000000
+    2     0.000000     0.500000     0.000000
+    2     0.000000     0.000000     0.500000
+    8     8.000000    -1.000000    -2.000000     0.500000
+    1     1.000000    -0.500000    -2.000000     0.500000
+ -2.00 -1.20 -0.40 0.00 0.40 1.00 1.50 2.00
+"""
+
+
 class TestMultiwfnGridRunner(unittest.TestCase):
     def make_candidate(self, root):
         fake_exe = Path(root) / "Multiwfn_noGUI"
@@ -88,6 +100,7 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertIn("preset=promolecular-rdg", text)
         self.assertIn("preset=promolecular-delta-g", text)
         self.assertIn("preset=iri-scalar", text)
+        self.assertIn("preset=vdw-potential", text)
         self.assertIn("promolecular-rdg", text)
         self.assertIn("alie", text)
         self.assertIn("mapped preset with --surface-cube: esp", text)
@@ -116,6 +129,9 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertEqual(resolve_grid_function("delta-g-promol").preset, "promolecular-delta-g")
         self.assertEqual(resolve_grid_function("iri").preset, "iri-scalar")
         self.assertEqual(resolve_grid_function("interaction-region-indicator").output_filename, "IRI.cub")
+        self.assertEqual(resolve_grid_function("vdw").preset, "vdw-potential")
+        self.assertEqual(resolve_grid_function("vdwpot").output_filename, "vdWpot.cub")
+        self.assertEqual(resolve_grid_function("van-der-waals-potential").index, 25)
         self.assertEqual(resolve_grid_function(None, 18).name, "alie")
         self.assertEqual(resolve_grid_function("sl2r-pro").index, 16)
         custom = resolve_grid_function(None, 99)
@@ -343,6 +359,84 @@ class TestMultiwfnGridRunner(unittest.TestCase):
             self.assertIn("canonical_preset: `promolecular-delta-g`", manifest)
             self.assertIn("effective_isosurface: `0.05`", manifest)
             self.assertIn("dg_inter.cub", manifest)
+
+    def test_run_multiwfn_grid_vdw_uses_standalone_vdw_potential_preset(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            wavefunction = root / "h2o.fch"
+            wavefunction.write_text("wavefunction", encoding="utf-8")
+            candidate = self.make_candidate(root)
+
+            def fake_run(command, **kwargs):
+                cwd = Path(kwargs["cwd"])
+                (cwd / "vdWpot.cub").write_text(VDW_POTENTIAL_CUBE, encoding="utf-8")
+                return subprocess.CompletedProcess(command, 0, stdout="ok", stderr="")
+
+            with patch("multiwfn2vesta.multiwfn_grid.find_multiwfn", return_value=candidate):
+                with patch("multiwfn2vesta.multiwfn_grid.subprocess.run", side_effect=fake_run):
+                    result = run_multiwfn_grid(
+                        wavefunction,
+                        root / "products",
+                        function_name="vdw",
+                        stem="case",
+                        grid_points=(10, 11, 12),
+                    )
+
+            self.assertTrue(result.success)
+            self.assertEqual(result.command_file.read_text(encoding="utf-8"), "5\n25\n4\n10,11,12\n2\n0\nq\n")
+            self.assertEqual(result.raw_cube.name, "vdWpot.cub")
+            self.assertEqual(result.cube.name, "case_vdw-potential.cub")
+            self.assertIsNotNone(result.vesta_result)
+            self.assertEqual(
+                result.vesta_result.vesta_path.name,
+                "case_vdw-potential_vdw-potential_cube.vesta",
+            )
+            recipe = result.recipe_path.read_text(encoding="utf-8")
+            self.assertIn("function_name: `vdw-potential`", recipe)
+            self.assertIn("function_index: `25`", recipe)
+            self.assertIn("auto_vesta_preset: `vdw-potential`", recipe)
+            manifest = result.vesta_result.manifest_path.read_text(encoding="utf-8")
+            self.assertIn("canonical_preset: `vdw-potential`", manifest)
+            self.assertIn("effective_isosurface: `1.0`", manifest)
+            self.assertIn("kcal/mol", manifest)
+
+    def test_run_multiwfn_grid_vdw_surface_cube_keeps_vdw_map_route(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            wavefunction = root / "h2o.fch"
+            wavefunction.write_text("wavefunction", encoding="utf-8")
+            surface_cube = root / "density_surface.cub"
+            surface_cube.write_text(DENSITY_CUBE, encoding="utf-8")
+            candidate = self.make_candidate(root)
+
+            def fake_run(command, **kwargs):
+                cwd = Path(kwargs["cwd"])
+                (cwd / "vdWpot.cub").write_text(VDW_POTENTIAL_CUBE, encoding="utf-8")
+                return subprocess.CompletedProcess(command, 0, stdout="ok", stderr="")
+
+            with patch("multiwfn2vesta.multiwfn_grid.find_multiwfn", return_value=candidate):
+                with patch("multiwfn2vesta.multiwfn_grid.subprocess.run", side_effect=fake_run):
+                    result = run_multiwfn_grid(
+                        wavefunction,
+                        root / "products",
+                        function_name="vdw-potential",
+                        surface_cube=surface_cube,
+                        stem="case",
+                        grid_points=(8, 8, 8),
+                    )
+
+            self.assertTrue(result.success)
+            self.assertEqual(result.surface_cube, surface_cube.resolve())
+            self.assertEqual(result.mapped_preset, "vdw-map")
+            self.assertEqual(result.cube.name, "case_vdw-potential.cub")
+            self.assertIsNotNone(result.vesta_result)
+            self.assertEqual(result.vesta_result.vesta_path.name, "case_vdw-potential_vdw-map_cube.vesta")
+            self.assertIn("IMPORT_TEXTURE", result.vesta_result.vesta_path.read_text(encoding="utf-8"))
+            manifest = result.vesta_result.manifest_path.read_text(encoding="utf-8")
+            self.assertIn("canonical_preset: `vdw-map`", manifest)
+            self.assertIn("texture_cube:", manifest)
+            recipe = result.recipe_path.read_text(encoding="utf-8")
+            self.assertIn("mapped_vesta_preset: `vdw-map`", recipe)
 
     def test_run_multiwfn_grid_can_map_generated_texture_on_surface_cube(self):
         with tempfile.TemporaryDirectory() as tmp:

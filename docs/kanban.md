@@ -1,6 +1,43 @@
 # Project Kanban
 
-Updated: 2026-06-10 21:13 CST
+Updated: 2026-06-10 21:38 CST
+
+## Active Implementation: 2026-06-10 Standalone vdW Potential Cube Preset
+
+- [x] Record continuation request: keep enriching useful Multiwfn
+  wavefunction/grid analyses that can be visualized in VESTA, especially
+  workflows that ABACUS can feed through Molden or direct cube routes.
+- [x] Record current user request: refresh README, audit the unusual-looking
+  branch state, converge to one maintained branch if needed, and keep git
+  identity as `Stardust0831 <13862180016@163.com>`.
+- [x] Recheck current state: local `main` is aligned with `origin/main` at
+  `fae7ac12d9a6d1fadbeda7a60c484752a643c23f`; untracked local probes
+  `domain.cub` and `domain.pdb` remain uncommitted.
+- [x] Recheck branch and identity state: local `main`, `origin/main`, and
+  `origin/HEAD` are aligned at
+  `fae7ac12d9a6d1fadbeda7a60c484752a643c23f`; `origin` points to
+  `Github:Stardust0831/multiwfn2vesta.git`; remote-visible branch state is
+  one maintained `main`; repository-local identity is
+  `Stardust0831 <13862180016@163.com>`.
+- [x] Select this bounded increment: Multiwfn `function.f90` lists function
+  `25` as van der Waals potential, `0123dim.f90` exports `vdWpot.cub`, and
+  the export block sets `sur_value=1D0`; the project currently routes
+  standalone `grid-run --function vdw-potential` through generic `signed`
+  while only the `--surface-cube` route uses `vdw-map`.
+- [x] Add a dedicated standalone `cube-preset vdw-potential` and map
+  `grid-run --function vdw-potential` to it without changing `vdw-map`.
+- [x] Update focused tests, README, usage docs, skills, research matrix, and
+  worklog.
+- [x] Sync root docs mirror, validate, and review: focused `py_compile`, 66
+  focused tests across `tests.test_cube_preset tests.test_multiwfn_grid`,
+  full 282-test no-GUI regression, `cube-preset --list-presets`,
+  `grid-run --list-functions`, `bin/multiwfn2vesta --help`,
+  root-docs checksum mirror, and `git diff --check` passed; read-only review
+  found no High/Medium blocker and confirmed standalone `vdw-potential` plus
+  mapped `vdw-map` routes stay separate.
+- [x] Prepare explicit staging, commit, push, and post-push verification with
+  `Stardust0831` identity.  Final commit hash and branch-alignment check are
+  reported in the assistant response to avoid a self-referential docs loop.
 
 ## Active Implementation: 2026-06-10 Promolecular Delta-g Cube Preset
 

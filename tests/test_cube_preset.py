@@ -48,6 +48,18 @@ texture two
 """
 
 
+VDW_POTENTIAL_CUBE = """vdw potential one
+vdw potential two
+    2    -1.000000    -2.000000     0.500000
+    2     0.500000     0.000000     0.000000
+    2     0.000000     0.500000     0.000000
+    2     0.000000     0.000000     0.500000
+    8     8.000000    -1.000000    -2.000000     0.500000
+    1     1.000000    -0.500000    -2.000000     0.500000
+ -2.0 -1.2 -0.8 0.0 0.5 1.0 1.5 2.0
+"""
+
+
 ALIE_TEXTURE_CUBE = """alie one
 alie two
     2    -1.000000    -2.000000     0.500000
@@ -92,6 +104,7 @@ class TestCubePreset(unittest.TestCase):
         self.assertIn("hamiltonian-ked", text)
         self.assertIn("lagrangian-ked", text)
         self.assertIn("potential", text)
+        self.assertIn("vdw-potential", text)
         self.assertIn("partial-charge", text)
         self.assertIn("wavefunction-norm", text)
         self.assertIn("local-information-entropy", text)
@@ -421,6 +434,28 @@ basin type two
             self.assertIn("requested_preset: `out-pot`", manifest)
             self.assertIn("effective_surface_mode: `signed`", manifest)
             self.assertIn("direct ABACUS out_pot cubes", manifest)
+
+    def test_vdw_potential_preset_writes_signed_surfaces(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            cube = self.write_tmp(root, "vdWpot.cub", VDW_POTENTIAL_CUBE)
+
+            result = run_preset("vdwpot", cube, root / "products")
+
+            text = result.vesta_path.read_text(encoding="utf-8")
+            manifest = result.manifest_path.read_text(encoding="utf-8")
+
+            self.assertRegex(
+                text,
+                r"ISURF\n  1   1\s+1(?:\.0+)?\s+255\s+120\s+60\s+130\s+255\n  1   1\s+-1(?:\.0+)?\s+70\s+150\s+255\s+130\s+255",
+            )
+            self.assertNotIn("IMPORT_TEXTURE", text)
+            self.assertIn("canonical_preset: `vdw-potential`", manifest)
+            self.assertIn("requested_preset: `vdwpot`", manifest)
+            self.assertIn("vdWpot.cub", manifest)
+            self.assertIn("kcal/mol", manifest)
+            self.assertIn("sur_value=1.0", manifest)
+            self.assertIn("use preset `vdw-map`", manifest)
 
     def test_abacus_partial_charge_preset_writes_single_positive_surface(self):
         with tempfile.TemporaryDirectory() as tmp:

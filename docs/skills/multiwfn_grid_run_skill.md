@@ -77,8 +77,11 @@ multiwfn2vesta grid-run --list-functions
   `IRI.cub`, preset `iri-scalar` with a single positive isosurface.  Use the
   separate two-cube `cube-preset iri` route when coloring IRI/RDG/NCI surfaces
   by sign(lambda2)rho.
-- `vdw-potential`: function `25`, raw `vdWpot.cub`, preset `signed`;
-  mapped preset `vdw-map` with `--surface-cube`.
+- `vdw-potential`, aliases `vdw`, `vdwpot`,
+  `van-der-waals-potential`: function `25`, raw `vdWpot.cub`, preset
+  `vdw-potential` with signed `+/-1.0` kcal/mol isosurfaces.  Multiwfn
+  evaluates the UFF vdW potential and sets main-function-5 `sur_value=1.0`.
+  Mapped preset `vdw-map` is used with `--surface-cube`.
 - `orbital-density`: function `44`, raw `orbdens.cub`, preset
   `orbital-density`, requires `--orbital` for one orbital or `--orbitals` for
   batch export.
@@ -206,6 +209,7 @@ multiwfn2vesta grid-run input.fch products --function esp --surface-cube density
 multiwfn2vesta grid-run input.fch products --function hamiltonian-ked --no-vesta
 multiwfn2vesta grid-run input.fch products --function alie --no-vesta
 multiwfn2vesta grid-run input.fch products --function delta-g
+multiwfn2vesta grid-run input.fch products --function vdw-potential
 ```
 
 For two-cube mapped surfaces, use `--surface-cube` when the new grid cube

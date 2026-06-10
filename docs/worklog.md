@@ -1,5 +1,47 @@
 # Worklog
 
+## 2026-06-10: Standalone vdW potential cube display preset
+
+- User requested a README refresh, branch-state audit, possible one-branch
+  closeout, and continued use of the `Stardust0831` git identity while the
+  active vdW potential increment was in progress.
+- Rechecked repository state before the closeout: local `main`,
+  `origin/main`, and `origin/HEAD` were aligned at
+  `fae7ac12d9a6d1fadbeda7a60c484752a643c23f` (`Add promolecular delta-g
+  cube preset`); the GitHub SSH remote is
+  `Github:Stardust0831/multiwfn2vesta.git`; repository-local identity is
+  `Stardust0831 <13862180016@163.com>`; no extra local or remote feature
+  branch needed merging.
+- Added `cube-preset vdw-potential` for standalone Multiwfn `vdWpot.cub`
+  from main-function-5 function `25`.  It writes signed VESTA isosurfaces at
+  `+/-1.0` kcal/mol.
+- Updated `grid-run --function vdw-potential` and aliases `vdw`, `vdwpot`,
+  and `van-der-waals-potential` so generated `vdWpot.cub` products route to
+  `cube-preset vdw-potential` instead of generic `signed`.
+- Preserved the mapped route: when `--surface-cube` is supplied,
+  `grid-run --function vdw-potential` still uses `cube-preset vdw-map` so the
+  generated vdW potential cube colors an existing density/surface cube.
+- Rechecked local Multiwfn 2026.6.2 source evidence: `function.f90` lists
+  function `25` as van der Waals potential and calls `vdwpotfunc`;
+  `vdwpotfunc` source comments identify the function as UFF vdW potential in
+  kcal/mol; `0123dim.f90` exports `vdWpot.cub` and sets `sur_value=1.0`.
+- Added focused tests for preset listing, `vdwpot` alias resolution, signed
+  `ISURF` output, manifest notes, function alias resolution, a fake Multiwfn
+  standalone `grid-run --function vdw` run, and a fake `--surface-cube` run
+  confirming `vdw-map` remains the mapped preset.
+- Updated README, usage docs, CLI/cube/grid/ABACUS skills, and the analysis
+  matrix so standalone `vdw-potential` and mapped `vdw-map` are documented as
+  separate routes.
+- Validation passed before commit/push: focused `py_compile`, 66 focused
+  tests across `tests.test_cube_preset` and `tests.test_multiwfn_grid`, full
+  282-test no-GUI regression, `bin/multiwfn2vesta cube-preset
+  --list-presets`, `bin/multiwfn2vesta grid-run --list-functions`,
+  `bin/multiwfn2vesta --help`, root docs mirror checksum check, and
+  `git diff --check`.
+- Read-only review found no High/Medium blocker and confirmed the default
+  standalone route and the `--surface-cube` mapped `vdw-map` route remain
+  separate; `domain.cub` and `domain.pdb` remain untracked local probes.
+
 ## 2026-06-10: Promolecular Delta-g cube display preset
 
 - Added `cube-preset promolecular-delta-g` for Multiwfn `Delta_g.cub` from

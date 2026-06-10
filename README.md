@@ -18,10 +18,10 @@ point.
   GitHub remote.
 - GitHub remote: `origin` points to `Github:Stardust0831/multiwfn2vesta.git`,
   with `origin/HEAD -> origin/main`.
-- Branch audit on 2026-06-10 20:56 CST found local `main`, `origin/main`, and
+- Branch audit on 2026-06-10 21:23 CST found local `main`, `origin/main`, and
   `origin/HEAD` aligned at
-  `764382c01698111f9d8b41932759a480233a272b`
-  (`Add local information entropy cube preset`) before this README/status
+  `fae7ac12d9a6d1fadbeda7a60c484752a643c23f`
+  (`Add promolecular delta-g cube preset`) before this README/status
   closeout.
 - `git ls-remote --heads origin` currently returns only `refs/heads/main`; no
   merge-back was needed in this pass because there is no extra local or remote
@@ -38,8 +38,9 @@ point.
 - Recent maintained feature work includes dedicated VESTA presets for
   Multiwfn gradient norm, spin-density, orbital-density, Laplacian, K(r),
   G(r), local information entropy, standalone RDG, promolecular RDG,
-  promolecular Delta-g, and standalone IRI scalar cubes, ABACUS direct cube
-  presets for potential, partial-charge, and wavefunction-norm cubes,
+  promolecular Delta-g, standalone IRI scalar, and standalone vdW potential
+  cubes, ABACUS direct cube presets for potential, partial-charge, and
+  wavefunction-norm cubes,
   charged-state `fukui-run` orchestration, aIGM/amIGM trajectory-average
   weak-interaction generation, cube/grid domain extraction, basin cube VESTA
   presets,
@@ -97,9 +98,10 @@ then delete the temporary branch.
 - Apply analysis-oriented cube presets for common ABACUS/Multiwfn products
   such as density, orbitals/wavefunctions, orbital density, spin density,
   Laplacian, K(r)/G(r) kinetic-density cubes, standalone RDG/promolecular
-  RDG, promolecular Delta-g, ABACUS direct potential, partial charge,
-  wavefunction norm cubes, ELF/LOL, IRI/RDG/NCI, ESP/MEP, IGM/IGMH/aIGM
-  weak-interaction maps, ALIE/LEA/LEAE, and vdW-potential mapped surfaces.
+  RDG, promolecular Delta-g, standalone IRI scalar, standalone vdW
+  potential, ABACUS direct potential, partial charge, wavefunction norm
+  cubes, ELF/LOL, IRI/RDG/NCI, ESP/MEP, IGM/IGMH/aIGM weak-interaction maps,
+  ALIE/LEA/LEAE, and vdW-potential mapped surfaces.
 - Overlay Multiwfn molecular-surface extrema from `surfanalysis.pdb` onto
   mapped-surface VESTA files as an extra atoms-only phase, with automatic
   minima/maxima selection for ALIE/LEA/LEAE presets.
@@ -209,6 +211,7 @@ multiwfn2vesta aigm-run trajectory.xyz aigm_products \
   --frame-range 1 200 \
   --grid-mode spacing --grid-spacing 0.25
 multiwfn2vesta grid-run input.molden grid_products --function density
+multiwfn2vesta grid-run input.molden grid_products --function vdw-potential
 multiwfn2vesta grid-run input.molden esp_map \
   --function esp \
   --surface-cube density.cub \
@@ -298,6 +301,7 @@ multiwfn2vesta cube-preset rdg-scalar RDG.cub cube_products
 multiwfn2vesta cube-preset promolecular-rdg RDGprodens.cub cube_products
 multiwfn2vesta cube-preset promolecular-delta-g Delta_g.cub cube_products
 multiwfn2vesta cube-preset iri-scalar IRI.cub cube_products
+multiwfn2vesta cube-preset vdw-potential vdWpot.cub cube_products
 multiwfn2vesta cube-preset potential pot_es.cube cube_products
 multiwfn2vesta cube-preset partial-charge pchg.cube cube_products
 multiwfn2vesta cube-preset wavefunction-norm wfc_norm.cube cube_products
@@ -325,9 +329,10 @@ Available presets can be listed with `multiwfn2vesta cube-preset
 orbital/wavefunction/density-difference cubes, Multiwfn gradient norm,
 orbital-density, spin-density, Laplacian, K(r), G(r), local information
 entropy, standalone RDG, promolecular RDG, and standalone IRI scalar cubes,
-direct ABACUS potential cubes, ABACUS partial-charge/state-density cubes,
-nonnegative ABACUS wavefunction norm cubes, ELF/LOL cubes, IRI/RDG/NCI mapped surfaces,
-STM/LDOS tunneling-current surfaces, binary domain isosurfaces, binary basin
+standalone vdW potential cubes, direct ABACUS potential cubes, ABACUS
+partial-charge/state-density cubes, nonnegative ABACUS wavefunction norm
+cubes, ELF/LOL cubes, IRI/RDG/NCI mapped surfaces, STM/LDOS
+tunneling-current surfaces, binary domain isosurfaces, binary basin
 isosurfaces, signed basin-type maps, IGM/IGMH/aIGM weak-interaction mapped
 surfaces, ESP/MEP mapped density surfaces, generic molecular surface maps,
 ALIE/LEA/LEAE density-surface maps, and vdW-potential density-surface maps.
@@ -337,7 +342,11 @@ isosurface, texture scaling source, and explicit texture percentage overrides
 when they are used.  The `surface-map`/`molsurfmap` defaults follow the
 bundled Multiwfn `molsurfmap.vmd` template.
 
-Use `potential` for direct `out_pot`/potential cube isosurfaces.  Use `esp`
+Use `vdw-potential` for standalone Multiwfn function `25` `vdWpot.cub`
+isosurfaces; it uses signed surfaces at `+/-1.0` kcal/mol, matching
+Multiwfn's main-function-5 display default.  Use `vdw-map`/`vdw-surface`
+when a vdW potential cube should color a density/surface cube.  Use
+`potential` for direct `out_pot`/potential cube isosurfaces.  Use `esp`
 when a density or molecular surface cube should be colored by a potential
 texture cube.
 
@@ -517,11 +526,14 @@ Common functions:
   Multiwfn evaluates function `11` as local information entropy
   `-rho/N*ln(rho/N)` and keeps the global main-function-5 default
   `sur_value=0.05`.
-- `esp`, `nuclear-esp`, `signlambda2rho`, and `vdw-potential`: signed scalar
-  fields, defaulting to the `signed` preset;
-  with `--surface-cube`, `esp`/`nuclear-esp` map through `cube-preset esp`,
-  `signlambda2rho` maps through `cube-preset iri`, and `vdw-potential` maps
-  through `cube-preset vdw-map`.
+- `esp`, `nuclear-esp`, and `signlambda2rho`: signed scalar fields,
+  defaulting to the `signed` preset; with `--surface-cube`,
+  `esp`/`nuclear-esp` map through `cube-preset esp` and
+  `signlambda2rho` maps through `cube-preset iri`.
+- `vdw-potential` / `vdw`: function `25`, raw `vdWpot.cub`, preset
+  `vdw-potential`, signed at `+/-1.0` kcal/mol by default.  With
+  `--surface-cube`, it maps through `cube-preset vdw-map` instead so the
+  generated vdW potential cube colors an existing density/surface cube.
 - `elf` and `lol`: localization cubes, defaulting to `cube-preset elf/lol`.
 - `alie` / `avglocion`: function `18`, raw `avglocion.cub`.  With
   `--surface-cube density.cub`, the generated ALIE cube is used as the
