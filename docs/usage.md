@@ -214,6 +214,7 @@ multiwfn2vesta cube-vesta \
 multiwfn2vesta cube-preset --list-presets
 multiwfn2vesta cube-preset density density.cub cube_products
 multiwfn2vesta cube-preset orbital orbital.cub cube_products
+multiwfn2vesta cube-preset gradient-norm gradient.cub cube_products
 multiwfn2vesta cube-preset orbital-density orbdens.cub cube_products
 multiwfn2vesta cube-preset spin-density spindensity.cub cube_products
 multiwfn2vesta cube-preset laplacian laplacian.cub cube_products
@@ -247,6 +248,9 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
 `cube-vesta`。当前预设：
 
 - `density`：单等值面，默认 `--isosurface 0.01`
+- `gradient-norm`：单正值等值面，别名包括 `gradient`、`rho-gradient`、
+  `grad-rho`，用于 Multiwfn `gradient.cub`；默认等值面 `0.05` 来自
+  Multiwfn main-function-5 全局 `sur_value`，通常需要按体系微调
 - `signed`：正/负等值面，别名包括 `orbital`、`wavefunction`、
   `density-difference` 和 `dual-descriptor`
 - `orbital-density`：单正值等值面，别名包括 `orbdens`、`mo-density`，
@@ -478,6 +482,9 @@ multiwfn2vesta grid-run --list-functions
 
 - `density` / `rho`：Multiwfn 函数 `1`，原始输出 `density.cub`，默认接
   `cube-preset density`
+- `gradient` / `rho-gradient`：函数 `2`，原始输出 `gradient.cub`，默认接
+  `cube-preset gradient-norm`，按单正值等值面显示；默认 `0.05` 是
+  Multiwfn 全局等值面初值，建议按体系调参
 - `orbital` / `mo`：函数 `4`，原始输出 `MOvalue.cub`，默认接 `signed`；
   单轨道用 `--orbital h`，多轨道批量用 `--orbitals h l l+1`
 - `orbital-density` / `orbdens`：函数 `44`，原始输出 `orbdens.cub`，

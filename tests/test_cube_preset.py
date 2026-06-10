@@ -84,6 +84,7 @@ class TestCubePreset(unittest.TestCase):
     def test_format_preset_list_mentions_main_routes(self):
         text = format_preset_list()
         self.assertIn("density", text)
+        self.assertIn("gradient-norm", text)
         self.assertIn("signed", text)
         self.assertIn("spin-density", text)
         self.assertIn("orbital-density", text)
@@ -208,6 +209,23 @@ basin type two
             self.assertIn("canonical_preset: `signed`", manifest)
             self.assertIn("requested_preset: `orbital`", manifest)
             self.assertIn("effective_surface_mode: `signed`", manifest)
+
+    def test_gradient_norm_preset_writes_single_positive_surface(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            cube = self.write_tmp(root, "gradient.cub", SURFACE_CUBE)
+
+            result = run_preset("rho-gradient", cube, root / "products")
+
+            text = result.vesta_path.read_text(encoding="utf-8")
+            manifest = result.manifest_path.read_text(encoding="utf-8")
+
+            self.assertRegex(text, r"ISURF\n  1   1\s+0\.05\s+120\s+210\s+255\s+145\s+255")
+            self.assertNotRegex(text, r"\n  1   1\s+-0\.05")
+            self.assertIn("canonical_preset: `gradient-norm`", manifest)
+            self.assertIn("requested_preset: `rho-gradient`", manifest)
+            self.assertIn("gradient.cub", manifest)
+            self.assertIn("sur_value=0.05", manifest)
 
     def test_spin_density_preset_writes_signed_surfaces(self):
         with tempfile.TemporaryDirectory() as tmp:

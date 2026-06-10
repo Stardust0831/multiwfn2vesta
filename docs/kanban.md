@@ -1,6 +1,6 @@
 # Project Kanban
 
-Updated: 2026-06-10 20:06 CST
+Updated: 2026-06-10 20:14 CST
 
 ## Current Request: 2026-06-10 README Refresh At Spin-Density Tip
 
@@ -90,15 +90,27 @@ Updated: 2026-06-10 20:06 CST
   Multiwfn/ABACUS wavefunction and cube analyses, prioritizing products that
   ABACUS can feed through Molden or direct cube routes.
 - [x] Recheck current state: `main` is aligned with `origin/main` at
-  `1a8bbc63cc785ec07b4b177078909971b8ac127b`; untracked local probes
+  `67a6e0f1a69f91b02481f5093477e32632f477de`; untracked local probes
   `domain.cub` and `domain.pdb` remain uncommitted.
-- [ ] Inspect current `grid-run` and `cube-preset` coverage for real-space
-  function `2` gradient norm, then decide whether to add a maintained
-  gradient-norm display preset.
-- [ ] If useful, implement tests/docs for the new preset/function mapping
-  without changing existing density or signed presets.
-- [ ] Sync root docs, validate, review, then commit and push on `main` if
-  stable.
+- [x] Inspect current `grid-run` and `cube-preset` coverage for real-space
+  function `2` gradient norm: `grid-run` already generated `gradient.cub` but
+  routed it through generic `density`; Multiwfn 2026.6.2 `0123dim.f90`
+  confirms function `2` exports `gradient.cub`, and `define.f90` provides the
+  global default `sur_value=0.05D0`.
+- [x] Implement tests/docs for the new preset/function mapping without
+  changing existing density or signed presets: added `cube-preset
+  gradient-norm`, mapped `grid-run --function gradient` to it, and focused
+  `py_compile` plus `tests.test_cube_preset tests.test_multiwfn_grid` passed
+  with 57 tests, including a fake Multiwfn integration-style run that writes
+  `gradient.cub` and verifies the generated recipe/VESTA manifest uses
+  `gradient-norm`.
+- [x] Sync root docs, validate, and review: focused `py_compile` passed;
+  focused `tests.test_cube_preset tests.test_multiwfn_grid` passed with 57
+  tests; full no-GUI regression passed with 273 tests; `cube-preset
+  --list-presets`, `grid-run --list-functions`, and `git diff --check`
+  passed; read-only subagent review found no blocker, and its suggested
+  integration-style gradient run test was added before closeout.  Commit/push
+  and post-push branch verification are reported in the assistant response.
 
 ## Current Continuation: 2026-06-10 Grid Function Display Presets
 

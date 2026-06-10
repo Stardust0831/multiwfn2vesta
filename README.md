@@ -18,10 +18,10 @@ point.
   GitHub remote.
 - GitHub remote: `origin` points to `Github:Stardust0831/multiwfn2vesta.git`,
   with `origin/HEAD -> origin/main`.
-- Branch audit on 2026-06-10 20:06 CST found local `main`, `origin/main`, and
+- Branch audit on 2026-06-10 20:14 CST found local `main`, `origin/main`, and
   `origin/HEAD` aligned at
-  `1a8bbc63cc785ec07b4b177078909971b8ac127b`
-  (`Add spin-density cube arithmetic`) before this README refresh.
+  `67a6e0f1a69f91b02481f5093477e32632f477de`
+  (`Refresh README branch audit`) before the gradient-norm preset update.
 - `git ls-remote --heads origin` currently returns only `refs/heads/main`; no
   merge-back was needed in this pass because there is no extra local or remote
   feature branch to consolidate.
@@ -32,8 +32,9 @@ point.
   containing feature commits and documentation closure commits, not active
   competing branches.
 - Recent maintained feature work includes dedicated VESTA presets for
-  Multiwfn spin-density, orbital-density, Laplacian, K(r), G(r), standalone
-  RDG, and promolecular RDG cubes, ABACUS direct cube presets for potential,
+  Multiwfn gradient norm, spin-density, orbital-density, Laplacian, K(r),
+  G(r), standalone RDG, and promolecular RDG cubes, ABACUS direct cube
+  presets for potential,
   partial-charge, and wavefunction-norm cubes, charged-state `fukui-run`
   orchestration, aIGM/amIGM trajectory-average weak-interaction generation,
   cube/grid domain extraction, basin cube VESTA presets,
@@ -280,6 +281,7 @@ top of the same `cube-vesta` backend:
 
 ```bash
 multiwfn2vesta cube-preset orbital orbital.cub cube_products
+multiwfn2vesta cube-preset gradient-norm gradient.cub cube_products
 multiwfn2vesta cube-preset orbital-density orbdens.cub cube_products
 multiwfn2vesta cube-preset spin-density spindensity.cub cube_products
 multiwfn2vesta cube-preset laplacian laplacian.cub cube_products
@@ -311,9 +313,9 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
 
 Available presets can be listed with `multiwfn2vesta cube-preset
 --list-presets`.  Current presets cover density-like scalar cubes, signed
-orbital/wavefunction/density-difference cubes, Multiwfn orbital-density,
-spin-density, Laplacian, K(r), G(r), standalone RDG, and promolecular RDG
-cubes, direct ABACUS potential cubes, ABACUS partial-charge/state-density
+orbital/wavefunction/density-difference cubes, Multiwfn gradient norm,
+orbital-density, spin-density, Laplacian, K(r), G(r), standalone RDG, and
+promolecular RDG cubes, direct ABACUS potential cubes, ABACUS partial-charge/state-density
 cubes, nonnegative ABACUS wavefunction norm cubes, ELF/LOL cubes,
 IRI/RDG/NCI mapped surfaces, STM/LDOS tunneling-current surfaces, binary
 domain isosurfaces, binary basin isosurfaces, signed basin-type maps,
@@ -484,6 +486,10 @@ Common functions:
 
 - `density` / `rho`: Multiwfn function `1`, raw `density.cub`, preset
   `density`.
+- `gradient` / `rho-gradient`: function `2`, raw `gradient.cub`, preset
+  `gradient-norm`, single positive surface by default.  The default
+  isosurface follows Multiwfn's global main-function-5 `sur_value=0.05` and
+  should be tuned per system.
 - `orbital` / `mo`: function `4`, raw `MOvalue.cub`, preset `signed`, requires
   `--orbital` for one orbital or `--orbitals` for batch export.
 - `orbital-density` / `orbdens`: function `44`, raw `orbdens.cub`, preset

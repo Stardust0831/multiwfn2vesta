@@ -20,9 +20,10 @@ Multiwfn evidence:
   `K(r).cub` and `G(r).cub`; ALIE is function `18`, exporting
   `avglocion.cub`.
 - Multiwfn `0123dim.f90` sets main-function-5 post-processing `sur_value`
-  defaults for several standalone cube displays: `spindensity.cub` uses
-  `0.02`, `RDG.cub` uses `0.5`, `RDGprodens.cub` uses `0.4`, `IRI.cub` uses
-  `1.0`, and `orbdens.cub` uses `0.005`.
+  defaults for several standalone cube displays: `gradient.cub` keeps the
+  global `define.f90` default `0.05`, `spindensity.cub` uses `0.02`,
+  `RDG.cub` uses `0.5`, `RDGprodens.cub` uses `0.4`, `IRI.cub` uses `1.0`,
+  and `orbdens.cub` uses `0.005`.
 - Weak-interaction module `visweak.f90` exports `sl2r.cub`, `dg_inter.cub`,
   `dg_intra.cub`, `dg.cub`, `avgRDG.cub`, `avgsl2r.cub`, and related scatter
   data.
@@ -128,7 +129,7 @@ occupations, and density derivatives from the wavefunction representation.
 | --- | --- | --- | --- | --- | --- |
 | Generic cube visualizer | Any `.cub` from Multiwfn or ABACUS | Strong: `out_chg`, `out_pot`, `out_pchg`, `out_wfc_*`, `out_elf` | Cube | Density/texture import, isosurface, section off by default | Implemented as `multiwfn2vesta cube-vesta`; `cube-preset` adds common analysis defaults, including direct ABACUS potential/partial-charge/wavefunction-norm presets |
 | Molecular orbitals and band wavefunctions | Full wavefunction Molden/FCH/WFN, or ABACUS real-space `get_wf` cubes | Strong for Gamma LCAO Molden; direct cube route for selected bands | `orb*.cub`, `MOvalue.cub`, `orbdens.cub`, or ABACUS `wfi*.cube` | Positive/negative orbital isosurfaces; orbital-density magnitude as a single surface | `cube-preset orbital` and `cube-preset orbital-density` implemented; `grid-run --function orbital --orbital ...`, `grid-run --function orbital-density --orbital ...`, and `grid-run --orbitals ...` cover isolated orbital exports |
-| Electron density, spin density, Laplacian, kinetic density | Full wavefunction, or ABACUS density cubes for density only | Strong for density cube; Molden route for derivatives | `density.cub`, `spindensity.cub`, `laplacian.cub`, `K(r).cub`, `G(r).cub` | Single/positive-negative isosurfaces or slices | `grid-run` now covers density, spin density, Laplacian, and K(r)/G(r) single cubes; `cube-preset spin-density`, `laplacian`, `hamiltonian-ked`, and `lagrangian-ked` provide maintained display defaults; `cube-arith --operation spin-density` builds alpha-minus-beta spin-density cubes from compatible spin-channel density cubes and routes them to `cube-preset spin-density` |
+| Electron density, gradient norm, spin density, Laplacian, kinetic density | Full wavefunction, or ABACUS density cubes for density only | Strong for density cube; Molden route for derivatives | `density.cub`, `gradient.cub`, `spindensity.cub`, `laplacian.cub`, `K(r).cub`, `G(r).cub` | Single/positive-negative isosurfaces or slices | `grid-run` now covers density, gradient norm, spin density, Laplacian, and K(r)/G(r) single cubes; `cube-preset gradient-norm`, `spin-density`, `laplacian`, `hamiltonian-ked`, and `lagrangian-ked` provide maintained display defaults; `cube-arith --operation spin-density` builds alpha-minus-beta spin-density cubes from compatible spin-channel density cubes and routes them to `cube-preset spin-density` |
 | ELF/LOL | Full wavefunction; ABACUS direct `out_elf` for ELF | Strong for ELF direct; Molden route for Multiwfn ELF/LOL | `ELF.cub`, `LOL.cub`, ABACUS `elf*.cube` | Isosurfaces around localized regions | `grid-run` now covers Multiwfn ELF/LOL; `cube-preset elf/lol` remains the VESTA writer |
 | AIM/QTAIM topology | Full wavefunction Molden/FCH/WFN/WFX | Feasible for Gamma LCAO Molden with `[Nval]`; validated on Ag(111)+benzene | `CPs.pdb`, `paths.pdb`, `CPprop.txt`, `mol.pdb` | Atoms-only pseudo-sites, no AIM bonds, optional labels | Already partly implemented; add ABACUS-aware recipes |
 | IGM/IGMH + AIM overlay | Full wavefunction and fragment definitions | Feasible for Gamma LCAO Molden; validated on Ag(111)+benzene | `dg_inter.cub`, `sl2r.cub`, AIM PDBs | Multi-phase VESTA density/texture plus AIM pseudo-sites | `igmh-run`/`igm-run`/`migm-run` now automate standard Multiwfn fragment streams and call `cube-preset igmh`/`igm`; saved AIM+IGMH overlay styling is implemented |
@@ -322,3 +323,7 @@ Main gaps:
   both the cube-arithmetic bottom layer and the `fukui-run` shared-grid
   charged-state orchestration layer; it still needs real chemistry smoke cases
   and guidance for charged periodic systems.
+- Density-gradient visualization now has a distinct `cube-preset
+  gradient-norm` route and `grid-run --function gradient` maps to it instead
+  of the generic density preset.  This is primarily useful for ABACUS Molden
+  handoffs where Multiwfn computes `gradient.cub` from the wavefunction.

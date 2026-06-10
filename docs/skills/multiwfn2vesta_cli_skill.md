@@ -153,6 +153,7 @@ environment is not suitable.
 multiwfn2vesta cube-preset --list-presets
 multiwfn2vesta cube-preset orbital orbital.cub cube_products
 multiwfn2vesta cube-preset orbital-density orbdens.cub cube_products
+multiwfn2vesta cube-preset gradient-norm gradient.cub cube_products
 multiwfn2vesta cube-preset spin-density spindensity.cub cube_products
 multiwfn2vesta cube-preset laplacian laplacian.cub cube_products
 multiwfn2vesta cube-preset hamiltonian-ked 'K(r).cub' cube_products
@@ -404,15 +405,16 @@ Function discovery:
 multiwfn2vesta grid-run --list-functions
 ```
 
-Common functions include `density`, `orbital --orbital h`, `orbital-density`,
-`spin-density`, `laplacian`, `hamiltonian-ked`, `lagrangian-ked`, `elf`,
-`lol`, `esp`, `alie`, `rdg`, `promolecular-rdg`, `iri`,
+Common functions include `density`, `gradient`, `orbital --orbital h`,
+`orbital-density`, `spin-density`, `laplacian`, `hamiltonian-ked`,
+`lagrangian-ked`, `elf`, `lol`, `esp`, `alie`, `rdg`, `promolecular-rdg`, `iri`,
 `signlambda2rho`, and `promolecular-signlambda2rho`.  The scalar display
-defaults are function-specific where possible: `spindensity.cub` uses
-`cube-preset spin-density`, `orbdens.cub` uses `orbital-density`,
-`laplacian.cub` uses `laplacian`, `K(r).cub` uses `hamiltonian-ked`,
-`G(r).cub` uses `lagrangian-ked`, `RDG.cub` uses `rdg-scalar`, and
-`RDGprodens.cub` uses `promolecular-rdg`.
+defaults are function-specific where possible: `gradient.cub` uses
+`gradient-norm`, `spindensity.cub` uses `cube-preset spin-density`,
+`orbdens.cub` uses `orbital-density`, `laplacian.cub` uses `laplacian`,
+`K(r).cub` uses `hamiltonian-ked`, `G(r).cub` uses `lagrangian-ked`,
+`RDG.cub` uses `rdg-scalar`, and `RDGprodens.cub` uses
+`promolecular-rdg`.
 
 Batch frontier orbital export:
 

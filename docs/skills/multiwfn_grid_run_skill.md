@@ -28,7 +28,9 @@ multiwfn2vesta grid-run --list-functions
 - `density`, aliases `rho`, `electron-density`, `charge-density`: function
   `1`, raw `density.cub`, preset `density`.
 - `gradient`, aliases `rho-gradient`, `grad-rho`: function `2`, raw
-  `gradient.cub`, preset `density`.
+  `gradient.cub`, preset `gradient-norm` with a single positive isosurface.
+  The default isosurface `0.05` follows Multiwfn's global main-function-5
+  `sur_value`; tune it per system.
 - `laplacian`, aliases `lap`, `laplacian-rho`: function `3`, raw
   `laplacian.cub`, preset `laplacian` with signed positive/negative
   isosurfaces.

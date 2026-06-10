@@ -41,6 +41,7 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertIn("density", text)
         self.assertIn("orbital", text)
         self.assertIn("hamiltonian-ked", text)
+        self.assertIn("preset=gradient-norm", text)
         self.assertIn("preset=spin-density", text)
         self.assertIn("preset=laplacian", text)
         self.assertIn("preset=hamiltonian-ked", text)
@@ -54,6 +55,8 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertIn("mapped preset with --surface-cube: alie", text)
         self.assertIn("requires --orbital", text)
         self.assertEqual(resolve_grid_function("rho").name, "density")
+        self.assertEqual(resolve_grid_function("rho-gradient").name, "gradient")
+        self.assertEqual(resolve_grid_function("grad-rho").preset, "gradient-norm")
         self.assertEqual(resolve_grid_function("12").name, "esp")
         self.assertEqual(resolve_grid_function(None, 9).name, "elf")
         self.assertEqual(resolve_grid_function("k(r)").output_filename, "K(r).cub")
@@ -141,6 +144,42 @@ class TestMultiwfnGridRunner(unittest.TestCase):
             recipe = result.recipe_path.read_text(encoding="utf-8")
             self.assertIn("function_index: `1`", recipe)
             self.assertIn("auto_vesta_preset: `density`", recipe)
+
+    def test_run_multiwfn_grid_gradient_uses_gradient_norm_preset(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            wavefunction = root / "h2o.fch"
+            wavefunction.write_text("wavefunction", encoding="utf-8")
+            candidate = self.make_candidate(root)
+
+            def fake_run(command, **kwargs):
+                cwd = Path(kwargs["cwd"])
+                (cwd / "gradient.cub").write_text(DENSITY_CUBE, encoding="utf-8")
+                return subprocess.CompletedProcess(command, 0, stdout="ok", stderr="")
+
+            with patch("multiwfn2vesta.multiwfn_grid.find_multiwfn", return_value=candidate):
+                with patch("multiwfn2vesta.multiwfn_grid.subprocess.run", side_effect=fake_run):
+                    result = run_multiwfn_grid(
+                        wavefunction,
+                        root / "products",
+                        function_name="gradient",
+                        stem="case",
+                        grid_points=(10, 11, 12),
+                    )
+
+            self.assertTrue(result.success)
+            self.assertEqual(result.command_file.read_text(encoding="utf-8"), "5\n2\n4\n10,11,12\n2\n0\nq\n")
+            self.assertEqual(result.raw_cube.name, "gradient.cub")
+            self.assertEqual(result.cube.name, "case_gradient.cub")
+            self.assertIsNotNone(result.vesta_result)
+            self.assertEqual(result.vesta_result.vesta_path.name, "case_gradient_gradient-norm_cube.vesta")
+            recipe = result.recipe_path.read_text(encoding="utf-8")
+            self.assertIn("function_name: `gradient`", recipe)
+            self.assertIn("function_index: `2`", recipe)
+            self.assertIn("auto_vesta_preset: `gradient-norm`", recipe)
+            manifest = result.vesta_result.manifest_path.read_text(encoding="utf-8")
+            self.assertIn("canonical_preset: `gradient-norm`", manifest)
+            self.assertIn("effective_isosurface: `0.05`", manifest)
 
     def test_run_multiwfn_grid_can_map_generated_texture_on_surface_cube(self):
         with tempfile.TemporaryDirectory() as tmp:

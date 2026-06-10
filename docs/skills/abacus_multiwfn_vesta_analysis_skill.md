@@ -50,6 +50,7 @@ without manually spelling every `cube-vesta` option:
 multiwfn2vesta cube-preset density density.cub cube_products
 multiwfn2vesta cube-preset orbital wfc_real.cub cube_products
 multiwfn2vesta cube-preset orbital-density orbdens.cub cube_products
+multiwfn2vesta cube-preset gradient-norm gradient.cub cube_products
 multiwfn2vesta cube-preset spin-density spindensity.cub cube_products
 multiwfn2vesta cube-preset laplacian laplacian.cub cube_products
 multiwfn2vesta cube-preset hamiltonian-ked 'K(r).cub' cube_products
@@ -210,12 +211,14 @@ multiwfn2vesta grid-run ABACUS_Multiwfn.molden grid_products \
 ```
 
 Useful `grid-run` functions for ABACUS-compatible Molden files include
-`density`, `orbital --orbital h`, `orbital-density --orbital h`,
+`density`, `gradient`, `orbital --orbital h`, `orbital-density --orbital h`,
 `spin-density`, `laplacian`, `hamiltonian-ked`, `lagrangian-ked`, `elf`,
 `lol`, `esp`, `rdg`, `promolecular-rdg`, `iri`, and `signlambda2rho`.
-The single-cube display presets for `spindensity.cub`, `orbdens.cub`,
-`RDG.cub`, and `RDGprodens.cub` follow Multiwfn main-function-5 `sur_value`
-defaults where the source defines them.
+The single-cube display presets for `gradient.cub`, `spindensity.cub`,
+`orbdens.cub`, `RDG.cub`, and `RDGprodens.cub` follow Multiwfn
+main-function-5 `sur_value` defaults where the source defines them.  For
+`gradient.cub`, Multiwfn leaves the function at the global `sur_value=0.05`,
+so tune the VESTA isosurface per system.
 
 For ABACUS LCAO Molden frontier orbital inspection, batch export is now the
 maintained route:

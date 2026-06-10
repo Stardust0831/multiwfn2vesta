@@ -1,5 +1,32 @@
 # Worklog
 
+## 2026-06-10: Gradient-norm cube display preset
+
+- Added `cube-preset gradient-norm` for Multiwfn `gradient.cub` from
+  main-function-5 function `2` (`Gradient norm of rho`).  It writes a single
+  positive VESTA isosurface because the field is nonnegative.
+- Updated `grid-run --function gradient` and aliases `rho-gradient` /
+  `grad-rho` so generated `gradient.cub` products route to
+  `cube-preset gradient-norm` instead of the generic density preset.
+- Rechecked local Multiwfn 2026.6.2 source evidence: `0123dim.f90` exports
+  `gradient.cub` for function `2`, while `define.f90` initializes the global
+  `sur_value=0.05D0`; Multiwfn does not reset a function-specific value for
+  gradient norm.  The maintained default is therefore `0.05`, with
+  system-specific tuning expected.
+- Added focused tests for preset listing, alias resolution, generated
+  single-positive `ISURF`, manifest notes, and `grid-run` function-to-preset
+  mapping.
+- Added an integration-style fake Multiwfn grid-run test for
+  `--function gradient`, verifying that `gradient.cub` becomes
+  `case_gradient.cub`, the recipe records `auto_vesta_preset:
+  gradient-norm`, and the generated VESTA manifest resolves to the
+  `gradient-norm` preset.
+- Validation passed: focused `py_compile`, 57 focused tests across
+  `tests.test_cube_preset` and `tests.test_multiwfn_grid`, the full 273-test
+  no-GUI regression, `bin/multiwfn2vesta cube-preset --list-presets`,
+  `bin/multiwfn2vesta grid-run --list-functions`, `git diff --check`, root
+  docs mirror check, and read-only subagent review with no blockers.
+
 ## 2026-06-10: README branch audit at spin-density tip
 
 - Rechecked the branch state for the user's README/branch-convergence request

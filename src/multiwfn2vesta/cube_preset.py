@@ -42,6 +42,20 @@ PRESETS: Tuple[CubePreset, ...] = (
         notes="Use for ABACUS out_chg cubes or Multiwfn electron-density cubes.",
     ),
     CubePreset(
+        name="gradient-norm",
+        aliases=("gradient", "rho-gradient", "grad-rho", "density-gradient-norm"),
+        description="Single positive isosurface for electron-density gradient norm cubes.",
+        surface_mode="single",
+        isosurface=0.05,
+        positive_rgb=(120, 210, 255),
+        surface_opacity=(145, 255),
+        notes=(
+            "Use for Multiwfn gradient.cub from real-space function 2. "
+            "Multiwfn does not reset sur_value for this function, so the default follows "
+            "the global main-function-5 sur_value=0.05 and usually needs system-specific tuning."
+        ),
+    ),
+    CubePreset(
         name="signed",
         aliases=("orbital", "mo", "wavefunction", "abacus-wfc", "density-difference", "dual-descriptor"),
         description="Positive/negative isosurfaces for signed real scalar cubes.",

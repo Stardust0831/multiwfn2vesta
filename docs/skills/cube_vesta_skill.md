@@ -44,6 +44,7 @@ Analysis preset wrapper:
 multiwfn2vesta cube-preset --list-presets
 multiwfn2vesta cube-preset orbital orbital.cub cube_products
 multiwfn2vesta cube-preset orbital-density orbdens.cub cube_products
+multiwfn2vesta cube-preset gradient-norm gradient.cub cube_products
 multiwfn2vesta cube-preset spin-density spindensity.cub cube_products
 multiwfn2vesta cube-preset laplacian laplacian.cub cube_products
 multiwfn2vesta cube-preset hamiltonian-ked 'K(r).cub' cube_products
@@ -190,6 +191,10 @@ passes it back through `cube-preset`.
 
 - `density` aliases: `rho`, `charge-density`, `scalar`; single surface,
   default isosurface `0.01`.
+- `gradient-norm` aliases: `gradient`, `rho-gradient`, `grad-rho`; single
+  positive surface for Multiwfn `gradient.cub`, default isosurface `0.05`.
+  Multiwfn leaves this at the global main-function-5 `sur_value`, so tune per
+  system.
 - `signed` aliases: `orbital`, `mo`, `wavefunction`, `abacus-wfc`,
   `density-difference`, `dual-descriptor`; positive/negative surfaces,
   default magnitude `0.02`.

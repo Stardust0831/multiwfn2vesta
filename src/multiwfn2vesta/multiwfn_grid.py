@@ -34,7 +34,7 @@ class GridFunction:
 
 GRID_FUNCTIONS: Tuple[GridFunction, ...] = (
     GridFunction("density", 1, "density.cub", "density", ("rho", "electron-density", "charge-density")),
-    GridFunction("gradient", 2, "gradient.cub", "density", ("rho-gradient", "grad-rho")),
+    GridFunction("gradient", 2, "gradient.cub", "gradient-norm", ("rho-gradient", "grad-rho")),
     GridFunction("laplacian", 3, "laplacian.cub", "laplacian", ("lap", "laplacian-rho")),
     GridFunction("orbital", 4, "MOvalue.cub", "signed", ("mo", "wavefunction", "mo-value"), True),
     GridFunction("spin-density", 5, "spindensity.cub", "spin-density", ("spin", "spindensity")),
