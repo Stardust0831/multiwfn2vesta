@@ -15,8 +15,8 @@ point.
   GitHub remote.
 - GitHub remote: `origin` points to `Github:Stardust0831/multiwfn2vesta.git`,
   with `origin/HEAD -> origin/main`.
-- Current audited tip on 2026-06-10 11:21 CST: local `main`, `origin/main`,
-  and `origin/HEAD` all point at
+- Pre-cleanup branch audit on 2026-06-10 11:21 CST found local `main`,
+  `origin/main`, and `origin/HEAD` all pointing at
   `8bf115a3fa332e1008c370d48e70e5235e942ac5`
   (`Add surface extrema VESTA overlay`).
 - `git ls-remote --heads origin` currently returns only
@@ -45,7 +45,7 @@ git branch --all --verbose --no-abbrev
 git ls-remote --heads origin
 ```
 
-At the time of this README refresh, the expected remote-head output is
+At the time of the pre-cleanup branch audit, the remote-head output was
 `8bf115a3fa332e1008c370d48e70e5235e942ac5 refs/heads/main`.  If a future
 experiment branch appears, keep all final project code, tests, and docs on
 `main` before pushing a release-style state:

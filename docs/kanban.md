@@ -7,7 +7,8 @@ Updated: 2026-06-10 11:21 CST
 - [x] Record the user's request: update README, inspect the confusing branch
   state, merge/consolidate back to one branch if needed, and use identity
   `Stardust0831`.
-- [x] Rechecked project branch state after `git fetch --prune origin`:
+- [x] Rechecked project branch state before the README cleanup commit after
+  `git fetch --prune origin`:
   local `main`, `origin/main`, and `origin/HEAD` all point at
   `8bf115a3fa332e1008c370d48e70e5235e942ac5`
   (`Add surface extrema VESTA overlay`).

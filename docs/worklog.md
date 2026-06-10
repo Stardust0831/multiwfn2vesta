@@ -5,8 +5,9 @@
 - User asked to update README again, noted that the branch state looked
   confusing, suggested merging back to one branch if useful, and requested
   commit identity `Stardust0831`.
-- Rechecked `/mnt/g/work/multiwfn2vesta/project` after `git fetch --prune
-  origin`.  Local `main`, `origin/main`, and `origin/HEAD` all point at
+- Rechecked `/mnt/g/work/multiwfn2vesta/project` before the README cleanup
+  commit after `git fetch --prune origin`.  Local `main`, `origin/main`, and
+  `origin/HEAD` all pointed at
   `8bf115a3fa332e1008c370d48e70e5235e942ac5`
   (`Add surface extrema VESTA overlay`), and `git ls-remote --heads origin`
   exposes only `refs/heads/main`.
