@@ -18,6 +18,7 @@ setup(
             'multiwfn2vesta-cube-preset=multiwfn2vesta.cube_preset:main',
             'multiwfn2vesta-cube-arith=multiwfn2vesta.cube_arith:main',
             'multiwfn2vesta-iri-run=multiwfn2vesta.multiwfn_iri:main',
+            'multiwfn2vesta-igmh-run=multiwfn2vesta.multiwfn_igmh:main',
             'multiwfn2vesta-grid-run=multiwfn2vesta.multiwfn_grid:main',
             'multiwfn2vesta-multiwfn-atom-color=multiwfn2vesta.multiwfn_atom_table:main',
             'multiwfn2vesta-aim-run=multiwfn2vesta.multiwfn_aim:main',

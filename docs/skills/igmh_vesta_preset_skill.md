@@ -2,12 +2,13 @@
 
 Use this when Multiwfn has already generated IGM, IGMH, or aIGM cube files
 and the task is to make a VESTA mapped-surface file without manually choosing
-the display defaults.
+the display defaults.  If the starting point is a wavefunction file and
+fragment definitions, prefer `multiwfn2vesta igmh-run`, which calls Multiwfn
+and then uses this preset layer.
 
 ## Inputs
 
-The preset layer does not run the Multiwfn fragment menus yet.  It expects
-compatible cube pairs already produced by Multiwfn:
+The preset layer expects compatible cube pairs already produced by Multiwfn:
 
 - `igmh` / `igm-inter`: surface `dg_inter.cub`, texture `sl2r.cub`.
 - `igm-intra`: surface `dg_intra.cub`, texture `sl2r.cub`.
@@ -15,10 +16,23 @@ compatible cube pairs already produced by Multiwfn:
 - `aigm-tfi`: surface `avgdg_inter.cub`, texture `thermflu.cub`.
 
 For ABACUS workflows, first produce a Multiwfn-readable Molden file with
-`multiwfn2vesta abacus-molden`, then run the relevant Multiwfn IGMH/aIGM menu
-manually or through a future command-stream wrapper.
+`multiwfn2vesta abacus-molden`, then run IGMH through
+`multiwfn2vesta igmh-run` or use this preset directly when the cube files
+already exist.
 
 ## Commands
+
+From a wavefunction file and two fragments:
+
+```bash
+multiwfn2vesta igmh-run input.molden igmh_products \
+  --fragment 1-48 \
+  --fragment 49-60 \
+  --grid-mode spacing \
+  --grid-spacing 0.25
+```
+
+From existing cube files:
 
 ```bash
 multiwfn2vesta cube-preset igmh dg_inter.cub products \
@@ -66,10 +80,21 @@ launching VESTA:
 The smoke generated `dg_inter_igmh_cube.vesta` and
 `dg_inter_igmh_cube_vesta_recipe.md` from `dg_inter.cub` plus `sl2r.cub`.
 
+The command-stream runner was smoke-tested on H2O without launching VESTA:
+
+```text
+/mnt/g/work/multiwfn2vesta/smoke/multiwfn_igmh_run_smoke_20260610/h2o/
+```
+
+This run used fragments `1` and `2-3`, grid `8 x 8 x 8`, generated
+`dg_inter.cub`/`sl2r.cub` plus optional `dg_intra.cub`/`dg.cub`, and wrote
+`h2o_igmh_cube.vesta`.
+
 ## Limitations
 
-- Fragment selection and Multiwfn IGMH command-stream automation are still a
-  later increment.
+- `igmh-run` automates the standard Multiwfn IGMH two-or-more-fragment path;
+  IGM, mIGM, and aIGM command-stream automation remain separate future
+  increments.
 - AIM path/BCP overlays are handled by `multiwfn2vesta aim-igmh` after VESTA
   has a saved multi-phase overlay.
 - For publication images, inspect the generated VESTA file and adjust

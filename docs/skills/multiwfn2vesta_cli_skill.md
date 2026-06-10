@@ -34,6 +34,7 @@ multiwfn2vesta cube-preset --help
 multiwfn2vesta surface-extrema --help
 multiwfn2vesta cube-arith --help
 multiwfn2vesta iri-run --help
+multiwfn2vesta igmh-run --help
 multiwfn2vesta grid-run --help
 multiwfn2vesta multiwfn-atom-color --help
 multiwfn2vesta aim-run --help
@@ -55,6 +56,8 @@ Aliases:
   `multiwfn2vesta fukui-cube ...` are aliases for `cube-arith`.
 - `multiwfn2vesta multiwfn-iri ...` and `multiwfn2vesta rdg-run ...` are
   aliases for `iri-run`.
+- `multiwfn2vesta multiwfn-igmh ...` and
+  `multiwfn2vesta multiwfn-igmh-run ...` are aliases for `igmh-run`.
 - `multiwfn2vesta multiwfn-grid ...`,
   `multiwfn2vesta scalar-cube-run ...`, and
   `multiwfn2vesta function-cube ...` are aliases for `grid-run`.
@@ -67,7 +70,8 @@ Aliases:
 - `multiwfn2vesta aim-vesta ...` is the same as `aim-pdb`.
 - `multiwfn2vesta igmh ...` is the same as `aim-igmh`; this top-level alias
   styles an already saved AIM+IGMH overlay.  The IGMH cube display preset is
-  invoked as `multiwfn2vesta cube-preset igmh ...`.
+  invoked as `multiwfn2vesta cube-preset igmh ...`, while the automated
+  Multiwfn fragment run is `multiwfn2vesta igmh-run ...`.
 
 ## Maintained workflows
 
@@ -197,6 +201,36 @@ multiwfn2vesta iri-run input.fch iri_products \
 Use `--commands-file commands.txt` to replace the default weak-interaction
 menu stream.  The runner sets `Multiwfnpath`, `MULTIWFNPATH`, and
 `MultiwfnPATH` to the selected executable directory for the subprocess.
+
+### Wavefunction to Multiwfn IGMH to VESTA
+
+```bash
+multiwfn2vesta igmh-run \
+  input.molden \
+  igmh_products \
+  --fragment 1-48 \
+  --fragment 49-60 \
+  --grid-mode spacing \
+  --grid-spacing 0.25 \
+  --timeout 600
+```
+
+Inputs can be any wavefunction file Multiwfn accepts.  The command writes the
+exact Multiwfn input stream and stdout/stderr logs, preserves raw
+`dg_inter.cub` and `sl2r.cub` under `multiwfn_igmh_raw/`, copies them to
+`<stem>_dg_inter.cub` and `<stem>_sl2r.cub`, preserves optional
+`dg_intra.cub`/`dg.cub`, then calls `cube-preset igmh` to create a
+mapped-surface `.vesta` unless `--no-vesta` is supplied.
+
+Fragments are passed directly to Multiwfn, so use the same atom-index syntax
+you would type interactively.  At least two `--fragment` entries are required
+for the default stream; `--commands-file commands.txt` can replace the entire
+stream for special cases.
+
+For periodic ABACUS Molden files with `[Cell]`, do not use `--grid-mode
+points`.  Multiwfn's PBC grid option `4` reads a spacing value in that case,
+so the runner rejects `points` before launch.  Use `--grid-mode spacing
+--grid-spacing VALUE` or `--grid-mode pbc-cell`.
 
 ### Wavefunction to Multiwfn scalar grid cube
 

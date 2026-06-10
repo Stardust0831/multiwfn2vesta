@@ -18,6 +18,7 @@ from . import (
     multiwfn_atom_table,
     multiwfn_aim,
     multiwfn_grid,
+    multiwfn_igmh,
     multiwfn_iri,
     surface_extrema_vesta,
 )
@@ -33,6 +34,7 @@ COMMANDS: Dict[str, Tuple[str, str]] = {
     "surface-extrema": ("Overlay Multiwfn surfanalysis.pdb extrema on VESTA", "surface_extrema_vesta"),
     "cube-arith": ("Combine compatible cube files, then optionally prepare VESTA", "cube_arith"),
     "iri-run": ("Run Multiwfn IRI/RDG cube generation, then prepare VESTA", "multiwfn_iri"),
+    "igmh-run": ("Run Multiwfn IGMH cube generation, then prepare VESTA", "multiwfn_igmh"),
     "grid-run": ("Run Multiwfn real-space function cube generation, then prepare VESTA", "multiwfn_grid"),
     "abacus-mulliken-color": ("Color VESTA atoms from ABACUS mulliken.txt", "abacus_mulliken"),
     "multiwfn-atom-color": ("Color VESTA atoms from a Multiwfn atom scalar table", "multiwfn_atom_table"),
@@ -59,6 +61,8 @@ ALIASES = {
     "fukui-cube": "cube-arith",
     "multiwfn-iri": "iri-run",
     "rdg-run": "iri-run",
+    "multiwfn-igmh": "igmh-run",
+    "multiwfn-igmh-run": "igmh-run",
     "multiwfn-grid": "grid-run",
     "scalar-cube-run": "grid-run",
     "function-cube": "grid-run",
@@ -98,6 +102,7 @@ Commands:
   cube-arith
              Combine compatible cube files for density differences, Fukui, or dual descriptor.
   iri-run    Run Multiwfn IRI/RDG cube generation and prepare a VESTA mapped surface.
+  igmh-run   Run Multiwfn IGMH cube generation and prepare a VESTA mapped surface.
   grid-run   Run Multiwfn real-space function cube generation and prepare VESTA.
   abacus-mulliken-color
              Color VESTA atoms from ABACUS mulliken.txt charge/magnetism.
@@ -120,6 +125,8 @@ Aliases:
              Aliases for cube-arith.
   multiwfn-iri, rdg-run
              Aliases for iri-run.
+  multiwfn-igmh, multiwfn-igmh-run
+             Aliases for igmh-run.
   multiwfn-grid, scalar-cube-run, function-cube
              Aliases for grid-run.
   multiwfn-table-color, atom-table-color
@@ -137,6 +144,7 @@ Examples:
   multiwfn2vesta surface-extrema input.vesta surfanalysis.pdb output.vesta --surface-cube density.cub
   multiwfn2vesta cube-arith products --operation dual-descriptor --anion-cube anion.cub --neutral-cube neutral.cub --cation-cube cation.cub
   multiwfn2vesta iri-run input.molden iri_products --timeout 300
+  multiwfn2vesta igmh-run input.molden igmh_products --fragment 1-48 --fragment 49-60
   multiwfn2vesta grid-run input.molden grid_products --function density
   multiwfn2vesta abacus-mulliken-color input.vesta mulliken.txt colored.vesta
   multiwfn2vesta multiwfn-atom-color input.vesta atom_values.csv colored.vesta --value-column charge
@@ -483,6 +491,70 @@ def interactive_iri_run() -> int:
     return multiwfn_iri.main(argv)
 
 
+def interactive_igmh_run() -> int:
+    print("\nWavefunction -> Multiwfn IGMH cubes -> VESTA")
+    wavefunction = _prompt("wavefunction file (.molden/.fch/.wfn/etc.)", required=True)
+    output_dir = _prompt("output directory", default=_default_output_dir(wavefunction, "multiwfn_igmh"))
+    argv: List[str] = [wavefunction, output_dir]
+
+    while True:
+        fragment = _prompt("fragment atom indices, e.g. 1-48 or c (empty when done)", required=False)
+        if not fragment:
+            break
+        argv.extend(["--fragment", fragment])
+
+    multiwfn = _prompt("Multiwfn executable or directory (empty for auto-discovery)")
+    if multiwfn:
+        argv.extend(["--multiwfn", multiwfn])
+
+    nthreads = _prompt("Multiwfn -nt threads (empty for default)")
+    if nthreads:
+        argv.extend(["--nthreads", nthreads])
+
+    timeout = _prompt("timeout seconds (empty for no timeout)")
+    if timeout:
+        argv.extend(["--timeout", timeout])
+
+    stem = _prompt("output stem (empty for wavefunction stem)")
+    if stem:
+        argv.extend(["--stem", stem])
+
+    grid_mode = _prompt("grid mode (low/medium/high/points/spacing/cube/pbc-cell)", default="points")
+    argv.extend(["--grid-mode", grid_mode])
+    if grid_mode == "points":
+        grid_points = _prompt("grid points NX NY NZ", default="40 40 40")
+        parts = grid_points.split()
+        if len(parts) != 3:
+            print("Grid points need exactly three integers.")
+            return 2
+        argv.extend(["--grid-points", parts[0], parts[1], parts[2]])
+    elif grid_mode == "spacing":
+        spacing = _prompt("grid spacing in Bohr", required=True)
+        argv.extend(["--grid-spacing", spacing])
+    elif grid_mode == "cube":
+        reference_cube = _prompt("reference cube for grid", required=True)
+        argv.extend(["--grid-cube", reference_cube])
+
+    if _yes_no("skip VESTA generation", default=False):
+        argv.append("--no-vesta")
+    else:
+        preset = _prompt("VESTA cube preset", default="igmh")
+        argv.extend(["--preset", preset])
+        isosurface = _prompt("override isosurface value (empty for preset default)")
+        if isosurface:
+            argv.extend(["--isosurface", isosurface])
+        tex_range = _prompt("override physical texture range, e.g. -0.05 0.05 (empty for preset default)")
+        if tex_range:
+            parts = tex_range.split()
+            if len(parts) == 2:
+                argv.extend(["--tex-physical", parts[0], parts[1]])
+            else:
+                print("Texture range needs exactly two numbers.")
+                return 2
+
+    return multiwfn_igmh.main(argv)
+
+
 def interactive_grid_run() -> int:
     print("\nWavefunction -> Multiwfn real-space function cube -> VESTA")
     wavefunction = _prompt("wavefunction file (.molden/.fch/.wfn/etc.)", required=True)
@@ -648,6 +720,7 @@ def interactive_main() -> int:
     print("11) Cube arithmetic -> density difference/Fukui/dual descriptor VESTA")
     print("12) Multiwfn atom table -> VESTA atom colors")
     print("13) surfanalysis.pdb extrema -> VESTA overlay")
+    print("14) Wavefunction -> Multiwfn IGMH cubes -> VESTA")
     print("q) Quit")
     choice = _prompt("choice", default="3").lower()
     if choice in {"0", "discover", "where", "env"}:
@@ -673,6 +746,8 @@ def interactive_main() -> int:
         return interactive_cube_arith()
     if choice in {"7", "iri-run", "multiwfn-iri", "rdg-run"}:
         return interactive_iri_run()
+    if choice in {"14", "igmh-run", "multiwfn-igmh", "multiwfn-igmh-run"}:
+        return interactive_igmh_run()
     if choice in {"8", "abacus-mulliken-color", "mulliken-color", "atom-color"}:
         return interactive_abacus_mulliken_color()
     if choice in {"9", "abacus-molden", "molden", "abacus-multiwfn-molden"}:
@@ -707,6 +782,8 @@ def run_command(command: str, args: Sequence[str]) -> int:
         return cube_arith.main(args)
     if command == "iri-run":
         return multiwfn_iri.main(args)
+    if command == "igmh-run":
+        return multiwfn_igmh.main(args)
     if command == "grid-run":
         return multiwfn_grid.main(args)
     if command == "abacus-mulliken-color":

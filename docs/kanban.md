@@ -1,6 +1,30 @@
 # Project Kanban
 
-Updated: 2026-06-10 11:51 CST
+Updated: 2026-06-10 12:20 CST
+## Current Request: 2026-06-10 README and Branch Consolidation After IGMH Runner Draft
+
+- [x] Record the user's request: update README, inspect the unusual branch state, consolidate back to one branch if needed, and keep Git identity as `Stardust0831`.
+- [x] Audit current local/remote branch state after fetching/pruning, without discarding the in-progress `igmh-run` work.
+- [x] Finish and validate the in-progress IGMH command-stream wrapper if it is already in the worktree, because README should describe the actual maintained CLI surface.
+- [x] Refresh README and synchronized docs/work records so repository status, branch guidance, and usage notes are current.
+- [x] Real noGUI H2O smoke passed for `igmh-run`, generating `dg_inter.cub`, `sl2r.cub`, optional `dg_intra.cub`/`dg.cub`, and `h2o_igmh_cube.vesta`.
+- [x] Read-only pre-commit review found a PBC grid semantics risk; the runner now rejects `--grid-mode points` for Molden `[Cell]` inputs and docs steer periodic workflows to spacing or `pbc-cell`.
+- [x] Run focused and full no-GUI validation where feasible, then do a read-only review pass before committing: `py_compile`, 48 focused tests, 203-test full no-GUI regression, `git diff --check`, and `igmh-run --help` passed after the review fix.
+- [x] Prepare the stable commit and push on `main` as `Stardust0831`; final commit hash and post-push branch check are reported in the assistant response.
+
+## Current Request: 2026-06-10 IGMH Command-Stream Foundation
+
+- [x] Continue the long-running Multiwfn/ABACUS/VESTA objective after the
+  IGMH/aIGM display preset increment.
+- [x] Choose the next concrete increment: investigate and implement the first
+  maintainable Multiwfn IGM/IGMH command-stream wrapper so ABACUS Molden files
+  can produce `dg_inter.cub`/`sl2r.cub` without hand-driving Multiwfn.
+- [x] Inspect existing `aim-run`, `iri-run`, and `grid-run` runners plus the
+  Multiwfn IGMH source/menu prompts.
+- [x] Implement the smallest reliable `igmh-run` workflow with tests and docs,
+  then connect its output to `cube-preset igmh` when requested.
+- [x] Validate and review the implementation, including the PBC grid guard.
+- [x] Prepare the stable commit and push closure; final commit hash and post-push branch check are reported in the assistant response.
 
 ## Current Request: 2026-06-10 IGMH/aIGM Cube Presets
 

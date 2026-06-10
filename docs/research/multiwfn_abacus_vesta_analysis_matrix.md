@@ -64,6 +64,10 @@ Local smoke evidence:
 - Multiwfn noGUI IRI/RDG from H2O FCHK produced raw `func1.cub`/`func2.cub`,
   processed `h2o_IRI1.cub`/`h2o_IRI2.cub`, and `h2o_iri_cube.vesta` under
   `smoke/multiwfn_iri_run_smoke_20260610/`.
+- Multiwfn noGUI IGMH from H2O FCHK, fragments `1` and `2-3`, grid
+  `8 x 8 x 8`, produced `dg_inter.cub`, `sl2r.cub`, optional
+  `dg_intra.cub`/`dg.cub`, and `h2o_igmh_cube.vesta` under
+  `smoke/multiwfn_igmh_run_smoke_20260610/h2o/`.
 
 ## ABACUS Input Routes
 
@@ -94,7 +98,7 @@ occupations, and density derivatives from the wavefunction representation.
 | Electron density, spin density, Laplacian, kinetic density | Full wavefunction, or ABACUS density cubes for density only | Strong for density cube; Molden route for derivatives | `density.cub`, `spindensity.cub`, `laplacian.cub`, `K(r).cub`, `G(r).cub` | Single/positive-negative isosurfaces or slices | `grid-run` now covers density, spin density, Laplacian, and K(r)/G(r) single cubes |
 | ELF/LOL | Full wavefunction; ABACUS direct `out_elf` for ELF | Strong for ELF direct; Molden route for Multiwfn ELF/LOL | `ELF.cub`, `LOL.cub`, ABACUS `elf*.cube` | Isosurfaces around localized regions | `grid-run` now covers Multiwfn ELF/LOL; `cube-preset elf/lol` remains the VESTA writer |
 | AIM/QTAIM topology | Full wavefunction Molden/FCH/WFN/WFX | Feasible for Gamma LCAO Molden with `[Nval]`; validated on Ag(111)+benzene | `CPs.pdb`, `paths.pdb`, `CPprop.txt`, `mol.pdb` | Atoms-only pseudo-sites, no AIM bonds, optional labels | Already partly implemented; add ABACUS-aware recipes |
-| IGMH + AIM overlay | Full wavefunction and fragment definitions | Feasible for Gamma LCAO Molden; validated on Ag(111)+benzene | `dg_inter.cub`, `sl2r.cub`, AIM PDBs | Multi-phase VESTA density/texture plus AIM pseudo-sites | `cube-preset igmh` now writes the IGMH cube layer from existing `dg_inter.cub`/`sl2r.cub`; saved AIM+IGMH overlay styling is implemented; automate Multiwfn fragment command streams next |
+| IGMH + AIM overlay | Full wavefunction and fragment definitions | Feasible for Gamma LCAO Molden; validated on Ag(111)+benzene | `dg_inter.cub`, `sl2r.cub`, AIM PDBs | Multi-phase VESTA density/texture plus AIM pseudo-sites | `igmh-run` now automates the standard Multiwfn IGMH fragment stream and calls `cube-preset igmh`; saved AIM+IGMH overlay styling is implemented |
 
 ### P1: High Value, Needs More Glue
 
@@ -188,11 +192,14 @@ Known limitations:
    more real-system orbital batch smokes, possible future Multiwfn main
    function `200` integration if it proves more reliable than repeated
    isolated runs, end-to-end Fukui/dual-descriptor cube generation on shared
-   grids, and IGMH fragment command streams.  K(r)/G(r), ALIE, and
+   grids.  K(r)/G(r), ALIE, and
    promolecular RDG/sign(lambda2)rho table entries are now maintained.  The
    cube arithmetic foundation for density-difference/Fukui/dual-descriptor
    maps now exists as `multiwfn2vesta cube-arith`.
-6. Keep headless/no-focus VESTA rendering as a separate backend concern.
+6. Extend `igmh-run` beyond the standard IGMH stream if needed: IGM, mIGM,
+   aIGM, and more real ABACUS slab smokes should be added only after their
+   prompt streams are stable.
+7. Keep headless/no-focus VESTA rendering as a separate backend concern.
    Visualization products should remain useful as `.vesta` even when rendering
    is skipped.
 
@@ -206,6 +213,7 @@ Implemented or partly implemented:
 - `multiwfn2vesta cube-preset`
 - `multiwfn2vesta cube-arith`
 - `multiwfn2vesta iri-run`
+- `multiwfn2vesta igmh-run`
 - `multiwfn2vesta grid-run`
 - `multiwfn2vesta aim-run`
 - `multiwfn2vesta aim-pdb`
@@ -233,15 +241,15 @@ Main gaps:
   tables; remaining work is direct parsers for specialized raw Multiwfn menu
   transcripts.
 - Maintained Multiwfn command streams now exist for AIM, IRI/RDG, and
-  main-function-5 grid cubes as `multiwfn2vesta grid-run`, including repeated
-  isolated batch orbital/orbital-density export through `--orbitals`.
-  Remaining gaps are higher-level Fukui/dual-descriptor generation, IGMH
-  fragment automation, molecular-surface extrema overlays, and more
-  real-system templates.
+  IGMH, plus main-function-5 grid cubes as `multiwfn2vesta grid-run`,
+  including repeated isolated batch orbital/orbital-density export through
+  `--orbitals`.  Remaining gaps are higher-level Fukui/dual-descriptor
+  generation, IGM/mIGM/aIGM command streams, molecular-surface extrema
+  overlays, and more real-system templates.
 - Dual-cube surface texture workflows now have a preset entry point for
   IRI/RDG/NCI, IGM/IGMH/aIGM, ESP/MEP, ALIE/LEA/LEAE, generic surface maps,
-  and vdW maps, but still need cleaner end-to-end templates for automatically
-  running Multiwfn fragment menus.
+  and vdW maps.  Standard IGMH now has an end-to-end fragment runner; IGM,
+  mIGM, and aIGM still need their own maintained prompt streams.
 - Fukui/dual-descriptor visualization now has the cube-arithmetic bottom
   layer, but still needs higher-level charged-state generation templates and
   real chemistry smoke cases.

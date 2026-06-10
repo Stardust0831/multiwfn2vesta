@@ -1,5 +1,44 @@
 # Worklog
 
+## 2026-06-10: IGMH command-stream runner and README refresh
+
+- User asked to update README, make the branch state less confusing, merge
+  back to one branch if useful, and keep commit identity as `Stardust0831`.
+- Rechecked the repository after `git fetch --prune origin`: local `main`,
+  `origin/main`, and `origin/HEAD` are aligned, and `git ls-remote --heads
+  origin` exposes only `refs/heads/main`.  No merge-back is needed in this
+  pass.
+- Confirmed repository-local identity remains
+  `Stardust0831 <13862180016@163.com>`.
+- Added `multiwfn2vesta igmh-run`, a maintained Multiwfn IGMH command-stream
+  runner for wavefunction inputs and fragment definitions.  The default stream
+  enters main function `20`, selects IGMH option `11`, forwards two-or-more
+  fragment strings, selects a grid mode, exports `dg_inter.cub`/`sl2r.cub`,
+  then calls `cube-preset igmh` unless `--no-vesta` is used.
+- Integrated `igmh-run` into the unified CLI, aliases `multiwfn-igmh` and
+  `multiwfn-igmh-run`, the interactive menu, and package console scripts.
+  The existing top-level `igmh` alias remains the AIM+IGMH overlay styler.
+- Added focused tests for generated command streams, complement fragment
+  input, output copying, missing-cube failure handling, VESTA preset chaining,
+  and CLI error handling.
+- Read-only pre-commit review found a real periodic-grid risk: Multiwfn PBC
+  grid option `4` reads spacing through `setgrid_for_PBC`, while non-PBC
+  option `4` can read explicit `NX,NY,NZ`.  The runner now detects Molden
+  `[Cell]` and rejects `--grid-mode points` before launching Multiwfn; docs
+  steer periodic ABACUS workflows to `--grid-mode spacing` or `pbc-cell`, and
+  tests cover the guard and the `pbc-cell` stream.
+- Real noGUI smoke passed on H2O:
+  `/mnt/g/work/multiwfn2vesta/smoke/multiwfn_igmh_run_smoke_20260610/h2o/`.
+  The run used fragments `1` and `2-3`, grid `8 x 8 x 8`, generated
+  `h2o_dg_inter.cub`, `h2o_sl2r.cub`, optional `h2o_dg_intra.cub` and
+  `h2o_dg.cub`, plus `h2o_igmh_cube.vesta` without launching VESTA.
+- Refreshed README branch-status wording so it records the current one-branch
+  state without stale commit hashes, and documented `igmh-run` usage,
+  outputs, and relationship to `cube-preset igmh`.
+- Synced usage docs, CLI skill notes, the IGMH preset skill, new
+  `docs/skills/multiwfn_igmh_run_skill.md`, the research matrix, kanban, and
+  root docs.
+
 ## 2026-06-10: IGMH and aIGM cube presets
 
 - Continued the Multiwfn/ABACUS/VESTA roadmap by closing a display-layer gap
