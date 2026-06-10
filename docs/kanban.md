@@ -1,19 +1,34 @@
 # Project Kanban
 
-Updated: 2026-06-10
+Updated: 2026-06-10 09:29 CST
+
+## Current Request: 2026-06-10 README Branch Consolidation Refresh
+
+- [x] Record the user's request: update README, simplify/merge the branch
+  state if needed, and use identity `Stardust0831`.
+- [x] Rechecked project branch state with `git fetch --prune`,
+  `git status --short --branch`, `git branch --all --verbose --no-abbrev`,
+  and `git ls-remote --heads origin`.
+- [x] Confirmed no merge is needed in this pass: local `main`,
+  `origin/main`, and `origin/HEAD` all point at
+  `2481cf79c87666503ea8d8186b4b76fba05b2847`, and the GitHub remote exposes
+  only `refs/heads/main`.
+- [x] Confirmed repository-local identity remains
+  `Stardust0831 <13862180016@163.com>`.
+- [x] Refresh README repository-status wording so the current single-branch
+  state is clear and old branch-audit details do not read like competing
+  active states.
+- [x] Sync project/root work records with this branch audit.
+- [ ] Validate, commit, push, and run a final branch/identity verification.
 
 ## Doing
 
-- Current increment: extend `multiwfn2vesta grid-run` with a batch
-  `orbital`/`orbital-density` export mode for ABACUS/Multiwfn Molden orbital
-  visualization.  The intended shape is multiple single-orbital runs with
-  separate command/log/recipe files, plus one batch manifest.
 - Continue the long-running objective: research and turn valuable
   Multiwfn wavefunction analyses into maintained VESTA workflows, especially
-  routes that can start from ABACUS LCAO Molden files.  The latest in-progress
-  increment is batch orbital export on top of `grid-run`; next likely targets
-  are higher-level charged-state cube templates, IGMH fragment command streams,
-  and more real ABACUS Molden smokes.
+  routes that can start from ABACUS LCAO Molden files.  The batch orbital
+  `grid-run` increment is now complete and pushed; next likely targets are
+  higher-level charged-state cube templates, IGMH fragment command streams,
+  Multiwfn atom scalar parsers, and more real ABACUS Molden smokes.
 - Turn the 2026-06-10 Multiwfn/ABACUS/VESTA research into the next
   maintainable features: IGMH command streams, real-system `abacus-molden`
   smoke coverage, Multiwfn atom scalar parsers, and more real IRI/RDG

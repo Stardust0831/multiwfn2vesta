@@ -1,5 +1,27 @@
 # Worklog
 
+## 2026-06-10: README branch consolidation refresh
+
+- User asked to update README again, noted that the branch state looked odd,
+  suggested merging back to one branch if needed, and requested identity
+  `Stardust0831`.
+- Rechecked `/mnt/g/work/multiwfn2vesta/project` with
+  `git fetch --prune origin`, `git status --short --branch`,
+  `git branch --all --verbose --no-abbrev`, and
+  `git ls-remote --heads origin`.
+- Result: local `main`, `origin/main`, and `origin/HEAD` all point at
+  `2481cf79c87666503ea8d8186b4b76fba05b2847`
+  (`Record batch orbital push`), and the GitHub remote exposes only
+  `refs/heads/main`.  There is no local or remote feature branch to merge in
+  this pass.
+- Confirmed repository-local identity remains
+  `Stardust0831 <13862180016@163.com>`.
+- Refreshed `README.md` so its Repository Status section records the current
+  verified branch tip, states explicitly that no merge action is needed, and
+  describes future experiment branches as short-lived branches that should be
+  merged or fast-forwarded back to `main`.
+- Synced project/root kanban and worklog entries with this branch audit.
+
 ## 2026-06-10: Batch orbital grid export and README branch refresh
 
 - User asked to refresh README, simplify the branch state if needed, and keep

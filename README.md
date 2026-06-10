@@ -14,31 +14,29 @@ point.
 - Maintained branch: `main`.
 - GitHub remote: `origin` points to `Github:Stardust0831/multiwfn2vesta.git`,
   with `origin/HEAD -> origin/main`.
-- Latest local/remote branch audits on 2026-06-10 confirmed the same branch
-  layout: local `main` tracks `origin/main`, `origin/HEAD` points to
-  `origin/main`, and `git ls-remote --heads origin` returns only
-  `refs/heads/main`.
-- Current cleanup result on 2026-06-10: there is no extra local or remote
-  feature branch to merge back, so no merge action is required.  The
-  apparently strange branch history is already represented as commits on
-  `main`.
-- Current 2026-06-10 cleanup pass: the branch state is already consolidated
-  to `main`; the useful experiment history is represented as normal commits
-  on `main`.  The active maintained increment extends `grid-run` with batch
-  `orbital`/`orbital-density` export through repeated isolated single-orbital
-  Multiwfn runs.
-- Batch orbital export was pushed to `main` as
+- Branch audit at the start of the 2026-06-10 09:29 CST README refresh, after
+  `git fetch --prune origin`: local `main`, `origin/main`, and
+  `origin/HEAD` all pointed at
+  `2481cf79c87666503ea8d8186b4b76fba05b2847`
+  (`Record batch orbital push`), and `git ls-remote --heads origin` returns
+  only `refs/heads/main`.  Later README/worklog commits may advance `main`;
+  they do not indicate a new branch.
+- Current cleanup result: there is no extra local or remote feature branch to
+  merge back.  The apparently strange branch history has already been
+  consolidated as normal commits on `main`.
+- Most recent maintained feature implementation: batch orbital export on top
+  of `grid-run`, pushed as
   `dcf7bd3cac0684f48f16ebd06458345b929837fd`
-  (`Add batch orbital grid export`).  Post-push verification showed local
-  `HEAD`, `origin/main`, and `origin/HEAD` all at `dcf7bd3`; the remote still
-  exposes only `refs/heads/main`.
+  (`Add batch orbital grid export`).  Documentation closure commits after a
+  feature commit are normal `main` commits, not separate branches.
 - Recent maintained feature pushes on 2026-06-10 include `grid-run`
-  (`3d192dc7ae9696dd433aae04e1a3bdb488b95482`) and `cube-arith`
-  (`4123d00ae051a710c954ed3c3712aa8b012c4bc0`).  Later documentation commits
+  (`3d192dc7ae9696dd433aae04e1a3bdb488b95482`), `cube-arith`
+  (`4123d00ae051a710c954ed3c3712aa8b012c4bc0`), and batch orbital export
+  (`dcf7bd3cac0684f48f16ebd06458345b929837fd`).  Later documentation commits
   may advance `main`, but they do not introduce extra branches.
-- Previous experiment branches should be treated as short-lived workspaces:
-  merge or fast-forward the useful commits into `main`, then remove the
-  experiment branch once `origin/main` contains the maintained result.
+- Future experiment branches should be short-lived: merge or fast-forward the
+  useful commits into `main`, then remove the experiment branch once
+  `origin/main` contains the maintained result.
 - Repository-local commit identity is
   `Stardust0831 <13862180016@163.com>`.
 
