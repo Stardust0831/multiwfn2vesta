@@ -68,6 +68,16 @@ multiwfn2vesta grid-run --list-functions
 - `alie`, aliases `average-local-ionization-energy`, `avglocion`: function
   `18`, raw `avglocion.cub`, preset `density`; mapped preset `alie` with
   `--surface-cube`.
+- `electron-delocalization-range`, aliases `edr`, `edr-r-d`,
+  `electron-delocalization-range-function`: function `20`, raw `EDR.cub`,
+  preset `electron-delocalization-range` with a single positive isosurface.
+  `grid-run` requires `--edr-length D_BOHR` because Multiwfn asks for the
+  EDR length scale before grid setup.
+- `orbital-overlap-distance`, aliases `orbital-overlap-length`, `edrdmax`,
+  `edr-dmax`, `d-r`, `d(r)`: function `21`, raw `EDRDmax.cub`, preset
+  `orbital-overlap-distance` with a single positive isosurface.  Omit
+  `--edr-exponents` to use Multiwfn's default exponent set `20, 2.50, 1.50`,
+  or pass `--edr-exponents COUNT START INCREMENT` for manual control.
 - `delta-g`, aliases `deltag`, `delta_g`, `promolecular-deltag`,
   `delta-g-promol`: function `22`, raw `Delta_g.cub`, preset
   `promolecular-delta-g` with a single positive isosurface.  This is
@@ -208,6 +218,8 @@ multiwfn2vesta grid-run input.fch products --function esp --no-vesta
 multiwfn2vesta grid-run input.fch products --function esp --surface-cube density.cub --grid-mode cube --grid-cube density.cub
 multiwfn2vesta grid-run input.fch products --function hamiltonian-ked --no-vesta
 multiwfn2vesta grid-run input.fch products --function alie --no-vesta
+multiwfn2vesta grid-run input.fch products --function edr --edr-length 0.85
+multiwfn2vesta grid-run input.fch products --function edrdmax --edr-exponents 12 3.0 1.2
 multiwfn2vesta grid-run input.fch products --function delta-g
 multiwfn2vesta grid-run input.fch products --function vdw-potential
 ```

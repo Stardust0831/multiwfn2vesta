@@ -1,6 +1,53 @@
 # Project Kanban
 
-Updated: 2026-06-10 21:38 CST
+Updated: 2026-06-10 21:58 CST
+
+## Active Goal Continuation: 2026-06-10 Next Multiwfn VESTA Analysis Gap
+
+- [x] Record automatic continuation of the long-running objective: keep
+  researching valuable Multiwfn wavefunction/grid analyses that can be
+  visualized in VESTA, especially workflows that ABACUS can feed through
+  LCAO Molden or direct cube outputs.
+- [x] Inspect the current implemented coverage, local Multiwfn 2026.6.2
+  source, and research matrix to choose the next source-backed, bounded
+  feature increment.
+- [x] Implement the selected increment with tests and documentation, keeping
+  standalone single-cube routes separate from mapped surface/texture routes.
+- [x] Sync root docs mirror, validate, review, commit, push, and verify
+  `main` remains aligned with `origin/main`.
+
+## Active Implementation: 2026-06-10 EDR and Orbital-Overlap Distance
+
+- [x] Record user request: update README, inspect unusual branch state,
+  merge/consolidate back to one branch where appropriate, and use identity
+  `Stardust0831`.
+- [x] Inspect current branch/remote/status without disturbing existing work:
+  local `main`, `origin/main`, and `origin/HEAD` are aligned at
+  `6de6b017d8fa8b66cde24731ca5403081201a0b4`; `git ls-remote --heads
+  origin` exposes only `refs/heads/main`; no extra branch needs merging.
+- [x] Preserve local probes: `domain.cub` and `domain.pdb` remain untracked
+  and must not be staged unless explicitly promoted later.
+- [x] Select this bounded increment: Multiwfn 2026.6.2 source shows function
+  `20` EDR(r;d) asks for length scale `d` in Bohr and exports `EDR.cub`;
+  function `21` D(r) accepts default or manual EDR exponent parameters and
+  exports `EDRDmax.cub`; both keep the global main-function-5
+  `sur_value=0.05`.
+- [x] Add `cube-preset electron-delocalization-range` and
+  `cube-preset orbital-overlap-distance`.
+- [x] Add `grid-run --function edr --edr-length D_BOHR` and
+  `grid-run --function edrdmax [--edr-exponents COUNT START INCREMENT]`,
+  including command-stream validation and recipe fields.
+- [x] Update focused tests, README, usage docs, skills, research matrix, and
+  worklog.
+- [x] Sync root docs mirror, run full validation, collect read-only review,
+  commit, push, and verify `main`/`origin/main` alignment.  Validation
+  passed: focused `py_compile`, 72 focused tests across
+  `tests.test_cube_preset tests.test_multiwfn_grid`, full 288-test no-GUI
+  regression, `cube-preset --list-presets`, `grid-run --list-functions`,
+  `grid-run --help`, `bin/multiwfn2vesta --help`, root-docs checksum
+  mirror, and `git diff --check`.  Read-only review found no High blocker;
+  the two Medium workflow notes were addressed by excluding `domain.cub` /
+  `domain.pdb` from staging and syncing the root docs mirror.
 
 ## Active Implementation: 2026-06-10 Standalone vdW Potential Cube Preset
 
@@ -125,7 +172,10 @@ Updated: 2026-06-10 21:38 CST
 - [x] Inspect current source-backed grid-function gaps: Multiwfn 2026.6.2
   `function.f90` lists function `11` as local information entropy and
   `0123dim.f90` exports it as `infoentro.cub`; Fermi hole/source function/EDR
-  remain deferred because they need reference points or extra EDR parameters.
+  were deferred at that time because they needed reference points or extra
+  EDR parameters.  EDR/D(r) was later implemented in the 2026-06-10 EDR and
+  orbital-overlap distance increment above; reference-point functions remain
+  deferred.
 - [x] Add a maintained `cube-preset` and `grid-run` mapping for
   `infoentro.cub`, with focused tests and docs: implemented
   `cube-preset local-information-entropy`, mapped `grid-run --function
@@ -1388,3 +1438,10 @@ Updated: 2026-06-10 21:38 CST
 - If the user asks for fresh PNGs, either run an explicitly accepted
   focus-stealing VESTA CLI export or continue the Linux/local-library
   non-focus route first.
+## Incoming Request: 2026-06-10 README and Branch Hygiene
+
+- [x] Record user request: update README, inspect unusual branch state, merge/consolidate back to one branch where appropriate, and use identity `Stardust0831`.
+- [ ] Inspect current branch/remote/status without disturbing existing work.
+- [ ] Finish or reconcile in-progress documentation/code edits before README update.
+- [ ] Update README and mirrored docs consistently.
+- [ ] Validate, review, commit, and push with `Stardust0831` identity.

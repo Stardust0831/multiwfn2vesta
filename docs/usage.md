@@ -58,7 +58,8 @@ multiwfn2vesta aim-igmh --help
 - `cube-preset`: 在 `cube-vesta` 后端上套用常见分析默认值，例如 density、
   orbital/signed、spin density、Laplacian、K(r)/G(r)、ABACUS direct
   potential、partial charge、wavefunction norm、ELF/LOL、IRI/RDG/NCI、
-  IGM/IGMH/aIGM、ESP/MEP、ALIE/LEA/LEAE、standalone vdW potential、vdW map
+  EDR(r;d)、D(r)、IGM/IGMH/aIGM、ESP/MEP、ALIE/LEA/LEAE、
+  standalone vdW potential、vdW map
 - `surface-extrema`: 把 Multiwfn `surfanalysis.pdb` 的分子表面极值点作为
   atoms-only phase 叠加到已有 `.vesta` 文件中
 - `cube-arith`: 对兼容 cube 做线性组合，用于 density difference、
@@ -76,8 +77,9 @@ multiwfn2vesta aim-igmh --help
   或 `cube-preset aigm-tfi` 写 mapped-surface `.vesta`
 - `grid-run`: 从 Multiwfn 可读波函数文件调用主菜单 `5` 的 real-space
   function grid，导出 density、MO/orbital、Laplacian、K(r)/G(r)、ELF、LOL、
-  ESP/MEP、ALIE、RDG/IRI-like、promolecular RDG/sign(lambda2)rho 等单 cube，
-  并可自动接 `cube-preset` 写 `.vesta`
+  ESP/MEP、ALIE、EDR(r;d)、D(r)、RDG/IRI-like、
+  promolecular RDG/sign(lambda2)rho 等单 cube，并可自动接 `cube-preset`
+  写 `.vesta`
 - `fukui-run`: 从中性、阴离子、阳离子波函数分别生成共享格点的 density
   cube，再调用 `cube-arith` 生成 Fukui+/Fukui-/dual descriptor cube 和
   可选 `.vesta`
@@ -221,6 +223,8 @@ multiwfn2vesta cube-preset laplacian laplacian.cub cube_products
 multiwfn2vesta cube-preset hamiltonian-ked 'K(r).cub' cube_products
 multiwfn2vesta cube-preset lagrangian-ked 'G(r).cub' cube_products
 multiwfn2vesta cube-preset local-information-entropy infoentro.cub cube_products
+multiwfn2vesta cube-preset electron-delocalization-range EDR.cub cube_products
+multiwfn2vesta cube-preset orbital-overlap-distance EDRDmax.cub cube_products
 multiwfn2vesta cube-preset rdg-scalar RDG.cub cube_products
 multiwfn2vesta cube-preset promolecular-rdg RDGprodens.cub cube_products
 multiwfn2vesta cube-preset promolecular-delta-g Delta_g.cub cube_products
@@ -273,6 +277,16 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
   Multiwfn `infoentro.cub`；Multiwfn 函数 `11` 计算局部信息熵
   `-rho/N*ln(rho/N)`，源码没有重设等值面，因此默认幅值沿用全局
   `sur_value=0.05`
+- `electron-delocalization-range`：单正值等值面，别名包括 `edr`、
+  `edr-r-d`，用于 Multiwfn 函数 `20` 的 `EDR.cub`；`grid-run` 需要
+  `--edr-length D_BOHR`，因为 Multiwfn 在格点设置前询问 EDR 长度标度
+  `d`，单位 Bohr；源码没有重设等值面，因此默认沿用全局
+  `sur_value=0.05`
+- `orbital-overlap-distance`：单正值等值面，别名包括
+  `orbital-overlap-length`、`edrdmax`、`edr-dmax`、`d(r)`，用于
+  Multiwfn 函数 `21` 的 `EDRDmax.cub`；不传 `--edr-exponents` 时使用
+  Multiwfn 默认指数集合 `20, 2.50, 1.50`，也可传
+  `--edr-exponents COUNT START INCREMENT` 手动控制
 - `rdg-scalar`：单正值等值面，别名包括 `rdg-cube`、
   `reduced-density-gradient`，用于单 cube 的 Multiwfn `RDG.cub`，默认
   等值面 `0.5`；双 cube 的 RDG/NCI 染色图仍用 `cube-preset iri`
@@ -524,6 +538,13 @@ multiwfn2vesta grid-run --list-functions
 - `local-information-entropy` / `information-entropy`：函数 `11`，原始
   输出 `infoentro.cub`，默认接 `cube-preset local-information-entropy`，
   按正/负等值面显示，默认幅值 `0.05`
+- `electron-delocalization-range` / `edr`：函数 `20`，原始输出
+  `EDR.cub`，默认接 `cube-preset electron-delocalization-range`，按单正值
+  等值面显示；必须传 `--edr-length D_BOHR`
+- `orbital-overlap-distance` / `edrdmax`：函数 `21`，原始输出
+  `EDRDmax.cub`，默认接 `cube-preset orbital-overlap-distance`，按单正值
+  等值面显示；默认使用 Multiwfn 指数集合 `20, 2.50, 1.50`，可用
+  `--edr-exponents COUNT START INCREMENT` 覆盖
 - `esp`、`nuclear-esp`、`signlambda2rho`：默认按 signed scalar 处理；配合
   `--surface-cube` 时，ESP/nuclear ESP 默认走 `cube-preset esp`，
   sign(lambda2)rho 默认走 `cube-preset iri`
@@ -558,6 +579,18 @@ multiwfn2vesta grid-run input.fch grid_products \
   --orbital h \
   --grid-mode points \
   --grid-points 80 80 80
+
+multiwfn2vesta grid-run input.fch grid_products \
+  --function edr \
+  --edr-length 0.85 \
+  --grid-mode points \
+  --grid-points 120 120 120
+
+multiwfn2vesta grid-run input.fch grid_products \
+  --function edrdmax \
+  --edr-exponents 12 3.0 1.2 \
+  --grid-mode points \
+  --grid-points 120 120 120
 ```
 
 批量导出多个轨道：

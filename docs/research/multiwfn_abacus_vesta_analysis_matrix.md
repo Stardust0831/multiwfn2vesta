@@ -157,6 +157,7 @@ occupations, and density derivatives from the wavefunction representation.
 | Molecular surface mapped properties | Full wavefunction or cube pair | Feasible through Molden; ABACUS can provide density/potential cubes | `surf.cub`, `mapfunc.cub`, `density.cub`, `avglocion.cub`, `surfanalysis.pdb` | Surface cube plus texture; extrema as atoms-only overlay phase | `cube-preset surface-map` covers surface+texture display using `molsurfmap.vmd` defaults; `--surfanalysis-pdb` and `surface-extrema` overlay surface extrema |
 | ALIE / LEA / LEAE | Full wavefunction, occupied/virtual orbitals | Feasible only if ABACUS Molden orbitals/energies are adequate; virtual levels in metals risky | `avglocion.cub`, `userfunc.cub`, `surfanalysis.pdb` | Colored density surface plus extrema points | `grid-run --function alie --surface-cube density.cub` now generates ALIE texture maps directly; `cube-preset alie/lea/leae` remains the lower-level display layer and auto-selects extrema from `surfanalysis.pdb` |
 | Information-theory density functions | Full wavefunction Molden/FCH/WFN; local information entropy is a normal main-function-5 grid function | Feasible for Gamma LCAO Molden; interpretation depends on the NAO2GTO density quality | `infoentro.cub`, possible future user-function Shannon/Fisher cubes | Signed scalar isosurfaces or slices | `grid-run --function local-information-entropy` now exports Multiwfn function `11` `infoentro.cub`; `cube-preset local-information-entropy` provides a signed display default |
+| Electron delocalization / orbital overlap distance | Full wavefunction Molden/FCH/WFN | Feasible for Gamma LCAO Molden; parameter choice needs chemical interpretation | `EDR.cub`, `EDRDmax.cub` | Single positive scalar isosurfaces or slices | `grid-run --function edr --edr-length D_BOHR` now exports function `20` `EDR.cub`; `grid-run --function edrdmax` exports function `21` `EDRDmax.cub`, using Multiwfn's default exponent set unless `--edr-exponents COUNT START INCREMENT` is supplied; `cube-preset electron-delocalization-range` and `cube-preset orbital-overlap-distance` provide display defaults |
 | vdW/repulsion/dispersion potential | Structure and/or wavefunction depending option | Feasible, often structure driven | `vdW.cub`, `repul.cub`, `disp.cub`, `density.cub`, `vdWpot.cub` | Standalone signed potential isosurfaces, potential slices, or density-surface context | `cube-preset vdw-potential` now covers standalone Multiwfn function `25` `vdWpot.cub` with `+/-1.0` kcal/mol surfaces; `grid-run --function vdw-potential` routes to it by default, while `grid-run --function vdw-potential --surface-cube density.cub` and `cube-preset vdw-map` remain the mapped density/surface route |
 | Atom scalar coloring | Per-atom values from Multiwfn or ABACUS `mulliken.txt` | Strong for ABACUS `out_mul`; also charges/Fukui from Multiwfn | CSV/table, `mulliken.txt` | Patch `SITET` RGB values | ABACUS Mulliken parser implemented; generic Multiwfn atom table parser implemented as `multiwfn2vesta multiwfn-atom-color` |
 
@@ -347,9 +348,14 @@ Main gaps:
 - Local information entropy now has a distinct `cube-preset
   local-information-entropy` route and `grid-run --function
   information-entropy` maps to Multiwfn function `11` `infoentro.cub`.
-  Reference-point functions such as Fermi hole and source function, and
-  extra-parameter functions such as EDR/D(r), remain deferred until their
-  prompt streams are bounded.
+- EDR(r;d) and orbital-overlap distance D(r) now have distinct
+  `cube-preset electron-delocalization-range` and
+  `cube-preset orbital-overlap-distance` routes; `grid-run --function edr`
+  maps to Multiwfn function `20` `EDR.cub` and requires
+  `--edr-length D_BOHR`, while `grid-run --function edrdmax` maps to
+  function `21` `EDRDmax.cub` and accepts optional `--edr-exponents`.
+  Reference-point functions such as Fermi hole and source function remain
+  deferred until their prompt streams are bounded.
 - Promolecular Delta-g now has a distinct `cube-preset
   promolecular-delta-g` route and `grid-run --function delta-g` maps to
   Multiwfn function `22` `Delta_g.cub`.  This is a single-cube promolecular

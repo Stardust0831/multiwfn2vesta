@@ -224,6 +224,36 @@ PRESETS: Tuple[CubePreset, ...] = (
         ),
     ),
     CubePreset(
+        name="electron-delocalization-range",
+        aliases=("edr", "edr-r-d", "electron-delocalization-range-function"),
+        description="Single positive isosurface for Multiwfn EDR(r;d) cubes.",
+        surface_mode="single",
+        isosurface=0.05,
+        positive_rgb=(105, 210, 180),
+        surface_opacity=(145, 255),
+        notes=(
+            "Use for Multiwfn EDR.cub from real-space function 20. "
+            "Multiwfn asks for the EDR length scale d in Bohr before grid setup. "
+            "The source does not reset sur_value for this function, so the default follows "
+            "the global main-function-5 sur_value=0.05."
+        ),
+    ),
+    CubePreset(
+        name="orbital-overlap-distance",
+        aliases=("orbital-overlap-length", "edrdmax", "edr-dmax", "d-r", "d(r)"),
+        description="Single positive isosurface for Multiwfn orbital-overlap distance D(r) cubes.",
+        surface_mode="single",
+        isosurface=0.05,
+        positive_rgb=(115, 170, 255),
+        surface_opacity=(145, 255),
+        notes=(
+            "Use for Multiwfn EDRDmax.cub from real-space function 21. "
+            "Multiwfn can use its default EDR exponent set 20, 2.50, 1.50 or manually supplied "
+            "exponent count/start/increment values. The source does not reset sur_value for this function, "
+            "so the default follows the global main-function-5 sur_value=0.05."
+        ),
+    ),
+    CubePreset(
         name="rdg-scalar",
         aliases=("rdg-cube", "scalar-rdg", "reduced-density-gradient"),
         description="Single positive isosurface for standalone RDG scalar cubes.",

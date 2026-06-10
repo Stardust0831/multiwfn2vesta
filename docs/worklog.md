@@ -1,5 +1,40 @@
 # Worklog
 
+## 2026-06-10: EDR and orbital-overlap distance cube presets
+
+- User requested a README refresh, branch-state audit, possible one-branch
+  closeout, and continued use of the `Stardust0831` git identity while an
+  automatic continuation had started another Multiwfn grid-analysis
+  increment.
+- Rechecked repository state: local `main`, `origin/main`, and
+  `origin/HEAD` were aligned at
+  `6de6b017d8fa8b66cde24731ca5403081201a0b4` (`Add standalone vdW potential
+  cube preset`); `git ls-remote --heads origin` exposed only
+  `refs/heads/main`; no extra local or remote branch needed merging.
+- Added `cube-preset electron-delocalization-range` for Multiwfn function
+  `20` `EDR.cub`, with aliases including `edr`, and a single positive
+  `0.05` isosurface default.
+- Added `cube-preset orbital-overlap-distance` for Multiwfn function `21`
+  `EDRDmax.cub`, with aliases including `edrdmax` and `d(r)`, and a single
+  positive `0.05` isosurface default.
+- Updated `grid-run` with function-table entries for functions `20` and
+  `21`; function `20` requires `--edr-length D_BOHR`, and function `21` uses
+  Multiwfn's default exponent set `20, 2.50, 1.50` unless
+  `--edr-exponents COUNT START INCREMENT` is supplied.
+- Rechecked local Multiwfn 2026.6.2 source evidence: `function.f90`
+  prompts function `20` for length scale `d` in Bohr and function `21` for
+  either default or manual EDR exponent parameters; `0123dim.f90` exports
+  `EDR.cub` and `EDRDmax.cub`; neither function resets the global
+  main-function-5 `sur_value=0.05`.
+- Added focused tests for preset listing, alias resolution, command streams,
+  EDR parameter validation, fake Multiwfn `EDR.cub`/`EDRDmax.cub` runs,
+  recipe fields, and VESTA manifest defaults.
+- Updated README, usage docs, CLI/cube/grid/ABACUS skills, the analysis
+  matrix, and kanban.  The README branch audit now records that `main` and
+  `origin/main` are aligned at `6de6b017...` before this closeout and that no
+  branch merge-back is needed.
+- Local untracked probes `domain.cub` and `domain.pdb` remain uncommitted.
+
 ## 2026-06-10: Standalone vdW potential cube display preset
 
 - User requested a README refresh, branch-state audit, possible one-branch
@@ -101,9 +136,11 @@
   `-rho/N*ln(rho/N)`; `0123dim.f90` exports `infoentro.cub` and does not
   reset `sur_value`, so the maintained default follows the global
   main-function-5 `sur_value=0.05`.
-- Deferred Fermi hole/source function/EDR/D(r) cube routes because they need
-  reference points or extra EDR parameters beyond the stable single-function
-  `grid-run` stream.
+- At that time, Fermi hole/source function and EDR/D(r) cube routes were
+  deferred because they needed reference points or extra prompt parameters;
+  EDR/D(r) was later implemented as the dedicated 2026-06-10 EDR and
+  orbital-overlap distance increment above, while reference-point functions
+  remain deferred.
 - Added focused tests for preset listing, signed `ISURF` defaults, manifest
   notes, function alias resolution, and a fake Multiwfn
   `grid-run --function information-entropy` run that verifies the recipe and

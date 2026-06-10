@@ -18,10 +18,10 @@ point.
   GitHub remote.
 - GitHub remote: `origin` points to `Github:Stardust0831/multiwfn2vesta.git`,
   with `origin/HEAD -> origin/main`.
-- Branch audit on 2026-06-10 21:23 CST found local `main`, `origin/main`, and
+- Branch audit on 2026-06-10 21:47 CST found local `main`, `origin/main`, and
   `origin/HEAD` aligned at
-  `fae7ac12d9a6d1fadbeda7a60c484752a643c23f`
-  (`Add promolecular delta-g cube preset`) before this README/status
+  `6de6b017d8fa8b66cde24731ca5403081201a0b4`
+  (`Add standalone vdW potential cube preset`) before this README/status
   closeout.
 - `git ls-remote --heads origin` currently returns only `refs/heads/main`; no
   merge-back was needed in this pass because there is no extra local or remote
@@ -37,7 +37,8 @@ point.
   competing branches.
 - Recent maintained feature work includes dedicated VESTA presets for
   Multiwfn gradient norm, spin-density, orbital-density, Laplacian, K(r),
-  G(r), local information entropy, standalone RDG, promolecular RDG,
+  G(r), local information entropy, electron delocalization range EDR(r;d),
+  orbital-overlap distance D(r), standalone RDG, promolecular RDG,
   promolecular Delta-g, standalone IRI scalar, and standalone vdW potential
   cubes, ABACUS direct cube presets for potential, partial-charge, and
   wavefunction-norm cubes,
@@ -98,7 +99,8 @@ then delete the temporary branch.
 - Apply analysis-oriented cube presets for common ABACUS/Multiwfn products
   such as density, orbitals/wavefunctions, orbital density, spin density,
   Laplacian, K(r)/G(r) kinetic-density cubes, standalone RDG/promolecular
-  RDG, promolecular Delta-g, standalone IRI scalar, standalone vdW
+  RDG, promolecular Delta-g, local information entropy, EDR(r;d),
+  orbital-overlap distance D(r), standalone IRI scalar, standalone vdW
   potential, ABACUS direct potential, partial charge, wavefunction norm
   cubes, ELF/LOL, IRI/RDG/NCI, ESP/MEP, IGM/IGMH/aIGM weak-interaction maps,
   ALIE/LEA/LEAE, and vdW-potential mapped surfaces.
@@ -126,8 +128,9 @@ then delete the temporary branch.
 - Run Multiwfn main function `5` real-space grid generation from a
   wavefunction file, export density, orbital/MO, Laplacian, K(r)/G(r)
   kinetic-energy-density cubes, ELF, LOL, ESP/MEP, ALIE, RDG/IRI-like,
-  promolecular RDG/sign(lambda2)rho, promolecular Delta-g, and related
-  scalar cubes, export multiple orbitals through isolated batch runs,
+  promolecular RDG/sign(lambda2)rho, local information entropy, EDR(r;d),
+  orbital-overlap distance D(r), promolecular Delta-g, and related scalar
+  cubes, export multiple orbitals through isolated batch runs,
   optionally write VESTA files through `cube-preset`, and map generated
   ESP/ALIE/vdW/sign(lambda2)rho cubes as textures on a provided
   density/surface cube.
@@ -212,6 +215,12 @@ multiwfn2vesta aigm-run trajectory.xyz aigm_products \
   --grid-mode spacing --grid-spacing 0.25
 multiwfn2vesta grid-run input.molden grid_products --function density
 multiwfn2vesta grid-run input.molden grid_products --function vdw-potential
+multiwfn2vesta grid-run input.molden grid_products \
+  --function edr \
+  --edr-length 0.85
+multiwfn2vesta grid-run input.molden grid_products \
+  --function edrdmax \
+  --edr-exponents 12 3.0 1.2
 multiwfn2vesta grid-run input.molden esp_map \
   --function esp \
   --surface-cube density.cub \
@@ -297,6 +306,8 @@ multiwfn2vesta cube-preset laplacian laplacian.cub cube_products
 multiwfn2vesta cube-preset hamiltonian-ked 'K(r).cub' cube_products
 multiwfn2vesta cube-preset lagrangian-ked 'G(r).cub' cube_products
 multiwfn2vesta cube-preset local-information-entropy infoentro.cub cube_products
+multiwfn2vesta cube-preset electron-delocalization-range EDR.cub cube_products
+multiwfn2vesta cube-preset orbital-overlap-distance EDRDmax.cub cube_products
 multiwfn2vesta cube-preset rdg-scalar RDG.cub cube_products
 multiwfn2vesta cube-preset promolecular-rdg RDGprodens.cub cube_products
 multiwfn2vesta cube-preset promolecular-delta-g Delta_g.cub cube_products
@@ -328,8 +339,9 @@ Available presets can be listed with `multiwfn2vesta cube-preset
 --list-presets`.  Current presets cover density-like scalar cubes, signed
 orbital/wavefunction/density-difference cubes, Multiwfn gradient norm,
 orbital-density, spin-density, Laplacian, K(r), G(r), local information
-entropy, standalone RDG, promolecular RDG, and standalone IRI scalar cubes,
-standalone vdW potential cubes, direct ABACUS potential cubes, ABACUS
+entropy, electron delocalization range, orbital-overlap distance, standalone
+RDG, promolecular RDG, and standalone IRI scalar cubes, standalone vdW
+potential cubes, direct ABACUS potential cubes, ABACUS
 partial-charge/state-density cubes, nonnegative ABACUS wavefunction norm
 cubes, ELF/LOL cubes, IRI/RDG/NCI mapped surfaces, STM/LDOS
 tunneling-current surfaces, binary domain isosurfaces, binary basin
@@ -349,6 +361,13 @@ when a vdW potential cube should color a density/surface cube.  Use
 `potential` for direct `out_pot`/potential cube isosurfaces.  Use `esp`
 when a density or molecular surface cube should be colored by a potential
 texture cube.
+
+Use `electron-delocalization-range`/`edr` for Multiwfn function `20`
+`EDR.cub`; `grid-run` requires `--edr-length D_BOHR` because Multiwfn asks
+for the EDR length scale before grid setup.  Use
+`orbital-overlap-distance`/`edrdmax` for function `21` `EDRDmax.cub`; omit
+`--edr-exponents` to use Multiwfn's default exponent set `20, 2.50, 1.50`,
+or pass `--edr-exponents COUNT START INCREMENT` for manual control.
 
 When Multiwfn main function `12` has exported `surfanalysis.pdb`,
 `cube-preset --surfanalysis-pdb` embeds surface maxima/minima as an extra
@@ -526,6 +545,15 @@ Common functions:
   Multiwfn evaluates function `11` as local information entropy
   `-rho/N*ln(rho/N)` and keeps the global main-function-5 default
   `sur_value=0.05`.
+- `electron-delocalization-range` / `edr`: function `20`, raw `EDR.cub`,
+  preset `electron-delocalization-range`, single positive surface by default.
+  Pass `--edr-length D_BOHR`; Multiwfn asks for this EDR length scale before
+  grid setup and keeps the global main-function-5 `sur_value=0.05`.
+- `orbital-overlap-distance` / `edrdmax`: function `21`, raw
+  `EDRDmax.cub`, preset `orbital-overlap-distance`, single positive surface
+  by default.  Without `--edr-exponents`, `grid-run` chooses Multiwfn's
+  default exponent set `20, 2.50, 1.50`; pass `--edr-exponents COUNT START
+  INCREMENT` to use manual exponent parameters.
 - `esp`, `nuclear-esp`, and `signlambda2rho`: signed scalar fields,
   defaulting to the `signed` preset; with `--surface-cube`,
   `esp`/`nuclear-esp` map through `cube-preset esp` and
@@ -558,6 +586,18 @@ Grid setup defaults to explicit point counts:
 ```bash
 multiwfn2vesta grid-run input.fch grid_products \
   --function elf \
+  --grid-mode points \
+  --grid-points 120 120 120
+
+multiwfn2vesta grid-run input.fch grid_products \
+  --function edr \
+  --edr-length 0.85 \
+  --grid-mode points \
+  --grid-points 120 120 120
+
+multiwfn2vesta grid-run input.fch grid_products \
+  --function edrdmax \
+  --edr-exponents 12 3.0 1.2 \
   --grid-mode points \
   --grid-points 120 120 120
 ```

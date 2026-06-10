@@ -159,6 +159,8 @@ multiwfn2vesta cube-preset laplacian laplacian.cub cube_products
 multiwfn2vesta cube-preset hamiltonian-ked 'K(r).cub' cube_products
 multiwfn2vesta cube-preset lagrangian-ked 'G(r).cub' cube_products
 multiwfn2vesta cube-preset local-information-entropy infoentro.cub cube_products
+multiwfn2vesta cube-preset electron-delocalization-range EDR.cub cube_products
+multiwfn2vesta cube-preset orbital-overlap-distance EDRDmax.cub cube_products
 multiwfn2vesta cube-preset rdg-scalar RDG.cub cube_products
 multiwfn2vesta cube-preset promolecular-rdg RDGprodens.cub cube_products
 multiwfn2vesta cube-preset promolecular-delta-g Delta_g.cub cube_products
@@ -413,14 +415,16 @@ multiwfn2vesta grid-run --list-functions
 Common functions include `density`, `gradient`, `orbital --orbital h`,
 `orbital-density`, `spin-density`, `laplacian`, `hamiltonian-ked`,
 `lagrangian-ked`, `local-information-entropy`, `elf`, `lol`, `esp`, `alie`,
-`rdg`, `promolecular-rdg`, `delta-g`, `iri`, `signlambda2rho`,
-`promolecular-signlambda2rho`, and `vdw-potential`.  The scalar display defaults are
+`edr`, `edrdmax`, `rdg`, `promolecular-rdg`, `delta-g`, `iri`,
+`signlambda2rho`, `promolecular-signlambda2rho`, and `vdw-potential`.
+The scalar display defaults are
 function-specific where possible: `gradient.cub` uses `gradient-norm`,
 `spindensity.cub` uses `cube-preset spin-density`, `orbdens.cub` uses
 `orbital-density`, `laplacian.cub` uses `laplacian`, `K(r).cub` uses
 `hamiltonian-ked`, `G(r).cub` uses `lagrangian-ked`, `infoentro.cub` uses
-`local-information-entropy`, `RDG.cub` uses `rdg-scalar`, `RDGprodens.cub`
-uses `promolecular-rdg`, `Delta_g.cub` uses `promolecular-delta-g`,
+`local-information-entropy`, `EDR.cub` uses `electron-delocalization-range`,
+`EDRDmax.cub` uses `orbital-overlap-distance`, `RDG.cub` uses `rdg-scalar`,
+`RDGprodens.cub` uses `promolecular-rdg`, `Delta_g.cub` uses `promolecular-delta-g`,
 `IRI.cub` uses `iri-scalar`, and `vdWpot.cub` uses `vdw-potential` with
 `+/-1.0` kcal/mol signed surfaces.  The existing `cube-preset iri` name
 remains the two-cube surface+texture route, `vdw-map` remains the

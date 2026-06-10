@@ -83,6 +83,20 @@ GRID_FUNCTIONS: Tuple[GridFunction, ...] = (
         mapped_preset="alie",
     ),
     GridFunction(
+        "electron-delocalization-range",
+        20,
+        "EDR.cub",
+        "electron-delocalization-range",
+        ("edr", "edr-r-d", "electron-delocalization-range-function"),
+    ),
+    GridFunction(
+        "orbital-overlap-distance",
+        21,
+        "EDRDmax.cub",
+        "orbital-overlap-distance",
+        ("orbital-overlap-length", "edrdmax", "edr-dmax", "d-r", "d(r)"),
+    ),
+    GridFunction(
         "delta-g",
         22,
         "Delta_g.cub",
@@ -130,6 +144,8 @@ class MultiwfnGridResult(NamedTuple):
     error: Optional[str]
     surface_cube: Optional[Path]
     mapped_preset: Optional[str]
+    edr_length: Optional[float]
+    edr_exponents: Optional[Tuple[int, float, float]]
 
 
 class MultiwfnGridBatchResult(NamedTuple):
@@ -238,10 +254,35 @@ def _safe_orbital_label(orbital: str) -> str:
     return label or "orbital"
 
 
+def _normalize_edr_exponents(values: Optional[Sequence[float]]) -> Optional[Tuple[int, float, float]]:
+    if values is None:
+        return None
+    if len(values) != 3:
+        raise ValueError("Expected EDR exponent parameters: count start increment")
+    count_float = float(values[0])
+    count = int(count_float)
+    if count_float != count:
+        raise ValueError("EDR exponent count must be an integer")
+    start = float(values[1])
+    increment = float(values[2])
+    if count < 1 or count > 50:
+        raise ValueError("EDR exponent count must be between 1 and 50")
+    if increment < 1.01:
+        raise ValueError("EDR exponent increment must be at least 1.01")
+    return count, start, increment
+
+
+def _format_edr_exponents(values: Sequence[float]) -> str:
+    count, start, increment = _normalize_edr_exponents(values) or (0, 0.0, 0.0)
+    return f"{count} {start} {increment}"
+
+
 def build_grid_commands(
     function: GridFunction,
     *,
     orbital: Optional[str] = None,
+    edr_length: Optional[float] = None,
+    edr_exponents: Optional[Sequence[float]] = None,
     grid_mode: str = "points",
     grid_points: Sequence[int] = (40, 40, 40),
     grid_spacing: Optional[float] = None,
@@ -257,6 +298,25 @@ def build_grid_commands(
         commands.append(str(orbital))
     elif orbital:
         raise ValueError("--orbital is only valid for orbital and orbital-density functions")
+
+    if function.index == 20:
+        if edr_length is None:
+            raise ValueError("Multiwfn function `electron-delocalization-range` requires --edr-length in Bohr")
+        if edr_length <= 0:
+            raise ValueError("--edr-length must be positive")
+        if edr_exponents is not None:
+            raise ValueError("--edr-exponents is only valid for orbital-overlap-distance / D(r)")
+        commands.append(str(float(edr_length)))
+    elif edr_length is not None:
+        raise ValueError("--edr-length is only valid for electron-delocalization-range / EDR(r;d)")
+
+    if function.index == 21:
+        if edr_exponents is None:
+            commands.append("2")
+        else:
+            commands.extend(["1", _format_edr_exponents(edr_exponents)])
+    elif edr_exponents is not None:
+        raise ValueError("--edr-exponents is only valid for orbital-overlap-distance / D(r)")
 
     mode = grid_mode.lower()
     if grid_extension is not None and mode in {"low", "medium", "high", "points", "spacing", "cube"}:
@@ -305,6 +365,8 @@ def _write_recipe(
     vesta_result: Optional[CubeVestaResult] = None,
     surface_cube: Optional[Path] = None,
     mapped_preset: Optional[str] = None,
+    edr_length: Optional[float] = None,
+    edr_exponents: Optional[Tuple[int, float, float]] = None,
     error: Optional[str] = None,
 ) -> None:
     if result is not None:
@@ -320,6 +382,8 @@ def _write_recipe(
         error = result.error
         surface_cube = result.surface_cube
         mapped_preset = result.mapped_preset
+        edr_length = result.edr_length
+        edr_exponents = result.edr_exponents
 
     lines = [
         "# Multiwfn Grid Run Recipe",
@@ -345,6 +409,8 @@ def _write_recipe(
             f"- processed_cube: `{cube}`",
             f"- surface_cube_for_texture_map: `{surface_cube}`",
             f"- mapped_vesta_preset: `{mapped_preset}`",
+            f"- edr_length_bohr: `{edr_length}`",
+            f"- edr_exponents_count_start_increment: `{edr_exponents}`",
             f"- vesta_file: `{vesta_result.vesta_path if vesta_result is not None else None}`",
             f"- vesta_recipe: `{vesta_result.manifest_path if vesta_result is not None else None}`",
             f"- error: `{error}`",
@@ -354,6 +420,8 @@ def _write_recipe(
             "- Multiwfn main menu `5` calls `study3dim` for real-space function grid data.",
             "- In the `study3dim` post-processing menu, option `2` exports the current grid to a Gaussian cube file.",
             "- The default cube filename is determined by the selected real-space function index in Multiwfn source `0123dim.f90`.",
+            "- Function `20` EDR(r;d) asks for length scale `d` in Bohr before grid setup and exports `EDR.cub`.",
+            "- Function `21` D(r) can use Multiwfn's default EDR exponent set `20, 2.50, 1.50` or a manual count/start/increment set and exports `EDRDmax.cub`.",
         ]
     )
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
@@ -440,6 +508,8 @@ def run_multiwfn_grid(
     commands: Optional[Sequence[str]] = None,
     commands_file: Optional[Path] = None,
     expected_cube: Optional[Path] = None,
+    edr_length: Optional[float] = None,
+    edr_exponents: Optional[Sequence[float]] = None,
     timeout: Optional[int] = None,
     nthreads: Optional[int] = None,
     stem: Optional[str] = None,
@@ -462,6 +532,8 @@ def run_multiwfn_grid(
     copy_cubes: bool = True,
 ) -> MultiwfnGridResult:
     function = resolve_grid_function(function_name, function_index)
+    normalized_edr_length = None if edr_length is None else float(edr_length)
+    normalized_edr_exponents = _normalize_edr_exponents(edr_exponents)
     candidate = find_multiwfn(multiwfn_path)
     if candidate is None:
         raise FileNotFoundError(
@@ -497,6 +569,8 @@ def run_multiwfn_grid(
         command_list = build_grid_commands(
             function,
             orbital=orbital,
+            edr_length=normalized_edr_length,
+            edr_exponents=normalized_edr_exponents,
             grid_mode=grid_mode,
             grid_points=grid_points,
             grid_spacing=grid_spacing,
@@ -552,27 +626,31 @@ def run_multiwfn_grid(
             raw_cube=raw_cube,
             surface_cube=mapped_surface_cube,
             mapped_preset=mapped_surface_preset(function, preset) if mapped_surface_cube is not None else None,
+            edr_length=normalized_edr_length,
+            edr_exponents=normalized_edr_exponents,
             error=error,
         )
         return MultiwfnGridResult(
-            candidate,
-            wavefunction,
-            output_dir,
-            raw_dir,
-            function,
-            GRID_PROCESSING_FAILED_CODE,
-            GRID_PROCESSING_FAILED_CODE,
-            False,
-            command_file,
-            stdout_log,
-            stderr_log,
-            raw_cube,
-            None,
-            recipe_path,
-            None,
-            error,
-            mapped_surface_cube,
-            mapped_surface_preset(function, preset) if mapped_surface_cube is not None else None,
+            multiwfn=candidate,
+            wavefunction=wavefunction,
+            output_dir=output_dir,
+            raw_dir=raw_dir,
+            function=function,
+            returncode=GRID_PROCESSING_FAILED_CODE,
+            cli_returncode=GRID_PROCESSING_FAILED_CODE,
+            success=False,
+            command_file=command_file,
+            stdout_log=stdout_log,
+            stderr_log=stderr_log,
+            raw_cube=raw_cube,
+            cube=None,
+            recipe_path=recipe_path,
+            vesta_result=None,
+            error=error,
+            surface_cube=mapped_surface_cube,
+            mapped_preset=mapped_surface_preset(function, preset) if mapped_surface_cube is not None else None,
+            edr_length=normalized_edr_length,
+            edr_exponents=normalized_edr_exponents,
         )
     except OSError as exc:
         error = f"Failed to launch Multiwfn grid run: {exc}; inspect {stdout_log} and {stderr_log}"
@@ -589,27 +667,31 @@ def run_multiwfn_grid(
             raw_cube=raw_cube,
             surface_cube=mapped_surface_cube,
             mapped_preset=mapped_surface_preset(function, preset) if mapped_surface_cube is not None else None,
+            edr_length=normalized_edr_length,
+            edr_exponents=normalized_edr_exponents,
             error=error,
         )
         return MultiwfnGridResult(
-            candidate,
-            wavefunction,
-            output_dir,
-            raw_dir,
-            function,
-            GRID_PROCESSING_FAILED_CODE,
-            GRID_PROCESSING_FAILED_CODE,
-            False,
-            command_file,
-            stdout_log,
-            stderr_log,
-            raw_cube,
-            None,
-            recipe_path,
-            None,
-            error,
-            mapped_surface_cube,
-            mapped_surface_preset(function, preset) if mapped_surface_cube is not None else None,
+            multiwfn=candidate,
+            wavefunction=wavefunction,
+            output_dir=output_dir,
+            raw_dir=raw_dir,
+            function=function,
+            returncode=GRID_PROCESSING_FAILED_CODE,
+            cli_returncode=GRID_PROCESSING_FAILED_CODE,
+            success=False,
+            command_file=command_file,
+            stdout_log=stdout_log,
+            stderr_log=stderr_log,
+            raw_cube=raw_cube,
+            cube=None,
+            recipe_path=recipe_path,
+            vesta_result=None,
+            error=error,
+            surface_cube=mapped_surface_cube,
+            mapped_preset=mapped_surface_preset(function, preset) if mapped_surface_cube is not None else None,
+            edr_length=normalized_edr_length,
+            edr_exponents=normalized_edr_exponents,
         )
 
     stdout_log.write_text(completed.stdout or "", encoding="utf-8")
@@ -690,6 +772,8 @@ def run_multiwfn_grid(
         error=error,
         surface_cube=mapped_surface_cube,
         mapped_preset=mapped_surface_preset(function, preset) if mapped_surface_cube is not None else None,
+        edr_length=normalized_edr_length,
+        edr_exponents=normalized_edr_exponents,
     )
     _write_recipe(recipe_path, result=result)
     return result
@@ -861,6 +945,21 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         type=Path,
         help="Expected cube name/path when using a custom command stream",
     )
+    parser.add_argument(
+        "--edr-length",
+        type=float,
+        help="Length scale d in Bohr for function 20, EDR(r;d)",
+    )
+    parser.add_argument(
+        "--edr-exponents",
+        nargs=3,
+        type=float,
+        metavar=("COUNT", "START", "INCREMENT"),
+        help=(
+            "Manual exponent count/start/increment for function 21, D(r). "
+            "Omit this option to use Multiwfn's default 20, 2.50, 1.50 set."
+        ),
+    )
     parser.add_argument("--timeout", type=int)
     parser.add_argument("--nthreads", type=int)
     parser.add_argument("--stem")
@@ -928,6 +1027,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 raise ValueError("--raw-dir is not supported with --orbitals")
             if args.surface_cube is not None:
                 raise ValueError("--surface-cube is not supported with --orbitals")
+            if args.edr_length is not None or args.edr_exponents is not None:
+                raise ValueError("--edr-length and --edr-exponents are not supported with --orbitals")
             result = run_multiwfn_grid_batch(
                 args.wavefunction,
                 args.output_dir,
@@ -978,6 +1079,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             multiwfn_path=args.multiwfn_path,
             commands_file=args.commands_file,
             expected_cube=args.expected_cube,
+            edr_length=args.edr_length,
+            edr_exponents=args.edr_exponents,
             timeout=args.timeout,
             nthreads=args.nthreads,
             stem=args.stem,

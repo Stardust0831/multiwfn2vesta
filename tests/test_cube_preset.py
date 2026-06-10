@@ -108,6 +108,8 @@ class TestCubePreset(unittest.TestCase):
         self.assertIn("partial-charge", text)
         self.assertIn("wavefunction-norm", text)
         self.assertIn("local-information-entropy", text)
+        self.assertIn("electron-delocalization-range", text)
+        self.assertIn("orbital-overlap-distance", text)
         self.assertIn("iri", text)
         self.assertIn("rdg-scalar", text)
         self.assertIn("promolecular-rdg", text)
@@ -348,6 +350,44 @@ basin type two
             self.assertIn("requested_preset: `infoentro`", manifest)
             self.assertIn("infoentro.cub", manifest)
             self.assertIn("-rho/N*ln(rho/N)", manifest)
+
+    def test_electron_delocalization_range_preset_writes_single_positive_surface(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            cube = self.write_tmp(root, "EDR.cub", SURFACE_CUBE)
+
+            result = run_preset("edr", cube, root / "products")
+
+            text = result.vesta_path.read_text(encoding="utf-8")
+            manifest = result.manifest_path.read_text(encoding="utf-8")
+
+            self.assertRegex(text, r"ISURF\n  1   1\s+0\.05\s+105\s+210\s+180\s+145\s+255")
+            self.assertNotRegex(text, r"\n  1   1\s+-0\.05")
+            self.assertNotIn("IMPORT_TEXTURE", text)
+            self.assertIn("canonical_preset: `electron-delocalization-range`", manifest)
+            self.assertIn("requested_preset: `edr`", manifest)
+            self.assertIn("EDR.cub", manifest)
+            self.assertIn("d in Bohr", manifest)
+            self.assertIn("sur_value=0.05", manifest)
+
+    def test_orbital_overlap_distance_preset_writes_single_positive_surface(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            cube = self.write_tmp(root, "EDRDmax.cub", SURFACE_CUBE)
+
+            result = run_preset("edrdmax", cube, root / "products")
+
+            text = result.vesta_path.read_text(encoding="utf-8")
+            manifest = result.manifest_path.read_text(encoding="utf-8")
+
+            self.assertRegex(text, r"ISURF\n  1   1\s+0\.05\s+115\s+170\s+255\s+145\s+255")
+            self.assertNotRegex(text, r"\n  1   1\s+-0\.05")
+            self.assertNotIn("IMPORT_TEXTURE", text)
+            self.assertIn("canonical_preset: `orbital-overlap-distance`", manifest)
+            self.assertIn("requested_preset: `edrdmax`", manifest)
+            self.assertIn("EDRDmax.cub", manifest)
+            self.assertIn("default EDR exponent set 20, 2.50, 1.50", manifest)
+            self.assertIn("sur_value=0.05", manifest)
 
     def test_standalone_rdg_scalar_preset_keeps_iri_alias_available_for_texture_route(self):
         with tempfile.TemporaryDirectory() as tmp:

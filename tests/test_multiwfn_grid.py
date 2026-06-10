@@ -77,6 +77,30 @@ vdw potential comment two
 """
 
 
+EDR_CUBE = """edr comment one
+edr comment two
+    2    -1.000000    -2.000000     0.500000
+    2     0.500000     0.000000     0.000000
+    2     0.000000     0.500000     0.000000
+    2     0.000000     0.000000     0.500000
+    8     8.000000    -1.000000    -2.000000     0.500000
+    1     1.000000    -0.500000    -2.000000     0.500000
+ 0.00 0.01 0.02 0.04 0.05 0.06 0.08 0.10
+"""
+
+
+EDRDMAX_CUBE = """edrdmax comment one
+edrdmax comment two
+    2    -1.000000    -2.000000     0.500000
+    2     0.500000     0.000000     0.000000
+    2     0.000000     0.500000     0.000000
+    2     0.000000     0.000000     0.500000
+    8     8.000000    -1.000000    -2.000000     0.500000
+    1     1.000000    -0.500000    -2.000000     0.500000
+ 0.00 0.01 0.02 0.04 0.05 0.06 0.08 0.10
+"""
+
+
 class TestMultiwfnGridRunner(unittest.TestCase):
     def make_candidate(self, root):
         fake_exe = Path(root) / "Multiwfn_noGUI"
@@ -101,6 +125,8 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertIn("preset=promolecular-delta-g", text)
         self.assertIn("preset=iri-scalar", text)
         self.assertIn("preset=vdw-potential", text)
+        self.assertIn("preset=electron-delocalization-range", text)
+        self.assertIn("preset=orbital-overlap-distance", text)
         self.assertIn("promolecular-rdg", text)
         self.assertIn("alie", text)
         self.assertIn("mapped preset with --surface-cube: esp", text)
@@ -132,6 +158,11 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertEqual(resolve_grid_function("vdw").preset, "vdw-potential")
         self.assertEqual(resolve_grid_function("vdwpot").output_filename, "vdWpot.cub")
         self.assertEqual(resolve_grid_function("van-der-waals-potential").index, 25)
+        self.assertEqual(resolve_grid_function("edr").index, 20)
+        self.assertEqual(resolve_grid_function("edr").output_filename, "EDR.cub")
+        self.assertEqual(resolve_grid_function("edrdmax").index, 21)
+        self.assertEqual(resolve_grid_function("edrdmax").output_filename, "EDRDmax.cub")
+        self.assertEqual(resolve_grid_function("d(r)").preset, "orbital-overlap-distance")
         self.assertEqual(resolve_grid_function(None, 18).name, "alie")
         self.assertEqual(resolve_grid_function("sl2r-pro").index, 16)
         custom = resolve_grid_function(None, 99)
@@ -168,6 +199,35 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         commands = build_grid_commands(function, grid_mode="medium")
 
         self.assertEqual(commands, ["5", "18", "2", "2", "0", "q"])
+
+    def test_build_edr_command_stream_requires_length_scale(self):
+        function = resolve_grid_function("edr")
+        with self.assertRaisesRegex(ValueError, "requires --edr-length"):
+            build_grid_commands(function)
+        with self.assertRaisesRegex(ValueError, "must be positive"):
+            build_grid_commands(function, edr_length=0)
+
+        commands = build_grid_commands(function, edr_length=0.85, grid_points=(10, 11, 12))
+
+        self.assertEqual(commands, ["5", "20", "0.85", "4", "10,11,12", "2", "0", "q"])
+
+    def test_build_orbital_overlap_distance_command_stream_uses_default_or_manual_exponents(self):
+        function = resolve_grid_function("orbital-overlap-distance")
+
+        self.assertEqual(
+            build_grid_commands(function, grid_mode="low"),
+            ["5", "21", "2", "1", "2", "0", "q"],
+        )
+        self.assertEqual(
+            build_grid_commands(function, edr_exponents=(12, 3.0, 1.2), grid_mode="medium"),
+            ["5", "21", "1", "12 3.0 1.2", "2", "2", "0", "q"],
+        )
+        with self.assertRaisesRegex(ValueError, "count must be an integer"):
+            build_grid_commands(function, edr_exponents=(12.5, 3.0, 1.2))
+        with self.assertRaisesRegex(ValueError, "increment must be at least 1.01"):
+            build_grid_commands(function, edr_exponents=(12, 3.0, 1.0))
+        with self.assertRaisesRegex(ValueError, "only valid for electron-delocalization-range"):
+            build_grid_commands(function, edr_length=0.85)
 
     def test_run_multiwfn_grid_writes_cube_vesta_and_recipe(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -399,6 +459,92 @@ class TestMultiwfnGridRunner(unittest.TestCase):
             self.assertIn("canonical_preset: `vdw-potential`", manifest)
             self.assertIn("effective_isosurface: `1.0`", manifest)
             self.assertIn("kcal/mol", manifest)
+
+    def test_run_multiwfn_grid_edr_uses_length_scale_and_dedicated_preset(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            wavefunction = root / "h2o.fch"
+            wavefunction.write_text("wavefunction", encoding="utf-8")
+            candidate = self.make_candidate(root)
+
+            def fake_run(command, **kwargs):
+                cwd = Path(kwargs["cwd"])
+                (cwd / "EDR.cub").write_text(EDR_CUBE, encoding="utf-8")
+                return subprocess.CompletedProcess(command, 0, stdout="ok", stderr="")
+
+            with patch("multiwfn2vesta.multiwfn_grid.find_multiwfn", return_value=candidate):
+                with patch("multiwfn2vesta.multiwfn_grid.subprocess.run", side_effect=fake_run):
+                    result = run_multiwfn_grid(
+                        wavefunction,
+                        root / "products",
+                        function_name="edr",
+                        edr_length=0.85,
+                        stem="case",
+                        grid_points=(10, 11, 12),
+                    )
+
+            self.assertTrue(result.success)
+            self.assertEqual(result.edr_length, 0.85)
+            self.assertIsNone(result.edr_exponents)
+            self.assertEqual(result.command_file.read_text(encoding="utf-8"), "5\n20\n0.85\n4\n10,11,12\n2\n0\nq\n")
+            self.assertEqual(result.raw_cube.name, "EDR.cub")
+            self.assertEqual(result.cube.name, "case_electron-delocalization-range.cub")
+            self.assertIsNotNone(result.vesta_result)
+            self.assertEqual(
+                result.vesta_result.vesta_path.name,
+                "case_electron-delocalization-range_electron-delocalization-range_cube.vesta",
+            )
+            recipe = result.recipe_path.read_text(encoding="utf-8")
+            self.assertIn("function_index: `20`", recipe)
+            self.assertIn("edr_length_bohr: `0.85`", recipe)
+            self.assertIn("EDR.cub", recipe)
+            manifest = result.vesta_result.manifest_path.read_text(encoding="utf-8")
+            self.assertIn("canonical_preset: `electron-delocalization-range`", manifest)
+            self.assertIn("effective_isosurface: `0.05`", manifest)
+            self.assertIn("d in Bohr", manifest)
+
+    def test_run_multiwfn_grid_orbital_overlap_distance_uses_manual_exponents(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            wavefunction = root / "h2o.fch"
+            wavefunction.write_text("wavefunction", encoding="utf-8")
+            candidate = self.make_candidate(root)
+
+            def fake_run(command, **kwargs):
+                cwd = Path(kwargs["cwd"])
+                (cwd / "EDRDmax.cub").write_text(EDRDMAX_CUBE, encoding="utf-8")
+                return subprocess.CompletedProcess(command, 0, stdout="ok", stderr="")
+
+            with patch("multiwfn2vesta.multiwfn_grid.find_multiwfn", return_value=candidate):
+                with patch("multiwfn2vesta.multiwfn_grid.subprocess.run", side_effect=fake_run):
+                    result = run_multiwfn_grid(
+                        wavefunction,
+                        root / "products",
+                        function_name="edrdmax",
+                        edr_exponents=(12, 3.0, 1.2),
+                        stem="case",
+                        grid_points=(10, 11, 12),
+                    )
+
+            self.assertTrue(result.success)
+            self.assertIsNone(result.edr_length)
+            self.assertEqual(result.edr_exponents, (12, 3.0, 1.2))
+            self.assertEqual(result.command_file.read_text(encoding="utf-8"), "5\n21\n1\n12 3.0 1.2\n4\n10,11,12\n2\n0\nq\n")
+            self.assertEqual(result.raw_cube.name, "EDRDmax.cub")
+            self.assertEqual(result.cube.name, "case_orbital-overlap-distance.cub")
+            self.assertIsNotNone(result.vesta_result)
+            self.assertEqual(
+                result.vesta_result.vesta_path.name,
+                "case_orbital-overlap-distance_orbital-overlap-distance_cube.vesta",
+            )
+            recipe = result.recipe_path.read_text(encoding="utf-8")
+            self.assertIn("function_index: `21`", recipe)
+            self.assertIn("edr_exponents_count_start_increment: `(12, 3.0, 1.2)`", recipe)
+            self.assertIn("EDRDmax.cub", recipe)
+            manifest = result.vesta_result.manifest_path.read_text(encoding="utf-8")
+            self.assertIn("canonical_preset: `orbital-overlap-distance`", manifest)
+            self.assertIn("effective_isosurface: `0.05`", manifest)
+            self.assertIn("default EDR exponent set 20, 2.50, 1.50", manifest)
 
     def test_run_multiwfn_grid_vdw_surface_cube_keeps_vdw_map_route(self):
         with tempfile.TemporaryDirectory() as tmp:
