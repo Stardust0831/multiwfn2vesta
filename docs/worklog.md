@@ -1,5 +1,39 @@
 # Worklog
 
+## 2026-06-11: DORI function-100 route and DORIfill preset
+
+- Continued the ABACUS/Multiwfn/VESTA analysis survey by adding a
+  weak-interaction route that ABACUS LCAO Molden files can feed through Multiwfn
+  real-space function `100`.
+- Rechecked local Multiwfn 2026.6.2 source evidence: `function.f90` maps
+  `iuserfunc=20` to `DORI(x,y,z)`; `0123dim.f90` exports function `100` as
+  `userfunc.cub` and gives DORI/IRI user functions a `0..2` display range;
+  `otherfunc.f90` weak-interaction post-processing pairs DORI with
+  sign(lambda2)rho; and the bundled `DORIfill.vmd` uses a DORI isosurface of
+  `0.95` with sign(lambda2)rho texture range `-0.04..0.02`.
+- Added named `grid-run --function dori`, which patches run-local
+  `iuserfunc=20`, exports the normal Multiwfn `userfunc.cub`, copies it to a
+  stable `<stem>_dori.cub`, and uses a new `cube-preset dori-scalar`
+  standalone surface at `0.95`.
+- Added `cube-preset dori` for explicit two-cube DORI+sign(lambda2)rho
+  figures.  This preset deliberately keeps DORI as the surface cube and
+  sign(lambda2)rho as `--texture-cube`, matching `DORIfill.vmd` instead of
+  overloading `grid-run --surface-cube`'s existing supplied-surface/generated-
+  texture direction.
+- Updated README, usage notes, reusable skill notes, research matrix, and
+  kanban before full validation and commit closeout.
+- Rechecked the README/branch-consolidation request: current branch is
+  `main`, `origin/HEAD` points to `origin/main`, GitHub currently exposes only
+  `refs/heads/main`, repository-local identity is
+  `Stardust0831 <13862180016@163.com>`, and no feature branch needs a real
+  merge-back for this pass.
+- Validation passed before commit: focused `py_compile`, focused
+  `tests.test_cube_preset tests.test_multiwfn_grid` with 111 tests, full
+  no-GUI `unittest discover -s tests -v` with 328 tests, CLI smoke for
+  `grid-run --list-functions`, `cube-preset --list-presets`, and
+  `grid-run --help`, plus `git diff --check`.  Local untracked `domain.cub`
+  and `domain.pdb` remain deliberately outside the intended commit.
+
 ## 2026-06-11: vdW potential probe control
 
 - Continued the ABACUS/Multiwfn/VESTA analysis survey by tightening an

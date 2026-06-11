@@ -172,12 +172,15 @@ multiwfn2vesta cube-preset promolecular-rdg RDGprodens.cub cube_products
 multiwfn2vesta cube-preset promolecular-delta-g Delta_g.cub cube_products
 multiwfn2vesta cube-preset hirshfeld-delta-g griddata.cub cube_products
 multiwfn2vesta cube-preset iri-scalar IRI.cub cube_products
+multiwfn2vesta cube-preset dori-scalar userfunc.cub cube_products
 multiwfn2vesta cube-preset vdw-potential vdWpot.cub cube_products
 multiwfn2vesta cube-preset potential pot_es.cube cube_products
 multiwfn2vesta cube-preset partial-charge pchg.cube cube_products
 multiwfn2vesta cube-preset wavefunction-norm wfc_norm.cube cube_products
 multiwfn2vesta cube-preset rdg IRI2_surface.cub cube_products \
   --texture-cube IRI1_color.cub
+multiwfn2vesta cube-preset dori DORI.cub cube_products \
+  --texture-cube sl2r.cub
 multiwfn2vesta cube-preset domain domain.cub cube_products
 multiwfn2vesta cube-preset basin basin0001.cub cube_products
 multiwfn2vesta cube-preset basin-type basinsyn.cub cube_products
@@ -195,7 +198,7 @@ default style is enough to start.  Presets cover density-like scalar cubes,
 signed orbital/wavefunction/density-difference cubes, Multiwfn
 orbital-density, spin-density, spin-polarization parameter, Laplacian, K(r),
 G(r), pair/correlation function, Becke and Hirshfeld weight cubes,
-standalone RDG, and promolecular RDG cubes, standalone IRI and vdW potential cubes, direct
+standalone RDG, and promolecular RDG cubes, standalone IRI/DORI and vdW potential cubes, direct
 ABACUS potential cubes, ABACUS partial-charge/state-density cubes,
 nonnegative ABACUS wavefunction-norm cubes, ELF/LOL, IRI/RDG/NCI mapped
 surfaces, binary domain isosurfaces, binary basin isosurfaces, signed
@@ -424,7 +427,7 @@ Common functions include `density`, `gradient`, `orbital --orbital h`,
 `orbital-density`, `spin-density`, `spin-polarization`, `laplacian`,
 `hamiltonian-ked`, `lagrangian-ked`, `local-information-entropy`, `elf`,
 `lol`, `esp`, `alie`,
-`pair-function`, `source-function`, `user-function`,
+`pair-function`, `source-function`, `user-function`, `dori`,
 `local-electron-affinity`, `local-electron-attachment-energy`,
 `information-gain-density`, `shannon-entropy-density`,
 `fisher-information-density`, `second-fisher-information-density`, `edr`, `edrdmax`,
@@ -445,7 +448,9 @@ function-specific where possible: `gradient.cub` uses `gradient-norm`,
 `hirshfeld-weight`, `RDG.cub` uses `rdg-scalar`, `RDGprodens.cub` uses
 `promolecular-rdg`, `Delta_g.cub` uses
 `promolecular-delta-g`, Multiwfn function `23` generic `griddata.cub` uses
-`hirshfeld-delta-g`, `IRI.cub` uses `iri-scalar`, and `vdWpot.cub` uses
+`hirshfeld-delta-g`, `IRI.cub` uses `iri-scalar`,
+`grid-run --function dori` writes `userfunc.cub` with `iuserfunc=20` and
+uses `dori-scalar`, and `vdWpot.cub` uses
 `vdw-potential` with `+/-1.0`
 kcal/mol signed surfaces.  `grid-run --function vdw-potential` writes
 run-local `ivdwprobe=6` by default and accepts `--vdw-probe ELEMENT_OR_Z`.
@@ -470,6 +475,7 @@ ELF/LOL definitions, or `--elflol-type d-over-d0` for the ELF-only D/D0 term
 without changing global settings.
 Generic `grid-run --function user-function` requires `--user-function-index
 IUSERFUNC`; named routes automatically patch common source-backed values:
+`dori` / `density-overlap-regions-indicator` = `20`,
 `local-electron-affinity` / `lea` = `27`,
 `local-electron-attachment-energy` / `leae` = `-27`,
 `information-gain-density` = `49`, `shannon-entropy-density` = `50`, and
@@ -477,7 +483,9 @@ IUSERFUNC`; named routes automatically patch common source-backed values:
 `51` / `52`.  The runner writes `iuserfunc` into a run-local settings file
 copied from the selected Multiwfn `settings.ini` when available and passed
 with `-set`.  LEA/LEAE named routes also auto-select mapped presets
-`lea`/`leae` when `--surface-cube` is supplied.
+`lea`/`leae` when `--surface-cube` is supplied.  DORI+sign(lambda2)rho uses
+the lower-level `cube-preset dori DORI.cub ... --texture-cube sl2r.cub`
+direction from Multiwfn `DORIfill.vmd`, not `grid-run --surface-cube`.
 `grid-run --function becke` requires
 `--becke-atoms I J`; `I J` requests Becke overlap weight and `I 0` requests
 Becke atomic weight.  `grid-run --function hirshfeld` requires

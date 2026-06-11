@@ -111,6 +111,7 @@ multiwfn2vesta grid-run --list-functions
   `userfunc.cub` output, but automatically patch the source-backed
   `iuserfunc` value into a run-local `multiwfn_grid_settings.ini` copied
   from the selected Multiwfn `settings.ini` when available:
+  `dori` / `density-overlap-regions-indicator` = `20`,
   `local-electron-affinity` / `lea` = `27`,
   `local-electron-attachment-energy` / `leae` = `-27`,
   `information-gain-density` / `relative-shannon-entropy` = `49`,
@@ -155,6 +156,12 @@ multiwfn2vesta grid-run --list-functions
   `IRI.cub`, preset `iri-scalar` with a single positive isosurface.  Use the
   separate two-cube `cube-preset iri` route when coloring IRI/RDG/NCI surfaces
   by sign(lambda2)rho.
+- `dori`, alias `density-overlap-regions-indicator`: function `100`, raw
+  `userfunc.cub`, preset `dori-scalar` with a single `0.95` isosurface.
+  The route patches run-local `iuserfunc=20`.  For DORI colored by
+  sign(lambda2)rho, run explicit `cube-preset dori DORI.cub ...` with
+  `--texture-cube sl2r.cub`; this follows Multiwfn `DORIfill.vmd`, where
+  DORI is the surface and sign(lambda2)rho is the texture.
 - `vdw-potential`, aliases `vdw`, `vdwpot`,
   `van-der-waals-potential`: function `25`, raw `vdWpot.cub`, preset
   `vdw-potential` with signed `+/-1.0` kcal/mol isosurfaces.  Multiwfn
@@ -293,6 +300,7 @@ multiwfn2vesta grid-run input.fch products --function hamiltonian-ked --no-vesta
 multiwfn2vesta grid-run input.fch products --function alie --no-vesta
 multiwfn2vesta grid-run input.fch products --function pair-function --reference-point 0 0 0 --pair-function-type 1 --pair-correlation-type 3
 multiwfn2vesta grid-run input.fch products --function source-function --reference-point 0 0 0 --source-function-mode 1
+multiwfn2vesta grid-run input.fch products --function dori
 multiwfn2vesta grid-run input.fch products --function local-electron-affinity
 multiwfn2vesta grid-run input.fch products --function user-function --user-function-index 49
 multiwfn2vesta grid-run input.fch products --function edr --edr-length 0.85

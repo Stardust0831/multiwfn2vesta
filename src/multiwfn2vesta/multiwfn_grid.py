@@ -222,6 +222,14 @@ GRID_FUNCTIONS: Tuple[GridFunction, ...] = (
         default_user_function_index=-27,
     ),
     GridFunction(
+        "dori",
+        100,
+        "userfunc.cub",
+        "dori-scalar",
+        ("density-overlap-regions-indicator", "dori-function"),
+        default_user_function_index=20,
+    ),
+    GridFunction(
         "information-gain-density",
         100,
         "userfunc.cub",
@@ -1771,9 +1779,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         default=None,
         help=(
             "Multiwfn iuserfunc value for generic function 100 user-function, e.g. "
-            "27 for LEA, -27 for LEAE, 49 for information gain, 50 for "
-            "Shannon entropy density, 51/52 for Fisher information density. "
-            "Named function-100 routes such as local-electron-affinity provide defaults. "
+            "20 for DORI, 27 for LEA, -27 for LEAE, 49 for information gain, "
+            "50 for Shannon entropy density, 51/52 for Fisher information "
+            "density. Named function-100 routes such as dori and "
+            "local-electron-affinity provide defaults. "
             "Special external-grid modes -1, -3, and 57/58/59 are not "
             "handled by this generic route."
         ),

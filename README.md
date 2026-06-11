@@ -26,8 +26,8 @@ point.
   origin` returned only `refs/heads/main`.  No merge-back was needed because
   there was no extra local or remote feature branch to consolidate.
 - Feature closeouts, including the user-function, spin-polarization,
-  ELF/LOL definition-control, and vdW-probe grid routes, are kept on the
-  maintained `main` branch.  Use
+  ELF/LOL definition-control, vdW-probe, and DORI grid routes, are kept on
+  the maintained `main` branch.  Use
   `git log --oneline --decorate -5` after pulling if an exact current commit
   hash is needed.
 - Local untracked probe files such as `domain.cub` and `domain.pdb` are not
@@ -43,9 +43,9 @@ point.
   orbital-overlap distance D(r), pair/correlation function, source function,
   Becke atomic/overlap weight, Hirshfeld weight, standalone RDG,
   promolecular RDG, promolecular Delta-g,
-  Hirshfeld-partition Delta-g, standalone IRI scalar, and standalone vdW
-  potential cubes with run-local probe-atom control, ABACUS direct cube
-  presets for potential,
+  Hirshfeld-partition Delta-g, standalone IRI scalar, standalone DORI scalar
+  and DORI+sign(lambda2)rho mapped surfaces, and standalone vdW potential
+  cubes with run-local probe-atom control, ABACUS direct cube presets for potential,
   partial-charge, and wavefunction-norm cubes,
   charged-state `fukui-run` orchestration, aIGM/amIGM trajectory-average
   weak-interaction generation, cube/grid domain extraction, basin cube VESTA
@@ -109,7 +109,7 @@ then delete the temporary branch.
   orbital-overlap distance D(r), Becke atomic/overlap weight, Hirshfeld
   weight, promolecular Delta-g, Hirshfeld-partition Delta-g, standalone IRI
   scalar, standalone vdW potential, ABACUS direct potential, partial charge,
-  wavefunction norm cubes, ELF/LOL, IRI/RDG/NCI, ESP/MEP,
+  wavefunction norm cubes, ELF/LOL, IRI/RDG/NCI, DORI, ESP/MEP,
   IGM/IGMH/aIGM weak-interaction maps, ALIE/LEA/LEAE, and vdW-potential
   mapped surfaces.
 - Overlay Multiwfn molecular-surface extrema from `surfanalysis.pdb` onto
@@ -141,7 +141,7 @@ then delete the temporary branch.
   promolecular RDG/sign(lambda2)rho, local information entropy, EDR(r;d),
   orbital-overlap distance D(r), pair/correlation functions with run-local
   `pairfunctype`/`paircorrtype`, source function with run-local
-  `srcfuncmode`, user-defined `iuserfunc` cubes such as LEA/LEAE and
+  `srcfuncmode`, user-defined `iuserfunc` cubes such as DORI, LEA/LEAE, and
   information-theory densities, Becke atomic/overlap weight, Hirshfeld weight,
   promolecular Delta-g, Hirshfeld-partition Delta-g, vdW potential with
   run-local `ivdwprobe` probe selection, and related scalar cubes, export
@@ -250,6 +250,8 @@ multiwfn2vesta grid-run input.molden grid_products \
 multiwfn2vesta grid-run input.molden grid_products \
   --function local-electron-affinity
 multiwfn2vesta grid-run input.molden grid_products \
+  --function dori
+multiwfn2vesta grid-run input.molden grid_products \
   --function becke \
   --becke-atoms 1 4
 multiwfn2vesta grid-run input.molden grid_products \
@@ -355,6 +357,7 @@ multiwfn2vesta cube-preset promolecular-rdg RDGprodens.cub cube_products
 multiwfn2vesta cube-preset promolecular-delta-g Delta_g.cub cube_products
 multiwfn2vesta cube-preset hirshfeld-delta-g griddata.cub cube_products
 multiwfn2vesta cube-preset iri-scalar IRI.cub cube_products
+multiwfn2vesta cube-preset dori-scalar userfunc.cub cube_products
 multiwfn2vesta cube-preset vdw-potential vdWpot.cub cube_products
 multiwfn2vesta cube-preset potential pot_es.cube cube_products
 multiwfn2vesta cube-preset partial-charge pchg.cube cube_products
@@ -362,6 +365,8 @@ multiwfn2vesta cube-preset wavefunction-norm wfc_norm.cube cube_products
 multiwfn2vesta cube-preset elf ELF.cub cube_products
 multiwfn2vesta cube-preset rdg IRI2_surface.cub cube_products \
   --texture-cube IRI1_color.cub
+multiwfn2vesta cube-preset dori DORI.cub cube_products \
+  --texture-cube sl2r.cub
 multiwfn2vesta cube-preset stm STM.cub cube_products
 multiwfn2vesta cube-preset domain domain.cub cube_products
 multiwfn2vesta cube-preset basin basin0001.cub cube_products
@@ -441,15 +446,21 @@ installation settings are not modified.  The VESTA preset shows signed
 Use `user-function`/`userfunc` for generic Multiwfn function `100`
 `userfunc.cub`; this generic route requires `--user-function-index
 IUSERFUNC`.  Source-backed named routes now imply common `iuserfunc` values:
-`local-electron-affinity` sets `27`, `local-electron-attachment-energy`
-sets `-27`, `information-gain-density` sets `49`,
-`shannon-entropy-density` sets `50`, and `fisher-information-density` /
-`second-fisher-information-density` set `51` / `52`.  The runner copies the
-selected Multiwfn `settings.ini` when available, patches only `iuserfunc`,
-and passes the run-local settings file with `-set`.  Generic standalone
-`userfunc.cub` uses signed `+/-0.05` surfaces by default; LEA/LEAE named
-routes automatically select the `lea`/`leae` mapped-surface preset when
-`--surface-cube density.cub` is supplied.
+`dori` sets `20`, `local-electron-affinity` sets `27`,
+`local-electron-attachment-energy` sets `-27`,
+`information-gain-density` sets `49`, `shannon-entropy-density` sets `50`,
+and `fisher-information-density` / `second-fisher-information-density` set
+`51` / `52`.  The runner copies the selected Multiwfn `settings.ini` when
+available, patches only `iuserfunc`, and passes the run-local settings file
+with `-set`.  Generic standalone `userfunc.cub` uses signed `+/-0.05`
+surfaces by default; `grid-run --function dori` uses the `dori-scalar`
+single-surface preset at `0.95`, and LEA/LEAE named routes automatically
+select the `lea`/`leae` mapped-surface preset when `--surface-cube
+density.cub` is supplied.  For DORI surfaces colored by sign(lambda2)rho,
+generate the DORI cube and sign(lambda2)rho cube separately, then run
+`cube-preset dori DORI.cub ... --texture-cube sl2r.cub`; the existing
+`grid-run --surface-cube` option keeps its older direction of supplied
+surface cube plus generated texture cube.
 
 Use `becke-weight`/`becke` for Multiwfn function `111` `Becke.cub`;
 `grid-run` requires `--becke-atoms I J` because Multiwfn asks for atom
@@ -672,11 +683,11 @@ Common functions:
 - `user-function` / `userfunc`: generic function `100`, raw `userfunc.cub`,
   preset `user-function`, signed by default.  Pass `--user-function-index
   IUSERFUNC` unless using a named route below.  Named routes
-  `local-electron-affinity`, `local-electron-attachment-energy`,
+  `dori`, `local-electron-affinity`, `local-electron-attachment-energy`,
   `information-gain-density`, `shannon-entropy-density`,
   `fisher-information-density`, and `second-fisher-information-density`
-  automatically patch `iuserfunc=27/-27/49/50/51/52` into a run-local `-set`
-  settings file, leaving global Multiwfn settings untouched.
+  automatically patch `iuserfunc=20/27/-27/49/50/51/52` into a run-local
+  `-set` settings file, leaving global Multiwfn settings untouched.
 - `electron-delocalization-range` / `edr`: function `20`, raw `EDR.cub`,
   preset `electron-delocalization-range`, single positive surface by default.
   Pass `--edr-length D_BOHR`; Multiwfn asks for this EDR length scale before
@@ -718,6 +729,12 @@ Common functions:
   `100`, raw `userfunc.cub`.  With `--surface-cube density.cub`, the
   generated LEA/LEAE cube is used as the texture for `cube-preset lea` or
   `cube-preset leae`.
+- `dori`: function `100`, raw `userfunc.cub`, run-local `iuserfunc=20`,
+  preset `dori-scalar` with a single `0.95` isosurface.  For the classic
+  DORI surface colored by sign(lambda2)rho, use explicit
+  `cube-preset dori DORI.cub ... --texture-cube sl2r.cub`; this follows the
+  bundled `DORIfill.vmd` direction of DORI as surface and sign(lambda2)rho
+  as texture.
 - `rdg` / `promolecular-rdg`: functions `13` and `14`, raw `RDG.cub` and
   `RDGprodens.cub`, presets `rdg-scalar` and `promolecular-rdg`.
   IRI/RDG mapped surfaces that need two coupled cubes should still use

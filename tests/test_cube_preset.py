@@ -133,6 +133,7 @@ class TestCubePreset(unittest.TestCase):
         self.assertIn("promolecular-delta-g", text)
         self.assertIn("hirshfeld-delta-g", text)
         self.assertIn("iri-scalar", text)
+        self.assertIn("dori-scalar", text)
         self.assertIn("stm", text)
         self.assertIn("domain", text)
         self.assertIn("basin", text)
@@ -140,6 +141,7 @@ class TestCubePreset(unittest.TestCase):
         self.assertIn("igmh", text)
         self.assertIn("aigm", text)
         self.assertIn("esp", text)
+        self.assertIn("dori", text)
         self.assertIn("alie", text)
         self.assertIn("surface-map", text)
         self.assertIn("vdw-map", text)
@@ -616,6 +618,23 @@ basin type two
             self.assertIn("IRI.cub", manifest)
             self.assertIn("keep using preset `iri` with --texture-cube", manifest)
 
+    def test_standalone_dori_scalar_preset_tracks_dorifill_isosurface(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            cube = self.write_tmp(root, "userfunc.cub", SURFACE_CUBE)
+
+            result = run_preset("standalone-dori", cube, root / "products")
+
+            text = result.vesta_path.read_text(encoding="utf-8")
+            manifest = result.manifest_path.read_text(encoding="utf-8")
+
+            self.assertRegex(text, r"ISURF\n  1   1\s+0\.95\s+140\s+210\s+190\s+145\s+255")
+            self.assertNotIn("IMPORT_TEXTURE", text)
+            self.assertIn("canonical_preset: `dori-scalar`", manifest)
+            self.assertIn("requested_preset: `standalone-dori`", manifest)
+            self.assertIn("iuserfunc=20", manifest)
+            self.assertIn("DORIfill.vmd", manifest)
+
     def test_abacus_direct_potential_preset_writes_signed_surfaces(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -716,6 +735,27 @@ basin type two
             self.assertIn("effective_tex_physical: `-0.04` to `0.04`", manifest)
             self.assertIn("canonical_preset: `iri`", manifest)
             self.assertIn("requested_preset: `rdg`", manifest)
+
+    def test_dori_preset_tracks_bundled_dorifill_defaults(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            surface = self.write_tmp(root, "DORI.cub", SURFACE_CUBE)
+            texture = self.write_tmp(root, "sl2r.cub", TEXTURE_CUBE)
+
+            result = run_preset("dori-fill", surface, root / "products", texture_cube=texture, surface_band=0.25)
+
+            text = result.vesta_path.read_text(encoding="utf-8")
+            manifest = result.manifest_path.read_text(encoding="utf-8")
+
+            self.assertRegex(text, r"ISURF\n  1   1\s+0\.95")
+            self.assertIn("IMPORT_TEXTURE", text)
+            self.assertIn("TEX3P", text)
+            self.assertIn("canonical_preset: `dori`", manifest)
+            self.assertIn("requested_preset: `dori-fill`", manifest)
+            self.assertIn("preset_tex_physical: `-0.04` to `0.02`", manifest)
+            self.assertIn("effective_tex_physical: `-0.04` to `0.02`", manifest)
+            self.assertIn("tex_reference_source: `surface-band`", manifest)
+            self.assertIn("DORIfill.vmd", manifest)
 
     def test_stm_preset_accepts_ldos_alias(self):
         with tempfile.TemporaryDirectory() as tmp:

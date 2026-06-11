@@ -456,6 +456,20 @@ PRESETS: Tuple[CubePreset, ...] = (
         ),
     ),
     CubePreset(
+        name="dori-scalar",
+        aliases=("standalone-dori", "dori-cube", "density-overlap-regions-indicator-scalar"),
+        description="Single positive isosurface for standalone DORI scalar cubes.",
+        surface_mode="single",
+        isosurface=0.95,
+        positive_rgb=(140, 210, 190),
+        surface_opacity=(145, 255),
+        notes=(
+            "Use for Multiwfn function-100 userfunc.cub with iuserfunc=20 (DORI). "
+            "For DORI surfaces colored by sign(lambda2)rho, use preset `dori` with --texture-cube. "
+            "The default isosurface follows the bundled DORIfill.vmd template."
+        ),
+    ),
+    CubePreset(
         name="stm",
         aliases=("ldos", "stm-ldos", "tunneling-current"),
         description="Constant-current STM/LDOS tunneling-current isosurface.",
@@ -512,6 +526,20 @@ PRESETS: Tuple[CubePreset, ...] = (
         tex_range_source="surface-band",
         texture_required=True,
         notes="Use the IRI/RDG scalar as surface cube and sign(lambda2)rho-like cube as texture cube.",
+    ),
+    CubePreset(
+        name="dori",
+        aliases=("dori-map", "dori-fill", "density-overlap-regions-indicator"),
+        description="DORI surface colored by sign(lambda2)rho texture cube.",
+        surface_mode="single",
+        isosurface=0.95,
+        tex_physical=(-0.04, 0.02),
+        tex_range_source="surface-band",
+        texture_required=True,
+        notes=(
+            "Use DORI userfunc.cub as surface cube and sign(lambda2)rho cube as texture cube; "
+            "defaults follow the bundled DORIfill.vmd template."
+        ),
     ),
     CubePreset(
         name="igmh",

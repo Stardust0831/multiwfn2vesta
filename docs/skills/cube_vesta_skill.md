@@ -63,6 +63,7 @@ multiwfn2vesta cube-preset promolecular-rdg RDGprodens.cub cube_products
 multiwfn2vesta cube-preset promolecular-delta-g Delta_g.cub cube_products
 multiwfn2vesta cube-preset hirshfeld-delta-g griddata.cub cube_products
 multiwfn2vesta cube-preset iri-scalar IRI.cub cube_products
+multiwfn2vesta cube-preset dori-scalar userfunc.cub cube_products
 multiwfn2vesta cube-preset vdw-potential vdWpot.cub cube_products
 multiwfn2vesta cube-preset potential pot_es.cube cube_products
 multiwfn2vesta cube-preset partial-charge pchg.cube cube_products
@@ -70,6 +71,8 @@ multiwfn2vesta cube-preset wavefunction-norm wfc_norm.cube cube_products
 multiwfn2vesta cube-preset elf ELF.cub cube_products
 multiwfn2vesta cube-preset rdg IRI2_surface.cub cube_products \
   --texture-cube IRI1_color.cub
+multiwfn2vesta cube-preset dori DORI.cub cube_products \
+  --texture-cube sl2r.cub
 multiwfn2vesta cube-preset igmh dg_inter.cub cube_products \
   --texture-cube sl2r.cub
 multiwfn2vesta cube-preset esp density.cub cube_products \
@@ -266,7 +269,8 @@ passes it back through `cube-preset`.
   default magnitude `0.05`.  When generating the cube with `grid-run`, the
   generic `--function user-function` route still requires
   `--user-function-index IUSERFUNC`, while named routes automatically patch
-  common values: `local-electron-affinity` / `lea` = `27`,
+  common values: `dori` / `density-overlap-regions-indicator` = `20`,
+  `local-electron-affinity` / `lea` = `27`,
   `local-electron-attachment-energy` / `leae` = `-27`,
   `information-gain-density` = `49`, `shannon-entropy-density` = `50`, and
   `fisher-information-density` / `second-fisher-information-density` =
@@ -310,6 +314,10 @@ passes it back through `cube-preset`.
   `interaction-region-indicator`; single positive surface for standalone
   Multiwfn `IRI.cub`, default isosurface `1.0`.  Use `iri` with
   `--texture-cube` for IRI/RDG/NCI surfaces colored by sign(lambda2)rho.
+- `dori-scalar` aliases: `standalone-dori`, `dori-cube`; single positive
+  surface for Multiwfn function-100 `userfunc.cub` with `iuserfunc=20`,
+  default isosurface `0.95`.  Use `dori` with `--texture-cube` for DORI
+  surfaces colored by sign(lambda2)rho.
 - `vdw-potential` aliases: `vdw`, `vdwpot`, `vdw-potential-cube`,
   `van-der-waals-potential`; positive/negative surfaces for standalone
   Multiwfn function `25` `vdWpot.cub`, default magnitude `1.0` kcal/mol.
@@ -338,6 +346,11 @@ passes it back through `cube-preset`.
 - `iri` aliases: `rdg`, `nci`, `weak-interaction`; requires
   `--texture-cube`, defaults to `--isosurface 1.0`,
   `--tex-physical -0.04 0.04`, and surface-band texture scaling.
+- `dori` aliases: `dori-map`, `dori-fill`,
+  `density-overlap-regions-indicator`; requires `--texture-cube`, defaults
+  to `--isosurface 0.95`, `--tex-physical -0.04 0.02`, and surface-band
+  texture scaling.  DORI is the surface cube and sign(lambda2)rho is the
+  texture cube, matching Multiwfn `DORIfill.vmd`.
 - `esp` aliases: `mep`, `electrostatic-potential`, `density-esp`; requires
   `--texture-cube`, defaults to density isosurface `0.001`; pass
   `--tex-physical` for comparable figures.

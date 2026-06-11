@@ -1,6 +1,54 @@
 # Project Kanban
 
-Updated: 2026-06-11 19:56 CST
+Updated: 2026-06-11 20:23 CST
+
+## Current Request: 2026-06-11 README Refresh And One-Branch Closeout For DORI
+
+- [x] Record user request immediately: update README, inspect the unusual
+  branch state, converge back to one maintained branch if needed, and keep
+  repository-local Git identity as `Stardust0831`.
+- [x] Confirm branch topology and identity before staging.  Current branch is
+  `main`; `origin/HEAD` points to `origin/main`; `git ls-remote --heads
+  origin` exposes only `refs/heads/main`; repository-local identity is
+  `Stardust0831 <13862180016@163.com>`.  There is no feature branch that
+  needs a real merge-back right now.
+- [x] Finish the in-progress DORI route on `main`: README/usage/skills/
+  research/worklog are synchronized; validation passed with focused
+  `py_compile`, focused `tests.test_cube_preset tests.test_multiwfn_grid`
+  with 111 tests, full no-GUI regression with 328 tests, CLI smoke, and
+  `git diff --check`; read-only subagent review found no blocker or major
+  issue and two documentation minor issues, both handled in this pass.  Root
+  docs checksum mirror dry-run is empty.  Final commit hash, push result, and
+  branch alignment are reported in the assistant response.  Preserve
+  untracked `domain.cub` and `domain.pdb`.
+
+## Active Goal Continuation: 2026-06-11 Next ABACUS-Compatible Visualization Route
+
+- [x] Record automatic continuation of the long-running objective: survey
+  valuable Multiwfn wavefunction analyses that can be visualized in VESTA,
+  prioritizing routes that ABACUS can feed through LCAO Molden files or
+  direct cube outputs.
+- [x] Recheck current repository state before choosing the next increment.
+  Current branch is `main` at `3e9657a0c65d0585a27d50b014021b8fda7f606f`,
+  aligned with `origin/main` and `origin/HEAD`; only local untracked
+  `domain.cub` and `domain.pdb` remain and must stay outside commits.
+- [x] Re-audit existing `grid-run`/`cube-preset` coverage against local
+  Multiwfn source, select one bounded source-backed analysis route or display
+  setting that improves ABACUS-to-VESTA wavefunction visualization, then
+  implement it with tests, README/usage/skill/research/worklog notes, root
+  docs sync, review, commit, push, and branch verification.  Selected
+  increment: DORI.  Source evidence: `function.f90` maps `iuserfunc=20` to
+  `DORI(x,y,z)`, `0123dim.f90` exports function `100` as `userfunc.cub`,
+  weak-interaction post-processing pairs DORI with sign(lambda2)rho, and
+  bundled `DORIfill.vmd` uses DORI isosurface `0.95` with sign(lambda2)rho
+  texture range `-0.04..0.02`.  Implementation added
+  `grid-run --function dori`, `cube-preset dori-scalar`, and
+  `cube-preset dori`.  Validation passed with focused `py_compile`,
+  focused `tests.test_cube_preset tests.test_multiwfn_grid` with 111 tests,
+  full no-GUI regression with 328 tests, CLI smoke, and `git diff --check`;
+  review found no blocker or major issue.  Root docs checksum mirror dry-run
+  is empty.  Final commit hash and post-push branch verification are reported
+  in the assistant response.
 
 ## Current Request: 2026-06-11 README Refresh And Branch Consolidation For vdW Probe Route
 

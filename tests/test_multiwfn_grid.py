@@ -41,6 +41,18 @@ iri comment two
 """
 
 
+DORI_CUBE = """dori comment one
+dori comment two
+    2    -1.000000    -2.000000     0.500000
+    2     0.500000     0.000000     0.000000
+    2     0.000000     0.500000     0.000000
+    2     0.000000     0.000000     0.500000
+    8     8.000000    -1.000000    -2.000000     0.500000
+    1     1.000000    -0.500000    -2.000000     0.500000
+ 0.00 0.40 0.80 0.95 1.00 1.10 1.20 1.60
+"""
+
+
 INFOENTRO_CUBE = """info entropy comment one
 info entropy comment two
     2    -1.000000    -2.000000     0.500000
@@ -202,6 +214,7 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertIn("preset=promolecular-delta-g", text)
         self.assertIn("preset=hirshfeld-delta-g", text)
         self.assertIn("preset=iri-scalar", text)
+        self.assertIn("preset=dori-scalar", text)
         self.assertIn("preset=vdw-potential", text)
         self.assertIn("preset=electron-delocalization-range", text)
         self.assertIn("preset=orbital-overlap-distance", text)
@@ -215,6 +228,7 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertIn("mapped preset with --surface-cube: esp", text)
         self.assertIn("mapped preset with --surface-cube: alie", text)
         self.assertIn("mapped preset with --surface-cube: lea", text)
+        self.assertIn("default iuserfunc=20", text)
         self.assertIn("default iuserfunc=27", text)
         self.assertIn("default iuserfunc=-27", text)
         self.assertIn("requires --orbital", text)
@@ -277,6 +291,9 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertEqual(resolve_grid_function("leae-function").name, "local-electron-attachment-energy")
         self.assertEqual(resolve_grid_function("leae-function").default_user_function_index, -27)
         self.assertEqual(resolve_grid_function("leae-function").mapped_preset, "leae")
+        self.assertEqual(resolve_grid_function("dori").preset, "dori-scalar")
+        self.assertEqual(resolve_grid_function("dori-function").default_user_function_index, 20)
+        self.assertEqual(resolve_grid_function("density-overlap-regions-indicator").name, "dori")
         self.assertEqual(resolve_grid_function("information-gain-density").default_user_function_index, 49)
         self.assertEqual(resolve_grid_function("relative-shannon-entropy").name, "information-gain-density")
         self.assertEqual(resolve_grid_function("shannon-entropy-density").default_user_function_index, 50)
@@ -445,6 +462,10 @@ class TestMultiwfnGridRunner(unittest.TestCase):
                 resolve_grid_function("shannon-entropy-density"),
                 grid_mode="low",
             ),
+            ["5", "100", "1", "2", "0", "q"],
+        )
+        self.assertEqual(
+            build_grid_commands(resolve_grid_function("dori"), grid_mode="low"),
             ["5", "100", "1", "2", "0", "q"],
         )
         with self.assertRaisesRegex(ValueError, "special external-grid"):
@@ -1035,6 +1056,49 @@ class TestMultiwfnGridRunner(unittest.TestCase):
                 "user_function_index_iuserfunc: `49`",
                 result.recipe_path.read_text(encoding="utf-8"),
             )
+
+    def test_run_multiwfn_grid_dori_uses_named_iuserfunc_and_scalar_preset(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            wavefunction = root / "h2o.fch"
+            wavefunction.write_text("wavefunction", encoding="utf-8")
+            candidate = self.make_candidate(root)
+
+            def fake_run(command, **kwargs):
+                cwd = Path(kwargs["cwd"])
+                (cwd / "userfunc.cub").write_text(DORI_CUBE, encoding="utf-8")
+                return subprocess.CompletedProcess(command, 0, stdout="ok", stderr="")
+
+            with patch("multiwfn2vesta.multiwfn_grid.find_multiwfn", return_value=candidate):
+                with patch("multiwfn2vesta.multiwfn_grid.subprocess.run", side_effect=fake_run):
+                    result = run_multiwfn_grid(
+                        wavefunction,
+                        root / "products",
+                        function_name="dori",
+                        stem="case",
+                        grid_mode="low",
+                    )
+
+            self.assertTrue(result.success)
+            self.assertEqual(result.user_function_index, 20)
+            self.assertIsNotNone(result.settings_override)
+            self.assertIn("iuserfunc= 20", result.settings_override.read_text(encoding="utf-8"))
+            self.assertEqual(result.raw_cube.name, "userfunc.cub")
+            self.assertEqual(result.cube.name, "case_dori.cub")
+            self.assertIsNotNone(result.vesta_result)
+            self.assertEqual(
+                result.vesta_result.vesta_path.name,
+                "case_dori_dori-scalar_cube.vesta",
+            )
+            recipe = result.recipe_path.read_text(encoding="utf-8")
+            self.assertIn("function_name: `dori`", recipe)
+            self.assertIn("function_index: `100`", recipe)
+            self.assertIn("user_function_index_iuserfunc: `20`", recipe)
+            self.assertIn("auto_vesta_preset: `dori-scalar`", recipe)
+            manifest = result.vesta_result.manifest_path.read_text(encoding="utf-8")
+            self.assertIn("canonical_preset: `dori-scalar`", manifest)
+            self.assertIn("effective_isosurface: `0.95`", manifest)
+            self.assertIn("DORIfill.vmd", manifest)
 
     def test_named_lea_leae_user_functions_select_mapped_presets(self):
         for function_name, expected_preset in (

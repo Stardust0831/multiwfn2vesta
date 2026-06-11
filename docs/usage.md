@@ -57,7 +57,7 @@ multiwfn2vesta aim-igmh --help
   texture/color cube，默认关闭 section plane
 - `cube-preset`: 在 `cube-vesta` 后端上套用常见分析默认值，例如 density、
   orbital/signed、spin density、Laplacian、K(r)/G(r)、ABACUS direct
-  potential、partial charge、wavefunction norm、ELF/LOL、IRI/RDG/NCI、
+  potential、partial charge、wavefunction norm、ELF/LOL、IRI/RDG/NCI、DORI、
   EDR(r;d)、D(r)、IGM/IGMH/aIGM、ESP/MEP、ALIE/LEA/LEAE、
   userfunc/iuserfunc、standalone vdW potential、vdW map
 - `surface-extrema`: 把 Multiwfn `surfanalysis.pdb` 的分子表面极值点作为
@@ -237,6 +237,7 @@ multiwfn2vesta cube-preset promolecular-rdg RDGprodens.cub cube_products
 multiwfn2vesta cube-preset promolecular-delta-g Delta_g.cub cube_products
 multiwfn2vesta cube-preset hirshfeld-delta-g griddata.cub cube_products
 multiwfn2vesta cube-preset iri-scalar IRI.cub cube_products
+multiwfn2vesta cube-preset dori-scalar userfunc.cub cube_products
 multiwfn2vesta cube-preset vdw-potential vdWpot.cub cube_products
 multiwfn2vesta cube-preset potential pot_es.cube cube_products
 multiwfn2vesta cube-preset partial-charge pchg.cube cube_products
@@ -244,6 +245,8 @@ multiwfn2vesta cube-preset wavefunction-norm wfc_norm.cube cube_products
 multiwfn2vesta cube-preset elf ELF.cub cube_products
 multiwfn2vesta cube-preset rdg IRI2_surface.cub cube_products \
   --texture-cube IRI1_color.cub
+multiwfn2vesta cube-preset dori DORI.cub cube_products \
+  --texture-cube sl2r.cub
 multiwfn2vesta cube-preset stm STM.cub cube_products
 multiwfn2vesta cube-preset domain domain.cub cube_products
 multiwfn2vesta cube-preset basin basin0001.cub cube_products
@@ -320,11 +323,11 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
   `leae-function`、`shannon-entropy-density`、`fisher-information-density`；
   用于 Multiwfn 函数 `100` 的 `userfunc.cub`；通用
   `grid-run --function user-function` 需要
-  `--user-function-index IUSERFUNC`。命名路由
+  `--user-function-index IUSERFUNC`。命名路由 `dori`、
   `local-electron-affinity`、`local-electron-attachment-energy`、
   `information-gain-density`、`shannon-entropy-density`、
   `fisher-information-density`、`second-fisher-information-density` 会分别
-  自动 patch `iuserfunc=27/-27/49/50/51/52`。runner 优先复制所选
+  自动 patch `iuserfunc=20/27/-27/49/50/51/52`。runner 优先复制所选
   Multiwfn 同目录的 `settings.ini`，只 patch `iuserfunc` 后通过
   run-local `-set` 传入；
   `-1/-3` 外部格点插值和 `57/58/59` Shubin 特殊模式暂不走这个通用路线
@@ -357,6 +360,10 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
 - `iri-scalar`：单正值等值面，别名包括 `iri-cube`、`standalone-iri`，
   用于单 cube 的 Multiwfn `IRI.cub`，默认等值面 `1.0`；双 cube 的
   IRI/RDG/NCI 染色图仍用 `cube-preset iri`
+- `dori-scalar`：单正值等值面，别名包括 `standalone-dori`、`dori-cube`，
+  用于 `grid-run --function dori` 生成的 function-100 `userfunc.cub`
+  (`iuserfunc=20`)，默认等值面 `0.95`，跟随 Multiwfn 自带
+  `DORIfill.vmd`
 - `vdw-potential`：正/负等值面，别名包括 `vdw`、`vdwpot`、
   `vdw-potential-cube`、`van-der-waals-potential`，用于 Multiwfn 函数
   `25` 的 `vdWpot.cub`；Multiwfn 源码中此函数按 UFF 参数计算 vdW
@@ -393,6 +400,10 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
 - `igmh`：别名包括 `igm`、`igm-inter`、`igmh-inter`，用 `dg_inter.cub`
   加 `sl2r.cub`，默认等值面 `0.01`，染色范围 `-0.05` 到 `0.05`，对齐
   Multiwfn `IGM_inter.vmd`
+- `dori`：别名包括 `dori-map`、`dori-fill`，用 DORI `userfunc.cub` 加
+  sign(lambda2)rho cube，默认等值面 `0.95`，染色范围 `-0.04` 到
+  `0.02`，对齐 Multiwfn `DORIfill.vmd`；注意这里 DORI 是 surface cube，
+  sign(lambda2)rho 是 `--texture-cube`
 - `igm-intra`：用 `dg_intra.cub` 加 `sl2r.cub`，默认等值面 `0.2`，对齐
   Multiwfn `IGM_intra.vmd`
 - `aigm` / `aigm-tfi`：用 `avgdg_inter.cub` 分别加 `avgsl2r.cub` 或
@@ -620,11 +631,11 @@ multiwfn2vesta grid-run --list-functions
   从所选 Multiwfn 的 `settings.ini` 复制后 patch
 - `user-function` / `userfunc`：函数 `100`，原始输出 `userfunc.cub`，
   默认接 `cube-preset user-function`，按正/负等值面显示；通用路由必须传
-  `--user-function-index IUSERFUNC`。也可直接用命名路由
+  `--user-function-index IUSERFUNC`。也可直接用命名路由 `dori`、
   `local-electron-affinity`、`local-electron-attachment-energy`、
   `information-gain-density`、`shannon-entropy-density`、
   `fisher-information-density`、`second-fisher-information-density`，这些会
-  自动设置 `iuserfunc=27/-27/49/50/51/52`；LEA/LEAE 若要画成 density
+  自动设置 `iuserfunc=20/27/-27/49/50/51/52`；LEA/LEAE 若要画成 density
   surface 上的染色图，可在 `grid-run` 中加 `--surface-cube density.cub`
   自动选 `lea` / `leae` mapped preset，也可手动用 `cube-preset lea` /
   `cube-preset leae`
@@ -658,6 +669,10 @@ multiwfn2vesta grid-run --list-functions
   `100`，原始输出 `userfunc.cub`；配合 `--surface-cube density.cub` 时，
   自动把生成的 LEA/LEAE cube 作为 `cube-preset lea` / `cube-preset leae`
   的 texture
+- `dori`：函数 `100`，原始输出 `userfunc.cub`，自动写 run-local
+  `iuserfunc=20`，默认接 `cube-preset dori-scalar`，按单正值 `0.95`
+  等值面显示；若要 DORI surface 按 sign(lambda2)rho 染色，显式运行
+  `cube-preset dori DORI.cub ... --texture-cube sl2r.cub`
 - `elf` / `lol`：局域化函数等值面
 - `rdg` / `promolecular-rdg`：函数 `13` / `14`，原始输出 `RDG.cub` /
   `RDGprodens.cub`，默认分别接 `cube-preset rdg-scalar` /

@@ -69,6 +69,7 @@ multiwfn2vesta cube-preset promolecular-rdg RDGprodens.cub cube_products
 multiwfn2vesta cube-preset promolecular-delta-g Delta_g.cub cube_products
 multiwfn2vesta cube-preset hirshfeld-delta-g griddata.cub cube_products
 multiwfn2vesta cube-preset iri-scalar IRI.cub cube_products
+multiwfn2vesta cube-preset dori-scalar userfunc.cub cube_products
 multiwfn2vesta cube-preset vdw-potential vdWpot.cub cube_products
 multiwfn2vesta cube-preset potential pot_es.cube cube_products
 multiwfn2vesta cube-preset partial-charge pchg.cube cube_products
@@ -76,6 +77,8 @@ multiwfn2vesta cube-preset wavefunction-norm wfc_norm.cube cube_products
 multiwfn2vesta cube-preset elf ELF.cub cube_products
 multiwfn2vesta cube-preset rdg IRI2_surface.cub cube_products \
   --texture-cube IRI1_color.cub
+multiwfn2vesta cube-preset dori DORI.cub cube_products \
+  --texture-cube sl2r.cub
 multiwfn2vesta cube-preset igmh dg_inter.cub cube_products \
   --texture-cube sl2r.cub
 multiwfn2vesta cube-preset esp density.cub cube_products \
@@ -232,13 +235,13 @@ Useful `grid-run` functions for ABACUS-compatible Molden files include
 `lagrangian-ked`, `elf`, `lol`, `local-information-entropy`, `esp`, `rdg`,
 `promolecular-rdg`,
 `pair-function`, `source-function`, `edr`, `edrdmax`, `becke`, `hirshfeld`,
-`delta-g`, `hirshfeld-delta-g`, `iri`, `vdw-potential`, and
+`delta-g`, `hirshfeld-delta-g`, `iri`, `dori`, `vdw-potential`, and
 `signlambda2rho`.
 The single-cube display presets for `gradient.cub`, `spindensity.cub`,
 `orbdens.cub`, `infoentro.cub`, `fermihole.cub`, `EDR.cub`,
 `EDRDmax.cub`, `srcfunc.cub`, `Becke.cub`, `Hirshfeld.cub`, `RDG.cub`,
 `RDGprodens.cub`, `Delta_g.cub`, function `23` generic `griddata.cub`,
-`IRI.cub`, and `vdWpot.cub` follow
+`IRI.cub`, DORI `userfunc.cub`, and `vdWpot.cub` follow
 Multiwfn main-function-5 `sur_value`
 defaults where the source defines them.  For `gradient.cub`, `infoentro.cub`,
 `fermihole.cub`, `EDR.cub`, `EDRDmax.cub`, `srcfunc.cub`, `Delta_g.cub`,
@@ -264,10 +267,10 @@ through `--pair-function-type`, and patches `paircorrtype` through
 run-local settings file copied from the selected Multiwfn `settings.ini` when
 available and passed with `-set`; generic `grid-run --function user-function`
 requires `--user-function-index IUSERFUNC`, while named routes
-`local-electron-affinity`, `local-electron-attachment-energy`,
+`dori`, `local-electron-affinity`, `local-electron-attachment-energy`,
 `information-gain-density`, `shannon-entropy-density`,
 `fisher-information-density`, and `second-fisher-information-density`
-automatically patch `iuserfunc=27/-27/49/50/51/52` through the same
+automatically patch `iuserfunc=20/27/-27/49/50/51/52` through the same
 run-local `-set` route;
 `grid-run --function becke` requires `--becke-atoms I J`,
 with `I J` for Becke overlap weight and `I 0` for Becke atomic weight;
@@ -281,13 +284,16 @@ Multiwfn's built-in atomic-density mode.  `infoentro.cub` uses signed
 `becke-weight`, `Hirshfeld.cub` uses `hirshfeld-weight`, `Delta_g.cub`
 uses standalone `promolecular-delta-g`, function `23` generic
 `griddata.cub` uses standalone `hirshfeld-delta-g`, `IRI.cub` uses
-standalone `iri-scalar`, and `vdWpot.cub` uses standalone
-`vdw-potential` with `+/-1.0` kcal/mol signed
+standalone `iri-scalar`, `grid-run --function dori` uses standalone
+`dori-scalar` (`iuserfunc=20`, isosurface `0.95`), and `vdWpot.cub` uses
+standalone `vdw-potential` with `+/-1.0` kcal/mol signed
 surfaces; `grid-run --function vdw-potential` defaults the UFF probe to
 carbon/6 through run-local `ivdwprobe` and accepts `--vdw-probe` for other
 probe atoms.  Use the existing two-cube `cube-preset iri` route when a
-sign(lambda2)rho-like texture cube is available; use `vdw-map` when a vdW
-potential cube should color a density/surface cube.  IGM/IGMH fragment
+sign(lambda2)rho-like texture cube is available; use `cube-preset dori`
+when a DORI surface should be colored by sign(lambda2)rho according to
+Multiwfn `DORIfill.vmd`; use `vdw-map` when a vdW potential cube should
+color a density/surface cube.  IGM/IGMH fragment
 `dg_inter.cub` remains a separate mapped-surface workflow through
 `cube-preset igmh`/`igm`.
 

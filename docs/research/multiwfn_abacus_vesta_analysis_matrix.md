@@ -24,7 +24,8 @@ Multiwfn evidence:
   defaults for several standalone cube displays: `gradient.cub` keeps the
   global `define.f90` default `0.05`, `spindensity.cub` uses `0.02`,
   `RDG.cub` uses `0.5`, `RDGprodens.cub` uses `0.4`, `IRI.cub` uses `1.0`,
-  and `orbdens.cub` uses `0.005`.
+  and `orbdens.cub` uses `0.005`; for function `100` DORI/IRI user
+  functions (`iuserfunc=20/99`), the source uses a display range of `0..2`.
 - Multiwfn `settings.ini` key `ipolarpara` changes main-function-5 function
   `5` from electron spin density to the spin-polarization parameter.  Local
   `function.f90` shows `ipolarpara=0` evaluates `rho_alpha-rho_beta`, while
@@ -71,17 +72,23 @@ Multiwfn evidence:
   `srcfuncmode` into a run-local `multiwfn_grid_settings.ini`, and passes it
   with `-set`, leaving global Multiwfn settings untouched.
 - Multiwfn main-function-5 function `100` evaluates `userfunc(x,y,z)` using
-  `iuserfunc` from settings.  The inspected source shows LEA (`iuserfunc=27`),
-  LEAE (`-27`), information gain (`49`), Shannon entropy density (`50`),
-  Fisher information density (`51/52`), and many other selectable functions;
-  `0123dim.f90` exports `userfunc.cub`.  Multiwfn main menu `1000 -> 2` can
-  set `iuserfunc` interactively, but the maintained runner copies the
-  selected Multiwfn `settings.ini` when available, patches `iuserfunc` into a
-  run-local `multiwfn_grid_settings.ini`, and passes it with `-set`.  The
-  generic `user-function` route still accepts any direct `iuserfunc`, while
-  named routes now imply common source-backed indices for LEA/LEAE and
+  `iuserfunc` from settings.  The inspected source shows DORI
+  (`iuserfunc=20`), LEA (`27`), LEAE (`-27`), information gain (`49`),
+  Shannon entropy density (`50`), Fisher information density (`51/52`), and
+  many other selectable functions; `0123dim.f90` exports `userfunc.cub`.
+  Multiwfn main menu `1000 -> 2` can set `iuserfunc` interactively, but the
+  maintained runner copies the selected Multiwfn `settings.ini` when
+  available, patches `iuserfunc` into a run-local
+  `multiwfn_grid_settings.ini`, and passes it with `-set`.  The generic
+  `user-function` route still accepts any direct `iuserfunc`, while named
+  routes now imply common source-backed indices for DORI, LEA/LEAE, and
   information-theory densities.  Special external-grid interpolation modes
   `-1/-3` and Shubin `57/58/59` are excluded from the generic route.
+- Multiwfn weak-interaction `DORIfill.vmd` uses DORI as the isosurface cube
+  at `0.95` and sign(lambda2)rho as the texture cube with range
+  `-0.04..0.02`.  The maintained project therefore separates
+  `cube-preset dori-scalar` for standalone `grid-run --function dori` from
+  `cube-preset dori` for explicit DORI+sign(lambda2)rho two-cube figures.
 - Multiwfn `function.f90` lists function `25` as van der Waals potential,
   evaluates it through `vdwpotfunc`; the source comments identify this as
   the UFF vdW potential in kcal/mol.  `0123dim.f90` exports the standalone
@@ -209,7 +216,7 @@ occupations, and density derivatives from the wavefunction representation.
 
 | Analysis | Multiwfn input | ABACUS feasibility | Multiwfn output | VESTA representation | Project action |
 | --- | --- | --- | --- | --- | --- |
-| IRI/NCI/RDG/Delta-g | Full wavefunction, or promolecular approximation from structure | Molden route feasible; promolecular route can avoid wavefunction | `IRI.cub`, `RDG.cub`, `RDGprodens.cub`, `Delta_g.cub`, function-23 `griddata.cub`, `sl2r.cub`, `func1.cub`, `func2.cub` | Standalone scalar isosurfaces, or isosurface plus texture cube; section planes off | `multiwfn2vesta iri-run` implemented for the two-cube weak-interaction stream; `grid-run --surface-cube` can use sign(lambda2)rho cubes as texture on an existing RDG/IRI surface; `cube-preset rdg-scalar`, `promolecular-rdg`, `promolecular-delta-g`, `hirshfeld-delta-g`, and `iri-scalar` cover standalone `RDG.cub`/`RDGprodens.cub`/`Delta_g.cub`/function-23 `griddata.cub`/`IRI.cub` without stealing the existing `rdg -> iri` texture alias or the IGM/IGMH `dg_inter.cub` route |
+| IRI/NCI/RDG/Delta-g/DORI | Full wavefunction, or promolecular approximation from structure | Molden route feasible; promolecular route can avoid wavefunction | `IRI.cub`, `RDG.cub`, `RDGprodens.cub`, `Delta_g.cub`, function-23 `griddata.cub`, DORI `userfunc.cub`, `sl2r.cub`, `func1.cub`, `func2.cub` | Standalone scalar isosurfaces, or isosurface plus texture cube; section planes off | `multiwfn2vesta iri-run` implemented for the two-cube weak-interaction stream; `grid-run --surface-cube` can use sign(lambda2)rho cubes as texture on an existing RDG/IRI surface; `grid-run --function dori` now exports DORI by patching `iuserfunc=20` and uses `cube-preset dori-scalar`; explicit `cube-preset dori DORI.cub --texture-cube sl2r.cub` follows `DORIfill.vmd` for DORI+sign(lambda2)rho; `cube-preset rdg-scalar`, `promolecular-rdg`, `promolecular-delta-g`, `hirshfeld-delta-g`, and `iri-scalar` cover standalone `RDG.cub`/`RDGprodens.cub`/`Delta_g.cub`/function-23 `griddata.cub`/`IRI.cub` without stealing the existing `rdg -> iri` texture alias or the IGM/IGMH `dg_inter.cub` route |
 | ESP/MEP on density surface | Full wavefunction or ABACUS `out_pot` plus density cube | Strong direct cube route; Molden route for Multiwfn ESP | `density.cub`, `totesp.cub`, `pot_es.cube`, `pots*.cube` | Density isosurface colored by potential texture | `grid-run --function esp --surface-cube density.cub --grid-mode cube --grid-cube density.cub` now generates the ESP texture and writes the mapped-surface VESTA file directly |
 | STM/LDOS | Full wavefunction with GTF information | Good candidate for Gamma LCAO Molden; metals and Fermi-level choices need care | `STM.cub` | Single positive LDOS/current isosurface or slices | `stm-run` now automates Multiwfn `300 -> 4`, switches to constant-current mode, exports `STM.cub`, and calls `cube-preset stm` |
 | Molecular surface mapped properties | Full wavefunction or cube pair | Feasible through Molden; ABACUS can provide density/potential cubes | `surf.cub`, `mapfunc.cub`, `density.cub`, `avglocion.cub`, `surfanalysis.pdb` | Surface cube plus texture; extrema as atoms-only overlay phase | `cube-preset surface-map` covers surface+texture display using `molsurfmap.vmd` defaults; `--surfanalysis-pdb` and `surface-extrema` overlay surface extrema |
@@ -451,13 +458,17 @@ Main gaps:
   a later tuning layer.
 - User-defined function now has `cube-preset user-function`, a generic
   `grid-run --function user-function --user-function-index IUSERFUNC` route,
-  and dedicated named function-100 routes for LEA/LEAE and
+  and dedicated named function-100 routes for DORI, LEA/LEAE, and
   information-theory densities.  Local Multiwfn source shows function `100`
   exports `userfunc.cub` and evaluates `userfunc(x,y,z)` according to
-  `iuserfunc`; named routes patch `27/-27/49/50/51/52` automatically through
-  the same run-local `-set` settings file while leaving global settings
-  untouched.  External-grid interpolation `-1/-3` and Shubin `57/58/59`
-  remain deferred special modes.
+  `iuserfunc`; named routes patch `20/27/-27/49/50/51/52` automatically
+  through the same run-local `-set` settings file while leaving global
+  settings untouched.  External-grid interpolation `-1/-3` and Shubin
+  `57/58/59` remain deferred special modes.
+- DORI visualization now has `cube-preset dori-scalar` for standalone
+  `iuserfunc=20` `userfunc.cub` and `cube-preset dori` for DORI surfaces
+  colored by sign(lambda2)rho, following Multiwfn `DORIfill.vmd`
+  (`isosurface=0.95`, texture range `-0.04..0.02`).
 - Promolecular Delta-g now has a distinct `cube-preset
   promolecular-delta-g` route and `grid-run --function delta-g` maps to
   Multiwfn function `22` `Delta_g.cub`.  This is a single-cube promolecular
