@@ -21,16 +21,15 @@ point.
 - Working checkout: `/mnt/g/work/multiwfn2vesta/project`.  The workspace-level
   `/mnt/g/work/multiwfn2vesta/.git` is an empty metadata stub and is not used
   for project commits.
-- Branch audit on 2026-06-11 00:31 CST, after `git fetch --prune origin`,
+- Branch audit on 2026-06-11 16:47 CST, after `git fetch --prune origin`,
   found local `main`, `origin/main`, and `origin/HEAD` aligned at
-  `c879f30c62e8361b6636f88504abed30bdce75b1`
-  (`Add source-function grid preset`).
+  `13e657fb700cc8d4bbb4c126434d6762d0f4d5f5`
+  (`Add pair-function grid preset`).
 - `git ls-remote --heads origin` currently returns only `refs/heads/main`; no
   merge-back was needed in this pass because there is no extra local or remote
   feature branch to consolidate.
-- This README/status refresh and the current pair-function closeout are being
-  kept on the same maintained `main` branch; there is still no side branch or
-  remote feature head to merge back in this pass.
+- The pair-function closeout is already on the maintained `main` branch; there
+  is still no side branch or remote feature head to merge back in this pass.
 - Local untracked probe files such as `domain.cub` and `domain.pdb` are not
   part of the maintained branch state and should stay uncommitted unless they
   are explicitly promoted into documented fixtures.

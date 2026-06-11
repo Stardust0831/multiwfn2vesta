@@ -1,6 +1,6 @@
 # Project Kanban
 
-Updated: 2026-06-11 00:31 CST
+Updated: 2026-06-11 16:47 CST
 
 ## Current Request: 2026-06-11 README Refresh And Main Branch Consolidation
 
@@ -11,25 +11,19 @@ Updated: 2026-06-11 00:31 CST
   `Stardust0831 <13862180016@163.com>`.
 - [x] Recheck branch state after `git fetch --prune origin`: local `main`,
   `origin/main`, and `origin/HEAD` are aligned at
-  `c879f30c62e8361b6636f88504abed30bdce75b1`; `git ls-remote --heads
+  `13e657fb700cc8d4bbb4c126434d6762d0f4d5f5`; `git ls-remote --heads
   origin` exposes only `refs/heads/main`.
 - [x] Decide merge action: no merge-back is needed because there is no extra
   local or remote feature branch to consolidate.
 - [x] Refresh README branch-status text to the current single-branch state
   and keep the pair-function closeout on `main`.
-- [x] Finish README/usage/skills/research docs sync for the current
-  pair-function increment.
-- [x] Sync root docs mirror and validate.  Passed checks: focused
-  `py_compile`, 90 focused cube/grid tests, full 306-test no-GUI regression,
-  `cube-preset --list-presets`, `grid-run --list-functions`,
-  `grid-run --help`, `bin/multiwfn2vesta --help`, docs mirror dry-run,
-  stale pair-function wording scan, and `git diff --check`.
-- [x] Complete pre-commit review.  The delegated read-only subagent response
-  was unrelated and not used as evidence; local review found no blocking
-  issue in branch-status text, function-17 command stream, run-local
-  settings handling, CLI validation, docs sync, or untracked probe handling.
-- [ ] Commit, push, and verify branch alignment; keep `domain.cub` and
-  `domain.pdb` untracked.
+- [x] Sync root docs mirror and validate the documentation-only change.
+  Passed checks: root docs checksum mirror dry-run, `git diff --check`,
+  `bin/multiwfn2vesta --help`, remote-head audit, git identity audit, and
+  read-only subagent review with no blocking issue.
+- [x] Prepare explicit staging/commit/push closeout.  Final commit hash and
+  post-push branch alignment are reported in the assistant response to avoid
+  a self-referential docs loop; keep `domain.cub` and `domain.pdb` untracked.
 
 ## Active Goal Continuation: 2026-06-11 Next ABACUS-Compatible Wavefunction Visualization Increment
 
@@ -68,8 +62,10 @@ Updated: 2026-06-11 00:31 CST
   was unrelated and not used as evidence; local review found no blocking
   issue in branch-status text, function-17 command stream, run-local
   settings handling, CLI validation, docs sync, or untracked probe handling.
-- [ ] Commit, push, and verify branch alignment; keep `domain.cub` and
-  `domain.pdb` untracked.
+- [x] Commit, push, and verify branch alignment for the pair-function feature:
+  `13e657fb700cc8d4bbb4c126434d6762d0f4d5f5` is on local `main`,
+  `origin/main`, and `origin/HEAD`; keep `domain.cub` and `domain.pdb`
+  untracked.
 
 ## Current Request: 2026-06-10 README Refresh, Branch Check, Source Function Closeout
 

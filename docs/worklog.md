@@ -7,14 +7,14 @@
   `Stardust0831`.
 - Rechecked repository state after `git fetch --prune origin`: local `main`,
   `origin/main`, and `origin/HEAD` are aligned at
-  `c879f30c62e8361b6636f88504abed30bdce75b1`
-  (`Add source-function grid preset`), and `git ls-remote --heads origin`
+  `13e657fb700cc8d4bbb4c126434d6762d0f4d5f5`
+  (`Add pair-function grid preset`), and `git ls-remote --heads origin`
   exposes only `refs/heads/main`.  No merge-back is needed because no extra
   local or remote feature branch exists.
 - Repository-local identity is `Stardust0831 <13862180016@163.com>`.
-- Refreshed README branch-status text and completed the pair-function
-  README/usage/skills/research documentation sync on the maintained `main`
-  branch.  Local untracked probes `domain.cub` and `domain.pdb` remain
+- Refreshed README branch-status text to match the current pair-function tip
+  and recorded that the maintained repository remains a single-branch `main`
+  workflow.  Local untracked probes `domain.cub` and `domain.pdb` remain
   outside version control.
 
 ## 2026-06-11: Pair/correlation function grid preset
