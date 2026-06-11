@@ -253,6 +253,19 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertIn("preset=dori-scalar", text)
         self.assertIn("preset=rose", text)
         self.assertIn("preset=sedd", text)
+        self.assertIn("steric-energy-density", text)
+        self.assertIn("preset=steric-energy-density", text)
+        self.assertIn("steric-potential", text)
+        self.assertIn("pauli-potential", text)
+        self.assertIn("quantum-potential", text)
+        self.assertIn("sbl-total-potential", text)
+        self.assertIn("preset=sbl-potential", text)
+        self.assertIn("sbl-force-magnitude", text)
+        self.assertIn("preset=sbl-force-magnitude", text)
+        self.assertIn("sbl-charge", text)
+        self.assertIn("preset=sbl-charge", text)
+        self.assertIn("sbl-total-energy-density", text)
+        self.assertIn("preset=sbl-energy-density", text)
         self.assertIn("preset=vdw-potential", text)
         self.assertIn("preset=electron-delocalization-range", text)
         self.assertIn("preset=orbital-overlap-distance", text)
@@ -272,6 +285,11 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertIn("default iuserfunc=103", text)
         self.assertIn("default iuserfunc=18", text)
         self.assertIn("default iuserfunc=19", text)
+        self.assertIn("default iuserfunc=40", text)
+        self.assertIn("default iuserfunc=60", text)
+        self.assertIn("default iuserfunc=-69", text)
+        self.assertIn("default iuserfunc=110", text)
+        self.assertIn("default iuserfunc=113", text)
         self.assertIn("mapped preset with --surface-cube: alie", text)
         self.assertIn("mapped preset with --surface-cube: lea", text)
         self.assertIn("local-mulliken-electronegativity", text)
@@ -404,6 +422,26 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertEqual(resolve_grid_function("sedd").preset, "sedd")
         self.assertEqual(resolve_grid_function("single-exponential-decay-detector").default_user_function_index, 19)
         self.assertEqual(resolve_grid_function("sedd-function").mapped_preset, "surface-map")
+        self.assertEqual(resolve_grid_function("steric-energy-density").default_user_function_index, 40)
+        self.assertEqual(resolve_grid_function("steric-energy-density").preset, "steric-energy-density")
+        self.assertEqual(resolve_grid_function("weizsacker-potential").default_user_function_index, 41)
+        self.assertEqual(resolve_grid_function("steric-charge").preset, "sbl-charge")
+        self.assertEqual(resolve_grid_function("steric-force").preset, "sbl-force-magnitude")
+        self.assertEqual(resolve_grid_function("pauli-potential").default_user_function_index, 60)
+        self.assertEqual(resolve_grid_function("pauliforce").default_user_function_index, 61)
+        self.assertEqual(resolve_grid_function("pauli-charge").preset, "sbl-charge")
+        self.assertEqual(resolve_grid_function("quantum-potential").default_user_function_index, 63)
+        self.assertEqual(resolve_grid_function("quantum-force").preset, "sbl-force-magnitude")
+        self.assertEqual(resolve_grid_function("quantum-charge").default_user_function_index, 65)
+        self.assertEqual(resolve_grid_function("electrostatic-force").default_user_function_index, 66)
+        self.assertEqual(resolve_grid_function("esp-charge").preset, "sbl-charge")
+        self.assertEqual(resolve_grid_function("sbl-electrostatic-energy-density").default_user_function_index, 68)
+        self.assertEqual(resolve_grid_function("sbl-quantum-energy-density").default_user_function_index, 69)
+        self.assertEqual(resolve_grid_function("sbl-quantum-energy-density-lagrangian").default_user_function_index, -69)
+        self.assertEqual(resolve_grid_function("sbl-total-energy-density").default_user_function_index, 110)
+        self.assertEqual(resolve_grid_function("sbl-potential").default_user_function_index, 111)
+        self.assertEqual(resolve_grid_function("sbl-force").default_user_function_index, 112)
+        self.assertEqual(resolve_grid_function("sbl-charge").default_user_function_index, 113)
         self.assertEqual(
             resolve_grid_function("local-electronegativity").name,
             "local-mulliken-electronegativity",
@@ -634,6 +672,14 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         )
         self.assertEqual(
             build_grid_commands(resolve_grid_function("sedd"), grid_mode="low"),
+            ["5", "100", "1", "2", "0", "q"],
+        )
+        self.assertEqual(
+            build_grid_commands(resolve_grid_function("sbl-quantum-energy-density-lagrangian"), grid_mode="low"),
+            ["5", "100", "1", "2", "0", "q"],
+        )
+        self.assertEqual(
+            build_grid_commands(resolve_grid_function("sbl-total-potential"), grid_mode="low"),
             ["5", "100", "1", "2", "0", "q"],
         )
         self.assertEqual(
@@ -1382,6 +1428,74 @@ class TestMultiwfnGridRunner(unittest.TestCase):
                     manifest = result.vesta_result.manifest_path.read_text(encoding="utf-8")
                     self.assertIn(f"canonical_preset: `{expected_preset}`", manifest)
                     self.assertIn("effective_isosurface: `0.5`", manifest)
+
+    def test_run_steric_sbl_routes_patch_iuserfunc(self):
+        cases = (
+            ("steric-energy-density", 40, "steric-energy-density", "0.01", "single"),
+            ("steric-potential", 41, "sbl-potential", "0.05", "signed"),
+            ("steric-charge", 42, "sbl-charge", "0.05", "signed"),
+            ("steric-force", 43, "sbl-force-magnitude", "0.05", "single"),
+            ("pauli-potential", 60, "sbl-potential", "0.05", "signed"),
+            ("pauli-force", 61, "sbl-force-magnitude", "0.05", "single"),
+            ("pauli-charge", 62, "sbl-charge", "0.05", "signed"),
+            ("quantum-potential", 63, "sbl-potential", "0.05", "signed"),
+            ("quantum-force", 64, "sbl-force-magnitude", "0.05", "single"),
+            ("quantum-charge", 65, "sbl-charge", "0.05", "signed"),
+            ("electrostatic-force", 66, "sbl-force-magnitude", "0.05", "single"),
+            ("electrostatic-charge", 67, "sbl-charge", "0.05", "signed"),
+            ("sbl-electrostatic-energy-density", 68, "sbl-energy-density", "0.05", "signed"),
+            ("sbl-quantum-energy-density", 69, "sbl-energy-density", "0.05", "signed"),
+            ("sbl-quantum-energy-density-lagrangian", -69, "sbl-energy-density", "0.05", "signed"),
+            ("sbl-total-energy-density", 110, "sbl-energy-density", "0.05", "signed"),
+            ("sbl-total-potential", 111, "sbl-potential", "0.05", "signed"),
+            ("sbl-total-force-magnitude", 112, "sbl-force-magnitude", "0.05", "single"),
+            ("sbl-total-charge", 113, "sbl-charge", "0.05", "signed"),
+        )
+        for function_name, expected_iuserfunc, expected_preset, expected_isosurface, expected_mode in cases:
+            with self.subTest(function_name=function_name):
+                with tempfile.TemporaryDirectory() as tmp:
+                    root = Path(tmp)
+                    wavefunction = root / "h2o.fch"
+                    wavefunction.write_text("wavefunction", encoding="utf-8")
+                    candidate = self.make_candidate(root)
+                    (candidate.path.parent / "settings.ini").write_text(
+                        "iuserfunc= 0 // stale userfunc\nother_setting= keep\n",
+                        encoding="utf-8",
+                    )
+
+                    def fake_run(command, **kwargs):
+                        cwd = Path(kwargs["cwd"])
+                        (cwd / "userfunc.cub").write_text(USER_FUNCTION_CUBE, encoding="utf-8")
+                        return subprocess.CompletedProcess(command, 0, stdout="ok", stderr="")
+
+                    with patch("multiwfn2vesta.multiwfn_grid.find_multiwfn", return_value=candidate):
+                        with patch("multiwfn2vesta.multiwfn_grid.subprocess.run", side_effect=fake_run):
+                            result = run_multiwfn_grid(
+                                wavefunction,
+                                root / "products",
+                                function_name=function_name,
+                                stem="case",
+                                grid_mode="low",
+                            )
+
+                    self.assertTrue(result.success)
+                    self.assertEqual(result.command_file.read_text(encoding="utf-8"), "5\n100\n1\n2\n0\nq\n")
+                    self.assertEqual(result.user_function_index, expected_iuserfunc)
+                    self.assertIsNotNone(result.settings_override)
+                    settings_text = result.settings_override.read_text(encoding="utf-8")
+                    self.assertIn(f"iuserfunc= {expected_iuserfunc} // stale userfunc", settings_text)
+                    self.assertIn("other_setting= keep", settings_text)
+                    self.assertEqual(result.raw_cube.name, "userfunc.cub")
+                    self.assertIsNotNone(result.vesta_result)
+                    recipe = result.recipe_path.read_text(encoding="utf-8")
+                    self.assertIn(f"function_name: `{resolve_grid_function(function_name).name}`", recipe)
+                    self.assertIn("function_index: `100`", recipe)
+                    self.assertIn(f"user_function_index_iuserfunc: `{expected_iuserfunc}`", recipe)
+                    self.assertIn(f"auto_vesta_preset: `{expected_preset}`", recipe)
+                    manifest = result.vesta_result.manifest_path.read_text(encoding="utf-8")
+                    self.assertIn(f"canonical_preset: `{expected_preset}`", manifest)
+                    self.assertIn(f"effective_isosurface: `{expected_isosurface}`", manifest)
+                    self.assertIn(f"effective_surface_mode: `{expected_mode}`", manifest)
 
     def test_run_alpha_density_uses_named_iuserfunc_and_density_preset(self):
         with tempfile.TemporaryDirectory() as tmp:

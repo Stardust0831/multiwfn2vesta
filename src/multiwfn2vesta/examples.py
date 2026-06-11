@@ -277,6 +277,19 @@ FEATURE_COVERAGE: List[Dict[str, object]] = [
         "next": "Use validated Molden input to generate RoSE and SEDD cubes, tune the default 0.5 isosurface, and render a paired figure.",
     },
     {
+        "command": "grid-run --function steric/sbl",
+        "feature": "Steric, Pauli, quantum, electrostatic, and SBL diagnostic scalar fields",
+        "status": "needs-render",
+        "example": "planned Ag(111)+benzene steric/SBL interface scalar suite",
+        "system": "Ag(111)+benzene adsorption interface, benzene dimer, or GC base pair",
+        "runbook": "docs/feature_examples_zh.md",
+        "gallery": [],
+        "next": (
+            "Use validated ABACUS Molden input to render steric/SBL potential, force, charge, and "
+            "energy-density fields on the same interface or weak-interaction system."
+        ),
+    },
+    {
         "command": "fukui-run",
         "feature": "Charged-state Fukui and dual descriptor maps",
         "status": "needs-example",

@@ -565,6 +565,18 @@ override its color with the single-surface `--positive-rgb` option.
 `userfunc.cub` with `iuserfunc=18/19`, call standalone `rose` / `sedd`
 presets with a `0.5` starting isosurface, and fall back to `surface-map` when
 `--surface-cube` is supplied.
+`grid-run --function steric-energy-density`, `steric-potential`,
+`steric-charge`, `steric-force-magnitude`, `pauli-potential`,
+`pauli-force-magnitude`, `pauli-charge`, `quantum-potential`,
+`quantum-force-magnitude`, `quantum-charge`,
+`electrostatic-force-magnitude`, `electrostatic-charge`,
+`sbl-electrostatic-energy-density`, `sbl-quantum-energy-density`,
+`sbl-quantum-energy-density-lagrangian`, `sbl-total-energy-density`,
+`sbl-total-potential`, `sbl-total-force-magnitude`, and `sbl-total-charge`
+write function-100 `userfunc.cub` with `iuserfunc=40-43/60-69/-69/110-113`.
+Standalone products use `steric-energy-density`, `sbl-energy-density`,
+`sbl-potential`, `sbl-force-magnitude`, or `sbl-charge`; with
+`--surface-cube`, they use `surface-map`.
 `grid-run --function pair-function` requires
 `--reference-point X Y Z`; `--pair-function-type` and
 `--pair-correlation-type` patch Multiwfn `pairfunctype`/`paircorrtype`
@@ -595,6 +607,17 @@ IUSERFUNC`; named routes automatically patch common source-backed values:
 `local-hardness` / `local-chemical-hardness` = `29`,
 `rose` / `region-of-slow-electrons` = `18`,
 `sedd` / `single-exponential-decay-detector` = `19`,
+`steric-energy-density` = `40`, `steric-potential` = `41`,
+`steric-charge` = `42`, `steric-force-magnitude` = `43`,
+`pauli-potential` = `60`, `pauli-force-magnitude` = `61`,
+`pauli-charge` = `62`, `quantum-potential` = `63`,
+`quantum-force-magnitude` = `64`, `quantum-charge` = `65`,
+`electrostatic-force-magnitude` = `66`, `electrostatic-charge` = `67`,
+`sbl-electrostatic-energy-density` = `68`,
+`sbl-quantum-energy-density` = `69`,
+`sbl-quantum-energy-density-lagrangian` = `-69`,
+`sbl-total-energy-density` = `110`, `sbl-total-potential` = `111`,
+`sbl-total-force-magnitude` = `112`, `sbl-total-charge` = `113`,
 `thomas-fermi-ked` / `tf-ked` = `1200` plus `iKEDsel=3`,
 `weizsacker-ked` / `vw-ked` = `1200` plus `iKEDsel=4`,
 `pauli-ked` = `114` plus `iKEDsel=2`,
@@ -611,10 +634,12 @@ into a run-local settings file copied from the selected Multiwfn
 `settings.ini` when available and passed with `-set`; KED routes also patch
 `iKEDsel`.  LEA/LEAE named routes also auto-select mapped presets
 `lea`/`leae` when `--surface-cube` is supplied; local electronegativity and
-local hardness plus alpha/beta density, FOD, KED variants, RoSE/SEDD, and the
+local hardness plus alpha/beta density, FOD, KED variants, RoSE/SEDD,
+steric/SBL routes, and the
 orbital-weighted Fukui/dual routes use `surface-map`.  Alpha/beta density,
 FOD, and Fukui+/Fukui-/Fukui0 standalone products use `density`, KED variants
-use `kinetic-energy-density`, RoSE/SEDD use `rose`/`sedd`, and
+use `kinetic-energy-density`, RoSE/SEDD use `rose`/`sedd`, steric/SBL
+routes use the five `steric-energy-density`/`sbl-*` presets, and
 orbital-weighted dual descriptor uses `signed`.  These 95..98 routes are single-wavefunction
 approximations, not
 `fukui-run` charged-state density differences; the current runner leaves

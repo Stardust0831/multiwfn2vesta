@@ -136,6 +136,7 @@ then delete the temporary branch.
   scalar, standalone vdW total/repulsion/dispersion potential, ABACUS direct potential, partial charge,
   wavefunction norm cubes, ELF/LOL, IRI/RDG/NCI, DORI, ESP/MEP,
   electron-only ESP, positive/negative ESP components, electric-field magnitude,
+  steric/SBL energy-density, potential, force-magnitude, and charge fields,
   IGM/IGMH/aIGM weak-interaction maps, ALIE/LEA/LEAE, and vdW-potential
   mapped surfaces.
 - Overlay Multiwfn molecular-surface extrema from `surfanalysis.pdb` onto
@@ -200,7 +201,9 @@ then delete the temporary branch.
   repulsion/dispersion components with `iuserfunc=93/94`, function-100
   electron-only ESP with `iuserfunc=14`, positive/negative ESP and
   electric-field magnitude routes with `iuserfunc=101/102/103`, RoSE and
-  SEDD scalar fields with `iuserfunc=18/19`, and related scalar cubes, export
+  SEDD scalar fields with `iuserfunc=18/19`, steric/SBL/Pauli/quantum
+  diagnostic fields with `iuserfunc=40-43`, `60-69`, `-69`, and `110-113`,
+  and related scalar cubes, export
   multiple orbitals through
   isolated batch runs, optionally write VESTA files through `cube-preset`,
   and map generated ESP/ALIE/vdW/sign(lambda2)rho cubes as textures on a
@@ -371,6 +374,12 @@ multiwfn2vesta grid-run input.molden grid_products \
   --function rose
 multiwfn2vesta grid-run input.molden grid_products \
   --function sedd
+multiwfn2vesta grid-run input.molden grid_products \
+  --function steric-potential
+multiwfn2vesta grid-run input.molden grid_products \
+  --function sbl-total-potential
+multiwfn2vesta grid-run input.molden grid_products \
+  --function sbl-total-force-magnitude
 multiwfn2vesta grid-run input.molden grid_products \
   --function edr \
   --edr-length 0.85
@@ -973,6 +982,19 @@ Common functions:
   nonnegative.  Use benzene dimer, GC base pair, or another real
   weak-interaction/aromatic system for the first manual render instead of a
   toy cube.
+- Steric/SBL diagnostic routes: function `100`, raw `userfunc.cub`, all
+  patched through run-local `iuserfunc` settings.  The maintained route set
+  covers steric energy density/potential/charge/force (`40-43`),
+  Pauli potential/force/charge (`60-62`), quantum potential/force/charge
+  (`63-65`), electrostatic force/charge (`66-67`), SBL electronic
+  electrostatic and quantum energy-density terms (`68`, `69`, `-69`), and
+  total SBL energy density/potential/force/charge (`110-113`).  Standalone
+  products use `steric-energy-density`, `sbl-energy-density`,
+  `sbl-potential`, `sbl-force-magnitude`, or `sbl-charge`; with
+  `--surface-cube`, they fall back to `surface-map`.  These fields are
+  useful for adsorption/interface repulsion and energy-decomposition
+  diagnostics, but the default isosurfaces are starting values and must be
+  retuned after inspecting cube ranges.
 - `vdw-potential` / `vdw`: function `25`, raw `vdWpot.cub`, preset
   `vdw-potential`, signed at `+/-1.0` kcal/mol by default.  With
   `--surface-cube`, it maps through `cube-preset vdw-map` instead so the

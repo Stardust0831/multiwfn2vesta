@@ -39,6 +39,7 @@ multiwfn2vesta examples --coverage --json
 | `aigm-run` / `amigm-run` | benzene dimer 轨迹或 Ag(111)+benzene AIMD 片段 | needs-example | 无 | 生成短轨迹平均 IGM cube 并渲染 |
 | `grid-run` | H2O、benzene、Ag(111)+benzene、未来 COF | needs-render | 无手册级图 | 按函数组补 density/orbital/KED/ELF/ESP/vdW/FOD 等图 |
 | `grid-run --function rose/sedd` | benzene dimer、GC 碱基对或类似弱相互作用/芳香体系 | needs-render | 无 | 已有 RoSE/SEDD CLI 和 preset；下一步在同一真实体系中渲染 paired figure |
+| `grid-run --function steric/sbl` | Ag(111)+benzene、benzene dimer、GC 碱基对 | needs-render | 无 | 已有 steric/SBL/Pauli/quantum/electrostatic CLI 和 preset；下一步在界面或弱相互作用体系中渲染成组图 |
 | `fukui-run` | 带杂原子的芳香分子，中性/阴/阳离子三态 | needs-example | 无 | 先固定同一网格的三态 density cube |
 | `stm-run` | 表面吸附小分子或芳香分子局域态 | needs-render | 无 | 选择 LDOS 能窗并渲染 constant-current surface |
 | `domain-run` | H2O density domain 或 COF 孔道区域 | needs-render | 无 | 渲染二值 domain surface 并记录 criterion |
@@ -62,6 +63,24 @@ multiwfn2vesta examples --coverage --json
 5. 真实 open-shell 或磁性体系：适合 spin density、ABACUS Mulliken magnetism coloring、Multiwfn atom table coloring。
 6. Cd/Cl NVT/NPT 轨迹：覆盖 trajectory frame、reference VESTA style、Boundary、成键判据和高码率视频。
 
+## 下一批正式 example 队列
+
+后续把 `needs-render` / `needs-example` 提升为 `ready` 时，优先按下面这些
+example id 落地。每个 example 都应先满足 `examples/_template/README_zh.md`
+的最低清单，再把轻量 PNG 放进 `docs/assets/gallery/`；大 cube、mp4、`.vesta`
+和波函数文件仍留在 `smoke/` 或本地计算目录，通过 manifest 引用。
+
+| 计划 example id | 体系 | 主要覆盖功能 | 当前可复用资产 | 验收缺口 |
+| --- | --- | --- | --- | --- |
+| `ag111_benzene_extended_fields` | Ag(111)+benzene 周期 slab | `abacus-molden`, `molden-check`, `igmh-run`, `aim-igmh`, vdW/ESP/steric/SBL/STM | 已有 Ag 三视图、ABACUS Molden、IGMH/AIM smoke | 为 vdW/ESP/steric/SBL/STM 生成同一视角下的真实 PNG，并记录 cube 范围和等值面 |
+| `benzene_dimer_scalar_suite` | benzene dimer | `iri-run`, RDG/DORI/Delta-g, RoSE/SEDD, vdW components | 目前无正式图 | 准备轻量 Molden/cube，渲染 paired weak-interaction/scalar figures |
+| `gc_weak_interaction_suite` | GC 碱基对 | `aim-run`, `aim-pdb`, IRI/RDG, ESP-on-density, `surface-extrema` | `gc_aim_overlay.png` 和 GC AIM runbook | 在同一 GC 体系补 IRI/ESP/ALIE 或 LEA extrema 图 |
+| `cof_direct_cube_suite` | COF_12000N2 单层或小 COF | `cube-vesta`, `cube-preset`, ABACUS density/potential/ELF/partial charge/wfc norm | 仅有 COF CIF 经验记录 | 跑 ABACUS 单点或复用 direct cube，渲染 density/potential/ELF 等图 |
+| `fukui_dual_reactivity` | 杂原子芳香小分子 | `cube-arith`, `fukui-run`, orbital-weighted Fukui/dual, atom scalar coloring | 无正式图 | 准备同网格 neutral/anion/cation density cube 和 condensed atom values |
+| `spin_atom_coloring_suite` | open-shell 或磁性 ABACUS 体系 | spin density, `abacus-mulliken-color`, `multiwfn-atom-color` | 只有 toy/coloring smoke | 换真实 `mulliken.txt` 或 Multiwfn atom table，补 PNG 和色标说明 |
+| `h2o_domain_baseline` | H2O 或小极性分子 | `domain-run`, KED/ESP 快速回归 | H2O domain/grid smoke | 渲染二值 domain 和基础 scalar 图，只作为快速 baseline |
+| `short_aigm_trajectory` | benzene dimer 或 Ag(111)+benzene AIMD 片段 | `aigm-run`, `amigm-run`, trajectory-average weak interaction | 轨迹经验和 Cd/Cl video workflow | 准备短轨迹平均 IGM cube，并给一张 mapped-surface PNG |
+
 ## grid-run 函数组到示例
 
 `grid-run` 功能很多，不应要求每个函数都单独维护一个大算例；更可维护的闭环方式是按物理含义分组：
@@ -76,6 +95,7 @@ multiwfn2vesta examples --coverage --json
 | ESP、electron-only ESP、positive/negative ESP、electric field magnitude | 极性分子、Ag(111)+benzene | potential surface 或 density surface texture；`electron-esp` 可拆出电子贡献 |
 | ALIE/LEA/LEAE | 芳香分子反应位点 | surface texture + `surface-extrema` |
 | vdW total/repulsion/dispersion | Ag(111)+benzene | density/interaction surface texture 或 standalone field |
+| steric/SBL/Pauli/quantum potential/force/charge | Ag(111)+benzene、benzene dimer | 界面/分子间排斥与势场诊断；standalone field 或映射到 density/interaction surface |
 | IRI/RDG/DORI/Delta-g | H2O-HF、benzene dimer | mapped surface，关闭 sections |
 | RoSE/SEDD | benzene dimer、GC 碱基对 | 单正值等值面，先试 `0.5` 后按 cube 范围调参 |
 | FOD、orbital-weighted Fukui/dual | 反应性分子 | signed/single surface，配 condensed atom value coloring |
@@ -101,7 +121,7 @@ CLI 入口补充：
 只读源码审计建议的下一批 Multiwfn function-100 路线：
 
 - 扩展 KED: `iuserfunc=1201/1202/1203/1204/1210`，适合 KED 差值、局域温度和 KED potential。
-- steric/SBL 场: `iuserfunc=40-47/60-67/110-113`，适合吸附排斥和界面相互作用解释。
+- steric/SBL 场已维护核心无额外交互路线：`iuserfunc=40-43/60-69/-69/110-113`，适合吸附排斥和界面相互作用解释；damped steric `44-47` 暂未维护。
 - on-top pair density: `iuserfunc=36`，适合电子对密度相关展示。
 
 这些候选暂时不阻塞当前“已有功能闭环”。优先级仍是先把 ready/needs-render 的现有功能补成清晰可复用算例。

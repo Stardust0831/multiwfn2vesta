@@ -174,6 +174,112 @@ PRESETS: Tuple[CubePreset, ...] = (
         ),
     ),
     CubePreset(
+        name="steric-energy-density",
+        aliases=("steric-density", "steric-energy", "steric-ked"),
+        description="Single positive isosurface for Multiwfn steric energy density cubes.",
+        surface_mode="single",
+        isosurface=0.01,
+        positive_rgb=(145, 220, 130),
+        surface_opacity=(145, 255),
+        notes=(
+            "Use for Multiwfn function-100 userfunc.cub with iuserfunc=40. "
+            "The local source maps this route to weizsacker(x,y,z), i.e. a positive "
+            "steric/Weizsacker-like energy-density field.  Inspect the range and tune "
+            "the isosurface for the selected system."
+        ),
+    ),
+    CubePreset(
+        name="sbl-energy-density",
+        aliases=(
+            "sbl-electrostatic-energy-density",
+            "sbl-quantum-energy-density",
+            "sbl-quantum-energy-density-lagrangian",
+            "sbl-total-energy-density",
+            "sbl-energy",
+            "sbl-density",
+        ),
+        description="Signed isosurfaces for SBL energy-decomposition density cubes.",
+        surface_mode="signed",
+        isosurface=0.05,
+        positive_rgb=(255, 190, 75),
+        negative_rgb=(80, 135, 255),
+        surface_opacity=(135, 255),
+        notes=(
+            "Use for Multiwfn function-100 SBL energy-density userfunc.cub routes: "
+            "iuserfunc=68 for electronic electrostatic energy density, 69/-69 for "
+            "Hamiltonian/Lagrangian quantum energy density, and 110 for total SBL "
+            "energy density.  These fields may be signed, so the default writes +/-0.05 "
+            "surfaces and should be retuned after inspecting the cube range."
+        ),
+    ),
+    CubePreset(
+        name="sbl-potential",
+        aliases=(
+            "steric-potential",
+            "pauli-potential",
+            "quantum-potential",
+            "sbl-total-potential",
+            "sbl-pot",
+        ),
+        description="Signed isosurfaces for steric/Pauli/quantum/SBL potential cubes.",
+        surface_mode="signed",
+        isosurface=0.05,
+        positive_rgb=(255, 115, 75),
+        negative_rgb=(70, 130, 255),
+        surface_opacity=(135, 255),
+        notes=(
+            "Use for Multiwfn function-100 potential-style userfunc.cub routes: "
+            "iuserfunc=41 steric potential, 60 Pauli potential, 63 quantum potential, "
+            "and 111 total SBL potential.  The standalone preset is signed; for "
+            "surface coloring, use the corresponding grid-run route with --surface-cube "
+            "and tune --tex-physical."
+        ),
+    ),
+    CubePreset(
+        name="sbl-force-magnitude",
+        aliases=(
+            "force-magnitude",
+            "steric-force-magnitude",
+            "pauli-force-magnitude",
+            "quantum-force-magnitude",
+            "electrostatic-force-magnitude",
+            "sbl-total-force-magnitude",
+        ),
+        description="Single positive isosurface for force-magnitude diagnostic cubes.",
+        surface_mode="single",
+        isosurface=0.05,
+        positive_rgb=(110, 210, 255),
+        surface_opacity=(135, 255),
+        notes=(
+            "Use for Multiwfn function-100 force-magnitude userfunc.cub routes: "
+            "iuserfunc=43 steric, 61 Pauli, 64 quantum, 66 electrostatic, and 112 "
+            "total SBL force magnitude.  These fields are nonnegative diagnostic "
+            "magnitudes and usually need system-specific isosurface tuning."
+        ),
+    ),
+    CubePreset(
+        name="sbl-charge",
+        aliases=(
+            "steric-charge",
+            "pauli-charge",
+            "quantum-charge",
+            "electrostatic-charge",
+            "sbl-total-charge",
+        ),
+        description="Signed isosurfaces for steric/Pauli/quantum/electrostatic/SBL charge cubes.",
+        surface_mode="signed",
+        isosurface=0.05,
+        positive_rgb=(255, 205, 75),
+        negative_rgb=(75, 145, 255),
+        surface_opacity=(135, 255),
+        notes=(
+            "Use for Multiwfn function-100 charge-style userfunc.cub routes: "
+            "iuserfunc=42 steric charge, 62 Pauli charge, 65 quantum charge, "
+            "67 electrostatic charge, and 113 total SBL charge.  These are signed "
+            "Laplacian-derived diagnostics; inspect the range before final figures."
+        ),
+    ),
+    CubePreset(
         name="potential",
         aliases=("potential-cube", "abacus-potential", "out-pot", "local-potential", "pot-es", "mep-cube"),
         description="Positive/negative isosurfaces for direct potential cubes.",

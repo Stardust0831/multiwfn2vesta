@@ -83,6 +83,7 @@ class TestExamplesIndex(unittest.TestCase):
         self.assertIn("feature example coverage", text)
         self.assertIn("grid-run", text)
         self.assertIn("rose/sedd", text)
+        self.assertIn("steric/sbl", text)
         self.assertIn("aim-igmh", text)
         self.assertIn("trajectory-video", text)
         self.assertIn("docs/feature_examples_zh.md", text)

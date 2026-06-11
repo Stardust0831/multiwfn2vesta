@@ -254,10 +254,14 @@ multiwfn2vesta grid-run input.molden esp_components --function negative-esp
 multiwfn2vesta grid-run input.molden efield --function electric-field-magnitude
 multiwfn2vesta grid-run input.molden slow_electron --function rose
 multiwfn2vesta grid-run input.molden sedd_field --function sedd
+multiwfn2vesta grid-run input.molden steric --function steric-potential
+multiwfn2vesta grid-run input.molden sbl --function sbl-total-potential
+multiwfn2vesta grid-run input.molden sbl_force --function sbl-total-force-magnitude
 ```
 
 这些命名路由都走 Multiwfn 函数 `100`，分别写 run-local
-`iuserfunc=14/101/102/103` 或 RoSE/SEDD 的 `iuserfunc=18/19`，不会修改全局 Multiwfn 配置。`electron-esp`
+`iuserfunc=14/101/102/103`、RoSE/SEDD 的 `iuserfunc=18/19`，或 steric/SBL 相关
+`iuserfunc=40-43/60-69/-69/110-113`，不会修改全局 Multiwfn 配置。`electron-esp`
 调用 Multiwfn 源码中的 `eleesp(x,y,z)`，即电子贡献静电势，通常按单负
 `-0.05` a.u. 等值面显示；正/负 ESP 分量适合在极性分子、吸附界面或电荷转移
 体系中快速分开看静电正负区域；电场强度适合看局域强场区域。若要映射到 density
@@ -266,6 +270,24 @@ surface 上，再加
 RoSE 用 `(Dh-G)/(Dh+G)` 描述慢电子区域，SEDD 用 `log(1+epsilon)` 描述单指数衰减偏离；
 两者当前已有 CLI 和 VESTA preset，但还缺真正适合手册的效果图。后续优先用 benzene dimer、
 GC 碱基对或类似弱相互作用/芳香体系生成 paired figure，而不是 toy cube。
+
+Steric/SBL 路线适合看吸附界面、分子间排斥/束缚区域和能量分解诊断：
+
+- `steric-energy-density`, `steric-potential`, `steric-charge`,
+  `steric-force-magnitude`
+- `pauli-potential`, `pauli-force-magnitude`, `pauli-charge`
+- `quantum-potential`, `quantum-force-magnitude`, `quantum-charge`
+- `electrostatic-force-magnitude`, `electrostatic-charge`
+- `sbl-electrostatic-energy-density`, `sbl-quantum-energy-density`,
+  `sbl-quantum-energy-density-lagrangian`
+- `sbl-total-energy-density`, `sbl-total-potential`,
+  `sbl-total-force-magnitude`, `sbl-total-charge`
+
+这些路线都导出 `userfunc.cub`。默认 standalone VESTA preset 分为
+`steric-energy-density`、`sbl-energy-density`、`sbl-potential`、
+`sbl-force-magnitude` 和 `sbl-charge`；如果提供 `--surface-cube`，则作为 texture
+映射到已有 density/interaction surface。默认等值面只是起点，正式出图前要看 cube
+最小/最大值并调 `--isosurface` 或 `--tex-physical`。
 
 ## 8. AIM、IRI、IGMH 的组合图
 

@@ -89,6 +89,12 @@ Multiwfn evidence:
   orbital-weighted dual descriptor (`98`), Shannon entropy density (`50`),
   electron-only ESP (`14` through `eleesp(x,y,z)`), positive ESP (`101`),
   negative ESP (`102`), electric-field magnitude from ESP gradient (`103`),
+  RoSE (`18` as `(Dh-G)/(Dh+G)`), SEDD (`19` as `log(1+epsilon)`),
+  steric energy/potential/charge/force (`40-43`), Pauli
+  potential/force/charge (`60-62`), quantum potential/force/charge (`63-65`),
+  electrostatic force/charge (`66-67`), SBL electronic electrostatic and
+  quantum energy-density terms (`68`, `69`, `-69`), total SBL
+  energy/potential/force/charge (`110-113`),
   Fisher information density (`51/52`), and many other
   selectable functions;
   `0123dim.f90` exports `userfunc.cub`.
@@ -101,7 +107,8 @@ Multiwfn evidence:
   Mulliken electronegativity/local hardness, selected KED variants,
   orbital-weighted Fukui/dual descriptor, FOD, spin-channel density, ESP
   electron-only and positive/negative components, electric-field magnitude, and
-  information-theory densities.  Multiwfn source computes the
+  information-theory densities, RoSE/SEDD, and core steric/SBL diagnostics.
+  Multiwfn source computes the
   orbital-weighted descriptors with HOMO/LUMO chemical potential, Gaussian
   orbital-energy weights, and `orbwei_delta=0.1` a.u. by default; the current
   wrapper only patches `iuserfunc`, not `orbwei_delta`.  Special external-grid
@@ -247,6 +254,7 @@ occupations, and density derivatives from the wavefunction representation.
 | --- | --- | --- | --- | --- | --- |
 | IRI/NCI/RDG/Delta-g/DORI | Full wavefunction, or promolecular approximation from structure | Molden route feasible; promolecular route can avoid wavefunction | `IRI.cub`, `RDG.cub`, `RDGprodens.cub`, `Delta_g.cub`, function-23 `griddata.cub`, DORI `userfunc.cub`, `sl2r.cub`, `func1.cub`, `func2.cub` | Standalone scalar isosurfaces, or isosurface plus texture cube; section planes off | `multiwfn2vesta iri-run` implemented for the two-cube weak-interaction stream; `grid-run --surface-cube` can use sign(lambda2)rho cubes as texture on an existing RDG/IRI surface; `grid-run --function dori` now exports DORI by patching `iuserfunc=20` and uses `cube-preset dori-scalar`; explicit `cube-preset dori DORI.cub --texture-cube sl2r.cub` follows `DORIfill.vmd` for DORI+sign(lambda2)rho; `cube-preset rdg-scalar`, `promolecular-rdg`, `promolecular-delta-g`, `hirshfeld-delta-g`, and `iri-scalar` cover standalone `RDG.cub`/`RDGprodens.cub`/`Delta_g.cub`/function-23 `griddata.cub`/`IRI.cub` without stealing the existing `rdg -> iri` texture alias or the IGM/IGMH `dg_inter.cub` route |
 | RoSE / SEDD slow-electron scalar fields | Full wavefunction Molden/FCH/WFN | Feasible for Gamma LCAO Molden; best used on real weak-interaction or aromatic systems rather than toy cubes | `userfunc.cub` | Single positive scalar isosurfaces, or optional density/surface texture maps | `grid-run --function rose` and `grid-run --function sedd` now patch function-100 `iuserfunc=18/19`, export `userfunc.cub`, and use standalone `cube-preset rose` / `sedd` with `0.5` starting isosurfaces; with `--surface-cube`, both fall back to `surface-map`.  First formal render should use benzene dimer or GC base pair and tune the isosurface after range inspection |
+| Steric/SBL/Pauli/quantum diagnostic fields | Full wavefunction Molden/FCH/WFN | Feasible for validated ABACUS Gamma LCAO Molden; most useful for interfaces, adsorption, and weak-interaction diagnostics | `userfunc.cub` | Signed potential/charge/energy-density surfaces, positive force-magnitude surfaces, or texture maps on a supplied density/interaction surface | `grid-run --function steric-energy-density`, `steric-potential`, `pauli-potential`, `quantum-potential`, `electrostatic-force-magnitude`, `sbl-total-potential`, and related `steric-*`/`pauli-*`/`quantum-*`/`electrostatic-*`/`sbl-*` routes now patch function-100 `iuserfunc=40-43/60-69/-69/110-113`, export `userfunc.cub`, and use `cube-preset steric-energy-density`, `sbl-energy-density`, `sbl-potential`, `sbl-force-magnitude`, or `sbl-charge`; with `--surface-cube`, they fall back to `surface-map`.  First formal render should use Ag(111)+benzene or a compact dimer and tune isosurfaces after range inspection |
 | ESP/MEP on density surface and ESP components | Full wavefunction or ABACUS `out_pot` plus density cube | Strong direct cube route for total potential; Molden route for Multiwfn electron/nuclear/total ESP components and electric field | `density.cub`, `totesp.cub`, `nucleiesp.cub`, `userfunc.cub`, `pot_es.cube`, `pots*.cube` | Density isosurface colored by potential texture, standalone electron-only/positive/negative ESP regions, or electric-field-strength isosurfaces | `grid-run --function esp --surface-cube density.cub --grid-mode cube --grid-cube density.cub` generates total ESP texture maps; `grid-run --function electron-esp` patches function-100 `iuserfunc=14`, exports electron-only ESP `userfunc.cub`, and uses the standalone single-negative `electron-esp` preset or `surface-map` with `--surface-cube`; `grid-run --function positive-esp` / `negative-esp` / `electric-field-magnitude` patch function-100 `iuserfunc=101/102/103`, export `userfunc.cub`, and use standalone `positive-esp` / `negative-esp` / `electric-field-magnitude` presets or `surface-map` with `--surface-cube` |
 | STM/LDOS | Full wavefunction with GTF information | Good candidate for Gamma LCAO Molden; metals and Fermi-level choices need care | `STM.cub` | Single positive LDOS/current isosurface or slices | `stm-run` now automates Multiwfn `300 -> 4`, switches to constant-current mode, exports `STM.cub`, and calls `cube-preset stm` |
 | Molecular surface mapped properties | Full wavefunction or cube pair | Feasible through Molden; ABACUS can provide density/potential cubes | `surf.cub`, `mapfunc.cub`, `density.cub`, `avglocion.cub`, `surfanalysis.pdb` | Surface cube plus texture; extrema as atoms-only overlay phase | `cube-preset surface-map` covers surface+texture display using `molsurfmap.vmd` defaults; `--surfanalysis-pdb` and `surface-extrema` overlay surface extrema |

@@ -151,6 +151,17 @@ multiwfn2vesta grid-run --list-functions
   `positive-esp` / `positive-mep` = `101`,
   `negative-esp` / `negative-mep` = `102`,
   `electric-field-magnitude` / `electric-field` = `103`,
+  `steric-energy-density` = `40`, `steric-potential` = `41`,
+  `steric-charge` = `42`, `steric-force-magnitude` = `43`,
+  `pauli-potential` = `60`, `pauli-force-magnitude` = `61`,
+  `pauli-charge` = `62`, `quantum-potential` = `63`,
+  `quantum-force-magnitude` = `64`, `quantum-charge` = `65`,
+  `electrostatic-force-magnitude` = `66`, `electrostatic-charge` = `67`,
+  `sbl-electrostatic-energy-density` = `68`,
+  `sbl-quantum-energy-density` = `69`,
+  `sbl-quantum-energy-density-lagrangian` = `-69`,
+  `sbl-total-energy-density` = `110`, `sbl-total-potential` = `111`,
+  `sbl-total-force-magnitude` = `112`, `sbl-total-charge` = `113`,
   `thomas-fermi-ked` / `tf-ked` = `1200` plus `iKEDsel=3`,
   `weizsacker-ked` / `vw-ked` = `1200` plus `iKEDsel=4`,
   `pauli-ked` = `114` plus `iKEDsel=2`,
@@ -165,11 +176,13 @@ multiwfn2vesta grid-run --list-functions
   and `second-fisher-information-density` = `52`.  LEA/LEAE named routes
   also auto-select mapped presets `lea`/`leae` when `--surface-cube` is
   supplied; alpha/beta density, FOD, local Mulliken electronegativity, local
-  hardness, electron ESP/ESP component/electric-field routes, KED variants, and the
-  orbital-weighted Fukui/dual routes, RoSE, and SEDD fall back to the generic `surface-map`
+  hardness, electron ESP/ESP component/electric-field routes, steric/SBL
+  routes, KED variants, and the orbital-weighted Fukui/dual routes, RoSE, and SEDD fall back to the generic `surface-map`
   mapped preset.  Alpha/beta density, FOD, and
   Fukui+/Fukui-/Fukui0 standalone products use `density`, KED variants use
-  `kinetic-energy-density`, electron ESP uses `electron-esp`, while orbital-weighted dual descriptor uses
+  `kinetic-energy-density`, electron ESP uses `electron-esp`, steric/SBL
+  standalone routes use `steric-energy-density`, `sbl-energy-density`,
+  `sbl-potential`, `sbl-force-magnitude`, or `sbl-charge`, while orbital-weighted dual descriptor uses
   `signed`.  The 95..98 routes are
   single-wavefunction approximations and should not be confused with
   charged-state `fukui-run`; the current runner leaves Multiwfn
@@ -232,6 +245,16 @@ multiwfn2vesta grid-run --list-functions
   isosurface as a starting point; inspect the cube range and tune
   `--isosurface` per real system.  With `--surface-cube`, they use
   `surface-map`.
+- Steric/SBL diagnostic routes: function `100`, raw `userfunc.cub`, no extra
+  prompts.  Maintained routes patch `iuserfunc=40-43` for steric
+  energy/potential/charge/force, `60-62` for Pauli potential/force/charge,
+  `63-65` for quantum potential/force/charge, `66-67` for electrostatic
+  force/charge, `68/69/-69` for SBL energy-density terms, and `110-113` for
+  total SBL energy/potential/force/charge.  Standalone presets are grouped as
+  `steric-energy-density`, `sbl-energy-density`, `sbl-potential`,
+  `sbl-force-magnitude`, and `sbl-charge`; with `--surface-cube`, they use
+  `surface-map`.  Use Ag(111)+benzene or another real interface/weak
+  interaction system, not toy cubes, for interpretive figures.
 - `alpha-density` and `beta-density`: function `100`, raw `userfunc.cub`,
   default `iuserfunc=1` / `2`, standalone preset `density`.  Multiwfn
   evaluates `fspindens(x,y,z,'a')` / `fspindens(x,y,z,'b')`; use these for

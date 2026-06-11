@@ -255,6 +255,23 @@ passes it back through `cube-preset`.
   `userfunc.cub`, default isosurface `0.01`.  Use this for
   `grid-run --function thomas-fermi-ked`, `weizsacker-ked`, or `pauli-ked`;
   inspect the value range and tune the isosurface per system.
+- `steric-energy-density` aliases: `steric-density`, `steric-energy`,
+  `steric-ked`; single positive surface for function-100 `iuserfunc=40`
+  steric/Weizsacker-like energy density, default isosurface `0.01`.
+- `sbl-energy-density` aliases: `sbl-electrostatic-energy-density`,
+  `sbl-quantum-energy-density`, `sbl-total-energy-density`; signed surfaces
+  for SBL energy-density terms, default magnitude `0.05`.
+- `sbl-potential` aliases: `steric-potential`, `pauli-potential`,
+  `quantum-potential`, `sbl-total-potential`; signed surfaces for potential
+  diagnostics, default magnitude `0.05`.
+- `sbl-force-magnitude` aliases: `force-magnitude`,
+  `steric-force-magnitude`, `pauli-force-magnitude`,
+  `quantum-force-magnitude`, `electrostatic-force-magnitude`,
+  `sbl-total-force-magnitude`; single positive force-magnitude surfaces,
+  default isosurface `0.05`.
+- `sbl-charge` aliases: `steric-charge`, `pauli-charge`, `quantum-charge`,
+  `electrostatic-charge`, `sbl-total-charge`; signed charge-like diagnostic
+  surfaces, default magnitude `0.05`.
 - `local-information-entropy` aliases: `information-entropy`, `infoentro`,
   `local-info-entropy`, `local-shannon-entropy`; positive/negative surfaces
   for Multiwfn `infoentro.cub`, default magnitude `0.05`.  Multiwfn function

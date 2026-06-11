@@ -1,5 +1,40 @@
 # Worklog
 
+## 2026-06-12: Steric/SBL diagnostic scalar routes
+
+- Continued the ABACUS-compatible Multiwfn/VESTA analysis route survey by
+  adding source-backed steric/SBL diagnostic scalar routes.
+- Local Multiwfn 2026.6.2 source evidence: function `100` with
+  `iuserfunc=40-43` covers steric energy density, potential, charge, and
+  force magnitude; `60-62` covers Pauli potential, force, and charge;
+  `63-65` covers quantum potential, force, and charge; `66-67` covers
+  electrostatic force and charge; `68/69/-69` covers SBL electronic
+  electrostatic and Hamiltonian/Lagrangian quantum energy-density terms; and
+  `110-113` covers total SBL energy density, potential, force, and charge.
+- Added named `grid-run` routes for those core no-extra-prompt fields.  Each
+  route exports `userfunc.cub`, patches `iuserfunc` through a run-local
+  settings file passed with Multiwfn `-set`, and falls back to `surface-map`
+  when a separate `--surface-cube` is supplied.
+- Added grouped VESTA presets: `steric-energy-density`,
+  `sbl-energy-density`, `sbl-potential`, `sbl-force-magnitude`, and
+  `sbl-charge`.  Their default isosurfaces are intentionally starting values;
+  real figures must inspect cube ranges before final rendering.
+- Damped steric variants `iuserfunc=44-47` were left unmaintained for now
+  because their extra damping settings need clearer interpretation before
+  exposing them as stable routes.
+- Focused tests now cover route discovery, alias resolution, command streams,
+  run-local `iuserfunc` patching including `-69`, VESTA preset selection, and
+  preset manifest content.
+- Read-only subagent audits were folded into `docs/feature_examples_zh.md` as
+  a concrete next-example queue.  The highest-value closure targets are
+  `ag111_benzene_extended_fields`, `benzene_dimer_scalar_suite`,
+  `gc_weak_interaction_suite`, `cof_direct_cube_suite`,
+  `fukui_dual_reactivity`, `spin_atom_coloring_suite`,
+  `h2o_domain_baseline`, and `short_aigm_trajectory`.  Ready manual figures
+  remain Ag(111)+benzene IGMH+AIM, GC AIM, and Cd/Cl trajectory; H2O-HF IRI
+  and benzene NICS are retained as debugging/misc evidence rather than final
+  feature closure.
+
 ## 2026-06-12: Feature closure UX, real-system selection, and gallery discovery
 
 - Continued the current feature-closure request by making the example index

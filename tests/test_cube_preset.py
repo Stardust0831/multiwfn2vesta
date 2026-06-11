@@ -141,6 +141,11 @@ class TestCubePreset(unittest.TestCase):
         self.assertIn("hamiltonian-ked", text)
         self.assertIn("lagrangian-ked", text)
         self.assertIn("kinetic-energy-density", text)
+        self.assertIn("steric-energy-density", text)
+        self.assertIn("sbl-energy-density", text)
+        self.assertIn("sbl-potential", text)
+        self.assertIn("sbl-force-magnitude", text)
+        self.assertIn("sbl-charge", text)
         self.assertIn("potential", text)
         self.assertIn("electron-esp", text)
         self.assertIn("vdw-potential", text)
@@ -222,6 +227,29 @@ ked two
             self.assertIn("effective_isosurface: `0.01`", manifest)
             self.assertIn("selected kinetic-energy-density variants", manifest)
             self.assertIn("inspect the range", manifest)
+
+    def test_steric_and_sbl_presets_write_expected_surface_modes(self):
+        cases = (
+            ("steric-density", SURFACE_CUBE, "steric-energy-density", "single", "0.01", "iuserfunc=40"),
+            ("sbl-total-energy-density", SIGNED_CUBE, "sbl-energy-density", "signed", "0.05", "iuserfunc=68"),
+            ("pauli-potential", SIGNED_CUBE, "sbl-potential", "signed", "0.05", "iuserfunc=41"),
+            ("force-magnitude", SURFACE_CUBE, "sbl-force-magnitude", "single", "0.05", "iuserfunc=43"),
+            ("electrostatic-charge", SIGNED_CUBE, "sbl-charge", "signed", "0.05", "iuserfunc=42"),
+        )
+        for preset_name, cube_text, expected_canonical, expected_mode, expected_iso, expected_note in cases:
+            with self.subTest(preset_name=preset_name):
+                with tempfile.TemporaryDirectory() as tmp:
+                    root = Path(tmp)
+                    cube = self.write_tmp(root, "userfunc.cub", cube_text)
+
+                    result = run_preset(preset_name, cube, root / "products")
+
+                    manifest = result.manifest_path.read_text(encoding="utf-8")
+                    self.assertIn(f"canonical_preset: `{expected_canonical}`", manifest)
+                    self.assertIn(f"requested_preset: `{preset_name}`", manifest)
+                    self.assertIn(f"effective_surface_mode: `{expected_mode}`", manifest)
+                    self.assertIn(f"effective_isosurface: `{expected_iso}`", manifest)
+                    self.assertIn(expected_note, manifest)
 
     def test_basin_preset_uses_binary_isosurface_default(self):
         with tempfile.TemporaryDirectory() as tmp:

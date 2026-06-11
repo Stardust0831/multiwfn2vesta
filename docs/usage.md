@@ -70,8 +70,8 @@ multiwfn2vesta trajectory-video --help
   orbital/signed、spin density、Laplacian、K(r)/G(r)、ABACUS direct
   potential、partial charge、wavefunction norm、ELF/LOL、IRI/RDG/NCI、DORI、
   EDR(r;d)、D(r)、IGM/IGMH/aIGM、ESP/MEP、electron-only ESP、positive/negative ESP、
-  electric-field magnitude、ALIE/LEA/LEAE、userfunc/iuserfunc、selected KED variants、standalone vdW total/repulsion/
-  dispersion potential、vdW map
+  electric-field magnitude、steric/SBL energy/potential/force/charge、ALIE/LEA/LEAE、
+  userfunc/iuserfunc、selected KED variants、standalone vdW total/repulsion/dispersion potential、vdW map
 - `surface-extrema`: 把 Multiwfn `surfanalysis.pdb` 的分子表面极值点作为
   atoms-only phase 叠加到已有 `.vesta` 文件中
 - `cube-arith`: 对兼容 cube 做线性组合，用于 density difference、
@@ -98,7 +98,8 @@ multiwfn2vesta trajectory-video --help
   及其 `ELFLOL_type` 变体、
   ESP/MEP、electron-only ESP、positive/negative ESP、电场强度、ALIE、EDR(r;d)、D(r)、RDG/IRI-like、
   promolecular RDG/sign(lambda2)rho、function-100 alpha/beta density 和
-  FOD、Thomas-Fermi/Weizsacker/Pauli KED 等单 cube，并可自动接
+  FOD、Thomas-Fermi/Weizsacker/Pauli KED、steric/SBL/Pauli/quantum/electrostatic
+  potential/force/charge/energy-density 等单 cube，并可自动接
   `cube-preset` 写 `.vesta`
 - `fukui-run`: 从中性、阴离子、阳离子波函数分别生成共享格点的 density
   cube，再调用 `cube-arith` 生成 Fukui+/Fukui-/dual descriptor cube 和
@@ -319,6 +320,18 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
   `thomas-fermi-ked`、`weizsacker-ked`、`vw-ked`、`pauli-ked`，用于
   function-100 导出的 KED 派生 `userfunc.cub`；默认等值面 `0.01`。
   这些量通常按正标量场显示，但需要检查数据范围并按体系微调
+- `steric-energy-density`：单正值等值面，用于 function-100
+  `iuserfunc=40` 的 steric/Weizsacker-like energy density；默认等值面
+  `0.01`
+- `sbl-energy-density`：正/负等值面，用于 SBL 电子静电能量密度、
+  Hamiltonian/Lagrangian quantum energy density 和 total SBL energy density
+  等 `userfunc.cub`；默认幅值 `0.05`
+- `sbl-potential`：正/负等值面，用于 steric、Pauli、quantum 和 total
+  SBL potential；默认幅值 `0.05`
+- `sbl-force-magnitude`：单正值等值面，用于 steric、Pauli、quantum、
+  electrostatic 和 total SBL force magnitude；默认等值面 `0.05`
+- `sbl-charge`：正/负等值面，用于 steric、Pauli、quantum、
+  electrostatic 和 total SBL charge；默认幅值 `0.05`
 - `local-information-entropy`：正/负等值面，别名包括
   `information-entropy`、`infoentro`、`local-info-entropy`，用于
   Multiwfn `infoentro.cub`；Multiwfn 函数 `11` 计算局部信息熵
@@ -774,6 +787,24 @@ multiwfn2vesta grid-run --list-functions
   `userfunc.cub`，自动 patch run-local `iuserfunc=19`；Multiwfn 源码中
   SEDD 为 `log(1+epsilon)`，数值非负。默认接 `cube-preset sedd`，用
   单正 `0.5` 等值面作为起点；后续应和 RoSE 在同一弱相互作用/芳香体系中配对渲染。
+- Steric/SBL/Pauli/quantum 诊断场：函数 `100`，原始输出
+  `userfunc.cub`，全部通过 run-local `iuserfunc` 控制，不修改全局
+  `settings.ini`。当前维护路线包括 `steric-energy-density` (`40`),
+  `steric-potential` (`41`), `steric-charge` (`42`),
+  `steric-force-magnitude` (`43`), `pauli-potential` (`60`),
+  `pauli-force-magnitude` (`61`), `pauli-charge` (`62`),
+  `quantum-potential` (`63`), `quantum-force-magnitude` (`64`),
+  `quantum-charge` (`65`), `electrostatic-force-magnitude` (`66`),
+  `electrostatic-charge` (`67`), `sbl-electrostatic-energy-density` (`68`),
+  `sbl-quantum-energy-density` (`69`),
+  `sbl-quantum-energy-density-lagrangian` (`-69`),
+  `sbl-total-energy-density` (`110`), `sbl-total-potential` (`111`),
+  `sbl-total-force-magnitude` (`112`) 和 `sbl-total-charge` (`113`)。
+  standalone 产物按 `steric-energy-density`、`sbl-energy-density`、
+  `sbl-potential`、`sbl-force-magnitude` 或 `sbl-charge` preset 显示；
+  若加 `--surface-cube` 则作为 texture 走 `surface-map`。这些量特别适合
+  Ag(111)+benzene 这类界面吸附/排斥解释，但默认等值面只是起点，正式图
+  必须先检查 cube 范围。
 - `vdw-potential` / `vdw`：函数 `25`，原始输出 `vdWpot.cub`，默认接
   `cube-preset vdw-potential`，按正/负 `1.0` kcal/mol 等值面显示；配合
   `--surface-cube` 时默认走 `cube-preset vdw-map`，把生成的 vdW potential

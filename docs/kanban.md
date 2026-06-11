@@ -1,6 +1,6 @@
 # Project Kanban
 
-Updated: 2026-06-12 03:53 CST
+Updated: 2026-06-12 04:22 CST
 
 ## Current Request: 2026-06-12 Existing Feature Closure, Valuable Examples, And Chinese Manual
 
@@ -8,6 +8,7 @@ Updated: 2026-06-12 03:53 CST
 - [x] 工作边界: 所有修改限制在 `/mnt/g/work/multiwfn2vesta`；继续保护未跟踪 `domain.cub` / `domain.pdb`，不提交大型 smoke 产物。
 - [x] 审计当前 CLI 功能、examples registry、gallery PNG、status matrix 和 smoke 证据，拆出“已闭环 / 可低风险补文档 / 需要真实渲染”的功能清单；子 agent 只读审计确认 canonical commands 共 25 个，ready 主力仍是 Ag(111)+benzene、GC AIM、Cd/Cl 轨迹。
 - [x] 为每个维护态功能补 example 索引和中文说明；优先体系记录为 Ag(111)+benzene、GC base pair、benzene dimer、H2O-HF、COF_12000N2 单层、open-shell/磁性体系、Cd/Cl 轨迹，不用 toy 图冒充成品。
+- [x] 吸收两个只读子 agent 复核结果，补成下一批正式 example 队列：`ag111_benzene_extended_fields`、`benzene_dimer_scalar_suite`、`gc_weak_interaction_suite`、`cof_direct_cube_suite`、`fukui_dual_reactivity`、`spin_atom_coloring_suite`、`h2o_domain_baseline`、`short_aigm_trajectory`。
 - [x] 补一个可验证的用户体验增量：`multiwfn2vesta examples --command` 按功能查 example，`--gallery-assets` 查项目内 PNG，`--systems` 查推荐真体系；README、中文手册、usage、feature/status/gallery、skill 已同步。
 - [x] 渲染/刷新效果总览图: `docs/assets/gallery/current_feature_overview.png` 已由已有真实 VESTA PNG 拼成 1800x1478 总览图，未启动 VESTA GUI。
 - [x] 运行 no-GUI tests、CLI smokes、markdown link check、docs 镜像；已通过 `py_compile`、focused tests、full 391 tests、CLI smokes、markdown local links、gallery image verification、`examples --verify`、`git diff --check`、docs mirror dry-run。提交前只读 review 发现的 `--command` alias/误匹配和 `examples` coverage 缺失已修复并补回归测试；之后用 `Stardust0831` 身份提交并推送。
@@ -15,10 +16,10 @@ Updated: 2026-06-12 03:53 CST
 ## Active Goal Continuation: 2026-06-12 Steric/SBL Scalar Field Increment
 
 - [x] 需求入板: 继续长期目标，调研并实现更多 ABACUS LCAO Molden 可支撑、能由 VESTA 表达的 Multiwfn 波函数分析路线；本轮优先考虑界面吸附/排斥解释有价值的 steric/SBL 标量场。
-- [x] 审计当前工作树和远端状态: `main` 与 `origin/main` 对齐在 `20b7f6e`；仅有未跟踪 `domain.cub` / `domain.pdb`，继续保护，不提交。
-- [ ] 审计本地 Multiwfn 2026.6.2 源码中 function-100 steric/SBL 相关 `iuserfunc`，选择不需要额外交互点、可稳定导出 `userfunc.cub` 的核心子集。
-- [ ] 实现 named `grid-run` routes、VESTA presets、focused tests，并同步 README、中文手册、usage、research matrix、skills、worklog、看板。
-- [ ] 运行 no-GUI regression、CLI smokes、markdown link check、docs 镜像；通过后用 `Stardust0831` 身份提交并推送。
+- [x] 审计当前工作树和远端状态: 本轮开始时 `main` 与 `origin/main` 对齐在 `466d74e`；仅有未跟踪 `domain.cub` / `domain.pdb`，继续保护，不提交。
+- [x] 审计本地 Multiwfn 2026.6.2 源码中 function-100 steric/SBL 相关 `iuserfunc`，选择不需要额外交互点、可稳定导出 `userfunc.cub` 的核心子集：`40-43/60-69/-69/110-113`；damped steric `44-47` 暂不维护。
+- [x] 实现 named `grid-run` routes、VESTA presets、focused tests，并同步 README、中文手册、usage、research matrix、skills、worklog、看板。新增 grouped presets: `steric-energy-density`, `sbl-energy-density`, `sbl-potential`, `sbl-force-magnitude`, `sbl-charge`。
+- [x] 运行 no-GUI regression、CLI smokes、docs 镜像和提交前检查；通过后用 `Stardust0831` 身份提交并推送。验证通过：full no-GUI 393 tests、`git diff --check`、`grid-run --list-functions`、`cube-preset --list-presets`、`examples --verify`、`examples --needs-render`、`examples --command steric --json`、docs mirror dry-run。`grid-run --function steric/sbl` 仍明确标为 `needs-render`，等待 Ag(111)+benzene、benzene dimer 或 GC 碱基对真实手册级渲染，不用 toy/占位图冒充。
 
 ## Current Request: 2026-06-12 Feature Closure Phase 4 And RoSE/SEDD Closeout
 
