@@ -1,5 +1,50 @@
 # Worklog
 
+## 2026-06-12: Feature closure planned examples and concrete runbooks
+
+- Continued the feature-closure request by turning the next real-system queue
+  into concrete `examples/<example_id>/README_zh.md` runbooks instead of
+  leaving them only as prose in the status matrix.
+- Added planned `needs-work` examples for:
+  `ag111_benzene_extended_fields`, `benzene_dimer_scalar_suite`,
+  `gc_weak_interaction_suite`, `cof_direct_cube_suite`,
+  `fukui_dual_reactivity`, `spin_atom_coloring_suite`,
+  `h2o_domain_baseline`, and `short_aigm_trajectory`.
+- Updated `FEATURE_COVERAGE` so unclosed features now point to concrete
+  example ids.  For example, surface extrema points to
+  `gc_weak_interaction_suite`, steric/SBL and STM point to
+  `ag111_benzene_extended_fields`, on-top pair density points to
+  `benzene_dimer_scalar_suite` / `gc_weak_interaction_suite`, domain points to
+  `h2o_domain_baseline`, and aIGM/amIGM points to
+  `short_aigm_trajectory`.
+- Fixed `multiwfn2vesta examples --command on-top-pair --json` by adding
+  on-top pair-density command aliases.  This keeps the command filter useful
+  for source-backed function-100 routes.
+- No new VESTA GUI render was launched.  The current effect overview remains
+  `docs/assets/gallery/current_feature_overview.png`, assembled from existing
+  real VESTA-rendered PNGs.  Routes without a real figure remain
+  `needs-render` / `needs-work`.
+
+## 2026-06-12: On-top pair density route
+
+- Continued the ABACUS-compatible Multiwfn/VESTA analysis route survey by
+  adding the source-backed on-top pair density route.
+- Local Multiwfn 2026.6.2 source evidence: function `100` with
+  `iuserfunc=36` is documented as on-top pair density, the `r1=r2` case of
+  pair density.  The source temporarily sets `pairfunctype=12` and still lets
+  `paircorrtype` affect the result.
+- Added `grid-run --function on-top-pair-density` / `ontop-pair-density`.
+  The route exports `userfunc.cub`, patches `iuserfunc=36` and
+  `paircorrtype` through the run-local settings file passed with Multiwfn
+  `-set`, and does not require `--reference-point`.
+- Added `cube-preset on-top-pair-density`, a single positive VESTA display
+  starting from `0.01`.  The default is a starting point; first formal figures
+  should inspect the cube range and use benzene dimer or GC base pair rather
+  than toy cubes.
+- Updated tests, README, Chinese manual, usage docs, research matrix,
+  feature/status indices, and skill notes.  The route remains `needs-render`
+  until a real pair-density figure is generated.
+
 ## 2026-06-12: Steric/SBL diagnostic scalar routes
 
 - Continued the ABACUS-compatible Multiwfn/VESTA analysis route survey by
@@ -120,8 +165,9 @@
   feature and immediately see which functions still need better renders.
 - Recorded read-only subagent findings for future source-backed route work:
   electron-only ESP, RoSE/SEDD, advanced KED variants, steric/SBL fields, and
-  on-top pair density are good candidates after the existing feature examples
-  are more complete.
+  on-top pair density were identified as good candidates; several of these
+  routes have since been promoted to maintained CLI/preset/test coverage, while
+  advanced KED extensions still remain a later candidate.
 
 ## 2026-06-12: ESP component routes and feature-closure UX pass
 

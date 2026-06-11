@@ -25,6 +25,13 @@ point.
 - The recommended user entry point is `multiwfn2vesta` from `project/bin` or
   an editable install.  Direct module execution from inside
   `src/multiwfn2vesta` is intentionally not the supported path.
+- Curated real-system examples are discoverable with
+  `multiwfn2vesta examples`.  The ready gallery currently uses
+  Ag(111)+benzene, GC AIM, and Cd/Cl trajectory figures; planned closure
+  runbooks for Ag extended fields, benzene dimer scalar fields, GC weak
+  interactions, COF direct cubes, Fukui/dual reactivity, spin/atom coloring,
+  H2O domains, and short aIGM trajectories remain marked `needs-work` until
+  real PNG renders are added.
 - Untracked local probe files such as `domain.cub` and `domain.pdb` are
   workspace artifacts and should stay out of normal commits.
 
@@ -67,6 +74,7 @@ point.
   and local hardness function-100 routes, spin-channel alpha/beta density
   function-100 routes, fractional occupation density function-100 route,
   selected kinetic-energy-density function-100 routes,
+  on-top pair density function-100 route,
   ABACUS direct cube presets for potential, partial-charge, and
   wavefunction-norm cubes,
   charged-state `fukui-run` orchestration, orbital-weighted Fukui/dual
@@ -136,6 +144,7 @@ then delete the temporary branch.
   scalar, standalone vdW total/repulsion/dispersion potential, ABACUS direct potential, partial charge,
   wavefunction norm cubes, ELF/LOL, IRI/RDG/NCI, DORI, ESP/MEP,
   electron-only ESP, positive/negative ESP components, electric-field magnitude,
+  on-top pair density,
   steric/SBL energy-density, potential, force-magnitude, and charge fields,
   IGM/IGMH/aIGM weak-interaction maps, ALIE/LEA/LEAE, and vdW-potential
   mapped surfaces.
@@ -203,6 +212,7 @@ then delete the temporary branch.
   electric-field magnitude routes with `iuserfunc=101/102/103`, RoSE and
   SEDD scalar fields with `iuserfunc=18/19`, steric/SBL/Pauli/quantum
   diagnostic fields with `iuserfunc=40-43`, `60-69`, `-69`, and `110-113`,
+  on-top pair density with `iuserfunc=36` and run-local `paircorrtype`,
   and related scalar cubes, export
   multiple orbitals through
   isolated batch runs, optionally write VESTA files through `cube-preset`,
@@ -380,6 +390,9 @@ multiwfn2vesta grid-run input.molden grid_products \
   --function sbl-total-potential
 multiwfn2vesta grid-run input.molden grid_products \
   --function sbl-total-force-magnitude
+multiwfn2vesta grid-run input.molden grid_products \
+  --function on-top-pair-density \
+  --pair-correlation-type 3
 multiwfn2vesta grid-run input.molden grid_products \
   --function edr \
   --edr-length 0.85
@@ -879,6 +892,13 @@ Common functions:
   and `--pair-correlation-type` controls `paircorrtype` through a run-local
   `-set` settings file copied from the selected Multiwfn `settings.ini` when
   available.
+- `on-top-pair-density` / `ontop-pair-density`: function `100`, raw
+  `userfunc.cub`, run-local `iuserfunc=36` plus `paircorrtype`, preset
+  `on-top-pair-density`, single positive by default.  The inspected Multiwfn
+  source evaluates the `r1=r2` all-electron pair-density case by temporarily
+  setting `pairfunctype=12`, so no reference point is required.  Use
+  `--pair-correlation-type 1|2|3` to choose exchange only, Coulomb
+  correlation only, or exchange plus Coulomb correlation; the default is `3`.
 - `source-function` / `source` / `srcfunc`: function `19`, raw
   `srcfunc.cub`, preset `source-function`, signed by default.  Pass
   `--reference-point X Y Z`; add `--reference-unit angstrom` when those

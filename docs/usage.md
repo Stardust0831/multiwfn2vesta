@@ -70,7 +70,7 @@ multiwfn2vesta trajectory-video --help
   orbital/signed、spin density、Laplacian、K(r)/G(r)、ABACUS direct
   potential、partial charge、wavefunction norm、ELF/LOL、IRI/RDG/NCI、DORI、
   EDR(r;d)、D(r)、IGM/IGMH/aIGM、ESP/MEP、electron-only ESP、positive/negative ESP、
-  electric-field magnitude、steric/SBL energy/potential/force/charge、ALIE/LEA/LEAE、
+  electric-field magnitude、on-top pair density、steric/SBL energy/potential/force/charge、ALIE/LEA/LEAE、
   userfunc/iuserfunc、selected KED variants、standalone vdW total/repulsion/dispersion potential、vdW map
 - `surface-extrema`: 把 Multiwfn `surfanalysis.pdb` 的分子表面极值点作为
   atoms-only phase 叠加到已有 `.vesta` 文件中
@@ -98,7 +98,7 @@ multiwfn2vesta trajectory-video --help
   及其 `ELFLOL_type` 变体、
   ESP/MEP、electron-only ESP、positive/negative ESP、电场强度、ALIE、EDR(r;d)、D(r)、RDG/IRI-like、
   promolecular RDG/sign(lambda2)rho、function-100 alpha/beta density 和
-  FOD、Thomas-Fermi/Weizsacker/Pauli KED、steric/SBL/Pauli/quantum/electrostatic
+  FOD、on-top pair density、Thomas-Fermi/Weizsacker/Pauli KED、steric/SBL/Pauli/quantum/electrostatic
   potential/force/charge/energy-density 等单 cube，并可自动接
   `cube-preset` 写 `.vesta`
 - `fukui-run`: 从中性、阴离子、阳离子波函数分别生成共享格点的 density
@@ -355,6 +355,12 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
   `pairfunctype`，`--pair-correlation-type` patch `paircorrtype`；runner
   优先复制所选 Multiwfn 同目录的 `settings.ini`，只 patch 这两个键后写入
   run-local `multiwfn_grid_settings.ini` 并通过 `-set` 传给 Multiwfn
+- `on-top-pair-density`：单正值等值面，别名包括
+  `ontop-pair-density`、`pair-density-ontop`，用于 Multiwfn function-100
+  `iuserfunc=36` 的 `userfunc.cub`；源码中它计算 `r1=r2` 情况的
+  all-electron pair density，并临时使用 `pairfunctype=12`，所以不需要
+  reference point。`--pair-correlation-type 1|2|3` 仍会 patch run-local
+  `paircorrtype`，默认 `3`；默认等值面 `0.01`
 - `source-function`：正/负等值面，别名包括 `source`、`srcfunc`、
   `source-func`，用于 Multiwfn 函数 `19` 的 `srcfunc.cub`；`grid-run`
   需要 `--reference-point X Y Z`，默认 Bohr，若坐标为 Angstrom 则加
@@ -720,6 +726,13 @@ multiwfn2vesta grid-run --list-functions
   `--reference-unit angstrom`；`--pair-function-type` 控制 `pairfunctype`，
   `--pair-correlation-type` 控制 `paircorrtype`，两者都通过本次运行目录里的
   run-local settings 文件和 Multiwfn `-set` 传入
+- `on-top-pair-density` / `ontop-pair-density`：函数 `100`，原始输出
+  `userfunc.cub`，自动 patch run-local `iuserfunc=36` 和 `paircorrtype`。
+  本地 Multiwfn 源码注释为 on-top pair density，即 pair density 的
+  `r1=r2` 情况；实现中临时设 `pairfunctype=12`，因此不需要
+  `--reference-point`。默认接 `cube-preset on-top-pair-density`，按单正值
+  `0.01` 等值面显示；可用 `--pair-correlation-type 1|2|3` 控制 exchange /
+  Coulomb correlation / exchange+Coulomb 的处理。
 - `source-function` / `source` / `srcfunc`：函数 `19`，原始输出
   `srcfunc.cub`，默认接 `cube-preset source-function`，按正/负等值面显示；
   必须传 `--reference-point X Y Z`，默认 Bohr，Angstrom 坐标用

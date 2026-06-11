@@ -333,6 +333,22 @@ GRID_FUNCTIONS: Tuple[GridFunction, ...] = (
         default_user_function_index=20,
     ),
     GridFunction(
+        "on-top-pair-density",
+        100,
+        "userfunc.cub",
+        "on-top-pair-density",
+        (
+            "ontop-pair-density",
+            "on-top-pair",
+            "ontop-pair",
+            "pair-density-ontop",
+            "pair-density-on-top",
+        ),
+        mapped_preset="surface-map",
+        default_user_function_index=36,
+        settings_updates=(("paircorrtype", 3),),
+    ),
+    GridFunction(
         "local-mulliken-electronegativity",
         100,
         "userfunc.cub",
@@ -1015,6 +1031,10 @@ def _function_accepts_vdw_probe(function: GridFunction) -> bool:
     return any(key == "ivdwprobe" for key, _value in function.settings_updates)
 
 
+def _function_accepts_pair_correlation_type(function: GridFunction) -> bool:
+    return function.index == 17 or any(key == "paircorrtype" for key, _value in function.settings_updates)
+
+
 def _normalize_float_pair(value: Optional[Sequence[float]], label: str) -> Optional[Tuple[float, float]]:
     if value is None:
         return None
@@ -1242,8 +1262,10 @@ def build_grid_commands(
     else:
         if pair_function_type is not None:
             raise ValueError("--pair-function-type is only valid for pair-function")
+        if pair_correlation_type is not None and not _function_accepts_pair_correlation_type(function):
+            raise ValueError("--pair-correlation-type is only valid for pair-function and on-top-pair-density")
         if pair_correlation_type is not None:
-            raise ValueError("--pair-correlation-type is only valid for pair-function")
+            _normalize_pair_correlation_type(pair_correlation_type)
 
     if function.index == 19:
         _normalize_source_function_mode(source_function_mode)
@@ -1456,6 +1478,7 @@ def _write_recipe(
             "- In the `study3dim` post-processing menu, option `2` exports the current grid to a Gaussian cube file.",
             "- The default cube filename is determined by the selected real-space function index in Multiwfn source `0123dim.f90`.",
             "- Function `17` uses `pairfunc(refx,refy,refz,x,y,z)` for correlation hole/factor, exchange-correlation density, or pair density; the maintained stream sets the reference point through main menu `1000 -> 1`, copies the selected Multiwfn `settings.ini` when available, patches `pairfunctype` and `paircorrtype`, and passes the run-local settings file through `-set`.",
+            "- Function `100` route `on-top-pair-density` patches `iuserfunc=36` and `paircorrtype`; the inspected Multiwfn source evaluates the r1=r2 case of all-electron pair density by temporarily setting `pairfunctype=12`, so no reference point is required.",
             "- Function `19` source function uses global `refx,refy,refz` and `srcfuncmode`; the maintained stream sets the reference point through main menu `1000 -> 1`, copies the selected Multiwfn `settings.ini` when available, patches `srcfuncmode`, and passes the run-local settings file through `-set`.",
             "- Functions `9` and `10` evaluate ELF/LOL according to `ELFLOL_type`; the maintained stream defaults ordinary `elf`/`lol` to Becke definitions (`0`) and can patch other supported definitions through a run-local settings file.  D/D0 type `3` is accepted only for ELF because Multiwfn implements it only in the ELF branch.",
             "- Function `25` van der Waals potential uses `ivdwprobe` to select the UFF probe atom; the maintained stream defaults it to carbon (`6`) and can patch another probe element through a run-local settings file.",
@@ -1648,8 +1671,10 @@ def run_multiwfn_grid(
     else:
         if pair_function_type is not None:
             raise ValueError("--pair-function-type is only valid for pair-function")
-        if pair_correlation_type is not None:
-            raise ValueError("--pair-correlation-type is only valid for pair-function")
+        if pair_correlation_type is not None and not _function_accepts_pair_correlation_type(function):
+            raise ValueError("--pair-correlation-type is only valid for pair-function and on-top-pair-density")
+        if _function_accepts_pair_correlation_type(function):
+            normalized_pair_correlation_type = _normalize_pair_correlation_type(pair_correlation_type)
 
     if function.index == 19:
         normalized_source_function_mode = _normalize_source_function_mode(source_function_mode)
@@ -1712,6 +1737,8 @@ def run_multiwfn_grid(
         settings_updates["iuserfunc"] = (
             normalized_user_function_index if normalized_user_function_index is not None else 0
         )
+        if _function_accepts_pair_correlation_type(function) and normalized_pair_correlation_type is not None:
+            settings_updates["paircorrtype"] = normalized_pair_correlation_type
     if function.index in {9, 10} and normalized_elflol_type is not None:
         settings_updates["ELFLOL_type"] = normalized_elflol_type
     effective_elflol_type = (
@@ -2299,7 +2326,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         default=None,
         help=(
             "Multiwfn paircorrtype for function 17. 1 exchange only, "
-            "2 Coulomb correlation only, 3 exchange plus Coulomb."
+            "2 Coulomb correlation only, 3 exchange plus Coulomb. Also valid "
+            "for named function-100 on-top-pair-density, where it controls "
+            "the iuserfunc=36 pair-density correction term."
         ),
     )
     parser.add_argument(
@@ -2319,6 +2348,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         help=(
             "Multiwfn iuserfunc value for generic function 100 user-function, e.g. "
             "1/2 for alpha/beta density, 20 for DORI, 27 for LEA, -27 for LEAE, "
+            "36 for on-top pair density, "
             "49 for information gain, 90 for fractional occupation density, "
             "50 for Shannon entropy density, 51/52 for Fisher information "
             "density, 28 for local Mulliken electronegativity, and 29 for "

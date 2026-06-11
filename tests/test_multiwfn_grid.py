@@ -221,6 +221,18 @@ rose sedd comment two
 """
 
 
+ON_TOP_PAIR_CUBE = """on top pair density comment one
+on top pair density comment two
+    2    -1.000000    -2.000000     0.500000
+    2     0.500000     0.000000     0.000000
+    2     0.000000     0.500000     0.000000
+    2     0.000000     0.000000     0.500000
+    8     8.000000    -1.000000    -2.000000     0.500000
+    1     1.000000    -0.500000    -2.000000     0.500000
+ 0.000 0.004 0.008 0.010 0.012 0.020 0.030 0.040
+"""
+
+
 class TestMultiwfnGridRunner(unittest.TestCase):
     def make_candidate(self, root):
         fake_exe = Path(root) / "Multiwfn_noGUI"
@@ -302,6 +314,10 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertIn("fractional-occupation-density", text)
         self.assertIn("default iuserfunc=90", text)
         self.assertIn("default iuserfunc=20", text)
+        self.assertIn("on-top-pair-density", text)
+        self.assertIn("preset=on-top-pair-density", text)
+        self.assertIn("default iuserfunc=36", text)
+        self.assertIn("settings: paircorrtype=3", text)
         self.assertIn("default iuserfunc=27", text)
         self.assertIn("default iuserfunc=-27", text)
         self.assertIn("default iuserfunc=28", text)
@@ -416,6 +432,9 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertEqual(resolve_grid_function("dori").preset, "dori-scalar")
         self.assertEqual(resolve_grid_function("dori-function").default_user_function_index, 20)
         self.assertEqual(resolve_grid_function("density-overlap-regions-indicator").name, "dori")
+        self.assertEqual(resolve_grid_function("ontop-pair-density").default_user_function_index, 36)
+        self.assertEqual(resolve_grid_function("pair-density-on-top").preset, "on-top-pair-density")
+        self.assertEqual(resolve_grid_function("on-top-pair").settings_updates, (("paircorrtype", 3),))
         self.assertEqual(resolve_grid_function("rose").preset, "rose")
         self.assertEqual(resolve_grid_function("region-of-slow-electrons").default_user_function_index, 18)
         self.assertEqual(resolve_grid_function("slow-electrons").mapped_preset, "surface-map")
@@ -1428,6 +1447,62 @@ class TestMultiwfnGridRunner(unittest.TestCase):
                     manifest = result.vesta_result.manifest_path.read_text(encoding="utf-8")
                     self.assertIn(f"canonical_preset: `{expected_preset}`", manifest)
                     self.assertIn("effective_isosurface: `0.5`", manifest)
+
+    def test_run_on_top_pair_density_patches_iuserfunc_and_paircorrtype(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            wavefunction = root / "h2o.fch"
+            wavefunction.write_text("wavefunction", encoding="utf-8")
+            candidate = self.make_candidate(root)
+            (candidate.path.parent / "settings.ini").write_text(
+                "iuserfunc= 0 // stale userfunc\npaircorrtype= 1 // stale pair corr\nother_setting= keep\n",
+                encoding="utf-8",
+            )
+
+            def fake_run(command, **kwargs):
+                cwd = Path(kwargs["cwd"])
+                (cwd / "userfunc.cub").write_text(ON_TOP_PAIR_CUBE, encoding="utf-8")
+                return subprocess.CompletedProcess(command, 0, stdout="ok", stderr="")
+
+            with patch("multiwfn2vesta.multiwfn_grid.find_multiwfn", return_value=candidate):
+                with patch("multiwfn2vesta.multiwfn_grid.subprocess.run", side_effect=fake_run):
+                    result = run_multiwfn_grid(
+                        wavefunction,
+                        root / "products",
+                        function_name="ontop-pair-density",
+                        pair_correlation_type=2,
+                        stem="case",
+                        grid_mode="low",
+                    )
+
+            self.assertTrue(result.success)
+            self.assertEqual(result.command_file.read_text(encoding="utf-8"), "5\n100\n1\n2\n0\nq\n")
+            self.assertEqual(result.user_function_index, 36)
+            self.assertEqual(result.pair_correlation_type, 2)
+            self.assertIsNotNone(result.settings_override)
+            settings_text = result.settings_override.read_text(encoding="utf-8")
+            self.assertIn("iuserfunc= 36 // stale userfunc", settings_text)
+            self.assertIn("paircorrtype= 2 // stale pair corr", settings_text)
+            self.assertIn("other_setting= keep", settings_text)
+            self.assertEqual(result.raw_cube.name, "userfunc.cub")
+            self.assertEqual(result.cube.name, "case_on-top-pair-density.cub")
+            self.assertIsNotNone(result.vesta_result)
+            self.assertEqual(
+                result.vesta_result.vesta_path.name,
+                "case_on-top-pair-density_on-top-pair-density_cube.vesta",
+            )
+            recipe = result.recipe_path.read_text(encoding="utf-8")
+            self.assertIn("function_name: `on-top-pair-density`", recipe)
+            self.assertIn("function_index: `100`", recipe)
+            self.assertIn("user_function_index_iuserfunc: `36`", recipe)
+            self.assertIn("pair_correlation_type: `2`", recipe)
+            self.assertIn("auto_vesta_preset: `on-top-pair-density`", recipe)
+            self.assertIn("iuserfunc=36", recipe)
+            manifest = result.vesta_result.manifest_path.read_text(encoding="utf-8")
+            self.assertIn("canonical_preset: `on-top-pair-density`", manifest)
+            self.assertIn("effective_surface_mode: `single`", manifest)
+            self.assertIn("effective_isosurface: `0.01`", manifest)
+            self.assertIn("paircorrtype", manifest)
 
     def test_run_steric_sbl_routes_patch_iuserfunc(self):
         cases = (

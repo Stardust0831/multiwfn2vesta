@@ -127,6 +127,20 @@ multiwfn2vesta examples --systems
 - open-shell/磁性体系：用于 spin density、Mulliken magnetism 和 atom value coloring。
 - Cd/Cl 轨迹：用于 trajectory frame、Boundary、成键判据和高码率视频。
 
+如果目标是“某个功能该看哪个 example”，优先用下面的 planned runbook。它们已经进
+`multiwfn2vesta examples --status needs-work`，但没有真实 PNG 前不会标成 `ready`：
+
+| 功能组 | example id | 当前定位 |
+| --- | --- | --- |
+| Ag 表面吸附的 ESP/vdW/steric/SBL/STM | `ag111_benzene_extended_fields` | 复用 Ag(111)+benzene IGMH+AIM 三视图相机 |
+| IRI/RDG/DORI/RoSE/SEDD/on-top pair density | `benzene_dimer_scalar_suite` | 弱相互作用标量场主 planned example |
+| GC AIM 扩展到 IRI/ESP/extrema/on-top pair density | `gc_weak_interaction_suite` | 在已 ready 的 GC AIM 上继续补图 |
+| ABACUS direct cube | `cof_direct_cube_suite` | COF 单层 density/potential/ELF 等 |
+| Fukui/dual descriptor/cube-arith/原子反应性染色 | `fukui_dual_reactivity` | 需要中性/阳离子/阴离子同网格 cube |
+| spin density/Mulliken magnetism/atom value coloring | `spin_atom_coloring_suite` | 替换 toy coloring smoke |
+| domain-run 和基础 density/ESP/KED baseline | `h2o_domain_baseline` | 快速小分子回归图 |
+| aIGM/amIGM trajectory average | `short_aigm_trajectory` | 和 Cd/Cl 几何轨迹视频互补 |
+
 如果只想看当前已经提交到项目里的效果图：
 
 ```bash
@@ -257,11 +271,13 @@ multiwfn2vesta grid-run input.molden sedd_field --function sedd
 multiwfn2vesta grid-run input.molden steric --function steric-potential
 multiwfn2vesta grid-run input.molden sbl --function sbl-total-potential
 multiwfn2vesta grid-run input.molden sbl_force --function sbl-total-force-magnitude
+multiwfn2vesta grid-run input.molden ontop_pair --function on-top-pair-density --pair-correlation-type 3
 ```
 
 这些命名路由都走 Multiwfn 函数 `100`，分别写 run-local
 `iuserfunc=14/101/102/103`、RoSE/SEDD 的 `iuserfunc=18/19`，或 steric/SBL 相关
-`iuserfunc=40-43/60-69/-69/110-113`，不会修改全局 Multiwfn 配置。`electron-esp`
+`iuserfunc=40-43/60-69/-69/110-113`，以及 on-top pair density 的
+`iuserfunc=36`，不会修改全局 Multiwfn 配置。`electron-esp`
 调用 Multiwfn 源码中的 `eleesp(x,y,z)`，即电子贡献静电势，通常按单负
 `-0.05` a.u. 等值面显示；正/负 ESP 分量适合在极性分子、吸附界面或电荷转移
 体系中快速分开看静电正负区域；电场强度适合看局域强场区域。若要映射到 density
@@ -288,6 +304,14 @@ Steric/SBL 路线适合看吸附界面、分子间排斥/束缚区域和能量�
 `sbl-force-magnitude` 和 `sbl-charge`；如果提供 `--surface-cube`，则作为 texture
 映射到已有 density/interaction surface。默认等值面只是起点，正式出图前要看 cube
 最小/最大值并调 `--isosurface` 或 `--tex-physical`。
+
+`on-top-pair-density` 也导出 `userfunc.cub`。Multiwfn 源码中 `iuserfunc=36`
+会在同一点取 `r1=r2` 的全电子 pair density，并临时使用 `pairfunctype=12`；
+因此它不需要 `pair-function` 所需的 reference point。`--pair-correlation-type`
+仍然会写 run-local `paircorrtype`：`1` 为 exchange only，`2` 为 Coulomb
+correlation only，`3` 为两者都包含。默认 VESTA preset 是单正值
+`on-top-pair-density`，等值面 `0.01` 只是起点；正式图建议用 benzene dimer
+或 GC 碱基对，先检查 cube 范围。
 
 ## 8. AIM、IRI、IGMH 的组合图
 

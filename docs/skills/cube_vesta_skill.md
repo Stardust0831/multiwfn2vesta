@@ -296,6 +296,12 @@ passes it back through `cube-preset`.
   `pairfunctype`, `--pair-correlation-type` patches `paircorrtype`, and both
   settings are written to a run-local settings file copied from the selected
   Multiwfn `settings.ini` when available and passed with `-set`.
+- `on-top-pair-density` aliases: `ontop-pair-density`, `on-top-pair`,
+  `pair-density-ontop`; single positive surface for Multiwfn function-100
+  `userfunc.cub` with `iuserfunc=36`, default isosurface `0.01`.  When
+  generating the cube with `grid-run`, `--pair-correlation-type 1|2|3`
+  patches `paircorrtype`; no reference point is required because Multiwfn
+  evaluates the `r1=r2` pair-density case internally.
 - `source-function` aliases: `source`, `srcfunc`, `source-func`;
   positive/negative surfaces for Multiwfn function `19` `srcfunc.cub`,
   default magnitude `0.05`.  When generating the cube with `grid-run`, pass
@@ -380,6 +386,8 @@ passes it back through `cube-preset`.
   surface for Multiwfn function-100 `userfunc.cub` with `iuserfunc=20`,
   default isosurface `0.95`.  Use `dori` with `--texture-cube` for DORI
   surfaces colored by sign(lambda2)rho.
+- `on-top-pair-density`; single positive surface for Multiwfn function-100
+  `userfunc.cub` with `iuserfunc=36`, default isosurface `0.01`.
 - `rose` aliases: `region-of-slow-electrons`, `slow-electrons`;
   single positive surface for Multiwfn function-100 `userfunc.cub` with
   `iuserfunc=18`, default isosurface `0.5`.  Multiwfn evaluates

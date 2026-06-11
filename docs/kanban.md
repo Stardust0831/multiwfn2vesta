@@ -1,6 +1,23 @@
 # Project Kanban
 
-Updated: 2026-06-12 04:22 CST
+Updated: 2026-06-12 05:06 CST
+
+## Current Request: 2026-06-12 Feature Closure Phase 5 With Valuable Systems
+
+- [x] 需求入板: 把当前已有功能进一步闭环，按功能补可发现 example、真实有价值体系、效果图或明确待渲染状态，并继续优化统一 CLI 使用体验和中文手册。
+- [x] 修复当前 on-top pair density 增量留下的 `examples --command on-top-pair --json` 过滤断点，确保新增功能能被统一 examples 入口发现；focused `tests.test_examples` 已覆盖。
+- [x] 盘点所有维护态功能的 example/runbook/gallery 状态，优先选择 Ag(111)+benzene、GC 碱基对、benzene dimer、COF_12000N2 单层、Cd/Cl 轨迹等真实体系补闭环，不用 toy placeholder 冒充手册图；子 agent 只读复核确认 ready 图仍限于 Ag/GC/CdCl 主线。
+- [x] 补中文手册与 example/status matrix：每个功能至少给出推荐命令、输入来源、代表体系、预期产物、效果图路径或 `needs-render` 原因；新增 8 个 `examples/<example_id>/README_zh.md` planned runbook，并把 coverage 的泛称 example 改成具体 example id。
+- [x] 尽量生成或整理真实效果图；无法无 GUI 稳定渲染的项目保留为待渲染，并记录缺口、下一步和可复现实验路径。当前效果图总览仍使用 `docs/assets/gallery/current_feature_overview.png`，由已有真实 VESTA PNG 组成，未启动 VESTA GUI。
+- [x] 运行 no-GUI regression、CLI smokes、docs 镜像、提交前检查；通过后用 `Stardust0831` 身份提交并推送。已通过 `py_compile`、396-test full no-GUI regression、`git diff --check`、54-file markdown local-link check、`examples --verify`、planned example/coverage/on-top pair/surface-extrema/gallery CLI smokes、grid-run/cube-preset route smokes，docs mirror checksum dry-run 为空；提交和 push 待最后执行。
+
+## Active Goal Continuation: 2026-06-12 On-Top Pair Density Increment
+
+- [x] 需求入板: 继续长期目标，调研并实现 ABACUS LCAO Molden 可支撑、能由 VESTA 表达的 Multiwfn 波函数分析路线；本轮选择电子对密度相关的 on-top pair density。
+- [x] 审计当前仓库状态和候选路线: `main` 与 `origin/main` 对齐在 `4264ef1`；仅有未跟踪 `domain.cub` / `domain.pdb`，继续保护，不提交。源码候选中 `iuserfunc=36` 比扩展 KED 更独立，且无需 reference point。
+- [x] 审计本地 Multiwfn 2026.6.2 源码证据: function `100` 的 `case (36)` 注释为 on-top pair density，即 pair density 的 `r1=r2` 情况；源码临时设置 `pairfunctype=12`，同时说明 `paircorrtype` 会影响结果。
+- [x] 实现 named `grid-run --function on-top-pair-density` / `ontop-pair-density`，导出 `userfunc.cub`，通过 run-local settings patch `iuserfunc=36` 和 `paircorrtype`，并新增 `cube-preset on-top-pair-density` 单正值显示。已同步 README、中文手册、usage、research matrix、feature/status indices、skills 和 worklog。
+- [x] 运行 no-GUI regression、CLI smokes、docs 镜像、提交前检查；通过后用 `Stardust0831` 身份提交并推送。Focused `tests.test_cube_preset tests.test_multiwfn_grid` 已通过 133 tests；本轮完整验证已通过 396-test full no-GUI regression、CLI smokes、`git diff --check`、markdown local-link check 和 docs mirror dry-run；提交和 push 待最后执行。
 
 ## Current Request: 2026-06-12 Existing Feature Closure, Valuable Examples, And Chinese Manual
 

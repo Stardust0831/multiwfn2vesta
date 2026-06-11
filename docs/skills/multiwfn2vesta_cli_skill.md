@@ -512,7 +512,7 @@ Common functions include `density`, `gradient`, `orbital --orbital h`,
 `orbital-density`, `spin-density`, `spin-polarization`, `laplacian`,
 `hamiltonian-ked`, `lagrangian-ked`, `local-information-entropy`, `elf`,
 `lol`, `esp`, `alie`,
-`pair-function`, `source-function`, `user-function`, `dori`,
+`pair-function`, `on-top-pair-density`, `source-function`, `user-function`, `dori`,
 `alpha-density`, `beta-density`,
 `local-electron-affinity`, `local-electron-attachment-energy`,
 `local-mulliken-electronegativity`, `local-hardness`,
@@ -577,6 +577,11 @@ write function-100 `userfunc.cub` with `iuserfunc=40-43/60-69/-69/110-113`.
 Standalone products use `steric-energy-density`, `sbl-energy-density`,
 `sbl-potential`, `sbl-force-magnitude`, or `sbl-charge`; with
 `--surface-cube`, they use `surface-map`.
+`grid-run --function on-top-pair-density` writes function-100 `userfunc.cub`
+with `iuserfunc=36`, patches run-local `paircorrtype`, uses standalone
+`on-top-pair-density`, and falls back to `surface-map` with `--surface-cube`.
+It does not require `--reference-point`; use `--pair-correlation-type 1|2|3`
+to select exchange only, Coulomb correlation only, or both.
 `grid-run --function pair-function` requires
 `--reference-point X Y Z`; `--pair-function-type` and
 `--pair-correlation-type` patch Multiwfn `pairfunctype`/`paircorrtype`
@@ -635,11 +640,12 @@ into a run-local settings file copied from the selected Multiwfn
 `iKEDsel`.  LEA/LEAE named routes also auto-select mapped presets
 `lea`/`leae` when `--surface-cube` is supplied; local electronegativity and
 local hardness plus alpha/beta density, FOD, KED variants, RoSE/SEDD,
-steric/SBL routes, and the
+on-top pair density, steric/SBL routes, and the
 orbital-weighted Fukui/dual routes use `surface-map`.  Alpha/beta density,
 FOD, and Fukui+/Fukui-/Fukui0 standalone products use `density`, KED variants
-use `kinetic-energy-density`, RoSE/SEDD use `rose`/`sedd`, steric/SBL
-routes use the five `steric-energy-density`/`sbl-*` presets, and
+use `kinetic-energy-density`, RoSE/SEDD use `rose`/`sedd`, on-top pair density
+uses `on-top-pair-density`, steric/SBL routes use the five
+`steric-energy-density`/`sbl-*` presets, and
 orbital-weighted dual descriptor uses `signed`.  These 95..98 routes are single-wavefunction
 approximations, not
 `fukui-run` charged-state density differences; the current runner leaves

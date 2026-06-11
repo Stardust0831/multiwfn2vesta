@@ -559,6 +559,29 @@ PRESETS: Tuple[CubePreset, ...] = (
         ),
     ),
     CubePreset(
+        name="on-top-pair-density",
+        aliases=(
+            "ontop-pair-density",
+            "on-top-pair",
+            "ontop-pair",
+            "pair-density-ontop",
+            "pair-density-on-top",
+        ),
+        description="Single positive isosurface for Multiwfn on-top pair density cubes.",
+        surface_mode="single",
+        isosurface=0.01,
+        positive_rgb=(255, 185, 90),
+        surface_opacity=(135, 255),
+        notes=(
+            "Use for Multiwfn function-100 userfunc.cub with iuserfunc=36. "
+            "The inspected source evaluates the r1=r2 case of all-electron pair density "
+            "by temporarily setting pairfunctype=12; paircorrtype still controls whether "
+            "exchange only, Coulomb correlation only, or exchange plus Coulomb correlation "
+            "is included.  This diagnostic is normally displayed as a positive scalar field, "
+            "but the default 0.01 isosurface is only a starting value."
+        ),
+    ),
+    CubePreset(
         name="user-function",
         aliases=(
             "userfunc",

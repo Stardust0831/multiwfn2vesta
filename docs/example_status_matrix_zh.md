@@ -85,6 +85,7 @@ multiwfn2vesta examples --systems
 | 弱相互作用标量 | `rdg`, `iri`, `dori`, `delta-g`, `hirshfeld-delta-g` | H2O dimer、benzene dimer、Ag adsorbate | IGMH 已闭环；IRI 有调试图 | IRI/DORI/Delta-g standalone 缺手册级图 |
 | 慢电子/指数衰减标量 | `rose`, `sedd` | benzene dimer、GC 碱基对 | 有入口 | 已有 source-backed `iuserfunc=18/19` 路由和 preset，缺真实 paired render |
 | steric/SBL/Pauli/quantum 诊断场 | `steric-*`, `pauli-*`, `quantum-*`, `electrostatic-*`, `sbl-*` | Ag(111)+benzene、benzene dimer、GC 碱基对 | 有入口 | 已有 source-backed `iuserfunc=40-43/60-69/-69/110-113` 路由和 preset，缺真实界面/弱相互作用 render |
+| 电子对密度 | `on-top-pair-density` | benzene dimer、GC 碱基对 | 有入口 | 已有 source-backed `iuserfunc=36` 路由、`paircorrtype` 控制和 preset，缺真实 pair-density render |
 | 反应性 | `fod`, `orbital-weighted-fukui-*`, `orbital-weighted-dual-descriptor` | 小分子反应位点 | 有入口 | 需要真实 closed-shell 测试体系 |
 | 信息论密度 | `local-information-entropy`, `information-gain-density`, `shannon-entropy-density`, `fisher-information-density` | 小分子/COF | 有入口 | 缺图，默认 isosurface 需调 |
 | 分区权重 | `becke`, `hirshfeld` | 分子内片段边界 | 有入口 | 缺图 |

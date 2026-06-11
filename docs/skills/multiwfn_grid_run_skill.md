@@ -119,6 +119,13 @@ multiwfn2vesta grid-run --list-functions
   `multiwfn_grid_settings.ini`, copied from the selected Multiwfn
   `settings.ini` when available and passed with `-set`, so global Multiwfn
   settings are not modified.
+- `on-top-pair-density`, aliases `ontop-pair-density`, `on-top-pair`,
+  `pair-density-ontop`: function `100`, raw `userfunc.cub`, preset
+  `on-top-pair-density` with a single positive isosurface.  The route patches
+  `iuserfunc=36` and `paircorrtype`; Multiwfn source temporarily sets
+  `pairfunctype=12` internally for the `r1=r2` all-electron pair-density
+  case, so no reference point is required.  `--pair-correlation-type 1|2|3`
+  controls exchange only, Coulomb correlation only, or both.
 - `alie`, aliases `average-local-ionization-energy`, `avglocion`: function
   `18`, raw `avglocion.cub`, preset `density`; mapped preset `alie` with
   `--surface-cube`.
@@ -176,11 +183,12 @@ multiwfn2vesta grid-run --list-functions
   and `second-fisher-information-density` = `52`.  LEA/LEAE named routes
   also auto-select mapped presets `lea`/`leae` when `--surface-cube` is
   supplied; alpha/beta density, FOD, local Mulliken electronegativity, local
-  hardness, electron ESP/ESP component/electric-field routes, steric/SBL
+  hardness, electron ESP/ESP component/electric-field routes, on-top pair density, steric/SBL
   routes, KED variants, and the orbital-weighted Fukui/dual routes, RoSE, and SEDD fall back to the generic `surface-map`
   mapped preset.  Alpha/beta density, FOD, and
   Fukui+/Fukui-/Fukui0 standalone products use `density`, KED variants use
-  `kinetic-energy-density`, electron ESP uses `electron-esp`, steric/SBL
+  `kinetic-energy-density`, electron ESP uses `electron-esp`, on-top pair density uses
+  `on-top-pair-density`, steric/SBL
   standalone routes use `steric-energy-density`, `sbl-energy-density`,
   `sbl-potential`, `sbl-force-magnitude`, or `sbl-charge`, while orbital-weighted dual descriptor uses
   `signed`.  The 95..98 routes are
@@ -471,6 +479,7 @@ multiwfn2vesta grid-run input.fch products --function electric-field-magnitude
 multiwfn2vesta grid-run input.fch products --function hamiltonian-ked --no-vesta
 multiwfn2vesta grid-run input.fch products --function alie --no-vesta
 multiwfn2vesta grid-run input.fch products --function pair-function --reference-point 0 0 0 --pair-function-type 1 --pair-correlation-type 3
+multiwfn2vesta grid-run input.fch products --function on-top-pair-density --pair-correlation-type 3
 multiwfn2vesta grid-run input.fch products --function source-function --reference-point 0 0 0 --source-function-mode 1
 multiwfn2vesta grid-run input.fch products --function dori
 multiwfn2vesta grid-run input.fch products --function local-electron-affinity
