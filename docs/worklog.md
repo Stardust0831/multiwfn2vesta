@@ -1,5 +1,46 @@
 # Worklog
 
+## 2026-06-11: README branch refresh before user-function closeout
+
+- User requested another README update, a check of the unusual-looking branch
+  state, convergence back to one maintained branch if needed, and git identity
+  `Stardust0831`.
+- Rechecked repository state after `git fetch --prune origin`: local `main`,
+  `origin/main`, and `origin/HEAD` are aligned at
+  `e1b3f866694e89d781f5722f0a4d18ca603c69ff`
+  (`Refresh README branch status`), and `git ls-remote --heads origin`
+  exposes only `refs/heads/main`.  No merge-back is needed because no extra
+  local or remote feature branch exists.
+- Repository-local identity is `Stardust0831 <13862180016@163.com>`.
+- Refreshed README branch-status text so it records the single-branch
+  maintenance model without embedding a self-referential final commit hash.
+  Local untracked probes `domain.cub` and `domain.pdb` remain outside version
+  control.
+
+## 2026-06-11: User-function grid preset
+
+- Continued the long-running Multiwfn/ABACUS/VESTA analysis objective with
+  the main-function-5 user-defined function route.
+- Rechecked local Multiwfn 2026.6.2 source evidence: `settings.ini` defines
+  `iuserfunc`, main menu `1000 -> 2` can set it interactively,
+  `function.f90` evaluates `userfunc(x,y,z)` by `select case(iuserfunc)`,
+  and `0123dim.f90` exports function `100` as `userfunc.cub`.
+- Added `grid-run --function user-function --user-function-index IUSERFUNC`
+  with aliases for `userfunc`, LEA/LEAE, and information-theory functions.
+  The runner copies the selected Multiwfn `settings.ini` when available,
+  patches only `iuserfunc` into a run-local `multiwfn_grid_settings.ini`, and
+  passes it with `-set`, leaving global settings untouched.
+- Added `cube-preset user-function` for standalone `userfunc.cub` signed
+  isosurfaces.  LEA/LEAE density-surface maps remain the existing
+  `cube-preset lea`/`leae` texture route using `density.cub` plus
+  `userfunc.cub`.
+- Special external-grid interpolation modes `-1/-3` and Shubin `57/58/59`
+  are intentionally rejected by the generic route until their extra grid
+  setup is scripted.
+- Focused validation passed during implementation: `py_compile` for edited
+  modules/tests and 95 tests across `tests.test_cube_preset` and
+  `tests.test_multiwfn_grid`.
+
 ## 2026-06-11: README branch refresh at pair-function tip
 
 - User requested a README update, a check of the unusual-looking branch state,

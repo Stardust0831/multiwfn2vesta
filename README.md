@@ -21,15 +21,13 @@ point.
 - Working checkout: `/mnt/g/work/multiwfn2vesta/project`.  The workspace-level
   `/mnt/g/work/multiwfn2vesta/.git` is an empty metadata stub and is not used
   for project commits.
-- Branch audit on 2026-06-11 16:47 CST, after `git fetch --prune origin`,
-  found local `main`, `origin/main`, and `origin/HEAD` aligned at
-  `13e657fb700cc8d4bbb4c126434d6762d0f4d5f5`
-  (`Add pair-function grid preset`).
-- `git ls-remote --heads origin` currently returns only `refs/heads/main`; no
-  merge-back was needed in this pass because there is no extra local or remote
-  feature branch to consolidate.
-- The pair-function closeout is already on the maintained `main` branch; there
-  is still no side branch or remote feature head to merge back in this pass.
+- Branch audit on 2026-06-11, after `git fetch --prune origin`, found only
+  local `main`, `origin/main`, and `origin/HEAD`; `git ls-remote --heads
+  origin` returned only `refs/heads/main`.  No merge-back was needed because
+  there was no extra local or remote feature branch to consolidate.
+- Feature closeouts, including the user-function grid route, are kept on the
+  maintained `main` branch.  Use `git log --oneline --decorate -5` after
+  pulling if an exact current commit hash is needed.
 - Local untracked probe files such as `domain.cub` and `domain.pdb` are not
   part of the maintained branch state and should stay uncommitted unless they
   are explicitly promoted into documented fixtures.
@@ -136,7 +134,8 @@ then delete the temporary branch.
   promolecular RDG/sign(lambda2)rho, local information entropy, EDR(r;d),
   orbital-overlap distance D(r), pair/correlation functions with run-local
   `pairfunctype`/`paircorrtype`, source function with run-local
-  `srcfuncmode`, Becke atomic/overlap weight, Hirshfeld weight,
+  `srcfuncmode`, user-defined `iuserfunc` cubes such as LEA/LEAE and
+  information-theory densities, Becke atomic/overlap weight, Hirshfeld weight,
   promolecular Delta-g, Hirshfeld-partition Delta-g, and related
   scalar cubes, export multiple orbitals through
   isolated batch runs, optionally write VESTA files through `cube-preset`,
@@ -239,6 +238,9 @@ multiwfn2vesta grid-run input.molden grid_products \
   --reference-point 0 0 0 \
   --source-function-mode 1
 multiwfn2vesta grid-run input.molden grid_products \
+  --function user-function \
+  --user-function-index 27
+multiwfn2vesta grid-run input.molden grid_products \
   --function becke \
   --becke-atoms 1 4
 multiwfn2vesta grid-run input.molden grid_products \
@@ -335,6 +337,7 @@ multiwfn2vesta cube-preset electron-delocalization-range EDR.cub cube_products
 multiwfn2vesta cube-preset orbital-overlap-distance EDRDmax.cub cube_products
 multiwfn2vesta cube-preset pair-function fermihole.cub cube_products
 multiwfn2vesta cube-preset source-function srcfunc.cub cube_products
+multiwfn2vesta cube-preset user-function userfunc.cub cube_products
 multiwfn2vesta cube-preset becke-weight Becke.cub cube_products
 multiwfn2vesta cube-preset hirshfeld-weight Hirshfeld.cub cube_products
 multiwfn2vesta cube-preset rdg-scalar RDG.cub cube_products
@@ -421,6 +424,18 @@ controls Multiwfn `srcfuncmode`; the runner copies the selected Multiwfn
 run-local `multiwfn_grid_settings.ini` with `-set`, so the global Multiwfn
 installation settings are not modified.  The VESTA preset shows signed
 `+/-0.05` isosurfaces by default.
+
+Use `user-function`/`userfunc` for Multiwfn function `100` `userfunc.cub`.
+`grid-run` requires `--user-function-index IUSERFUNC`; common choices from
+the inspected Multiwfn source include `27` for local electron affinity,
+`-27` for local electron attachment energy, `49` for information gain,
+`50` for Shannon entropy density, and `51`/`52` for Fisher information
+density.  The runner copies the selected Multiwfn `settings.ini` when
+available, patches only `iuserfunc`, and passes the run-local settings file
+with `-set`.  Generic standalone `userfunc.cub` uses signed `+/-0.05`
+surfaces by default; for LEA/LEAE mapped density surfaces, generate or
+provide `density.cub` and use `cube-preset lea`/`leae` with `userfunc.cub`
+as the texture cube.
 
 Use `becke-weight`/`becke` for Multiwfn function `111` `Becke.cub`;
 `grid-run` requires `--becke-atoms I J` because Multiwfn asks for atom
@@ -632,6 +647,12 @@ Common functions:
   coordinates are Angstrom.  `--source-function-mode` controls
   `srcfuncmode` through a run-local `-set` settings file copied from the
   selected Multiwfn `settings.ini` when available.
+- `user-function` / `userfunc`: function `100`, raw `userfunc.cub`, preset
+  `user-function`, signed by default.  Pass `--user-function-index
+  IUSERFUNC`; examples include `27` for LEA, `-27` for LEAE, `49` for
+  information gain, and `50`/`51`/`52` for Shannon/Fisher information
+  densities.  The selected `iuserfunc` is written to a run-local `-set`
+  settings file, leaving the global Multiwfn settings untouched.
 - `electron-delocalization-range` / `edr`: function `20`, raw `EDR.cub`,
   preset `electron-delocalization-range`, single positive surface by default.
   Pass `--edr-length D_BOHR`; Multiwfn asks for this EDR length scale before
@@ -718,6 +739,12 @@ multiwfn2vesta grid-run input.fch grid_products \
   --grid-points 120 120 120
 
 multiwfn2vesta grid-run input.fch grid_products \
+  --function user-function \
+  --user-function-index 27 \
+  --grid-mode points \
+  --grid-points 120 120 120
+
+multiwfn2vesta grid-run input.fch grid_products \
   --function becke \
   --becke-atoms 1 4 \
   --grid-mode points \
@@ -796,8 +823,9 @@ Default batch outputs in `orbital_products/`:
 The batch command stops after the first failed orbital by default.  Add
 `--keep-going` to continue later orbitals and record failed/skipped states in
 the batch manifest.  Batch mode rejects `--orbital`, `--commands-file`,
-`--expected-cube`, and `--raw-dir`, because each child run owns its own command
-stream and raw output directory.
+`--expected-cube`, `--raw-dir`, `--surface-cube`, reference-point,
+pair/source/user-function, and other non-orbital function-specific options,
+because each child run owns its own command stream and raw output directory.
 
 Default outputs in `grid_products/`:
 

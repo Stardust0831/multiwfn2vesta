@@ -301,6 +301,35 @@ PRESETS: Tuple[CubePreset, ...] = (
         ),
     ),
     CubePreset(
+        name="user-function",
+        aliases=(
+            "userfunc",
+            "user-defined-function",
+            "custom-function",
+            "lea-function",
+            "leae-function",
+            "information-gain-density",
+            "relative-shannon-entropy",
+            "shannon-entropy-density",
+            "fisher-information-density",
+        ),
+        description="Generic positive/negative isosurfaces for Multiwfn userfunc.cub.",
+        surface_mode="signed",
+        isosurface=0.05,
+        positive_rgb=(255, 205, 80),
+        negative_rgb=(75, 135, 255),
+        surface_opacity=(135, 255),
+        notes=(
+            "Use for Multiwfn userfunc.cub from real-space function 100. "
+            "The generated scalar is selected by iuserfunc in settings.ini; grid-run copies the "
+            "selected Multiwfn settings.ini when available, patches iuserfunc into a run-local "
+            "multiwfn_grid_settings.ini, and passes it with -set. "
+            "This generic standalone preset uses signed +/-0.05 surfaces and usually needs "
+            "system- and function-specific tuning. For LEA/LEAE colored density surfaces, "
+            "use preset `lea` or `leae` with density.cub as the surface and userfunc.cub as texture."
+        ),
+    ),
+    CubePreset(
         name="becke-weight",
         aliases=("becke", "becke-overlap-weight", "becke-atomic-weight", "beckewei"),
         description="Single positive isosurface for Multiwfn Becke atomic/overlap weight cubes.",

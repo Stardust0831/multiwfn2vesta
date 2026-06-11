@@ -1,6 +1,64 @@
 # Project Kanban
 
-Updated: 2026-06-11 16:47 CST
+Updated: 2026-06-11 18:12 CST
+
+## Current Request: 2026-06-11 README Refresh And Branch Consolidation Recheck
+
+- [x] Record user request immediately: update README, recheck the unusual
+  branch state, converge back to one maintained branch if needed, and keep
+  git identity as `Stardust0831`.
+- [x] Audit current local/remote branch state and repository-local git
+  identity before staging anything.
+- [x] Refresh README and synchronized docs if the current branch state or CLI
+  workflow needs clearer closeout text.
+- [x] Validate and prepare an explicit closeout plan while preserving local
+  untracked probe files.  Audit result before staging: after
+  `git fetch --prune origin`, local `main`, `origin/main`, and `origin/HEAD`
+  were aligned at `e1b3f866694e89d781f5722f0a4d18ca603c69ff`; remote heads
+  exposed only `refs/heads/main`; repository-local identity was
+  `Stardust0831 <13862180016@163.com>`.  Validation passed before staging:
+  focused `py_compile`, full 311-test no-GUI regression, `grid-run
+  --list-functions`, `cube-preset --list-presets`, `grid-run --help`,
+  `bin/multiwfn2vesta --help`, root docs checksum mirror dry-run, and
+  `git diff --check`; read-only subagent review found one documentation
+  status problem about premature commit/push wording, fixed in this update.
+- [ ] Stage only intended tracked files, commit/push the real update, and
+  verify `main`/`origin/main` alignment.  Final commit hash and post-push
+  branch alignment are reported in the assistant response to avoid a
+  self-referential docs loop.
+
+## Active Goal Continuation: 2026-06-11 User-Function Grid Route
+
+- [x] Record automatic continuation of the long-running objective: survey and
+  implement valuable Multiwfn wavefunction analyses that can be visualized in
+  VESTA, prioritizing analyses ABACUS can feed through LCAO Molden files or
+  direct cube outputs.
+- [x] Recheck current repository state, Multiwfn source evidence, and existing
+  `grid-run`/`cube-preset` coverage before editing.  Source evidence:
+  `settings.ini` defines `iuserfunc`, main menu `1000 -> 2` can set it,
+  `function.f90` evaluates `userfunc(x,y,z)`, and `0123dim.f90` exports
+  `userfunc.cub`.
+- [x] Implement a maintained Multiwfn main-function-5 `ifuncsel=100`
+  user-defined function route using run-local `iuserfunc` settings, with
+  conservative exclusions for special external-grid modes.  Added
+  `grid-run --function user-function --user-function-index IUSERFUNC`,
+  `cube-preset user-function`, recipe fields, CLI help, and batch-mode
+  rejection for non-orbital user-function options.
+- [x] Add focused tests, README/usage/research/skill documentation, and
+  worklog/skill notes.  Focused validation already passed for `py_compile`
+  and 95 cube/grid tests; root docs mirror sync remains for final validation.
+- [x] Validate, review, and prepare branch closeout on `main`;
+  keep `domain.cub` and `domain.pdb` untracked.  Validation passed before
+  review: focused `py_compile`, 95 focused cube/grid tests, full 311-test
+  no-GUI regression, `grid-run --list-functions`, `cube-preset
+  --list-presets`, `grid-run --help`, root docs checksum mirror dry-run, and
+  `git diff --check`.  Pre-commit subagent review found no blocking issue and
+  two low documentation mismatches; both were fixed by clarifying cube-preset
+  versus grid-run aliases and batch-mode rejection docs.  Final validation
+  passed again after the README branch refresh: focused `py_compile`, full
+  311-test no-GUI regression, CLI smoke checks, root docs mirror dry-run, and
+  `git diff --check`.  The final commit/push result is reported by the
+  assistant response after it actually happens.
 
 ## Current Request: 2026-06-11 README Refresh And Main Branch Consolidation
 

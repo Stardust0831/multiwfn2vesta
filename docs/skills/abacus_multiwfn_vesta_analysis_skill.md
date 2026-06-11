@@ -60,6 +60,7 @@ multiwfn2vesta cube-preset electron-delocalization-range EDR.cub cube_products
 multiwfn2vesta cube-preset orbital-overlap-distance EDRDmax.cub cube_products
 multiwfn2vesta cube-preset pair-function fermihole.cub cube_products
 multiwfn2vesta cube-preset source-function srcfunc.cub cube_products
+multiwfn2vesta cube-preset user-function userfunc.cub cube_products
 multiwfn2vesta cube-preset becke-weight Becke.cub cube_products
 multiwfn2vesta cube-preset hirshfeld-weight Hirshfeld.cub cube_products
 multiwfn2vesta cube-preset rdg-scalar RDG.cub cube_products
@@ -246,7 +247,11 @@ through `--pair-function-type`, and patches `paircorrtype` through
 `--pair-correlation-type`; `grid-run --function source-function` requires
 `--reference-point X Y Z`; `--source-function-mode` is patched into a
 run-local settings file copied from the selected Multiwfn `settings.ini` when
-available and passed with `-set`; `grid-run --function becke` requires `--becke-atoms I J`,
+available and passed with `-set`; `grid-run --function user-function`
+requires `--user-function-index IUSERFUNC` and patches `iuserfunc` through
+the same run-local `-set` route; common values include `27` LEA, `-27` LEAE,
+`49` information gain, and `50/51/52` Shannon/Fisher information densities;
+`grid-run --function becke` requires `--becke-atoms I J`,
 with `I J` for Becke overlap weight and `I 0` for Becke atomic weight;
 `grid-run --function hirshfeld` requires
 `--hirshfeld-atoms ATOMS`, for example `2,3,7-10`, and currently selects
@@ -254,7 +259,7 @@ Multiwfn's built-in atomic-density mode.  `infoentro.cub` uses signed
 `local-information-entropy`, `fermihole.cub` uses `pair-function`,
 `EDR.cub` uses `electron-delocalization-range`, `EDRDmax.cub` uses
 `orbital-overlap-distance`, `srcfunc.cub` uses `source-function`,
-`Becke.cub` uses
+`userfunc.cub` uses `user-function`, `Becke.cub` uses
 `becke-weight`, `Hirshfeld.cub` uses `hirshfeld-weight`, `Delta_g.cub`
 uses standalone `promolecular-delta-g`, function `23` generic
 `griddata.cub` uses standalone `hirshfeld-delta-g`, `IRI.cub` uses

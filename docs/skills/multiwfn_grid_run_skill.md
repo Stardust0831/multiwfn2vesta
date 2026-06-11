@@ -87,6 +87,19 @@ multiwfn2vesta grid-run --list-functions
   run-local `multiwfn_grid_settings.ini`, copied from the selected Multiwfn
   `settings.ini` when available and passed with `-set`, so global Multiwfn
   settings are not modified.
+- `user-function`, aliases `userfunc`, `user-defined-function`,
+  `custom-function`, `local-electron-affinity`, `lea-function`,
+  `local-electron-attachment-energy`, `leae-function`,
+  `information-gain-density`, `relative-shannon-entropy`,
+  `shannon-entropy-density`, `fisher-information-density`: function `100`,
+  raw `userfunc.cub`, preset `user-function` with signed positive/negative
+  isosurfaces.  Pass `--user-function-index IUSERFUNC`; examples are `27`
+  for LEA, `-27` for LEAE, `49` for information gain, `50` for Shannon
+  entropy density, and `51/52` for Fisher information densities.  The runner
+  patches `iuserfunc` into a run-local `multiwfn_grid_settings.ini`, copied
+  from the selected Multiwfn `settings.ini` when available and passed with
+  `-set`.  Special external-grid modes `-1`, `-3`, and Shubin `57/58/59`
+  are intentionally rejected by this generic route.
 - `electron-delocalization-range`, aliases `edr`, `edr-r-d`,
   `electron-delocalization-range-function`: function `20`, raw `EDR.cub`,
   preset `electron-delocalization-range` with a single positive isosurface.
@@ -159,8 +172,8 @@ paths.
 
 Default behavior stops after the first failed orbital.  Add `--keep-going` to
 continue later orbitals.  Batch mode rejects `--orbital`, `--commands-file`,
-`--expected-cube`, `--raw-dir`, reference-point/source-function/pair-function
-options, and other function-specific non-orbital options because those
+`--expected-cube`, `--raw-dir`, reference-point/source-function/pair-function/
+user-function options, and other function-specific non-orbital options because those
 options would make the child run ownership ambiguous.
 
 ## Grid Modes
@@ -257,6 +270,7 @@ multiwfn2vesta grid-run input.fch products --function hamiltonian-ked --no-vesta
 multiwfn2vesta grid-run input.fch products --function alie --no-vesta
 multiwfn2vesta grid-run input.fch products --function pair-function --reference-point 0 0 0 --pair-function-type 1 --pair-correlation-type 3
 multiwfn2vesta grid-run input.fch products --function source-function --reference-point 0 0 0 --source-function-mode 1
+multiwfn2vesta grid-run input.fch products --function user-function --user-function-index 27
 multiwfn2vesta grid-run input.fch products --function edr --edr-length 0.85
 multiwfn2vesta grid-run input.fch products --function edrdmax --edr-exponents 12 3.0 1.2
 multiwfn2vesta grid-run input.fch products --function becke --becke-atoms 1 4

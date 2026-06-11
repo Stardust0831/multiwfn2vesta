@@ -146,6 +146,26 @@ GRID_FUNCTIONS: Tuple[GridFunction, ...] = (
     ),
     GridFunction("orbital-density", 44, "orbdens.cub", "orbital-density", ("orbdens", "mo-density"), True),
     GridFunction(
+        "user-function",
+        100,
+        "userfunc.cub",
+        "user-function",
+        (
+            "userfunc",
+            "user-defined-function",
+            "custom-function",
+            "local-electron-affinity",
+            "lea-function",
+            "local-electron-attachment-energy",
+            "leae-function",
+            "information-gain-density",
+            "relative-shannon-entropy",
+            "shannon-entropy-density",
+            "fisher-information-density",
+            "second-fisher-information-density",
+        ),
+    ),
+    GridFunction(
         "becke-weight",
         111,
         "Becke.cub",
@@ -200,6 +220,7 @@ class MultiwfnGridResult(NamedTuple):
     pair_function_type: Optional[int]
     pair_correlation_type: Optional[int]
     source_function_mode: Optional[int]
+    user_function_index: Optional[int]
     settings_override: Optional[Path]
 
 
@@ -370,6 +391,28 @@ def _normalize_pair_correlation_type(value: Optional[int]) -> int:
     return corr_type
 
 
+def _normalize_user_function_index(value: Optional[int]) -> int:
+    if value is None:
+        raise ValueError("Multiwfn function `user-function` requires --user-function-index IUSERFUNC")
+    index_float = float(value)
+    index = int(index_float)
+    if index_float != index:
+        raise ValueError("--user-function-index must be an integer")
+    special = {
+        -3: "external-grid cubic-spline interpolation",
+        -1: "external-grid trilinear interpolation",
+        57: "Shubin g1 term requiring rho_0 grid setup",
+        58: "Shubin g2 term requiring rho_0 grid setup",
+        59: "Shubin g3 term requiring rho_0 grid setup",
+    }
+    if index in special:
+        raise ValueError(
+            f"--user-function-index {index} is a special {special[index]} mode; "
+            "the maintained user-function route only supports direct iuserfunc functions"
+        )
+    return index
+
+
 def _write_run_local_settings(
     path: Path,
     updates: Dict[str, int],
@@ -443,6 +486,19 @@ def _write_pair_function_settings(
             "pairfunctype": _normalize_pair_function_type(pair_function_type),
             "paircorrtype": _normalize_pair_correlation_type(pair_correlation_type),
         },
+        base_settings=base_settings,
+    )
+
+
+def _write_user_function_settings(
+    path: Path,
+    user_function_index: int,
+    *,
+    base_settings: Optional[Path] = None,
+) -> None:
+    _write_run_local_settings(
+        path,
+        {"iuserfunc": _normalize_user_function_index(user_function_index)},
         base_settings=base_settings,
     )
 
@@ -564,6 +620,7 @@ def build_grid_commands(
     pair_function_type: Optional[int] = None,
     pair_correlation_type: Optional[int] = None,
     source_function_mode: Optional[int] = None,
+    user_function_index: Optional[int] = None,
     grid_mode: str = "points",
     grid_points: Sequence[int] = (40, 40, 40),
     grid_spacing: Optional[float] = None,
@@ -597,6 +654,11 @@ def build_grid_commands(
         _normalize_source_function_mode(source_function_mode)
     elif source_function_mode is not None:
         raise ValueError("--source-function-mode is only valid for source-function")
+
+    if function.index == 100:
+        _normalize_user_function_index(user_function_index)
+    elif user_function_index is not None:
+        raise ValueError("--user-function-index is only valid for user-function")
 
     commands.extend(["5", str(function.index)])
     if function.requires_orbital:
@@ -701,6 +763,7 @@ def _write_recipe(
     pair_function_type: Optional[int] = None,
     pair_correlation_type: Optional[int] = None,
     source_function_mode: Optional[int] = None,
+    user_function_index: Optional[int] = None,
     settings_override: Optional[Path] = None,
     error: Optional[str] = None,
 ) -> None:
@@ -727,6 +790,7 @@ def _write_recipe(
         pair_function_type = result.pair_function_type
         pair_correlation_type = result.pair_correlation_type
         source_function_mode = result.source_function_mode
+        user_function_index = result.user_function_index
         settings_override = result.settings_override
 
     lines = [
@@ -763,6 +827,7 @@ def _write_recipe(
             f"- pair_function_type: `{pair_function_type}`",
             f"- pair_correlation_type: `{pair_correlation_type}`",
             f"- source_function_mode: `{source_function_mode}`",
+            f"- user_function_index_iuserfunc: `{user_function_index}`",
             f"- local_settings_file: `{settings_override}`",
             f"- vesta_file: `{vesta_result.vesta_path if vesta_result is not None else None}`",
             f"- vesta_recipe: `{vesta_result.manifest_path if vesta_result is not None else None}`",
@@ -777,6 +842,7 @@ def _write_recipe(
             "- Function `19` source function uses global `refx,refy,refz` and `srcfuncmode`; the maintained stream sets the reference point through main menu `1000 -> 1`, copies the selected Multiwfn `settings.ini` when available, patches `srcfuncmode`, and passes the run-local settings file through `-set`.",
             "- Function `20` EDR(r;d) asks for length scale `d` in Bohr before grid setup and exports `EDR.cub`.",
             "- Function `21` D(r) can use Multiwfn's default EDR exponent set `20, 2.50, 1.50` or a manual count/start/increment set and exports `EDRDmax.cub`.",
+            "- Function `100` evaluates `userfunc(x,y,z)` using `iuserfunc` from settings; the maintained stream copies the selected Multiwfn `settings.ini` when available, patches `iuserfunc`, passes the run-local settings file through `-set`, and exports `userfunc.cub`.  Special external-grid modes `-1`, `-3`, and Shubin `57/58/59` are intentionally excluded from this generic route.",
             "- Function `111` Becke weight asks for atom indices `I,J` before grid setup and exports `Becke.cub`; `J=0` means atomic weight and two positive indices mean overlap weight.",
             "- Function `112` Hirshfeld weight asks for an atom selection string and an atomic-density source before grid setup; the maintained command stream uses built-in atomic densities and exports `Hirshfeld.cub`.",
             "- Function `23` Delta-g (Hirshfeld partition) exports the generic `griddata.cub` in the inspected Multiwfn 2026.6.2 source; this project renames the processed cube to a stable `hirshfeld-delta-g` product.",
@@ -876,6 +942,7 @@ def run_multiwfn_grid(
     pair_function_type: Optional[int] = None,
     pair_correlation_type: Optional[int] = None,
     source_function_mode: Optional[int] = None,
+    user_function_index: Optional[int] = None,
     timeout: Optional[int] = None,
     nthreads: Optional[int] = None,
     stem: Optional[str] = None,
@@ -912,6 +979,7 @@ def run_multiwfn_grid(
     normalized_pair_function_type: Optional[int] = None
     normalized_pair_correlation_type: Optional[int] = None
     normalized_source_function_mode: Optional[int] = None
+    normalized_user_function_index: Optional[int] = None
     if function.index in {17, 19}:
         normalized_reference_point = _normalize_reference_point(reference_point)
         normalized_reference_unit = _normalize_reference_unit(reference_unit)
@@ -936,6 +1004,11 @@ def run_multiwfn_grid(
         normalized_source_function_mode = _normalize_source_function_mode(source_function_mode)
     elif source_function_mode is not None:
         raise ValueError("--source-function-mode is only valid for source-function")
+
+    if function.index == 100:
+        normalized_user_function_index = _normalize_user_function_index(user_function_index)
+    elif user_function_index is not None:
+        raise ValueError("--user-function-index is only valid for user-function")
     candidate = find_multiwfn(multiwfn_path)
     if candidate is None:
         raise FileNotFoundError(
@@ -963,7 +1036,7 @@ def run_multiwfn_grid(
     raw_dir.mkdir(parents=True, exist_ok=True)
 
     settings_override: Optional[Path] = None
-    if function.index in {17, 19}:
+    if function.index in {17, 19, 100}:
         settings_override = raw_dir / "multiwfn_grid_settings.ini"
         if function.index == 17:
             _write_pair_function_settings(
@@ -972,10 +1045,16 @@ def run_multiwfn_grid(
                 normalized_pair_correlation_type if normalized_pair_correlation_type is not None else 3,
                 base_settings=candidate.path.parent / "settings.ini",
             )
-        else:
+        elif function.index == 19:
             _write_source_function_settings(
                 settings_override,
                 normalized_source_function_mode if normalized_source_function_mode is not None else 1,
+                base_settings=candidate.path.parent / "settings.ini",
+            )
+        elif function.index == 100:
+            _write_user_function_settings(
+                settings_override,
+                normalized_user_function_index if normalized_user_function_index is not None else 0,
                 base_settings=candidate.path.parent / "settings.ini",
             )
 
@@ -998,6 +1077,7 @@ def run_multiwfn_grid(
             pair_function_type=normalized_pair_function_type,
             pair_correlation_type=normalized_pair_correlation_type,
             source_function_mode=normalized_source_function_mode,
+            user_function_index=normalized_user_function_index,
             grid_mode=grid_mode,
             grid_points=grid_points,
             grid_spacing=grid_spacing,
@@ -1065,6 +1145,7 @@ def run_multiwfn_grid(
             pair_function_type=normalized_pair_function_type,
             pair_correlation_type=normalized_pair_correlation_type,
             source_function_mode=normalized_source_function_mode,
+            user_function_index=normalized_user_function_index,
             settings_override=settings_override,
             error=error,
         )
@@ -1097,6 +1178,7 @@ def run_multiwfn_grid(
             pair_function_type=normalized_pair_function_type,
             pair_correlation_type=normalized_pair_correlation_type,
             source_function_mode=normalized_source_function_mode,
+            user_function_index=normalized_user_function_index,
             settings_override=settings_override,
         )
     except OSError as exc:
@@ -1124,6 +1206,7 @@ def run_multiwfn_grid(
             pair_function_type=normalized_pair_function_type,
             pair_correlation_type=normalized_pair_correlation_type,
             source_function_mode=normalized_source_function_mode,
+            user_function_index=normalized_user_function_index,
             settings_override=settings_override,
             error=error,
         )
@@ -1156,6 +1239,7 @@ def run_multiwfn_grid(
             pair_function_type=normalized_pair_function_type,
             pair_correlation_type=normalized_pair_correlation_type,
             source_function_mode=normalized_source_function_mode,
+            user_function_index=normalized_user_function_index,
             settings_override=settings_override,
         )
 
@@ -1247,6 +1331,7 @@ def run_multiwfn_grid(
         pair_function_type=normalized_pair_function_type,
         pair_correlation_type=normalized_pair_correlation_type,
         source_function_mode=normalized_source_function_mode,
+        user_function_index=normalized_user_function_index,
         settings_override=settings_override,
     )
     _write_recipe(recipe_path, result=result)
@@ -1509,6 +1594,18 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "Laplacian numerator; mode 2 uses the reference-point numerator."
         ),
     )
+    parser.add_argument(
+        "--user-function-index",
+        type=int,
+        default=None,
+        help=(
+            "Multiwfn iuserfunc value for function 100 user-function, e.g. "
+            "27 for LEA, -27 for LEAE, 49 for information gain, 50 for "
+            "Shannon entropy density, 51/52 for Fisher information density. "
+            "Special external-grid modes -1, -3, and 57/58/59 are not "
+            "handled by this generic route."
+        ),
+    )
     parser.add_argument("--timeout", type=int)
     parser.add_argument("--nthreads", type=int)
     parser.add_argument("--stem")
@@ -1587,13 +1684,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 or args.pair_function_type is not None
                 or args.pair_correlation_type is not None
                 or args.source_function_mode is not None
+                or args.user_function_index is not None
             ):
                 raise ValueError(
                     "--edr-length, --edr-exponents, --becke-atoms, "
                     "--hirshfeld-atoms, --hirshfeld-density-type, "
                     "--reference-point, --reference-unit, "
                     "--pair-function-type, --pair-correlation-type, and "
-                    "--source-function-mode are not "
+                    "--source-function-mode, --user-function-index are not "
                     "supported with --orbitals"
                 )
             result = run_multiwfn_grid_batch(
@@ -1656,6 +1754,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             pair_function_type=args.pair_function_type,
             pair_correlation_type=args.pair_correlation_type,
             source_function_mode=args.source_function_mode,
+            user_function_index=args.user_function_index,
             timeout=args.timeout,
             nthreads=args.nthreads,
             stem=args.stem,

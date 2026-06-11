@@ -111,6 +111,7 @@ class TestCubePreset(unittest.TestCase):
         self.assertIn("electron-delocalization-range", text)
         self.assertIn("orbital-overlap-distance", text)
         self.assertIn("source-function", text)
+        self.assertIn("user-function", text)
         self.assertIn("becke-weight", text)
         self.assertIn("hirshfeld-weight", text)
         self.assertIn("iri", text)
@@ -397,6 +398,28 @@ basin type two
             self.assertIn("reference point", manifest)
             self.assertIn("pairfunctype", manifest)
             self.assertIn("paircorrtype", manifest)
+            self.assertIn("-set", manifest)
+
+    def test_user_function_preset_writes_signed_surfaces(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            cube = self.write_tmp(root, "userfunc.cub", SIGNED_CUBE)
+
+            result = run_preset("userfunc", cube, root / "products")
+
+            text = result.vesta_path.read_text(encoding="utf-8")
+            manifest = result.manifest_path.read_text(encoding="utf-8")
+
+            self.assertRegex(
+                text,
+                r"ISURF\n  1   1\s+0\.05\s+255\s+205\s+80\s+135\s+255\n  1   1\s+-0\.05\s+75\s+135\s+255\s+135\s+255",
+            )
+            self.assertIn("canonical_preset: `user-function`", manifest)
+            self.assertIn("requested_preset: `userfunc`", manifest)
+            self.assertIn("userfunc.cub", manifest)
+            self.assertIn("iuserfunc", manifest)
+            self.assertIn("LEA/LEAE", manifest)
+            self.assertIn("system- and function-specific tuning", manifest)
             self.assertIn("-set", manifest)
 
     def test_electron_delocalization_range_preset_writes_single_positive_surface(self):

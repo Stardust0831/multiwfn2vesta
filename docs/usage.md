@@ -59,7 +59,7 @@ multiwfn2vesta aim-igmh --help
   orbital/signed、spin density、Laplacian、K(r)/G(r)、ABACUS direct
   potential、partial charge、wavefunction norm、ELF/LOL、IRI/RDG/NCI、
   EDR(r;d)、D(r)、IGM/IGMH/aIGM、ESP/MEP、ALIE/LEA/LEAE、
-  standalone vdW potential、vdW map
+  userfunc/iuserfunc、standalone vdW potential、vdW map
 - `surface-extrema`: 把 Multiwfn `surfanalysis.pdb` 的分子表面极值点作为
   atoms-only phase 叠加到已有 `.vesta` 文件中
 - `cube-arith`: 对兼容 cube 做线性组合，用于 density difference、
@@ -227,6 +227,7 @@ multiwfn2vesta cube-preset electron-delocalization-range EDR.cub cube_products
 multiwfn2vesta cube-preset orbital-overlap-distance EDRDmax.cub cube_products
 multiwfn2vesta cube-preset pair-function fermihole.cub cube_products
 multiwfn2vesta cube-preset source-function srcfunc.cub cube_products
+multiwfn2vesta cube-preset user-function userfunc.cub cube_products
 multiwfn2vesta cube-preset becke-weight Becke.cub cube_products
 multiwfn2vesta cube-preset hirshfeld-weight Hirshfeld.cub cube_products
 multiwfn2vesta cube-preset rdg-scalar RDG.cub cube_products
@@ -308,6 +309,17 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
   run-local `multiwfn_grid_settings.ini` 并通过 `-set` 传给 Multiwfn；
   找不到 base settings 时才写最小 settings 文件，不修改全局
   `settings.ini`；默认幅值沿用全局 `sur_value=0.05`
+- `user-function`：正/负等值面，cube-preset 别名包括 `userfunc`、
+  `user-defined-function`、`custom-function`、`lea-function`、
+  `leae-function`、`shannon-entropy-density`、`fisher-information-density`；
+  用于 Multiwfn 函数 `100` 的 `userfunc.cub`；`grid-run` 还接受
+  `local-electron-affinity`、`local-electron-attachment-energy` 等函数别名，
+  且必须传
+  `--user-function-index IUSERFUNC`，例如 `27` 是 LEA，`-27` 是 LEAE，
+  `49` 是 information gain，`50` 是 Shannon entropy density，`51/52`
+  是 Fisher information density；runner 优先复制所选 Multiwfn 同目录的
+  `settings.ini`，只 patch `iuserfunc` 后通过 run-local `-set` 传入；
+  `-1/-3` 外部格点插值和 `57/58/59` Shubin 特殊模式暂不走这个通用路线
 - `becke-weight`：单正值等值面，别名包括 `becke`、
   `becke-overlap-weight`、`becke-atomic-weight`，用于 Multiwfn 函数
   `111` 的 `Becke.cub`；`grid-run` 需要 `--becke-atoms I J`，其中
@@ -587,6 +599,12 @@ multiwfn2vesta grid-run --list-functions
   `--reference-unit angstrom`；`--source-function-mode` 通过本次运行目录里的
   run-local settings 文件和 Multiwfn `-set` 控制 `srcfuncmode`，该文件优先
   从所选 Multiwfn 的 `settings.ini` 复制后 patch
+- `user-function` / `userfunc`：函数 `100`，原始输出 `userfunc.cub`，
+  默认接 `cube-preset user-function`，按正/负等值面显示；必须传
+  `--user-function-index IUSERFUNC`，由 run-local settings 文件和 Multiwfn
+  `-set` 控制 `iuserfunc`，不改全局 `settings.ini`；LEA/LEAE 若要画成
+  density surface 上的染色图，应把 `userfunc.cub` 当 texture，继续使用
+  `cube-preset lea` / `cube-preset leae`
 - `electron-delocalization-range` / `edr`：函数 `20`，原始输出
   `EDR.cub`，默认接 `cube-preset electron-delocalization-range`，按单正值
   等值面显示；必须传 `--edr-length D_BOHR`
@@ -669,6 +687,12 @@ multiwfn2vesta grid-run input.fch grid_products \
   --grid-points 120 120 120
 
 multiwfn2vesta grid-run input.fch grid_products \
+  --function user-function \
+  --user-function-index 27 \
+  --grid-mode points \
+  --grid-points 120 120 120
+
+multiwfn2vesta grid-run input.fch grid_products \
   --function becke \
   --becke-atoms 1 4 \
   --grid-mode points \
@@ -713,8 +737,9 @@ Multiwfn 内部一次性批处理，而是多次隔离的单轨道运行：每�
 
 默认遇到第一个失败轨道就停止，后续轨道在 batch recipe 中标为 `skipped`。
 如果希望继续尝试后续轨道，加 `--keep-going`。批量模式会拒绝 `--orbital`、
-`--commands-file`、`--expected-cube` 和 `--raw-dir`，因为每个子任务需要独立的
-命令流和 raw 目录。
+`--commands-file`、`--expected-cube`、`--raw-dir`、`--surface-cube`、参考点、
+pair/source/user-function 等非轨道专用选项，因为每个子任务需要独立的命令流
+和 raw 目录。
 
 复用已有 cube 的格点，便于后续做双 cube 或多图层叠加：
 

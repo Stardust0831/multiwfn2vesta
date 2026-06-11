@@ -54,6 +54,16 @@ Multiwfn evidence:
   copies the selected Multiwfn `settings.ini` when available, patches
   `srcfuncmode` into a run-local `multiwfn_grid_settings.ini`, and passes it
   with `-set`, leaving global Multiwfn settings untouched.
+- Multiwfn main-function-5 function `100` evaluates `userfunc(x,y,z)` using
+  `iuserfunc` from settings.  The inspected source shows LEA (`iuserfunc=27`),
+  LEAE (`-27`), information gain (`49`), Shannon entropy density (`50`),
+  Fisher information density (`51/52`), and many other selectable functions;
+  `0123dim.f90` exports `userfunc.cub`.  Multiwfn main menu `1000 -> 2` can
+  set `iuserfunc` interactively, but the maintained runner copies the
+  selected Multiwfn `settings.ini` when available, patches `iuserfunc` into a
+  run-local `multiwfn_grid_settings.ini`, and passes it with `-set`.  Special
+  external-grid interpolation modes `-1/-3` and Shubin `57/58/59` are
+  excluded from the generic route.
 - Multiwfn `function.f90` lists function `25` as van der Waals potential,
   evaluates it through `vdwpotfunc`; the source comments identify this as
   the UFF vdW potential in kcal/mol.  `0123dim.f90` exports the standalone
@@ -183,8 +193,8 @@ occupations, and density derivatives from the wavefunction representation.
 | ESP/MEP on density surface | Full wavefunction or ABACUS `out_pot` plus density cube | Strong direct cube route; Molden route for Multiwfn ESP | `density.cub`, `totesp.cub`, `pot_es.cube`, `pots*.cube` | Density isosurface colored by potential texture | `grid-run --function esp --surface-cube density.cub --grid-mode cube --grid-cube density.cub` now generates the ESP texture and writes the mapped-surface VESTA file directly |
 | STM/LDOS | Full wavefunction with GTF information | Good candidate for Gamma LCAO Molden; metals and Fermi-level choices need care | `STM.cub` | Single positive LDOS/current isosurface or slices | `stm-run` now automates Multiwfn `300 -> 4`, switches to constant-current mode, exports `STM.cub`, and calls `cube-preset stm` |
 | Molecular surface mapped properties | Full wavefunction or cube pair | Feasible through Molden; ABACUS can provide density/potential cubes | `surf.cub`, `mapfunc.cub`, `density.cub`, `avglocion.cub`, `surfanalysis.pdb` | Surface cube plus texture; extrema as atoms-only overlay phase | `cube-preset surface-map` covers surface+texture display using `molsurfmap.vmd` defaults; `--surfanalysis-pdb` and `surface-extrema` overlay surface extrema |
-| ALIE / LEA / LEAE | Full wavefunction, occupied/virtual orbitals | Feasible only if ABACUS Molden orbitals/energies are adequate; virtual levels in metals risky | `avglocion.cub`, `userfunc.cub`, `surfanalysis.pdb` | Colored density surface plus extrema points | `grid-run --function alie --surface-cube density.cub` now generates ALIE texture maps directly; `cube-preset alie/lea/leae` remains the lower-level display layer and auto-selects extrema from `surfanalysis.pdb` |
-| Information-theory density functions | Full wavefunction Molden/FCH/WFN; local information entropy is a normal main-function-5 grid function | Feasible for Gamma LCAO Molden; interpretation depends on the NAO2GTO density quality | `infoentro.cub`, possible future user-function Shannon/Fisher cubes | Signed scalar isosurfaces or slices | `grid-run --function local-information-entropy` now exports Multiwfn function `11` `infoentro.cub`; `cube-preset local-information-entropy` provides a signed display default |
+| ALIE / LEA / LEAE | Full wavefunction, occupied/virtual orbitals | Feasible only if ABACUS Molden orbitals/energies are adequate; virtual levels in metals risky | `avglocion.cub`, `userfunc.cub`, `surfanalysis.pdb` | Colored density surface plus extrema points | `grid-run --function alie --surface-cube density.cub` now generates ALIE texture maps directly; `grid-run --function user-function --user-function-index 27|-27` exports LEA/LEAE `userfunc.cub`; `cube-preset alie/lea/leae` remains the lower-level density-surface display layer and auto-selects extrema from `surfanalysis.pdb` |
+| Information-theory density functions | Full wavefunction Molden/FCH/WFN; local information entropy is a normal main-function-5 grid function | Feasible for Gamma LCAO Molden; interpretation depends on the NAO2GTO density quality | `infoentro.cub`, `userfunc.cub` | Signed scalar isosurfaces or slices | `grid-run --function local-information-entropy` now exports Multiwfn function `11` `infoentro.cub`; `grid-run --function user-function --user-function-index 49/50/51/52` exports information-gain/Shannon/Fisher `userfunc.cub`; `cube-preset local-information-entropy` and `cube-preset user-function` provide signed display defaults |
 | Pair/correlation function | Full wavefunction Molden/FCH/WFN plus a reference point | Feasible for Gamma LCAO Molden; pair density/correlation interpretation depends on orbitals and occupations | `fermihole.cub` | Signed scalar isosurfaces by default; pair-density modes can use a single positive preset | `grid-run --function pair-function --reference-point X Y Z` now exports Multiwfn function `17`; `--pair-function-type` patches `pairfunctype`, `--pair-correlation-type` patches `paircorrtype`, the runner copies the selected Multiwfn `settings.ini` when available, and `cube-preset pair-function` provides signed `+/-0.05` display defaults |
 | Source function | Full wavefunction Molden/FCH/WFN plus a reference point | Feasible for Gamma LCAO Molden; reference-point choice controls the chemical meaning | `srcfunc.cub` | Signed scalar isosurfaces or slices | `grid-run --function source-function --reference-point X Y Z` now exports Multiwfn function `19` `srcfunc.cub`; `--reference-unit angstrom` supports Angstrom reference coordinates, `--source-function-mode` is patched into a run-local settings file copied from the selected Multiwfn `settings.ini` when available, and `cube-preset source-function` provides signed `+/-0.05` display defaults |
 | Electron delocalization / orbital overlap distance | Full wavefunction Molden/FCH/WFN | Feasible for Gamma LCAO Molden; parameter choice needs chemical interpretation | `EDR.cub`, `EDRDmax.cub` | Single positive scalar isosurfaces or slices | `grid-run --function edr --edr-length D_BOHR` now exports function `20` `EDR.cub`; `grid-run --function edrdmax` exports function `21` `EDRDmax.cub`, using Multiwfn's default exponent set unless `--edr-exponents COUNT START INCREMENT` is supplied; `cube-preset electron-delocalization-range` and `cube-preset orbital-overlap-distance` provide display defaults |
@@ -411,6 +421,15 @@ Main gaps:
   available, patches those two settings, and passes the run-local settings
   file with `-set`.  More specialized pair-density display defaults remain
   a later tuning layer.
+- User-defined function now has `cube-preset user-function` and
+  `grid-run --function user-function --user-function-index IUSERFUNC`; local
+  Multiwfn source shows function `100` exports `userfunc.cub` and evaluates
+  `userfunc(x,y,z)` according to `iuserfunc`.  The maintained stream copies
+  the selected Multiwfn `settings.ini` when available, patches `iuserfunc`,
+  and passes the run-local settings file with `-set`, leaving global settings
+  untouched.  Implemented aliases cover LEA/LEAE and information-theory
+  density routes; external-grid interpolation `-1/-3` and Shubin `57/58/59`
+  remain deferred special modes.
 - Promolecular Delta-g now has a distinct `cube-preset
   promolecular-delta-g` route and `grid-run --function delta-g` maps to
   Multiwfn function `22` `Delta_g.cub`.  This is a single-cube promolecular

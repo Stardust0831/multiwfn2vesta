@@ -163,6 +163,7 @@ multiwfn2vesta cube-preset electron-delocalization-range EDR.cub cube_products
 multiwfn2vesta cube-preset orbital-overlap-distance EDRDmax.cub cube_products
 multiwfn2vesta cube-preset pair-function fermihole.cub cube_products
 multiwfn2vesta cube-preset source-function srcfunc.cub cube_products
+multiwfn2vesta cube-preset user-function userfunc.cub cube_products
 multiwfn2vesta cube-preset becke-weight Becke.cub cube_products
 multiwfn2vesta cube-preset hirshfeld-weight Hirshfeld.cub cube_products
 multiwfn2vesta cube-preset rdg-scalar RDG.cub cube_products
@@ -421,8 +422,9 @@ multiwfn2vesta grid-run --list-functions
 Common functions include `density`, `gradient`, `orbital --orbital h`,
 `orbital-density`, `spin-density`, `laplacian`, `hamiltonian-ked`,
 `lagrangian-ked`, `local-information-entropy`, `elf`, `lol`, `esp`, `alie`,
-`pair-function`, `source-function`, `edr`, `edrdmax`, `becke`, `hirshfeld`,
-`rdg`, `promolecular-rdg`, `delta-g`, `hirshfeld-delta-g`, `iri`, `signlambda2rho`,
+`pair-function`, `source-function`, `user-function`, `edr`, `edrdmax`,
+`becke`, `hirshfeld`, `rdg`, `promolecular-rdg`, `delta-g`,
+`hirshfeld-delta-g`, `iri`, `signlambda2rho`,
 `promolecular-signlambda2rho`, and `vdw-potential`.
 The scalar display defaults are
 function-specific where possible: `gradient.cub` uses `gradient-norm`,
@@ -431,9 +433,10 @@ function-specific where possible: `gradient.cub` uses `gradient-norm`,
 `hamiltonian-ked`, `G(r).cub` uses `lagrangian-ked`, `infoentro.cub` uses
 `local-information-entropy`, `EDR.cub` uses `electron-delocalization-range`,
 `EDRDmax.cub` uses `orbital-overlap-distance`, `fermihole.cub` uses
-`pair-function`, `srcfunc.cub` uses `source-function`, `Becke.cub` uses
-`becke-weight`, `Hirshfeld.cub` uses `hirshfeld-weight`, `RDG.cub` uses
-`rdg-scalar`, `RDGprodens.cub` uses `promolecular-rdg`, `Delta_g.cub` uses
+`pair-function`, `srcfunc.cub` uses `source-function`, `userfunc.cub` uses
+`user-function`, `Becke.cub` uses `becke-weight`, `Hirshfeld.cub` uses
+`hirshfeld-weight`, `RDG.cub` uses `rdg-scalar`, `RDGprodens.cub` uses
+`promolecular-rdg`, `Delta_g.cub` uses
 `promolecular-delta-g`, Multiwfn function `23` generic `griddata.cub` uses
 `hirshfeld-delta-g`, `IRI.cub` uses `iri-scalar`, and `vdWpot.cub` uses
 `vdw-potential` with `+/-1.0`
@@ -446,6 +449,11 @@ through a run-local settings file copied from the selected Multiwfn
 `--source-function-mode` is patched into a run-local settings file copied
 from the selected Multiwfn `settings.ini` when available and passed with
 `-set`.
+`grid-run --function user-function` requires `--user-function-index
+IUSERFUNC`; the runner patches `iuserfunc` into a run-local settings file
+copied from the selected Multiwfn `settings.ini` when available and passed
+with `-set`.  Typical values include `27` LEA, `-27` LEAE, `49`
+information gain, and `50/51/52` Shannon/Fisher information densities.
 `grid-run --function becke` requires
 `--becke-atoms I J`; `I J` requests Becke overlap weight and `I 0` requests
 Becke atomic weight.  `grid-run --function hirshfeld` requires

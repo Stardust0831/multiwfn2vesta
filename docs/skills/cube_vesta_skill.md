@@ -54,6 +54,7 @@ multiwfn2vesta cube-preset electron-delocalization-range EDR.cub cube_products
 multiwfn2vesta cube-preset orbital-overlap-distance EDRDmax.cub cube_products
 multiwfn2vesta cube-preset pair-function fermihole.cub cube_products
 multiwfn2vesta cube-preset source-function srcfunc.cub cube_products
+multiwfn2vesta cube-preset user-function userfunc.cub cube_products
 multiwfn2vesta cube-preset becke-weight Becke.cub cube_products
 multiwfn2vesta cube-preset hirshfeld-weight Hirshfeld.cub cube_products
 multiwfn2vesta cube-preset rdg-scalar RDG.cub cube_products
@@ -253,6 +254,18 @@ passes it back through `cube-preset`.
   Angstrom input coordinates, and `--source-function-mode` is patched into a
   run-local settings file copied from the selected Multiwfn `settings.ini`
   when available and passed with `-set`.
+- `user-function` aliases: `userfunc`, `user-defined-function`,
+  `custom-function`, `lea-function`, `leae-function`,
+  `information-gain-density`, `relative-shannon-entropy`,
+  `shannon-entropy-density`, `fisher-information-density`;
+  positive/negative surfaces for Multiwfn function `100` `userfunc.cub`,
+  default magnitude `0.05`.  When generating the cube with `grid-run`, pass
+  `--user-function-index IUSERFUNC`; `27` is LEA, `-27` is LEAE, `49` is
+  information gain, `50` is Shannon entropy density, and `51/52` are Fisher
+  information densities.  The index is patched into a run-local settings file
+  copied from the selected Multiwfn `settings.ini` when available and passed
+  with `-set`.  For LEA/LEAE density-surface maps, use the separate
+  `lea`/`leae` texture presets with `density.cub` plus `userfunc.cub`.
 - `becke-weight` aliases: `becke`, `becke-overlap-weight`,
   `becke-atomic-weight`, `beckewei`; single positive surface for Multiwfn
   function `111` `Becke.cub`, default isosurface `0.5`.  When generating the
@@ -339,9 +352,10 @@ passes it back through `cube-preset`.
   Multiwfn main-function-5 single-cube generation now exists as
   `multiwfn2vesta grid-run` for density, orbital/MO, Laplacian, K(r)/G(r),
   ELF, LOL, ESP/MEP, ALIE, RDG/IRI-like, promolecular RDG/sign(lambda2)rho,
-  and related scalar cubes.  IRI/RDG mapped surfaces with two coupled cubes
-  have a separate maintained runner as `multiwfn2vesta iri-run`; this cube
-  workflow remains the lower-level VESTA writer both runners call.
+  user-function, and related scalar cubes.  IRI/RDG mapped surfaces with two
+  coupled cubes have a separate maintained runner as `multiwfn2vesta
+  iri-run`; this cube workflow remains the lower-level VESTA writer both
+  runners call.
 - Surface-band sampling uses grid-point values, not interpolation exactly on
   the triangulated VESTA isosurface.
 - AIM/BCP pseudo-site overlays remain in the AIM/AIM+IGMH workflows, not this
