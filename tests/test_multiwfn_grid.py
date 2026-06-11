@@ -235,6 +235,8 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertIn("beta-density", text)
         self.assertIn("default iuserfunc=1", text)
         self.assertIn("default iuserfunc=2", text)
+        self.assertIn("fractional-occupation-density", text)
+        self.assertIn("default iuserfunc=90", text)
         self.assertIn("default iuserfunc=20", text)
         self.assertIn("default iuserfunc=27", text)
         self.assertIn("default iuserfunc=-27", text)
@@ -304,6 +306,10 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertEqual(resolve_grid_function("beta-density").preset, "density")
         self.assertEqual(resolve_grid_function("rho-beta").default_user_function_index, 2)
         self.assertEqual(resolve_grid_function("beta-rho").mapped_preset, "surface-map")
+        self.assertEqual(resolve_grid_function("fractional-occupation-density").preset, "density")
+        self.assertEqual(resolve_grid_function("fod").default_user_function_index, 90)
+        self.assertEqual(resolve_grid_function("fractional-occupancy-density").default_user_function_index, 90)
+        self.assertEqual(resolve_grid_function("fod-density").mapped_preset, "surface-map")
         self.assertEqual(resolve_grid_function("local-electron-affinity").preset, "user-function")
         self.assertEqual(resolve_grid_function("local-electron-affinity").default_user_function_index, 27)
         self.assertEqual(resolve_grid_function("local-electron-affinity").mapped_preset, "lea")
@@ -507,6 +513,10 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         )
         self.assertEqual(
             build_grid_commands(resolve_grid_function("alpha-density"), grid_mode="low"),
+            ["5", "100", "1", "2", "0", "q"],
+        )
+        self.assertEqual(
+            build_grid_commands(resolve_grid_function("fod"), grid_mode="low"),
             ["5", "100", "1", "2", "0", "q"],
         )
         self.assertEqual(
@@ -1225,6 +1235,90 @@ class TestMultiwfnGridRunner(unittest.TestCase):
             manifest = result.vesta_result.manifest_path.read_text(encoding="utf-8")
             self.assertIn("canonical_preset: `surface-map`", manifest)
             self.assertIn("effective_tex_physical: `0.0` to `0.01`", manifest)
+
+    def test_run_fractional_occupation_density_uses_named_iuserfunc(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            wavefunction = root / "h2o.fch"
+            wavefunction.write_text("wavefunction", encoding="utf-8")
+            candidate = self.make_candidate(root)
+            (candidate.path.parent / "settings.ini").write_text("iuserfunc= 0\n", encoding="utf-8")
+
+            def fake_run(command, **kwargs):
+                cwd = Path(kwargs["cwd"])
+                (cwd / "userfunc.cub").write_text(USER_FUNCTION_CUBE, encoding="utf-8")
+                return subprocess.CompletedProcess(command, 0, stdout="ok", stderr="")
+
+            with patch("multiwfn2vesta.multiwfn_grid.find_multiwfn", return_value=candidate):
+                with patch("multiwfn2vesta.multiwfn_grid.subprocess.run", side_effect=fake_run):
+                    result = run_multiwfn_grid(
+                        wavefunction,
+                        root / "products",
+                        function_name="fod",
+                        stem="case",
+                        grid_mode="low",
+                    )
+
+            self.assertTrue(result.success)
+            self.assertEqual(result.user_function_index, 90)
+            self.assertIn("iuserfunc= 90", result.settings_override.read_text(encoding="utf-8"))
+            self.assertEqual(result.raw_cube.name, "userfunc.cub")
+            self.assertEqual(result.cube.name, "case_fractional-occupation-density.cub")
+            self.assertIsNotNone(result.vesta_result)
+            self.assertEqual(
+                result.vesta_result.vesta_path.name,
+                "case_fractional-occupation-density_density_cube.vesta",
+            )
+            recipe = result.recipe_path.read_text(encoding="utf-8")
+            self.assertIn("function_name: `fractional-occupation-density`", recipe)
+            self.assertIn("user_function_index_iuserfunc: `90`", recipe)
+            self.assertIn("auto_vesta_preset: `density`", recipe)
+            manifest = result.vesta_result.manifest_path.read_text(encoding="utf-8")
+            self.assertIn("canonical_preset: `density`", manifest)
+
+    def test_run_fractional_occupation_density_surface_map_passes_texture_scale(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            wavefunction = root / "h2o.fch"
+            wavefunction.write_text("wavefunction", encoding="utf-8")
+            surface_cube = root / "density.cub"
+            surface_cube.write_text(DENSITY_CUBE, encoding="utf-8")
+            candidate = self.make_candidate(root)
+            (candidate.path.parent / "settings.ini").write_text("iuserfunc= 0\n", encoding="utf-8")
+
+            def fake_run(command, **kwargs):
+                cwd = Path(kwargs["cwd"])
+                (cwd / "userfunc.cub").write_text(USER_FUNCTION_CUBE, encoding="utf-8")
+                return subprocess.CompletedProcess(command, 0, stdout="ok", stderr="")
+
+            with patch("multiwfn2vesta.multiwfn_grid.find_multiwfn", return_value=candidate):
+                with patch("multiwfn2vesta.multiwfn_grid.subprocess.run", side_effect=fake_run):
+                    result = run_multiwfn_grid(
+                        wavefunction,
+                        root / "products",
+                        function_name="fractional-occupancy-density",
+                        surface_cube=surface_cube,
+                        tex_physical=(0.0, 0.005),
+                        tex_range_source="surface-band",
+                        stem="case",
+                        grid_mode="low",
+                    )
+
+            self.assertTrue(result.success)
+            self.assertEqual(result.user_function_index, 90)
+            self.assertEqual(result.cube.name, "case_fractional-occupation-density.cub")
+            self.assertEqual(result.mapped_preset, "surface-map")
+            self.assertEqual(result.tex_physical, (0.0, 0.005))
+            self.assertEqual(result.tex_range_source, "surface-band")
+            self.assertIsNotNone(result.vesta_result)
+            recipe = result.recipe_path.read_text(encoding="utf-8")
+            self.assertIn("function_name: `fractional-occupation-density`", recipe)
+            self.assertIn("user_function_index_iuserfunc: `90`", recipe)
+            self.assertIn("auto_vesta_preset: `density`", recipe)
+            self.assertIn("mapped_vesta_preset: `surface-map`", recipe)
+            manifest = result.vesta_result.manifest_path.read_text(encoding="utf-8")
+            self.assertIn("canonical_preset: `surface-map`", manifest)
+            self.assertIn("effective_tex_physical: `0.0` to `0.005`", manifest)
 
     def test_run_orbital_weighted_dual_descriptor_surface_map_passes_texture_scale(self):
         with tempfile.TemporaryDirectory() as tmp:

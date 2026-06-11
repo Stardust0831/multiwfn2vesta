@@ -122,13 +122,15 @@ multiwfn2vesta grid-run --list-functions
   `orbital-weighted-fukui-minus` / `ow-fminus` = `96`,
   `orbital-weighted-fukui-zero` / `ow-f0` = `97`,
   `orbital-weighted-dual-descriptor` / `ow-dual` / `ow-dd` = `98`,
+  `fractional-occupation-density` / `fod` /
+  `fractional-occupancy-density` = `90`,
   `information-gain-density` / `relative-shannon-entropy` = `49`,
   `shannon-entropy-density` = `50`, `fisher-information-density` = `51`,
   and `second-fisher-information-density` = `52`.  LEA/LEAE named routes
   also auto-select mapped presets `lea`/`leae` when `--surface-cube` is
-  supplied; alpha/beta density, local Mulliken electronegativity, local
+  supplied; alpha/beta density, FOD, local Mulliken electronegativity, local
   hardness, and the orbital-weighted Fukui/dual routes fall back to the
-  generic `surface-map` mapped preset.  Alpha/beta density and
+  generic `surface-map` mapped preset.  Alpha/beta density, FOD, and
   Fukui+/Fukui-/Fukui0 standalone products use `density`, while
   orbital-weighted dual descriptor uses `signed`.  The 95..98 routes are
   single-wavefunction approximations and should not be confused with
@@ -195,6 +197,17 @@ multiwfn2vesta grid-run --list-functions
   cases need extra interpretation.  Multiwfn `fspindens` does not include all
   EDF density contributions handled by `fdens`, so special EDF/ECP files may
   not satisfy alpha plus beta equals total density exactly.
+- `fractional-occupation-density`, aliases `fod`,
+  `fractional-occupancy-density`, `fod-density`: function `100`, raw
+  `userfunc.cub`, default `iuserfunc=90`, standalone preset `density`.
+  Multiwfn evaluates the fractional occupation number weighted electron
+  density from MO occupations and orbital amplitudes.  It is most useful when
+  fractional occupations are chemically meaningful or intentionally used; with
+  integer occupations it is usually near zero.  ABACUS Molden use requires
+  checking that occupations were exported correctly, especially for smearing,
+  multi-k, SOC/noncollinear, or metallic cases.  The shared `density` preset
+  default isosurface `0.01` may be too high for FOD; try `--isosurface 0.001`
+  or tune per system.
 - `orbital-weighted-fukui-plus`, `orbital-weighted-fukui-minus`, and
   `orbital-weighted-fukui-zero`: function `100`, raw `userfunc.cub`, default
   `iuserfunc=95` / `96` / `97`, standalone preset `density`.  Use these when

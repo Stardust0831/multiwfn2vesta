@@ -47,8 +47,9 @@ point.
   and DORI+sign(lambda2)rho mapped surfaces, and standalone vdW potential
   cubes with run-local probe-atom control, local Mulliken electronegativity
   and local hardness function-100 routes, spin-channel alpha/beta density
-  function-100 routes, ABACUS direct cube presets for potential, partial-charge,
-  and wavefunction-norm cubes,
+  function-100 routes, fractional occupation density function-100 route,
+  ABACUS direct cube presets for potential, partial-charge, and
+  wavefunction-norm cubes,
   charged-state `fukui-run` orchestration, orbital-weighted Fukui/dual
   function-100 routes, aIGM/amIGM trajectory-average
   weak-interaction generation, cube/grid domain extraction, basin cube VESTA
@@ -126,6 +127,9 @@ then delete the temporary branch.
   function `100` `iuserfunc=1/2`, useful when an open-shell or spin-polarized
   wavefunction should be inspected by channel rather than only as total
   density or alpha-minus-beta spin density.
+- Run fractional occupation number weighted electron density (FOD) cubes
+  through Multiwfn function `100` `iuserfunc=90`, useful for visualizing
+  density contributions associated with fractional orbital occupations.
 - Run high-level Fukui/dual-descriptor maps from neutral, anion, and cation
   wavefunction files by generating Multiwfn density cubes on a shared neutral
   grid and then delegating the map arithmetic to `cube-arith`.
@@ -154,7 +158,8 @@ then delete the temporary branch.
   `pairfunctype`/`paircorrtype`, source function with run-local
   `srcfuncmode`, user-defined `iuserfunc` cubes such as DORI, LEA/LEAE, and
   information-theory densities, spin-resolved alpha/beta density, Becke
-  atomic/overlap weight, Hirshfeld weight, promolecular Delta-g,
+  atomic/overlap weight, Hirshfeld weight, fractional occupation density,
+  promolecular Delta-g,
   Hirshfeld-partition Delta-g, vdW potential with
   run-local `ivdwprobe` probe selection, and related scalar cubes, export
   multiple orbitals through
@@ -266,6 +271,8 @@ multiwfn2vesta grid-run input.molden grid_products \
   --function local-electron-affinity
 multiwfn2vesta grid-run input.molden grid_products \
   --function alpha-density
+multiwfn2vesta grid-run input.molden grid_products \
+  --function fod
 multiwfn2vesta grid-run input.molden grid_products \
   --function orbital-weighted-dual-descriptor
 multiwfn2vesta grid-run input.molden grid_products \
@@ -478,6 +485,7 @@ IUSERFUNC`.  Source-backed named routes now imply common `iuserfunc` values:
 `local-mulliken-electronegativity` sets `28`, `local-hardness` sets `29`,
 `orbital-weighted-fukui-plus` / `minus` / `zero` set `95` / `96` / `97`,
 `orbital-weighted-dual-descriptor` sets `98`,
+`fractional-occupation-density` sets `90`,
 `information-gain-density` sets `49`, `shannon-entropy-density` sets `50`,
 and `fisher-information-density` / `second-fisher-information-density` set
 `51` / `52`.  The runner copies the selected Multiwfn `settings.ini` when
@@ -490,10 +498,10 @@ density.cub` is supplied.  Local Mulliken electronegativity and local
 hardness use the generic `surface-map` mapped preset when `--surface-cube`
 is supplied; pass `--tex-physical`, `--tex-range-source surface-band`,
 `--surface-band`, or `--tex-percent` to tune the texture scale from
-`grid-run`.  Alpha/beta density and orbital-weighted Fukui+/Fukui-/Fukui0
-use the `density` preset, the orbital-weighted dual descriptor uses the
-`signed` preset, and these routes can use the generic `surface-map` mapped
-preset with `--surface-cube`;
+`grid-run`.  Alpha/beta density, FOD, and orbital-weighted
+Fukui+/Fukui-/Fukui0 use the `density` preset, the orbital-weighted dual
+descriptor uses the `signed` preset, and these routes can use the generic
+`surface-map` mapped preset with `--surface-cube`;
 explicit `--tex-physical MIN MAX` is recommended for mapped dual-descriptor
 figures.  These orbital-weighted routes are single-wavefunction approximations,
 not replacements for `fukui-run` charged-state density differences.  Use them
@@ -733,9 +741,10 @@ Common functions:
   `local-mulliken-electronegativity`, `local-hardness`,
   `orbital-weighted-fukui-plus`, `orbital-weighted-fukui-minus`,
   `orbital-weighted-fukui-zero`, `orbital-weighted-dual-descriptor`,
+  `fractional-occupation-density`,
   `information-gain-density`, `shannon-entropy-density`,
   `fisher-information-density`, and `second-fisher-information-density`
-  automatically patch `iuserfunc=1/2/20/27/-27/28/29/95/96/97/98/49/50/51/52`
+  automatically patch `iuserfunc=1/2/20/27/-27/28/29/90/95/96/97/98/49/50/51/52`
   into a run-local `-set` settings file, leaving global Multiwfn settings
   untouched.
 - `alpha-density` and `beta-density`: function `100`, raw `userfunc.cub`,
@@ -748,6 +757,17 @@ Common functions:
   separate validation.  Multiwfn's `fspindens` path does not include every EDF
   density contribution handled by `fdens`, so alpha plus beta may not exactly
   equal total density for special EDF/ECP inputs.
+- `fractional-occupation-density` / `fod` / `fractional-occupancy-density`:
+  function `100`, raw `userfunc.cub`, run-local `iuserfunc=90`, default
+  `density` preset.
+  Multiwfn evaluates the fractional occupation number weighted electron
+  density from orbital occupations and orbital amplitudes.  It is usually near
+  zero for integer-occupation single-reference wavefunctions and is most useful
+  when fractional occupations are physically meaningful or intentionally used;
+  ABACUS Molden occupation export and metallic smearing should be checked
+  before chemical interpretation.  The shared `density` preset default
+  isosurface `0.01` may be too high for FOD; try `--isosurface 0.001` or tune
+  the level per system.
 - `electron-delocalization-range` / `edr`: function `20`, raw `EDR.cub`,
   preset `electron-delocalization-range`, single positive surface by default.
   Pass `--edr-length D_BOHR`; Multiwfn asks for this EDR length scale before

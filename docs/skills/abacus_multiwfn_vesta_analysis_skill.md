@@ -236,7 +236,7 @@ Useful `grid-run` functions for ABACUS-compatible Molden files include
 `lagrangian-ked`, `elf`, `lol`, `local-information-entropy`, `esp`, `rdg`,
 `promolecular-rdg`,
 `pair-function`, `source-function`, `edr`, `edrdmax`, `becke`, `hirshfeld`,
-`delta-g`, `hirshfeld-delta-g`, `iri`, `dori`,
+`delta-g`, `hirshfeld-delta-g`, `iri`, `dori`, `fod`,
 `orbital-weighted-fukui-plus`, `orbital-weighted-fukui-minus`,
 `orbital-weighted-fukui-zero`, `orbital-weighted-dual-descriptor`,
 `vdw-potential`, and
@@ -267,6 +267,12 @@ write `userfunc.cub` through the `density` display preset.  This is mainly
 useful for validated ABACUS `nspin=2` LCAO Molden exports; closed-shell inputs
 normally give half of total density in each channel, and SOC/noncollinear,
 multi-k, or metallic fractional-occupation cases require separate checks.
+For FOD, `grid-run --function fod` patches function-100 `iuserfunc=90` and
+uses the `density` display preset.  This is only chemically useful when
+fractional occupations are meaningful and correctly present in the ABACUS
+Molden file; ordinary integer-occupation calculations usually give little or
+no FOD.  The shared `density` preset default isosurface `0.01` may be too high
+for FOD; try `--isosurface 0.001` or tune per system.
 For orbital-weighted Fukui and dual descriptor, use the function-100 named
 routes (`iuserfunc=95/96/97/98`) only when the ABACUS Molden file contains
 complete occupied/virtual orbital information and the single-determinant

@@ -145,6 +145,11 @@ If Multiwfn function `100` already exported alpha or beta density
 `userfunc.cub` (`iuserfunc=1/2`), display it with `cube-preset density` or
 regenerate it through `grid-run --function alpha-density` /
 `grid-run --function beta-density`.
+If function `100` exported FOD `userfunc.cub` (`iuserfunc=90`), display it
+with `cube-preset density` or regenerate it through
+`grid-run --function fractional-occupation-density`.  The density preset
+default `0.01` isosurface may hide weak FOD fields; try `--isosurface 0.001`
+or tune the value per system.
 If Multiwfn function `100` already exported orbital-weighted Fukui
 `userfunc.cub` (`iuserfunc=95/96/97`), display it with `cube-preset density`
 or regenerate it through `grid-run --function orbital-weighted-fukui-*`.

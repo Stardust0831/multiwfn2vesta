@@ -1,5 +1,39 @@
 # Worklog
 
+## 2026-06-11: fractional occupation density FOD route
+
+- Continued the ABACUS/Multiwfn/VESTA analysis survey after the spin-channel
+  density closeout by selecting a single-cube function-100 route for
+  fractional occupation number weighted electron density.
+- Rechecked local Multiwfn 2026.6.2 source evidence.  `function.f90` maps
+  `iuserfunc=90` to `FODfunc(x,y,z)`, which sums orbital-amplitude squares
+  weighted by fractional MO occupations for closed-shell and open-shell
+  wavefunction types; `0123dim.f90` exports function `100` as `userfunc.cub`.
+- Added named `grid-run --function fractional-occupation-density` with aliases
+  `fod`, `fractional-occupation-number-weighted-density`,
+  `fractional-occupation-weighted-density`, `fractional-occupancy-density`,
+  and `fod-density`.  The route patches only `iuserfunc=90` through a
+  run-local settings file passed with Multiwfn `-set`, uses `density` for
+  standalone products, and uses `surface-map` with `--surface-cube`.
+- Documented the caveats: ordinary integer-occupation single-reference inputs
+  usually give little or no FOD; ABACUS Molden occupation export must be
+  checked; metallic smearing, multi-k, SOC/noncollinear, and other fractional
+  occupation cases need chemical interpretation before the VESTA surface is
+  used as evidence.  Because FOD can be much weaker than ordinary density, the
+  shared `density` preset default isosurface `0.01` may need lowering, for
+  example `--isosurface 0.001`.
+- Focused resolver, command-stream, standalone fake Multiwfn run, and
+  mapped-surface fake Multiwfn run tests were added.  Validation passed in
+  this working copy: `py_compile`, 74 focused `tests.test_multiwfn_grid`
+  tests, 127 focused `tests.test_multiwfn_grid tests.test_cli` tests, 338
+  full no-GUI tests, and CLI smokes for top-level help, `grid-run
+  --list-functions`, `grid-run --help`, and `cube-preset --list-presets`;
+  `git diff --check` also passed.  The project docs were mirrored to the
+  workspace root docs directory and checksum dry-run was empty.  After
+  `git fetch --prune origin`, only `main`, `origin/main`, and
+  `origin/HEAD -> origin/main` are present, so no real branch merge-back is
+  needed.
+
 ## 2026-06-11: spin-channel alpha/beta density routes
 
 - Continued the ABACUS/Multiwfn/VESTA analysis survey after the

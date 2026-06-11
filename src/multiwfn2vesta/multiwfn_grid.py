@@ -230,6 +230,21 @@ GRID_FUNCTIONS: Tuple[GridFunction, ...] = (
         default_user_function_index=2,
     ),
     GridFunction(
+        "fractional-occupation-density",
+        100,
+        "userfunc.cub",
+        "density",
+        (
+            "fod",
+            "fractional-occupation-number-weighted-density",
+            "fractional-occupation-weighted-density",
+            "fractional-occupancy-density",
+            "fod-density",
+        ),
+        mapped_preset="surface-map",
+        default_user_function_index=90,
+    ),
+    GridFunction(
         "local-electron-affinity",
         100,
         "userfunc.cub",
@@ -1993,7 +2008,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         help=(
             "Multiwfn iuserfunc value for generic function 100 user-function, e.g. "
             "1/2 for alpha/beta density, 20 for DORI, 27 for LEA, -27 for LEAE, "
-            "49 for information gain, "
+            "49 for information gain, 90 for fractional occupation density, "
             "50 for Shannon entropy density, 51/52 for Fisher information "
             "density, 28 for local Mulliken electronegativity, and 29 for "
             "local hardness, and 95/96/97/98 for orbital-weighted "

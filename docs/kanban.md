@@ -1,6 +1,58 @@
 # Project Kanban
 
-Updated: 2026-06-11 21:28 CST
+Updated: 2026-06-11 22:10 CST
+
+## Current Request: 2026-06-11 README Refresh And One-Branch Closeout For FOD Route
+
+- [x] Record user request immediately: update README, inspect the unusual
+  branch state, converge back to one maintained branch if needed, and keep
+  repository-local Git identity as `Stardust0831`.
+- [x] Confirm local branch and identity before staging anything.  Current
+  branch is `main`, tracking `origin/main`; remote tracking refs expose
+  `origin/HEAD -> origin/main` and `origin/main`; repository-local identity is
+  `Stardust0831 <13862180016@163.com>`.  Current uncommitted work is the
+  function-100 fractional occupation density increment plus docs; local
+  untracked `domain.cub` and `domain.pdb` must stay uncommitted.
+- [x] Finish README/docs/tests/review for the FOD route, mirror root docs,
+  fetch/prune and confirm whether any real merge-back is needed, then
+  commit/push to the maintained branch.  Code/tests/docs now include the
+  extra alias `fractional-occupancy-density`, standalone and mapped-surface
+  fake-run coverage, and the caveat that FOD may need a lower standalone
+  isosurface such as `--isosurface 0.001`.  Validation passed:
+  `py_compile`, 74 focused `tests.test_multiwfn_grid` tests, 127 focused
+  `tests.test_multiwfn_grid tests.test_cli` tests, 338 full no-GUI tests, and
+  CLI smokes; `git diff --check` passed.  `git fetch --prune origin` found
+  only `main`, `origin/main`, and `origin/HEAD -> origin/main`; no real
+  merge-back is needed.  Root-docs mirror checksum dry-run is empty.  Final
+  commit hash, push result, and post-push branch verification are reported in
+  the assistant response.
+
+## Active Goal Continuation: 2026-06-11 Next Function-100 Wavefunction Analysis Route
+
+- [x] Record automatic continuation of the long-running objective: keep
+  surveying valuable Multiwfn wavefunction analyses that can be visualized in
+  VESTA, prioritizing ABACUS-compatible LCAO Molden or direct cube routes.
+- [x] Recheck current repository state after the spin-channel density commit,
+  preserve local untracked `domain.cub` and `domain.pdb`, and select the next
+  bounded source-backed Multiwfn/VESTA increment.  Current `main`,
+  `origin/main`, and `origin/HEAD` are aligned at
+  `b565f4d4fe3dc021ad3dd3c744f1a0fbdffa431c`; only this kanban update plus
+  untracked `domain.cub` and `domain.pdb` were present.  Selected increment:
+  function-100 fractional occupation density FOD (`iuserfunc=90`), which local
+  Multiwfn evaluates via `FODfunc(x,y,z)` and exports as `userfunc.cub`.
+- [x] Implement the selected route with focused tests, README/usage/skill/
+  research/worklog/kanban notes, root-docs mirror, validation, commit, push,
+  and branch verification.  Code/tests/docs now include
+  `grid-run --function fractional-occupation-density` / `fod` /
+  `fractional-occupancy-density`, standalone `density` preset, mapped
+  `surface-map`, and caveats for integer occupations, ABACUS Molden
+  occupation export, metallic smearing, multi-k, SOC/noncollinear
+  interpretation, and lowered FOD isosurfaces when needed.  Validation passed:
+  `py_compile`, 74 focused `tests.test_multiwfn_grid` tests, 127 focused
+  `tests.test_multiwfn_grid tests.test_cli` tests, 338 full no-GUI tests, and
+  CLI smokes; `git diff --check` passed.  Root-docs mirror checksum dry-run is
+  empty.  Final commit hash, push result, and branch verification are reported
+  in the assistant response.
 
 ## Active Goal Continuation: 2026-06-11 Next ABACUS/Multiwfn VESTA Analysis Route
 
