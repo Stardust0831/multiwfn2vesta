@@ -7,14 +7,14 @@ Updated: 2026-06-12 02:10 CST
 - [x] 需求入板: 在已有 examples/gallery/manual 基础上继续闭环，把每个已有功能尽量配套真实有价值体系、example/runbook、效果图和中文手册入口，并优化用户发现与使用体验。
 - [x] 审计当前 CLI、examples registry、runbook、gallery 和 smoke 渲染产物；保护未跟踪 `domain.cub` / `domain.pdb`，不把大型 smoke 产物误提交。子 agent 只读审计确认最高缺口是 trajectory video CLI、atom coloring 真体系图、IRI+AIM 成品图；AIM+IGMH 和 AIM 已基本闭环。
 - [x] 选择本轮低风险增量，优先补“已有效果图但缺正式入口/验证”的功能；轨迹视频、AIM+IGMH、AIM、IRI、atom value coloring、VESTA three-views 都在矩阵中有明确状态。本轮选择 Cd/Cl 轨迹视频 artifact manifest + `examples --id` + `examples --verify-smoke`，避免把大型 smoke 产物提交进 Git。
-- [ ] 实现代码/文档/测试，镜像 docs，验证后用 `Stardust0831` 身份提交推送。当前已实现 `examples --id`、`--verify-smoke`、可选 example `manifest` 字段和 `examples/cdcl_trajectory_video/artifact_manifest.json`；README、中文手册、usage、gallery、状态矩阵、runbook、skill、worklog 已同步。验证通过：focused `py_compile`、`tests.test_examples`、`tests.test_cli`、`examples --id cdcl_trajectory_video --verify`、`examples --id cdcl_trajectory_video --verify-smoke`（检查 4 个本地 smoke 证据路径）、356-test full no-GUI regression、`git diff --check`、`bin/multiwfn2vesta --help`、markdown local-link check。docs 镜像和提交推送待执行。
+- [x] 实现代码/文档/测试，镜像 docs，验证后用 `Stardust0831` 身份提交推送。已实现 `examples --id`、`--verify-smoke`、可选 example `manifest` 字段和 `examples/cdcl_trajectory_video/artifact_manifest.json`；README、中文手册、usage、gallery、状态矩阵、runbook、skill、worklog 已同步。验证通过：focused `py_compile`、`tests.test_examples`、`tests.test_cli`、`examples --id cdcl_trajectory_video --verify`、`examples --id cdcl_trajectory_video --verify-smoke`（检查 4 个本地 smoke 证据路径）、356-test full no-GUI regression、`git diff --check`、`bin/multiwfn2vesta --help`、markdown local-link check。docs 镜像 dry-run 为空；已提交并推送到 `origin/main`，最终提交信息由本轮回复报告。
 
 ## Active Goal Continuation: 2026-06-12 Trajectory Video Workflow Closure
 
 - [x] 需求入板: 继续长期目标，把已有 Cd/Cl 轨迹 smoke 经验向正式可维护 workflow 收敛，优先审计已有脚本、VESTA frame/style 复用、Boundary/bond 参数和视频产物记录。
 - [x] 审计当前工作区状态、trajectory 相关脚本/烟测/文档和测试覆盖，保护未跟踪 `domain.cub` / `domain.pdb`。
 - [x] 选择一个低风险增量：先做可验证的 trajectory example manifest/validator 和中文 runbook 补强；正式轨迹视频 CLI 留给下一轮。
-- [ ] 实现代码/文档/测试，重新镜像 docs，验证后用 `Stardust0831` 身份提交推送。当前实现已完成，验证已通过；docs 镜像和提交推送待执行。
+- [x] 实现代码/文档/测试，重新镜像 docs，验证后用 `Stardust0831` 身份提交推送。当前实现已完成，验证已通过；docs 镜像 dry-run 为空，提交推送完成。
 
 ## Active Goal Continuation: 2026-06-12 Formal Examples And CLI Discovery
 
