@@ -172,6 +172,11 @@ then delete the temporary branch.
   `avgsl2r.cub`, optionally preserve `avgRDG.cub`, `thermflu.cub`, and
   scatter data, and write a mapped-surface `.vesta` through `cube-preset
   aigm`/`aigm-tfi`.
+- Convert XYZ/extXYZ trajectories directly into per-frame VESTA structure
+  files with `trajectory-frames`, including extXYZ `Lattice`, optional manual
+  cell vectors, reusable reference `.vesta` camera/style tail, Boundary, and
+  custom SBOND rules such as the widened Cd-Cl cutoff used by the trajectory
+  video example.
 - Prepare high-bitrate MP4 videos from already rendered VESTA trajectory PNG
   frames with `trajectory-video`, including natural frame sorting, an ffmpeg
   concat list, a markdown recipe, manifest-based frame discovery for curated
@@ -310,6 +315,10 @@ multiwfn2vesta aigm-run trajectory.xyz aigm_products \
   --fragment 1-48 --fragment 49-60 \
   --frame-range 1 200 \
   --grid-mode spacing --grid-spacing 0.25
+multiwfn2vesta trajectory-frames examples/cdcl_trajectory_video/cdcl_tiny.extxyz \
+  /tmp/cdcl_vesta_frames \
+  --bond Cd Cl 0 3.5 \
+  --boundary -0.05 1.05 -0.05 1.05 -0.05 1.05
 multiwfn2vesta trajectory-video \
   --manifest examples/cdcl_trajectory_video/artifact_manifest.json \
   --output /tmp/cdcl_trajectory.mp4 \
@@ -1394,12 +1403,31 @@ detects common `Lattice=`, `pbc=`, and `CRYST1` markers and rejects
 `--grid-mode points` for periodic input, because Multiwfn's PBC grid option
 `4` reads a spacing value rather than `NX,NY,NZ`.
 
-## Rendered Trajectory Frames to MP4
+## XYZ/extXYZ Trajectory Frames and MP4
 
-For VESTA trajectory videos, `trajectory-video` handles the maintained
-encoding layer after PNG frames already exist.  It does not start VESTA and
-therefore does not steal focus.  By default it writes an ffmpeg concat list
-and a markdown recipe, then prints the command without running it:
+For VESTA trajectory videos, the maintained no-GUI part is now split into two
+steps.  `trajectory-frames` converts standard XYZ/extXYZ frames to VESTA
+structure files without importing ASE or starting VESTA.  It can reuse the
+`SCENE`/`STYLE` tail from a saved `.vesta` file, apply a Boundary such as
+`-0.05 1.05` in each direction, and write widened SBOND rules:
+
+```bash
+multiwfn2vesta trajectory-frames examples/cdcl_trajectory_video/cdcl_tiny.extxyz \
+  /tmp/cdcl_vesta_frames \
+  --bond Cd Cl 0 3.5 \
+  --boundary -0.05 1.05 -0.05 1.05 -0.05 1.05
+```
+
+The command writes `/tmp/cdcl_vesta_frames/vesta/*.vesta`,
+`frame_trajectory_frames_manifest.json`, and
+`frame_trajectory_frames_recipe.md`.  It still does not render PNG images;
+that VESTA rendering layer remains separate because GUI automation can steal
+focus.
+
+After PNG frames already exist, `trajectory-video` handles the maintained
+encoding layer.  It does not start VESTA and therefore does not steal focus.
+By default it writes an ffmpeg concat list and a markdown recipe, then prints
+the command without running it:
 
 ```bash
 multiwfn2vesta trajectory-video png_frames trajectory.mp4 \
@@ -1416,8 +1444,8 @@ multiwfn2vesta trajectory-video \
 Add `--run` to execute ffmpeg, and `--overwrite` only when replacing an
 existing MP4 is intended.  The command writes `<output>_frames.txt` and
 `<output>_trajectory_video_recipe.md`.  The still-open part of the workflow is
-the upstream step that converts ASE/XYZ trajectory frames into styled VESTA
-files and PNG images.
+ASE `.traj` reading and unattended VESTA PNG rendering; XYZ/extXYZ to VESTA
+frame files is maintained through `trajectory-frames`.
 
 ## ABACUS Calculation to Molden
 
@@ -1795,6 +1823,8 @@ and `aim_atoms_only.vesta` without launching VESTA.
   runner notes.
 - `docs/skills/multiwfn_aigm_run_skill.md`: Multiwfn aIGM/amIGM trajectory-average
   runner notes.
+- `docs/skills/vesta_trajectory_frames_skill.md`: XYZ/extXYZ trajectory to
+  VESTA frame file workflow.
 - `docs/skills/vesta_trajectory_video_skill.md`: VESTA PNG frame sequence to
   MP4 video workflow.
 - `docs/skills/multiwfn_fukui_run_skill.md`: shared-grid

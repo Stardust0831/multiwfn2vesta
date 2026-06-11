@@ -3,8 +3,9 @@
 ## When to use
 
 Use this workflow when VESTA trajectory frames have already been rendered to a
-PNG sequence and the next step is to make a reproducible MP4.  This skill does
-not cover ASE/XYZ trajectory parsing or VESTA frame rendering yet.
+PNG sequence and the next step is to make a reproducible MP4.  If the starting
+point is XYZ/extXYZ rather than PNG, first use `trajectory-frames` to write
+per-frame `.vesta` files.
 
 ## Current maintained command
 
@@ -58,6 +59,10 @@ The current curated example is:
 
 ```bash
 multiwfn2vesta examples --id cdcl_trajectory_video --verify-smoke
+multiwfn2vesta trajectory-frames examples/cdcl_trajectory_video/cdcl_tiny.extxyz \
+  /tmp/cdcl_vesta_frames \
+  --bond Cd Cl 0 3.5 \
+  --boundary -0.05 1.05 -0.05 1.05 -0.05 1.05
 multiwfn2vesta trajectory-video \
   --manifest examples/cdcl_trajectory_video/artifact_manifest.json \
   --output /tmp/cdcl_trajectory.mp4 \
@@ -71,8 +76,8 @@ evidence.  Large videos remain in `smoke/` and are not committed.
 ## Boundaries
 
 - This command does not start VESTA and should not steal focus.
-- It does not yet create VESTA frame files from ASE/XYZ trajectories.
-- It does not yet apply reference `.vesta` camera, Boundary, or bond rules to
-  new frames.
-- The next workflow increment should connect trajectory-to-frame generation
-  and VESTA PNG rendering to the same artifact manifest contract.
+- XYZ/extXYZ to `.vesta` frame generation is handled by
+  `multiwfn2vesta trajectory-frames`.
+- ASE `.traj` direct reading is still not maintained; export XYZ/extXYZ first.
+- Unattended VESTA PNG rendering is still separate and should eventually
+  connect to the same artifact manifest contract.

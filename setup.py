@@ -31,6 +31,7 @@ setup(
             'multiwfn2vesta-aim-run=multiwfn2vesta.multiwfn_aim:main',
             'multiwfn2vesta-aim-pdb=multiwfn2vesta.aim_vesta:main',
             'multiwfn2vesta-aim-igmh=multiwfn2vesta.aim_igmh_vesta:main',
+            'multiwfn2vesta-trajectory-frames=multiwfn2vesta.trajectory_frames:main',
             'multiwfn2vesta-trajectory-video=multiwfn2vesta.trajectory_video:main',
             'multiwfn2vesta-examples=multiwfn2vesta.examples:main',
         ],

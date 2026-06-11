@@ -44,6 +44,8 @@ multiwfn2vesta multiwfn-atom-color --help
 multiwfn2vesta aim-run --help
 multiwfn2vesta aim-pdb --help
 multiwfn2vesta aim-igmh --help
+multiwfn2vesta trajectory-frames --help
+multiwfn2vesta trajectory-video --help
 ```
 
 已维护的子命令：
@@ -81,6 +83,10 @@ multiwfn2vesta aim-igmh --help
   或 amIGM 轨迹平均菜单，导出 `avgdg_inter.cub`/`avgsl2r.cub`，可选
   `avgRDG.cub`、`thermflu.cub`、`output.txt`，再通过 `cube-preset aigm`
   或 `cube-preset aigm-tfi` 写 mapped-surface `.vesta`
+- `trajectory-frames`: 从标准 XYZ 或 extXYZ 轨迹直接写逐帧 `.vesta`
+  frame、manifest 和 recipe；支持 extXYZ `Lattice`、手动 cell vectors、
+  Boundary、可重复 `SBOND` 规则和参考 `.vesta` 的 `SCENE`/`STYLE` 尾段；
+  不启动 VESTA、不渲染 PNG
 - `trajectory-video`: 从已经渲染好的 VESTA 轨迹 PNG 帧准备或执行高码率
   mp4 合成；默认只写 ffmpeg frame list 和 markdown recipe，不启动 VESTA
 - `grid-run`: 从 Multiwfn 可读波函数文件调用主菜单 `5` 的 real-space
@@ -1324,6 +1330,47 @@ PBC 网格菜单的选项 `4` 读取的是 spacing，而不是 `NX,NY,NZ`。
 Multiwfn 非零退出、超时、或返回 0 但缺 `avgdg_inter.cub`/`avgsl2r.cub` 时，
 CLI 会保留 stdout/stderr 日志并返回非零码。
 
+## XYZ/extXYZ 轨迹到 VESTA frame
+
+`trajectory-frames` 负责轨迹视频工作流的上游 frame 生成。它读取标准
+XYZ 或 extXYZ 轨迹，写逐帧 `.vesta` 文件和一个 manifest/recipe，不依赖
+ASE，不启动 VESTA，也不输出 PNG。
+
+最小 Cd/Cl example：
+
+```bash
+multiwfn2vesta trajectory-frames examples/cdcl_trajectory_video/cdcl_tiny.extxyz \
+  /tmp/cdcl_vesta_frames \
+  --bond Cd Cl 0 3.5 \
+  --boundary -0.05 1.05 -0.05 1.05 -0.05 1.05
+```
+
+如果有一个手动调好视角、style 和成键显示的 `.vesta`，可以复用它的
+`SCENE`/`STYLE` 尾段：
+
+```bash
+multiwfn2vesta trajectory-frames traj.extxyz frame_products \
+  --reference-vesta nvt_frame_0001_saved.vesta \
+  --bond Cd Cl 0 3.5 \
+  --boundary -0.05 1.05 -0.05 1.05 -0.05 1.05 \
+  --stride 20
+```
+
+输出：
+
+- `vesta/frame_0001.vesta` 等逐帧 VESTA 文件。
+- `frame_trajectory_frames_manifest.json`: 源轨迹、帧序号、Boundary、bond
+  rules、reference `.vesta` 等参数。
+- `frame_trajectory_frames_recipe.md`: 下一步渲染 PNG 和调用
+  `trajectory-video` 的说明。
+
+当前明确边界：
+
+- extXYZ `Lattice="..."` 会自动转为晶体结构；普通 XYZ 可用
+  `--cell-vectors` 手动给晶胞。
+- ASE `.traj` 还没有直接读取入口，需先转 XYZ/extXYZ。
+- VESTA PNG 渲染仍是外部步骤，避免自动打开 GUI 抢焦点。
+
 ## 已渲染轨迹帧到 MP4
 
 `trajectory-video` 是 VESTA 轨迹视频工作流里已经维护的合成层。它读取已渲染的
@@ -1360,8 +1407,8 @@ multiwfn2vesta trajectory-video \
 - `--crf N`: 使用 CRF 质量模式，替代固定 `--bitrate`。
 - `--extra-ffmpeg-arg ARG`: 追加单个 ffmpeg 参数，可重复。
 
-这个命令不启动 VESTA，不处理 ASE/XYZ 到 VESTA/PNG 的上游渲染步骤。后续正式
-trajectory workflow 应继续把参考 `.vesta` 视角、Boundary、成键判据和逐帧关窗策略接到这里。
+这个命令不启动 VESTA。XYZ/extXYZ 到 `.vesta` frame 已由 `trajectory-frames`
+维护；仍待补的是 ASE `.traj` 直接读取和不抢焦点的 VESTA PNG 渲染层。
 
 ## ABACUS Mulliken 原子着色
 

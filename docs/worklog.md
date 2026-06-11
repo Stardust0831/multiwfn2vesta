@@ -1,5 +1,26 @@
 # Worklog
 
+## 2026-06-12: Maintained XYZ/extXYZ trajectory-to-VESTA frame layer
+
+- Continued feature closure by filling the upstream gap before
+  `trajectory-video`: added `multiwfn2vesta trajectory-frames` with aliases
+  `traj-frames`, `xyz-vesta-frames`, and `vesta-trajectory-frames`.
+- The command reads standard XYZ and extXYZ, supports extXYZ `Lattice`,
+  optional manual `--cell-vectors`, `--boundary`, repeated `--bond` SBOND
+  rules, `--reference-vesta` SCENE/STYLE tail reuse, `--stride`, and
+  `--comps`.
+- Outputs are per-frame `.vesta` files under `vesta/`, a JSON manifest, and a
+  markdown recipe that records frame selection, Boundary, bond settings,
+  reference style, and the next PNG/MP4 steps.
+- Added a tiny committed Cd/Cl extXYZ example at
+  `examples/cdcl_trajectory_video/cdcl_tiny.extxyz`, plus tests for parsing,
+  crystal coordinate conversion, SBOND writing, reference tail reuse, CLI
+  dispatch, and interactive launcher argument construction.
+- Updated README, Chinese manual, usage guide, Cd/Cl runbook, gallery, status
+  matrix, examples registry, artifact manifest, and skills.  Current boundary:
+  ASE `.traj` direct reading and unattended VESTA PNG rendering remain future
+  workflow layers; XYZ/extXYZ to `.vesta` frames is now maintained.
+
 ## 2026-06-12: Maintained trajectory-video encoding layer
 
 - Continued the long-running Multiwfn/ABACUS/VESTA objective by closing the
@@ -20,9 +41,9 @@
 - Added `docs/skills/vesta_trajectory_video_skill.md` and updated README,
   Chinese manual, usage docs, example gallery, status matrix, CLI skill notes,
   runbook, and artifact manifest.
-- Scope boundary: this increment maintains PNG-sequence to MP4 encoding.  The
-  upstream trajectory-to-VESTA-frame generation and VESTA PNG rendering remain
-  future work.
+- Scope boundary at that time: this increment maintained PNG-sequence to MP4
+  encoding.  It has since been paired with the maintained XYZ/extXYZ
+  `trajectory-frames` layer; VESTA PNG rendering remains future work.
 
 ## 2026-06-12: Curated example artifact verification
 

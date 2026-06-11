@@ -1,10 +1,10 @@
 {
   "id": "cdcl_trajectory_video",
   "status": "ready",
-  "system": "Cd/Cl ASE trajectory",
+  "system": "Cd/Cl trajectory",
   "route": [
-    "ASE trajectory",
-    "VESTA frame sequence using a saved reference style",
+    "XYZ/extXYZ trajectory",
+    "VESTA frame sequence using trajectory-frames and optional saved reference style",
     "PNG sequence",
     "high-bitrate MP4"
   ],
@@ -20,6 +20,10 @@
     {
       "role": "runbook",
       "path": "examples/cdcl_trajectory_video/README_zh.md"
+    },
+    {
+      "role": "tiny_extxyz_input",
+      "path": "examples/cdcl_trajectory_video/cdcl_tiny.extxyz"
     }
   ],
   "workspace_smoke_evidence": [
@@ -43,6 +47,7 @@
   "validation_commands": [
     "multiwfn2vesta examples --id cdcl_trajectory_video --verify",
     "multiwfn2vesta examples --id cdcl_trajectory_video --verify-smoke",
+    "multiwfn2vesta trajectory-frames examples/cdcl_trajectory_video/cdcl_tiny.extxyz /tmp/cdcl_vesta_frames --bond Cd Cl 0 3.5 --boundary -0.05 1.05 -0.05 1.05 -0.05 1.05",
     "multiwfn2vesta trajectory-video --manifest examples/cdcl_trajectory_video/artifact_manifest.json --output /tmp/cdcl_trajectory.mp4 --fps 24 --bitrate 20M"
   ],
   "style_notes": [
@@ -50,10 +55,12 @@
     "The cdcl3p50 smoke keeps a deliberately looser Cd-Cl bonding criterion.",
     "Do not commit large MP4 files; keep them in smoke and commit only curated poster frames.",
     "Close or reuse VESTA windows during batch rendering to avoid save failures.",
-    "trajectory-video is the maintained PNG-sequence to MP4 layer; upstream trajectory-to-VESTA-frame rendering remains separate future work."
+    "trajectory-frames is the maintained XYZ/extXYZ-to-.vesta layer.",
+    "trajectory-video is the maintained PNG-sequence to MP4 layer."
   ],
   "next_work": [
-    "Promote frame generation and VESTA rendering into a maintained trajectory workflow.",
+    "Add direct ASE .traj reading or document a preferred ase-to-extXYZ export helper.",
+    "Promote unattended VESTA PNG rendering into a maintained trajectory workflow.",
     "Keep the manifest stable so smoke evidence can be verified without committing large artifacts."
   ]
 }

@@ -84,6 +84,7 @@ multiwfn2vesta examples --json
 | 已有多个 cube | `cube-arith` | 线性组合 cube + `.vesta` | density difference、spin density、dual descriptor |
 | 波函数 + fragment | `igmh-run` / `igm-run` / `migm-run` | `dg_inter.cub` + `sl2r.cub` + `.vesta` | 弱相互作用和片段相互作用 |
 | 轨迹 + fragment | `aigm-run` / `amigm-run` | averaged IGM cubes + `.vesta` | 动力学平均弱相互作用 |
+| XYZ/extXYZ 轨迹 | `trajectory-frames` | per-frame `.vesta` + manifest + recipe | 不启动 VESTA 的轨迹 frame 生成 |
 | 已渲染 PNG 轨迹帧 | `trajectory-video` | ffmpeg frame list + mp4 + recipe | VESTA 轨迹视频合成 |
 | 波函数 | `iri-run` | IRI/RDG cube pair + `.vesta` | NCI/IRI 弱相互作用 |
 | 波函数 | `aim-run` | `paths.pdb`/`CPs.pdb` + `.vesta` | AIM 键径和临界点 |
@@ -238,7 +239,41 @@ multiwfn2vesta aim-igmh input_overlay.vesta products \
 - H2O-HF IRI+AIM 调试证据
 - benzene NICS arrow 杂项
 
-## 9.1 已渲染轨迹帧合成视频
+## 9.1 XYZ/extXYZ 轨迹生成 VESTA frame
+
+`trajectory-frames` 是轨迹视频工作流的上游维护入口：读取标准 XYZ 或带 `Lattice="..."`
+的 extXYZ，直接写逐帧 `.vesta` 文件、manifest 和 recipe。它不依赖 ASE，不启动 VESTA，也不渲染 PNG，
+因此适合先批量生成结构帧，再在方便时用 VESTA 或其它渲染层导出图片。
+
+Cd/Cl 最小 example：
+
+```bash
+multiwfn2vesta trajectory-frames examples/cdcl_trajectory_video/cdcl_tiny.extxyz \
+  /tmp/cdcl_vesta_frames \
+  --bond Cd Cl 0 3.5 \
+  --boundary -0.05 1.05 -0.05 1.05 -0.05 1.05
+```
+
+常用选项：
+
+- `--reference-vesta saved.vesta`: 复用已保存 VESTA 的 `SCENE`/`STYLE` 尾段，适合继承视角和显示风格。
+- `--bond E1 E2 MIN MAX`: 写 VESTA `SBOND` 成键规则，可重复；Cd-Cl 轨迹常用 `0 3.5` 放宽判据。
+- `--boundary XMIN XMAX YMIN YMAX ZMIN ZMAX`: 扩展周期显示范围，例如三个方向都用 `-0.05 1.05`。
+- `--cell-vectors ...`: 普通 XYZ 没有 extXYZ `Lattice` 时手动给 9 个晶胞向量分量。
+- `--stride N`: 只输出部分帧，便于先做预览。
+
+输出包括：
+
+- `vesta/frame_0001.vesta` 等逐帧 VESTA 文件。
+- `frame_trajectory_frames_manifest.json`: 记录源轨迹、帧序号、Boundary、bond rules 和参考 `.vesta`。
+- `frame_trajectory_frames_recipe.md`: 记录下一步 PNG 渲染和 `trajectory-video` 合成提示。
+
+当前限制：
+
+- 还不直接读取 ASE `.traj`；如果只有 ASE `.traj`，先导出 XYZ/extXYZ。
+- 还不启动 VESTA 渲染 PNG；这一步仍然单独维护，以免自动化窗口抢焦点。
+
+## 9.2 已渲染轨迹帧合成视频
 
 `trajectory-video` 只处理已经渲染好的 PNG 序列，不启动 VESTA，因此不会抢鼠标。默认只写 ffmpeg
 frame list 和 recipe，并打印命令；只有加 `--run` 才真的执行 ffmpeg。
@@ -261,7 +296,8 @@ multiwfn2vesta trajectory-video \
 - `<output>_trajectory_video_recipe.md`: 帧数、首尾帧、编码参数和完整命令。
 - `<output>.mp4`: 只有使用 `--run` 且 ffmpeg 成功时生成。
 
-仍待维护的是上游步骤：从 ASE/XYZ 轨迹生成带统一视角、Boundary、成键参数和样式的 VESTA/PNG 帧。
+仍待维护的是 ASE `.traj` 直接读取和 VESTA PNG 自动渲染；XYZ/extXYZ 到 `.vesta` frame 的部分已经由
+`trajectory-frames` 维护。
 
 ## 10. 每个功能的 example 状态
 

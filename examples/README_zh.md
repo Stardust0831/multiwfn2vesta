@@ -18,7 +18,7 @@ multiwfn2vesta examples --verify
 | 1 | Ag(111)+benzene | ABACUS Molden -> Multiwfn IGMH+AIM -> VESTA 三视图 | `../../smoke/ag111_benzene_igmh_aim_periodic_cell_20260607/`，已复制 gallery 图 | 整理输入清单、命令记录、输出说明；后续重渲染更紧凑视角 |
 | 2 | GC 碱基对 | AIM paths/BCP overlay | `../../smoke/20260605_sob445_more_aim_examples/gc/`，已复制 gallery 图 | 做一个轻量 AIM 教程 example |
 | 3 | benzene | AIM 基础例和 NICS/vector misc | `../../smoke/20260605_sob445_more_aim_examples/benzene/`，`../../smoke/20260605_nics_vesta_vectors/` | AIM 可入主线；NICS/vector 仅放 misc |
-| 4 | Cd/Cl 轨迹 | ASE trajectory -> VESTA frames -> mp4 | `../../smoke/vesta_trajectory_video_1608/ase_nvt_refstyle_stride20_cdcl3p50/` | 整理 poster frame、mp4、Boundary/bond/style 参数 |
+| 4 | Cd/Cl 轨迹 | XYZ/extXYZ trajectory -> VESTA frames -> PNG -> mp4 | `../../smoke/vesta_trajectory_video_1608/ase_nvt_refstyle_stride20_cdcl3p50/`，`cdcl_trajectory_video/cdcl_tiny.extxyz` | 已有 `trajectory-frames` 和 `trajectory-video`；下一步补 ASE `.traj` 读取和 VESTA PNG 渲染 |
 
 ## 暂不作为完成 example 的体系
 

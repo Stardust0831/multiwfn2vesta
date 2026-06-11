@@ -35,6 +35,7 @@ class TestUnifiedCli(unittest.TestCase):
         self.assertIn("aim-run", text)
         self.assertIn("aim-pdb", text)
         self.assertIn("aim-igmh", text)
+        self.assertIn("trajectory-frames", text)
         self.assertIn("trajectory-video", text)
         self.assertIn("examples", text)
 
@@ -300,6 +301,20 @@ class TestUnifiedCli(unittest.TestCase):
         self.assertEqual(code, 0)
         mocked.assert_called_once_with(["png", "movie.mp4", "--bitrate", "20M"])
 
+    def test_dispatches_trajectory_frames_command(self):
+        with patch("multiwfn2vesta.cli.trajectory_frames.main", return_value=0) as mocked:
+            code = cli.main(["trajectory-frames", "traj.xyz", "frames", "--stride", "2"])
+
+        self.assertEqual(code, 0)
+        mocked.assert_called_once_with(["traj.xyz", "frames", "--stride", "2"])
+
+    def test_dispatches_trajectory_frames_alias(self):
+        with patch("multiwfn2vesta.cli.trajectory_frames.main", return_value=0) as mocked:
+            code = cli.main(["traj-frames", "traj.xyz", "frames"])
+
+        self.assertEqual(code, 0)
+        mocked.assert_called_once_with(["traj.xyz", "frames"])
+
     def test_dispatches_trajectory_video_alias(self):
         with patch("multiwfn2vesta.cli.trajectory_video.main", return_value=0) as mocked:
             code = cli.main(["traj-video", "png", "movie.mp4"])
@@ -380,6 +395,57 @@ class TestUnifiedCli(unittest.TestCase):
         self.assertEqual(code, 0)
         mocked.assert_called_once_with(
             ["overlay.vesta", "products", "--stem", "case", "--label-bcp-sites"]
+        )
+
+    def test_interactive_trajectory_frames_builds_expected_args(self):
+        answers = iter(
+            [
+                "21",
+                "traj.extxyz",
+                "frames_out",
+                "cdcl",
+                "5",
+                "crystal",
+                "-0.05 1.05 -0.05 1.05 -0.05 1.05",
+                "Cd Cl 0 3.5",
+                "",
+                "ref.vesta",
+                "y",
+            ]
+        )
+        with patch("builtins.input", lambda _prompt: next(answers)):
+            with patch("sys.stdout", io.StringIO()):
+                with patch("multiwfn2vesta.cli.trajectory_frames.main", return_value=0) as mocked:
+                    code = cli.main([])
+
+        self.assertEqual(code, 0)
+        mocked.assert_called_once_with(
+            [
+                "traj.extxyz",
+                "frames_out",
+                "--stem",
+                "cdcl",
+                "--stride",
+                "5",
+                "--structure",
+                "crystal",
+                "--boundary",
+                "-0.05",
+                "1.05",
+                "-0.05",
+                "1.05",
+                "-0.05",
+                "1.05",
+                "--bond",
+                "Cd",
+                "Cl",
+                "0",
+                "3.5",
+                "--reference-vesta",
+                "ref.vesta",
+                "--comps",
+                "on",
+            ]
         )
 
     def test_interactive_aim_run_builds_expected_args(self):

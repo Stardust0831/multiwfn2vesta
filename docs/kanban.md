@@ -1,6 +1,20 @@
 # Project Kanban
 
-Updated: 2026-06-12 02:45 CST
+Updated: 2026-06-12 04:20 CST
+
+## Current Request: 2026-06-12 Feature Closure With Examples, Renders, And Chinese Manual Phase 3
+
+- [x] 需求入板: 把当前已有功能继续闭环成可复用体验；每个维护态功能需要有 example/runbook、代表性体系、可验证产物或效果图路径，并补中文手册与更顺手的 CLI 发现入口。
+- [x] 审计上轮未提交的 trajectory frame 代码、已有 examples/gallery/manual/status matrix 和 smoke 渲染产物；保护未跟踪 `domain.cub` / `domain.pdb`，不提交大型本地产物。
+- [x] 先补一个可验证的体验闭环增量：XYZ/extXYZ 轨迹直接生成 VESTA frame 文件，作为轨迹视频 workflow 的上游；同步 example、中文手册、状态矩阵和 skill。已实现 `trajectory-frames`、别名、交互入口、console scripts、`cdcl_tiny.extxyz` example、manifest/recipe 记录和 `vesta_trajectory_frames_skill.md`。
+- [x] 汇总每个已有功能的代表体系和效果图现状，明确哪些已有图片可作为手册级效果图、哪些仍是待渲染/待维护；验证、镜像 docs、提交并推送。当前已同步 README、中文手册、usage、gallery、status matrix、Cd/Cl runbook、examples registry、artifact manifest 和 worklog；验证已过 focused tests、375-test no-GUI regression、`git diff --check`、markdown local-link check、Cd/Cl tiny extXYZ smoke、`examples --id cdcl_trajectory_video --verify` 和 docs 镜像 dry-run。本次提交推送完成后由最终回复报告 commit。
+
+## Active Goal Continuation: 2026-06-12 Trajectory Frame Generation Increment
+
+- [x] 需求入板: 继续长期目标，上一轮已维护 `trajectory-video` 的 PNG->MP4 合成层；本轮继续补上游轨迹可视化能力，优先把 XYZ/extXYZ 轨迹转成可批处理的 VESTA frame 文件，并与后续 PNG/MP4 工作流衔接。
+- [x] 审计当前工作区、VESTA 写入工具、trajectory smoke/runbook 和测试；保护未跟踪 `domain.cub` / `domain.pdb`。
+- [x] 实现一个不依赖 ASE/import 库的轨迹 frame 生成增量，支持真实轨迹常见输入，产出 recipe/manifest，避免启动 VESTA。
+- [x] 同步 README/中文手册/usage/skill/worklog/kanban，镜像 docs，验证后用 `Stardust0831` 身份提交推送。代码/文档/测试已同步，提交推送完成后由最终回复报告 commit。
 
 ## Active Goal Continuation: 2026-06-12 Next Feature Closure Increment
 

@@ -48,6 +48,7 @@ multiwfn2vesta multiwfn-atom-color --help
 multiwfn2vesta aim-run --help
 multiwfn2vesta aim-pdb --help
 multiwfn2vesta aim-igmh --help
+multiwfn2vesta trajectory-frames --help
 multiwfn2vesta trajectory-video --help
 ```
 
@@ -105,6 +106,9 @@ Aliases:
   `multiwfn2vesta igm-run ...`, and `multiwfn2vesta migm-run ...`.
   Trajectory-average runs are `multiwfn2vesta aigm-run ...` and
   `multiwfn2vesta amigm-run ...`.
+- `multiwfn2vesta traj-frames ...`, `multiwfn2vesta xyz-vesta-frames ...`,
+  and `multiwfn2vesta vesta-trajectory-frames ...` are aliases for
+  `trajectory-frames`.
 - `multiwfn2vesta traj-video ...`, `multiwfn2vesta trajectory-mp4 ...`, and
   `multiwfn2vesta vesta-trajectory-video ...` are aliases for
   `trajectory-video`.
@@ -177,8 +181,24 @@ multiwfn2vesta trajectory-video \
 The command consumes already rendered PNG frames, writes an ffmpeg concat list
 and a markdown recipe, and defaults to dry-run mode.  Add `--run` to execute
 ffmpeg and `--overwrite` only when replacing an existing video is intended.
-It does not start VESTA; upstream VESTA frame rendering remains a separate
-workflow.
+It does not start VESTA.  XYZ/extXYZ to `.vesta` frame writing is handled by
+`trajectory-frames`; PNG rendering from those `.vesta` files remains a
+separate workflow.
+
+### XYZ/extXYZ trajectory to VESTA frames
+
+```bash
+multiwfn2vesta trajectory-frames examples/cdcl_trajectory_video/cdcl_tiny.extxyz \
+  /tmp/cdcl_vesta_frames \
+  --bond Cd Cl 0 3.5 \
+  --boundary -0.05 1.05 -0.05 1.05 -0.05 1.05
+```
+
+The command writes `vesta/frame_*.vesta`,
+`frame_trajectory_frames_manifest.json`, and
+`frame_trajectory_frames_recipe.md`.  It supports extXYZ `Lattice`, manual
+`--cell-vectors`, `--reference-vesta`, `--stride`, repeated `--bond`, and
+expanded `--boundary` values.  It does not start VESTA or render PNG images.
 
 ### ABACUS calculation to Molden
 

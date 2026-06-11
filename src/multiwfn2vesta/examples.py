@@ -62,8 +62,8 @@ EXAMPLES: List[Dict[str, object]] = [
         "status": "ready",
         "priority": 3,
         "title": "Cd/Cl trajectory frames and high-bitrate VESTA video",
-        "system": "Cd/Cl ASE trajectory",
-        "route": "ASE trajectory -> VESTA frames -> PNG sequence -> MP4",
+        "system": "Cd/Cl trajectory",
+        "route": "XYZ/extXYZ trajectory -> VESTA frames -> PNG sequence -> MP4",
         "runbook": "examples/cdcl_trajectory_video/README_zh.md",
         "manifest": "examples/cdcl_trajectory_video/artifact_manifest.json",
         "gallery": [
@@ -76,8 +76,8 @@ EXAMPLES: List[Dict[str, object]] = [
             "../smoke/vesta_trajectory_video_1608/ase_nvt_refstyle_stride20_cdcl3p50/patched/",
             "../smoke/vesta_trajectory_video_1608/ase_npt_refstyle_stride20/ase_npt_refstyle_stride20_hq20m.mp4",
         ],
-        "note": "Good trajectory/video evidence; MP4 encoding now has a maintained trajectory-video dry-run/ffmpeg wrapper.",
-        "next": "Turn trajectory-to-VESTA frame generation and PNG rendering into a maintained CLI.",
+        "note": "Good trajectory/video evidence; XYZ/extXYZ frame writing and MP4 encoding now have maintained wrappers.",
+        "next": "Add direct ASE .traj reading and a non-focus-stealing VESTA PNG rendering layer.",
     },
     {
         "id": "benzene_aim",

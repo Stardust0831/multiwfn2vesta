@@ -22,7 +22,8 @@
 | IRI/RDG runner | `iri-run` | H2O-HF 或后续二聚体 | `smoke/20260605_iri_aim_h2o_hf/` 有调试 PNG/cube | 有 VESTA/cube | 当前图不够清楚，需继续修 VESTA surface/texture 样式后再作为手册成品 |
 | IGM/IGMH/mIGM runner | `igmh-run` / `igm-run` / `migm-run` | Ag(111)+benzene，H2O | Ag(111)+benzene 三视图；H2O smoke | 已闭环 | 保留 Ag 作为主展示，H2O 作为快速测试 |
 | aIGM/amIGM runner | `aigm-run` / `amigm-run` | 轨迹平均弱相互作用 | 文档/测试，部分轨迹经验 | 有入口 | 准备短 XYZ 轨迹并渲染平均 IGM |
-| trajectory video encoder | `trajectory-video` | Cd/Cl VESTA PNG frame 序列 | Cd/Cl manifest dry-run、frame list/recipe 测试 | 有入口 | 上游 ASE/XYZ -> VESTA/PNG 帧生成仍待维护 |
+| trajectory frame writer | `trajectory-frames` | Cd/Cl extXYZ 轨迹 | `examples/cdcl_trajectory_video/cdcl_tiny.extxyz`、单元测试和 smoke 命令 | 有入口 | 补 ASE `.traj` 直接读取，并把 reference `.vesta` 到 PNG 渲染层串起来 |
+| trajectory video encoder | `trajectory-video` | Cd/Cl VESTA PNG frame 序列 | Cd/Cl manifest dry-run、frame list/recipe 测试 | 有入口 | 与 `trajectory-frames` manifest 和后续 PNG 渲染层衔接 |
 | STM runner | `stm-run` | 表面/分子轨道态 | `smoke/multiwfn_stm_run_smoke_20260610/` | 有 VESTA/cube | 选有物理意义的表面或分子轨道补 PNG |
 | domain runner | `domain-run` | H2O density domain | `smoke/multiwfn_domain_run_smoke_20260610/` | 有 VESTA/cube | 渲染二值域等值面 |
 | AIM runner | `aim-run` | GC 碱基对、benzene | Sob/AIM smoke PNG | 已闭环 | `gc` 作为手册主例，benzene 作基础例；phenanthrene 需重调视角 |
@@ -78,7 +79,7 @@
 
 1. 把 Ag(111)+benzene IGMH+AIM 整理成 `examples/ag111_benzene_igmh_aim/`，包含命令、输入清单、输出清单和图；后续重渲染更紧凑的 camera/zoom。
 2. 把 GC AIM 和 benzene AIM 整理成轻量 examples；GC 作氢键/分子间 AIM 主图，benzene 作基础例。
-3. 把 Cd/Cl NVT 高码率 mp4 轨迹例子整理出 summary、poster frame、artifact manifest、smoke 验证入口和复用视角说明；当前已升级 PNG->mp4 合成层为 `trajectory-video` CLI，后续补上轨迹到 VESTA/PNG 帧生成。
+3. 把 Cd/Cl NVT 高码率 mp4 轨迹例子整理出 summary、poster frame、artifact manifest、smoke 验证入口和复用视角说明；当前已升级 XYZ/extXYZ->VESTA frame 的 `trajectory-frames` CLI 和 PNG->mp4 的 `trajectory-video` CLI，后续补 ASE `.traj` 读取和 VESTA PNG 渲染。
 4. 继续完善 IRI+AIM，当前 H2O-HF 只作为调试证据，不能作为最终展示图。
 5. 给 `cube-vesta`/`cube-preset` 基础功能补一张 direct cube PNG。
 6. 给 `grid-run` 选 3 个代表图：ESP-on-density、ELF、vdW potential 或 KED。
