@@ -141,6 +141,7 @@ multiwfn2vesta examples --systems
 | Ag 表面吸附的 ESP/vdW/steric/SBL/STM | `ag111_benzene_extended_fields` | 复用 Ag(111)+benzene IGMH+AIM 三视图相机 |
 | IRI/RDG/DORI/RoSE/SEDD/on-top pair density | `benzene_dimer_scalar_suite` | 弱相互作用标量场主 planned example |
 | 信息论/Ghosh/Renyi/USI/BNI 标量诊断 | `benzene_dimer_scalar_suite` / `gc_weak_interaction_suite` / `ag111_benzene_extended_fields` | 先作为高级 `grid-run` planned render，不标 ready |
+| bonding/energy/anisotropy 诊断 | `benzene_dimer_scalar_suite` / `gc_weak_interaction_suite` / `ag111_benzene_extended_fields` | shape function、bond metallicity、局域能量密度、SCI/stiffness 等先作为 `needs-render` planned render |
 | GC AIM 扩展到 IRI/ESP/extrema/on-top pair density | `gc_weak_interaction_suite` | 在已 ready 的 GC AIM 上继续补图 |
 | ABACUS direct cube | `cof_direct_cube_suite` | COF 单层 density/potential/ELF 等 |
 | Fukui/dual descriptor/cube-arith/原子反应性染色 | `fukui_dual_reactivity` | 需要中性/阳离子/阴离子同网格 cube |
@@ -263,6 +264,9 @@ multiwfn2vesta grid-run --list-functions
 - `fod`, `orbital-weighted-fukui-plus/minus/zero`, `orbital-weighted-dual-descriptor`
 - `information-gain-density`, `shannon-entropy-density`, `fisher-information-density`, `ghosh-entropy-density`, `renyi-quadratic-density`, `disequilibrium-density`
 - `usi`, `bni`
+- `shape-function`, `average-local-electrostatic-potential`, `potential-energy-density`, `energy-density`, `scaled-energy-density`
+- `lagrangian-ked-per-electron`, `bond-metallicity`, `dimensionless-bond-metallicity`, `energy-density-per-electron`
+- `momentum-fluctuation-magnitude`, `electron-density-ellipticity`, `eta-index`, `modified-eta-index`, `sci`, `stiffness`
 - `becke`, `hirshfeld`, `hirshfeld-delta-g`
 - `pair-function`, `source-function`
 
@@ -296,6 +300,11 @@ multiwfn2vesta grid-run input.molden ghosh --function ghosh-entropy-density
 multiwfn2vesta grid-run input.molden renyi2 --function renyi-quadratic-density
 multiwfn2vesta grid-run input.molden usi --function usi
 multiwfn2vesta grid-run input.molden bni --function bni
+multiwfn2vesta grid-run input.molden shape --function shape-function
+multiwfn2vesta grid-run input.molden avg_esp --function average-local-electrostatic-potential
+multiwfn2vesta grid-run input.molden energy_density --function energy-density
+multiwfn2vesta grid-run input.molden bond_metallicity --function bond-metallicity
+multiwfn2vesta grid-run input.molden sci --function sci
 ```
 
 这些命名路由都走 Multiwfn 函数 `100`，分别写 run-local
@@ -352,6 +361,25 @@ correlation only，`3` 为两者都包含。默认 VESTA preset 是单正值
 这些路线都有 CLI、preset 和测试，但还没有手册级真实 PNG。推荐先用 benzene/phenol dimer 或 GC
 碱基对做弱相互作用示例，USI/BNI 也可放到 Ag(111)+benzene 吸附界面；正式出图必须记录 cube
 最小/最大值、等值面和是否映射到 density/interaction surface。
+
+bonding/energy diagnostics 也是 function `100` 命名路线，当前已有 CLI、preset 和测试，但还没有
+手册级真实 PNG。维护态路线包括：
+
+- `shape-function`: `iuserfunc=9`，`rho/N` 型 density-like shape function，单正值 preset。
+- `average-local-electrostatic-potential`: `iuserfunc=8`，`totesp/rho`，signed preset；低密度区可能尖锐。
+- `potential-energy-density` / `energy-density` / `scaled-energy-density` /
+  `local-nuclear-attraction-energy-density`: `iuserfunc=10/11/-11/12`，signed energy-density preset。
+- `lagrangian-ked-per-electron` / `energy-density-per-electron`: `iuserfunc=13/17`，signed local-energy-per-electron preset；
+  `G(r)/rho(r)` 在 BCP 附近可辅助区分共价和闭壳层相互作用。
+- `bond-metallicity` / `dimensionless-bond-metallicity`: `iuserfunc=15/16`，signed preset；Laplacian 分母附近要谨慎。
+- `momentum-fluctuation-magnitude`: `iuserfunc=25`，单正值 preset。
+- `electron-density-ellipticity`, `eta-index`, `modified-eta-index`: `iuserfunc=30/31/32`，用于密度各向异性诊断。
+- `sci`: `iuserfunc=37`，Multiwfn 源码调用 `ELF_LOL(...,"SCI")`，作为强共价相互作用指标显示。
+- `stiffness`: `iuserfunc=115`，源码调用 `densellip(...,3)`，单正值 stiffness preset。
+
+这组功能优先用 benzene/phenol dimer 或 GC 碱基对做分子间相互作用/BCP 附近对照；Ag(111)+benzene
+可用于界面 metallicity、局域能量密度或 stiffness。正式图必须先记录 cube range，再调
+`--isosurface` 或通过 `--surface-cube` 映射到统一的 density/interaction surface。
 
 扩展 KED diagnostics 也走 function `100` 和 run-local `-set`，不会改全局
 `settings.ini`：

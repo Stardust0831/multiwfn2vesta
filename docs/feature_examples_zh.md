@@ -45,6 +45,7 @@ multiwfn2vesta examples --coverage --json
 | `grid-run --function on-top-pair-density` | benzene dimer、GC 碱基对 | needs-render | 无 | 已有 `iuserfunc=36` CLI 和 preset；下一步比较 `paircorrtype` 后渲染电子对密度图 |
 | `grid-run --function information-theory` | benzene dimer、GC 碱基对、小极性分子或 COF | needs-render | 无 | 已有 `iuserfunc=49/50/51/52/53/54/55/56/70/100` CLI 和专用 preset；`information-gain-density` 会先执行 promolecular 初始化，second-Fisher 是 signed preset；下一步渲染信息增益、Shannon/Fisher/Ghosh/Renyi/disequilibrium 组合图 |
 | `grid-run --function usi/bni` | benzene/phenol dimer、GC 碱基对或 Ag(111)+benzene | needs-render | 无 | 已有 `iuserfunc=819/820` CLI 和 preset；下一步在弱相互作用或吸附界面体系中调 cube 范围后出图 |
+| `grid-run --function bonding/energy diagnostics` | benzene/phenol dimer、GC 碱基对或 Ag(111)+benzene | needs-render | 无 | 已有 `iuserfunc=8/9/10/11/-11/12/13/15/16/17/25/30/31/32/37/115` CLI 和 preset；下一步渲染 shape function、average local ESP、bond metallicity、SCI/stiffness 或局域能量诊断面板 |
 | `fukui-run` | 带杂原子的芳香分子，中性/阴/阳离子三态 | needs-example | 无 | 先固定同一网格的三态 density cube |
 | `stm-run` | 表面吸附小分子或芳香分子局域态 | needs-render | 无 | 选择 LDOS 能窗并渲染 constant-current surface |
 | `domain-run` | H2O density domain 或 COF 孔道区域 | needs-render | 无 | 渲染二值 domain surface 并记录 criterion |
@@ -81,9 +82,9 @@ example id 落地。每个 example 都应先满足 `examples/_template/README_zh
 
 | 计划 example id | 体系 | 主要覆盖功能 | 当前可复用资产 | 验收缺口 |
 | --- | --- | --- | --- | --- |
-| `ag111_benzene_extended_fields` | Ag(111)+benzene 周期 slab | `abacus-molden`, `molden-check`, `igmh-run`, `aim-igmh`, vdW/ESP/steric/SBL/STM | 已有 Ag 三视图、ABACUS Molden、IGMH/AIM smoke | 为 vdW/ESP/steric/SBL/STM 生成同一视角下的真实 PNG，并记录 cube 范围和等值面 |
-| `benzene_dimer_scalar_suite` | benzene dimer；公开 fallback 可用 phenol dimer | `iri-run`, RDG/DORI/Delta-g, RoSE/SEDD, vdW components, on-top pair density, information-density, USI/BNI | 目前无正式图 | 准备轻量 Molden/cube，渲染 paired weak-interaction/scalar figures |
-| `gc_weak_interaction_suite` | GC 碱基对 | `aim-run`, `aim-pdb`, IRI/RDG, ESP-on-density, on-top pair density, information-density, USI/BNI, `surface-extrema` | `gc_aim_overlay.png` 和 GC AIM runbook | 在同一 GC 体系补 IRI/ESP/ALIE、LEA extrema、information-density、USI/BNI 或 on-top pair density 图 |
+| `ag111_benzene_extended_fields` | Ag(111)+benzene 周期 slab | `abacus-molden`, `molden-check`, `igmh-run`, `aim-igmh`, vdW/ESP/steric/SBL/STM, bonding/energy diagnostics | 已有 Ag 三视图、ABACUS Molden、IGMH/AIM smoke | 为 vdW/ESP/steric/SBL/STM、bond metallicity 或局域能量密度生成同一视角下的真实 PNG，并记录 cube 范围和等值面 |
+| `benzene_dimer_scalar_suite` | benzene dimer；公开 fallback 可用 phenol dimer | `iri-run`, RDG/DORI/Delta-g, RoSE/SEDD, vdW components, on-top pair density, information-density, USI/BNI, bonding/energy diagnostics | 目前无正式图 | 准备轻量 Molden/cube，渲染 paired weak-interaction/scalar figures，并至少补一张 bond metallicity/SCI/ellipticity 对照图 |
+| `gc_weak_interaction_suite` | GC 碱基对 | `aim-run`, `aim-pdb`, IRI/RDG, ESP-on-density, on-top pair density, information-density, USI/BNI, bonding/energy diagnostics, `surface-extrema` | `gc_aim_overlay.png` 和 GC AIM runbook | 在同一 GC 体系补 IRI/ESP/ALIE、LEA extrema、information-density、USI/BNI、bonding diagnostics 或 on-top pair density 图 |
 | `cof_direct_cube_suite` | COF_12000N2 单层或小 COF | `cube-vesta`, `cube-preset`, ABACUS density/potential/ELF/partial charge/wfc norm | 仅有 COF CIF 经验记录 | 跑 ABACUS 单点或复用 direct cube，渲染 density/potential/ELF 等图 |
 | `fukui_dual_reactivity` | coronene、nitro/hetero aromatic 或其它三态反应性分子 | `cube-arith`, `fukui-run`, orbital-weighted Fukui/dual, atom scalar coloring | 无正式图 | 准备同网格 neutral/anion/cation density cube 和 condensed atom values |
 | `spin_atom_coloring_suite` | C4H8 diradical、triplet 小分子、磁性氧化物或 spin-polarized adsorbate | spin density, `abacus-mulliken-color`, `multiwfn-atom-color` | 只有 toy/coloring smoke | 换真实 `mulliken.txt` 或 Multiwfn atom table，补 PNG 和色标说明 |
@@ -110,6 +111,7 @@ example id 落地。每个 example 都应先满足 `examples/_template/README_zh
 | on-top pair density | benzene dimer、GC 碱基对 | 单正值等值面；可比较 `paircorrtype=1/2/3` |
 | information gain / Shannon / Fisher / Ghosh / Renyi / disequilibrium | benzene dimer、GC、H2O 或 COF | 信息增益和 Shannon 用 signed surface；second-Fisher 用 signed surface；normal/phase-space Fisher、Ghosh/Renyi/disequilibrium 用单正值 surface |
 | USI/BNI | benzene/phenol dimer、GC 或 Ag(111)+benzene | USI signed、BNI 单正值；低密度尖峰需用真实 cube range 调等值面 |
+| bonding/energy/anisotropy diagnostics | benzene/phenol dimer、GC、Ag(111)+benzene | shape function、average local ESP、energy-density、bond metallicity、ellipticity/eta、SCI、stiffness；含 `rho` 或 Laplacian 分母的场要先检查低密度尖峰 |
 | FOD、orbital-weighted Fukui/dual | 反应性分子 | signed/single surface，配 condensed atom value coloring |
 | Becke/Hirshfeld weights | 小分子/COF | standalone diagnostic surface，先作为高级例 |
 | pair/source function | 选定键或孤对电子参考点 | 需要更好的参考点交互说明后再正式化 |
@@ -141,5 +143,6 @@ CLI 入口补充：
 - steric/SBL 场已维护核心无额外交互路线：`iuserfunc=40-43/60-69/-69/110-113`，适合吸附排斥和界面相互作用解释；damped steric `44-47` 暂未维护。
 - on-top pair density 已维护：`iuserfunc=36`，适合电子对密度相关展示；需要真实 `benzene dimer` 或 GC 渲染后再标 ready。
 - 信息论/Ghosh/Renyi/USI/BNI 路线已维护：`iuserfunc=49/50/51/52/53/54/55/56/70/100/819/820`；需要 benzene dimer、GC、COF 或 Ag(111)+benzene 的真实 render 后再标 ready。
+- bonding/energy diagnostics 已维护：`iuserfunc=8/9/10/11/-11/12/13/15/16/17/25/30/31/32/37/115`；推荐先在 benzene/phenol dimer、GC 碱基对或 Ag(111)+benzene 上渲染 shape function、average local ESP、bond metallicity、SCI/stiffness 和局域能量密度对照图。
 
 这些候选暂时不阻塞当前“已有功能闭环”。优先级仍是先把 ready/needs-render 的现有功能补成清晰可复用算例。

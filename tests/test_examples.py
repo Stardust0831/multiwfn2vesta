@@ -112,6 +112,7 @@ class TestExamplesIndex(unittest.TestCase):
         self.assertIn("on-top-pair-density", text)
         self.assertIn("information-theory", text)
         self.assertIn("usi/bni", text)
+        self.assertIn("bonding/energy diagnostics", text)
         self.assertIn("aim-igmh", text)
         self.assertIn("trajectory-video", text)
         self.assertIn("docs/feature_examples_zh.md", text)
@@ -193,6 +194,33 @@ class TestExamplesIndex(unittest.TestCase):
         records = json.loads(output.getvalue())
         commands = {item["command"] for item in records}
         self.assertEqual(commands, {"grid-run --function usi/bni"})
+
+        output = io.StringIO()
+        with patch("sys.stdout", output):
+            code = examples.main(["--command", "bond-metallicity", "--json"])
+
+        self.assertEqual(code, 0)
+        records = json.loads(output.getvalue())
+        commands = {item["command"] for item in records}
+        self.assertEqual(commands, {"grid-run --function bonding/energy diagnostics"})
+
+        output = io.StringIO()
+        with patch("sys.stdout", output):
+            code = examples.main(["--command", "shape-function", "--json"])
+
+        self.assertEqual(code, 0)
+        records = json.loads(output.getvalue())
+        commands = {item["command"] for item in records}
+        self.assertEqual(commands, {"grid-run --function bonding/energy diagnostics"})
+
+        output = io.StringIO()
+        with patch("sys.stdout", output):
+            code = examples.main(["--command", "sci", "--json"])
+
+        self.assertEqual(code, 0)
+        records = json.loads(output.getvalue())
+        commands = {item["command"] for item in records}
+        self.assertEqual(commands, {"grid-run --function bonding/energy diagnostics"})
 
         output = io.StringIO()
         with patch("sys.stdout", output):

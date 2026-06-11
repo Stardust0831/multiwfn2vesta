@@ -8,8 +8,10 @@ Updated: 2026-06-12 09:42 CST
 - [x] 盘点当前代码/CLI/examples/docs/gallery 状态，确认哪些功能已有可复用真实图，哪些只有 planned runbook，哪些需要补真实算例或渲染产物。继续保护未跟踪 `domain.cub` / `domain.pdb`。当前真实项目内 PNG 资产 12/12 present；ready 主线仍是 Ag(111)+benzene IGMH+AIM、GC/benzene AIM 和 Cd/Cl 轨迹，H2O-HF IRI+AIM/phenanthrene/NICS 保持调试或杂项定位。
 - [x] 选择优先级最高的一批真实体系补闭环：Ag(111)+benzene IGMH+AIM、GC/benzene weak interaction、COF 单层 direct cube、Cd/Cl 轨迹，以及信息论/USI/BNI/steric/KED 等标量场的手册级 examples。新增 `docs/research/valuable_systems_for_examples_zh.md` 记录体系选择依据，避免后续回退到 toy examples。
 - [x] 优化用户体验：让 `examples` / 中文手册 / status matrix 更容易按功能找到命令、输入、输出、效果图和缺口；必要时补 CLI 子命令或校验脚本。新增 `multiwfn2vesta examples --summary` 和 JSON 输出，汇总 example/coverage/gallery 状态、ready ids 和下一批优先体系。
+- [x] 吸收只读子 agent 审计：当前 ready 渲染仍集中在 Ag(111)+benzene IGMH+AIM、GC/benzene AIM 和 Cd/Cl 轨迹；新增 bonding/local-energy/density-anisotropy diagnostics 需要独立 coverage，不能标成 ready。
+- [x] 补 source-backed bonding/energy diagnostics 闭环入口：`grid-run` / `cube-preset` 已新增 `iuserfunc=8/9/10/11/-11/12/13/15/16/17/25/30/31/32/37/115` 路线，`examples --command bond-metallicity`、`--command shape-function`、`--command sci` 可反查到 `needs-render` coverage；README、中文手册、usage、feature/status matrix、planned runbook、skills 和 worklog 已同步。
 - [x] 尽可能渲染或复用真实效果图；不能在本轮稳定渲染的功能保持 `needs-render`，不使用 toy/placeholder 图冒充成品。本轮复用并索引已有真实 VESTA PNG，不新增假图；grid-run 标量场、surface-extrema、Fukui/cube-arith、atom coloring、STM、domain、aIGM/amIGM 仍明确待渲染或待真实体系。
-- [ ] 同步 README、中文手册、feature/status matrix、skills、worklog、看板和根 docs 镜像，运行 no-GUI regression/CLI smokes/docs checks 后用 `Stardust0831` 身份提交推送。当前已同步主要项目文档和 CLI skill；focused `tests.test_examples` 24 tests、`tests.test_examples tests.test_cli` 87 tests、full no-GUI 405 tests、`examples --verify`、`examples --summary --json`、markdown local-link check 和 `git diff --check` 已通过；只读子 agent 审计无阻塞，已修正 trajectory ready 状态和 `cube-vesta` linked/standalone-render-pending 口径。待最终 docs mirror dry-run/commit/push。
+- [x] 同步 README、中文手册、feature/status matrix、skills、worklog、看板和根 docs 镜像，运行 no-GUI regression/CLI smokes/docs checks 后用 `Stardust0831` 身份提交推送。当前已完成 bonding/energy diagnostics 代码、focused 165 tests、full 407 no-GUI tests、CLI smokes、`examples --verify`、markdown local-link check、`git diff --check` 和 docs mirror checksum dry-run；最终提交/push 哈希由本轮回复报告。
 
 ## Current Request: 2026-06-12 Feature Closure Phase 7, Information-Density Routes, Examples, And Manual
 

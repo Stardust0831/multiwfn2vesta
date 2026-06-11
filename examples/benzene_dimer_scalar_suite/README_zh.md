@@ -3,7 +3,7 @@
 ## 体系价值
 
 - 体系：benzene dimer、phenol dimer 或取代芳香二聚体。
-- 对应功能：`iri-run`、RDG/DORI/Delta-g、RoSE/SEDD、vdW component、on-top pair density。
+- 对应功能：`iri-run`、RDG/DORI/Delta-g、RoSE/SEDD、vdW component、on-top pair density、bonding/energy diagnostics。
 - 为什么值得作为示例：pi-stacking/氢键/色散相互作用直观，体系比 Ag slab 小，适合做弱相互作用标量场的快速教程。若本地没有 benzene dimer 波函数，phenol dimer 可作为公开教程型 fallback。
 - 不适合说明的问题：不覆盖周期性边界和金属表面吸附。
 
@@ -33,6 +33,15 @@ multiwfn2vesta grid-run benzene_dimer.molden products/ontop_pair \
   --function on-top-pair-density \
   --pair-correlation-type 3
 
+multiwfn2vesta grid-run benzene_dimer.molden products/bond_metallicity \
+  --function bond-metallicity
+
+multiwfn2vesta grid-run benzene_dimer.molden products/sci \
+  --function sci
+
+multiwfn2vesta grid-run benzene_dimer.molden products/ellipticity \
+  --function electron-density-ellipticity
+
 multiwfn2vesta grid-run benzene_dimer.molden products/vdw \
   --function vdw-potential \
   --vdw-probe C
@@ -46,12 +55,15 @@ multiwfn2vesta grid-run benzene_dimer.molden products/vdw \
 | `products/rose/userfunc.cub` | RoSE cube | 否 |
 | `products/sedd/userfunc.cub` | SEDD cube | 否 |
 | `products/ontop_pair/userfunc.cub` | on-top pair density cube | 否 |
+| `products/bond_metallicity/userfunc.cub` | bond metallicity cube | 否 |
+| `products/sci/userfunc.cub` | SCI bonding indicator cube | 否 |
+| `products/ellipticity/userfunc.cub` | density ellipticity cube | 否 |
 | `products/*/*.vesta` | VESTA 场景 | 小文件可选 |
 | `docs/assets/gallery/benzene_dimer_scalar_suite_*.png` | 配对效果图 | 是，生成后再加入 |
 
 ## 效果图状态
 
-尚无正式 PNG。正式图建议至少包含两列：IRI/RDG 或 DORI 用于弱相互作用直观展示，RoSE/SEDD 或 on-top pair density 用于电子结构诊断对照。
+尚无正式 PNG。正式图建议至少包含两列：IRI/RDG 或 DORI 用于弱相互作用直观展示，RoSE/SEDD、on-top pair density、bond metallicity、SCI 或 density ellipticity 用于电子结构诊断对照。
 
 ## 验收条件
 
@@ -59,6 +71,7 @@ multiwfn2vesta grid-run benzene_dimer.molden products/vdw \
 multiwfn2vesta examples --id benzene_dimer_scalar_suite --verify
 multiwfn2vesta examples --command on-top-pair --json
 multiwfn2vesta examples --command rose --json
+multiwfn2vesta examples --command bond-metallicity --json
 ```
 
 升为 `ready` 前需要记录 cube 最小/最大值、选定等值面、VESTA sections 是否关闭，以及至少一张项目内 PNG。

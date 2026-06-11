@@ -30,9 +30,9 @@ mp4、临时 `.vesta` 留在 `smoke/`，项目内只提交 runbook、manifest、
 | 2 | GC 碱基对 | AIM paths/BCP overlay | `../../smoke/20260605_sob445_more_aim_examples/gc/`，已复制 gallery 图 | 做一个轻量 AIM 教程 example |
 | 3 | benzene | AIM 基础例和 NICS/vector misc | `../../smoke/20260605_sob445_more_aim_examples/benzene/`，`../../smoke/20260605_nics_vesta_vectors/` | AIM 可入主线；NICS/vector 仅放 misc |
 | 4 | Cd/Cl 轨迹 | XYZ/extXYZ trajectory -> VESTA frames -> PNG -> mp4 | `../../smoke/vesta_trajectory_video_1608/ase_nvt_refstyle_stride20_cdcl3p50/`，`cdcl_trajectory_video/cdcl_tiny.extxyz` | 已有 `trajectory-frames` 和 `trajectory-video`；下一步补 ASE `.traj` 读取和 VESTA PNG 渲染 |
-| 5 | Ag(111)+benzene 扩展场 | vdW/ESP/electric-field/steric/SBL/STM | `ag111_benzene_igmh_aim` 已有三视图 | 见 `ag111_benzene_extended_fields/README_zh.md`，复用同一相机补 scalar-field 图 |
-| 6 | benzene dimer | IRI/RDG/DORI/Delta-g、RoSE/SEDD、vdW、on-top pair density | 当前只有 CLI/preset/test；暂无正式 smoke 图 | 见 `benzene_dimer_scalar_suite/README_zh.md`，用 validated Molden 渲染 paired figure |
-| 7 | GC 碱基对扩展 | IRI/RDG、ESP-on-density、surface extrema、on-top pair density | `gc_aim` 已有 AIM overlay | 见 `gc_weak_interaction_suite/README_zh.md`，在同一体系上补弱相互作用图 |
+| 5 | Ag(111)+benzene 扩展场 | vdW/ESP/electric-field/steric/SBL/STM、bonding/energy diagnostics | `ag111_benzene_igmh_aim` 已有三视图 | 见 `ag111_benzene_extended_fields/README_zh.md`，复用同一相机补 scalar-field 图 |
+| 6 | benzene dimer | IRI/RDG/DORI/Delta-g、RoSE/SEDD、vdW、on-top pair density、bonding/energy diagnostics | 当前只有 CLI/preset/test；暂无正式 smoke 图 | 见 `benzene_dimer_scalar_suite/README_zh.md`，用 validated Molden 渲染 paired figure |
+| 7 | GC 碱基对扩展 | IRI/RDG、ESP-on-density、surface extrema、on-top pair density、bonding/energy diagnostics | `gc_aim` 已有 AIM overlay | 见 `gc_weak_interaction_suite/README_zh.md`，在同一体系上补弱相互作用图 |
 | 8 | COF_12000N2 单层 | ABACUS direct density/potential/ELF/partial charge/wfc norm | 当前只有体系规划 | 见 `cof_direct_cube_suite/README_zh.md`，只提交轻量 runbook/PNG |
 | 9 | 杂原子芳香分子 | Fukui/dual descriptor、cube-arith、atom coloring | 当前缺三态同网格 cube | 见 `fukui_dual_reactivity/README_zh.md` |
 | 10 | open-shell/磁性体系 | spin density、Mulliken magnetism、atom table coloring | 只有 Fe toy smoke | 见 `spin_atom_coloring_suite/README_zh.md`，换真实体系 |
@@ -54,9 +54,9 @@ planned examples，等真实 PNG 生成后再把状态提升为 `ready`：
 
 | example id | 覆盖功能 |
 | --- | --- |
-| `ag111_benzene_extended_fields` | Ag(111)+benzene 上的 ESP、电场、vdW、steric/SBL、STM |
-| `benzene_dimer_scalar_suite` | IRI/RDG/DORI/Delta-g、RoSE/SEDD、vdW、on-top pair density |
-| `gc_weak_interaction_suite` | GC AIM 扩展到 IRI/RDG、ESP、surface extrema、on-top pair density |
+| `ag111_benzene_extended_fields` | Ag(111)+benzene 上的 ESP、电场、vdW、steric/SBL、STM、bond metallicity、局域能量密度 |
+| `benzene_dimer_scalar_suite` | IRI/RDG/DORI/Delta-g、RoSE/SEDD、vdW、on-top pair density、SCI、bond metallicity、density ellipticity |
+| `gc_weak_interaction_suite` | GC AIM 扩展到 IRI/RDG、ESP、surface extrema、on-top pair density、G(r)/rho、stiffness、eta |
 | `cof_direct_cube_suite` | ABACUS direct density/potential/ELF/partial charge/wfc norm |
 | `fukui_dual_reactivity` | `fukui-run`、`cube-arith`、dual descriptor、atom scalar coloring |
 | `spin_atom_coloring_suite` | spin density、Mulliken magnetism、atom value coloring |

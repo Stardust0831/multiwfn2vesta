@@ -57,6 +57,12 @@ multiwfn2vesta cube-preset orbital-overlap-distance EDRDmax.cub cube_products
 multiwfn2vesta cube-preset pair-function fermihole.cub cube_products
 multiwfn2vesta cube-preset source-function srcfunc.cub cube_products
 multiwfn2vesta cube-preset user-function userfunc.cub cube_products
+multiwfn2vesta cube-preset shape-function userfunc.cub cube_products
+multiwfn2vesta cube-preset average-local-electrostatic-potential userfunc.cub cube_products
+multiwfn2vesta cube-preset energy-density userfunc.cub cube_products
+multiwfn2vesta cube-preset local-energy-per-electron userfunc.cub cube_products
+multiwfn2vesta cube-preset bond-metallicity userfunc.cub cube_products
+multiwfn2vesta cube-preset sci userfunc.cub cube_products
 multiwfn2vesta cube-preset information-gain-density userfunc.cub cube_products
 multiwfn2vesta cube-preset shannon-entropy-density userfunc.cub cube_products
 multiwfn2vesta cube-preset fisher-information-density userfunc.cub cube_products
@@ -279,6 +285,34 @@ passes it back through `cube-preset`.
   `gea2-ked-potential`, and `tfvw-ked-potential`; signed surfaces for
   source-supported function-100 `iuserfunc=1210` routes with `iKEDsel=3/5/7`,
   default magnitude `0.05`.
+- `shape-function` aliases include `shape` and `density-shape-function`;
+  single positive surface for function-100 `iuserfunc=9` `rho/N`, default
+  isosurface `0.001`.
+- `average-local-electrostatic-potential` aliases include
+  `average-local-esp` and `totesp-over-rho`; signed surfaces for
+  function-100 `iuserfunc=8`, default magnitude `0.05`.
+- `energy-density` aliases include `potential-energy-density`,
+  `scaled-energy-density`, and `local-nuclear-attraction-energy-density`;
+  signed surfaces for function-100 `iuserfunc=10/11/-11/12`, default
+  magnitude `0.01`.
+- `local-energy-per-electron` aliases include `g-over-rho`,
+  `lagrangian-ked-per-electron`, and `energy-density-per-electron`; signed
+  surfaces for function-100 `iuserfunc=13/17`, default magnitude `0.05`.
+- `bond-metallicity` aliases include `dimensionless-bond-metallicity` and
+  `rho-over-laplacian`; signed surfaces for function-100 `iuserfunc=15/16`,
+  default magnitude `0.05`.
+- `momentum-fluctuation` aliases include
+  `momentum-fluctuation-magnitude`; single positive surface for
+  function-100 `iuserfunc=25`, default isosurface `0.05`.
+- `density-ellipticity` aliases include `electron-density-ellipticity`;
+  single positive surface for function-100 `iuserfunc=30`, default
+  isosurface `0.1`.
+- `eta-index` aliases include `eta` and `modified-eta-index`; signed
+  surfaces for function-100 `iuserfunc=31/32`, default magnitude `0.5`.
+- `sci` aliases include `strong-covalent-interaction`; single positive
+  surface for function-100 `iuserfunc=37`, default isosurface `0.5`.
+- `stiffness` aliases include `density-stiffness`; single positive surface
+  for function-100 `iuserfunc=115`, default isosurface `0.1`.
 - `steric-energy-density` aliases: `steric-density`, `steric-energy`,
   `steric-ked`; single positive surface for function-100 `iuserfunc=40`
   steric/Weizsacker-like energy density, default isosurface `0.01`.
@@ -381,6 +415,11 @@ passes it back through `cube-preset`.
   `renyi-quadratic-density` / `renyi-cubic-density` = `55` / `56`,
   `phase-space-fisher-information-density` = `70`,
   `disequilibrium-density` = `100`, `usi` / `bni` = `819` / `820`,
+  bonding/energy diagnostics such as `shape-function` = `9`,
+  `average-local-esp` = `8`, energy-density family =
+  `10/11/-11/12`, local-energy-per-electron family = `13/17`,
+  bond-metallicity family = `15/16`, anisotropy/SCI/stiffness family =
+  `25/30/31/32/37/115`,
   `fractional-occupation-density` / `fod` = `90`,
   `vdw-repulsion-potential` / `vdw-dispersion-potential` = `93` / `94`,
   ESP components = `101` / `102` / `103`, orbital-weighted Fukui/dual =

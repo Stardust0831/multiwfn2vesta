@@ -91,6 +91,7 @@ multiwfn2vesta examples --systems
 | 电子对密度 | `on-top-pair-density` | benzene dimer、GC 碱基对 | 有入口 | 已有 source-backed `iuserfunc=36` 路由、`paircorrtype` 控制和 preset，缺真实 pair-density render |
 | 信息论/Ghosh/Renyi/disequilibrium | `information-gain-density`, `shannon-entropy-density`, `fisher-information-density`, `second-fisher-information-density`, `ghosh-entropy-density`, `renyi-quadratic-density`, `disequilibrium-density` | benzene dimer、GC 碱基对、H2O 或 COF | 有入口 | 已有 source-backed `iuserfunc=49/50/51/52/53/54/55/56/70/100` 路由和 preset；information gain 自动做 promolecular 初始化，second-Fisher 为 signed preset，缺真实解释型 render |
 | USI/BNI 相互作用指标 | `usi`, `bni` | benzene/phenol dimer、GC 碱基对、Ag(111)+benzene | 有入口 | 已有 source-backed `iuserfunc=819/820` 路由和 preset，低密度尖峰需真实 cube range 调参后再出图 |
+| bonding/energy/anisotropy 诊断 | `shape-function`, `average-local-electrostatic-potential`, `energy-density`, `bond-metallicity`, `electron-density-ellipticity`, `eta-index`, `sci`, `stiffness` 等 | benzene/phenol dimer、GC 碱基对、Ag(111)+benzene | 有入口 | 已有 source-backed `iuserfunc=8/9/10/11/-11/12/13/15/16/17/25/30/31/32/37/115` 路由和 preset；缺真实 bonding/energy diagnostic render |
 | 反应性 | `fod`, `orbital-weighted-fukui-*`, `orbital-weighted-dual-descriptor` | 小分子反应位点 | 有入口 | 需要真实 closed-shell 测试体系 |
 | 局部信息熵 | `local-information-entropy` | 小分子/COF | 有入口 | 缺图，默认 isosurface 需调 |
 | 分区权重 | `becke`, `hirshfeld` | 分子内片段边界 | 有入口 | 缺图 |
@@ -106,15 +107,16 @@ multiwfn2vesta examples --systems
 | IRI/DORI/IGMH/aIGM | `iri`, `dori`, `igmh`, `aigm` | IGMH 已闭环；IRI 有调试图 | IRI/DORI/aIGM 补手册级图 |
 | RoSE/SEDD | `rose`, `sedd` | 有入口 | 用 benzene dimer 或 GC 配对渲染慢电子/SEDD 等值面 |
 | information/Ghosh/Renyi/USI/BNI | `information-gain-density`, `shannon-entropy-density`, `fisher-information-density`, `second-fisher-information-density`, `ghosh-entropy-density`, `renyi-entropy-density`, `usi`, `bni` | 有入口 | 用 benzene dimer、GC、COF 或 Ag(111)+benzene 调 cube range 后补图 |
+| bonding/energy diagnostics | `shape-function`, `average-local-electrostatic-potential`, `energy-density`, `local-energy-per-electron`, `bond-metallicity`, `momentum-fluctuation`, `density-ellipticity`, `eta-index`, `sci`, `stiffness` | 有入口 | 用 benzene/phenol dimer、GC 或 Ag(111)+benzene 补 shape/bonding/SCI/stiffness 对照图 |
 | ESP/ALIE/LEA/vdW map | `esp`, `alie`, `lea`, `leae`, `vdw-map` | 有 VESTA/cube | 先补 ESP/ALIE surface extrema |
 | domain/basin | `domain`, `basin`, `basin-type` | 有 VESTA/cube | 渲染 H2O domain 和 basin 示例 |
 | vdW components | `vdw-potential`, `vdw-repulsion-potential`, `vdw-dispersion-potential` | 有入口 | 用同一体系展示 total/repul/disp |
 
 ## 近期闭环优先级
 
-1. `ag111_benzene_extended_fields`: 复用已 ready 的 Ag(111)+benzene Molden、cell 和三视图相机，补 ESP/vdW/electric-field/steric/SBL/STM 至少一张 scalar-field PNG。
-2. `benzene_dimer_scalar_suite`: 用 benzene dimer 或 phenol dimer 一次性覆盖 IRI/RDG/DORI/Delta-g、RoSE/SEDD、vdW 和 on-top pair density 的弱相互作用图。
-3. `gc_weak_interaction_suite`: 在已 ready 的 GC AIM 上补 IRI/ESP/surface-extrema/on-top pair density，形成完整氢键教程。
+1. `ag111_benzene_extended_fields`: 复用已 ready 的 Ag(111)+benzene Molden、cell 和三视图相机，补 ESP/vdW/electric-field/steric/SBL/STM、bond metallicity 或局域能量密度至少一张 scalar-field PNG。
+2. `benzene_dimer_scalar_suite`: 用 benzene dimer 或 phenol dimer 一次性覆盖 IRI/RDG/DORI/Delta-g、RoSE/SEDD、vdW、on-top pair density 和 bonding/energy diagnostics 的弱相互作用图。
+3. `gc_weak_interaction_suite`: 在已 ready 的 GC AIM 上补 IRI/ESP/surface-extrema/on-top pair density、SCI/stiffness 或 bond metallicity，形成完整氢键教程。
 4. `cof_direct_cube_suite`: 给 COF_12000N2 单层补 ABACUS direct density/potential/ELF/partial-charge/wavefunction-norm 的真实材料 cube 图。
 5. `fukui_dual_reactivity`: 准备 coronene、nitro/hetero aromatic 或类似三态反应性体系的同网格 neutral/anion/cation density cube，闭合 `fukui-run`、`cube-arith` 和 atom coloring 主线。
 6. `spin_atom_coloring_suite`: 用 C4H8 diradical、triplet 小分子、磁性氧化物或 spin-polarized adsorbate 替换 toy Fe smoke，补 spin-density 和原子电荷/磁矩染色图。

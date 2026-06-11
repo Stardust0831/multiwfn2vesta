@@ -337,6 +337,35 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertIn("preset=on-top-pair-density", text)
         self.assertIn("default iuserfunc=36", text)
         self.assertIn("settings: paircorrtype=3", text)
+        self.assertIn("shape-function", text)
+        self.assertIn("preset=shape-function", text)
+        self.assertIn("average-local-electrostatic-potential", text)
+        self.assertIn("preset=average-local-electrostatic-potential", text)
+        self.assertIn("potential-energy-density", text)
+        self.assertIn("preset=energy-density", text)
+        self.assertIn("bond-metallicity", text)
+        self.assertIn("preset=bond-metallicity", text)
+        self.assertIn("energy-density-per-electron", text)
+        self.assertIn("preset=local-energy-per-electron", text)
+        self.assertIn("momentum-fluctuation-magnitude", text)
+        self.assertIn("preset=momentum-fluctuation", text)
+        self.assertIn("electron-density-ellipticity", text)
+        self.assertIn("preset=density-ellipticity", text)
+        self.assertIn("eta-index", text)
+        self.assertIn("preset=eta-index", text)
+        self.assertIn("sci", text)
+        self.assertIn("preset=sci", text)
+        self.assertIn("stiffness", text)
+        self.assertIn("preset=stiffness", text)
+        self.assertIn("default iuserfunc=8", text)
+        self.assertIn("default iuserfunc=9", text)
+        self.assertIn("default iuserfunc=10", text)
+        self.assertIn("default iuserfunc=-11", text)
+        self.assertIn("default iuserfunc=15", text)
+        self.assertIn("default iuserfunc=17", text)
+        self.assertIn("default iuserfunc=25", text)
+        self.assertIn("default iuserfunc=30", text)
+        self.assertIn("default iuserfunc=115", text)
         self.assertIn("default iuserfunc=27", text)
         self.assertIn("default iuserfunc=-27", text)
         self.assertIn("default iuserfunc=28", text)
@@ -1637,6 +1666,80 @@ class TestMultiwfnGridRunner(unittest.TestCase):
             self.assertIn("effective_surface_mode: `single`", manifest)
             self.assertIn("effective_isosurface: `0.01`", manifest)
             self.assertIn("paircorrtype", manifest)
+
+    def test_run_bonding_energy_diagnostic_routes_patch_iuserfunc(self):
+        cases = (
+            ("shape-function", 9, "shape-function", "0.001", "single"),
+            ("average-local-esp", 8, "average-local-electrostatic-potential", "0.05", "signed"),
+            ("potential-energy-density", 10, "energy-density", "0.01", "signed"),
+            ("energy-density", 11, "energy-density", "0.01", "signed"),
+            ("scaled-energy-density", -11, "energy-density", "0.01", "signed"),
+            ("nuclear-attraction-energy-density", 12, "energy-density", "0.01", "signed"),
+            ("g-over-rho", 13, "local-energy-per-electron", "0.05", "signed"),
+            ("bond-metallicity", 15, "bond-metallicity", "0.05", "signed"),
+            ("dimensionless-bond-metallicity", 16, "bond-metallicity", "0.05", "signed"),
+            ("energy-density-per-electron", 17, "local-energy-per-electron", "0.05", "signed"),
+            ("momentum-fluctuation", 25, "momentum-fluctuation", "0.05", "single"),
+            ("electron-density-ellipticity", 30, "density-ellipticity", "0.1", "single"),
+            ("eta-index", 31, "eta-index", "0.5", "signed"),
+            ("modified-eta-index", 32, "eta-index", "0.5", "signed"),
+            ("strong-covalent-interaction", 37, "sci", "0.5", "single"),
+            ("stiffness", 115, "stiffness", "0.1", "single"),
+        )
+        for function_name, expected_iuserfunc, expected_preset, expected_isosurface, expected_mode in cases:
+            with self.subTest(function_name=function_name):
+                with tempfile.TemporaryDirectory() as tmp:
+                    root = Path(tmp)
+                    wavefunction = root / "h2o.fch"
+                    wavefunction.write_text("wavefunction", encoding="utf-8")
+                    candidate = self.make_candidate(root)
+                    (candidate.path.parent / "settings.ini").write_text(
+                        "iuserfunc= 0 // stale userfunc\nother_setting= keep\n",
+                        encoding="utf-8",
+                    )
+
+                    def fake_run(command, **kwargs):
+                        cwd = Path(kwargs["cwd"])
+                        cube_text = (
+                            ON_TOP_PAIR_CUBE
+                            if expected_preset == "shape-function"
+                            else VDW_POTENTIAL_CUBE
+                            if expected_preset == "eta-index"
+                            else ROSE_SEDD_CUBE
+                            if expected_isosurface == "0.5"
+                            else USER_FUNCTION_CUBE
+                        )
+                        (cwd / "userfunc.cub").write_text(cube_text, encoding="utf-8")
+                        return subprocess.CompletedProcess(command, 0, stdout="ok", stderr="")
+
+                    with patch("multiwfn2vesta.multiwfn_grid.find_multiwfn", return_value=candidate):
+                        with patch("multiwfn2vesta.multiwfn_grid.subprocess.run", side_effect=fake_run):
+                            result = run_multiwfn_grid(
+                                wavefunction,
+                                root / "products",
+                                function_name=function_name,
+                                stem="case",
+                                grid_mode="low",
+                            )
+
+                    self.assertTrue(result.success)
+                    self.assertEqual(result.command_file.read_text(encoding="utf-8"), "5\n100\n1\n2\n0\nq\n")
+                    self.assertEqual(result.user_function_index, expected_iuserfunc)
+                    self.assertIsNotNone(result.settings_override)
+                    settings_text = result.settings_override.read_text(encoding="utf-8")
+                    self.assertIn(f"iuserfunc= {expected_iuserfunc} // stale userfunc", settings_text)
+                    self.assertIn("other_setting= keep", settings_text)
+                    self.assertEqual(result.raw_cube.name, "userfunc.cub")
+                    self.assertIsNotNone(result.vesta_result)
+                    recipe = result.recipe_path.read_text(encoding="utf-8")
+                    self.assertIn(f"function_name: `{resolve_grid_function(function_name).name}`", recipe)
+                    self.assertIn("function_index: `100`", recipe)
+                    self.assertIn(f"user_function_index_iuserfunc: `{expected_iuserfunc}`", recipe)
+                    self.assertIn(f"auto_vesta_preset: `{expected_preset}`", recipe)
+                    manifest = result.vesta_result.manifest_path.read_text(encoding="utf-8")
+                    self.assertIn(f"canonical_preset: `{expected_preset}`", manifest)
+                    self.assertIn(f"effective_isosurface: `{expected_isosurface}`", manifest)
+                    self.assertIn(f"effective_surface_mode: `{expected_mode}`", manifest)
 
     def test_run_steric_sbl_routes_patch_iuserfunc(self):
         cases = (

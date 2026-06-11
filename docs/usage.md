@@ -73,7 +73,8 @@ multiwfn2vesta trajectory-video --help
   potential、partial charge、wavefunction norm、ELF/LOL、IRI/RDG/NCI、DORI、
   EDR(r;d)、D(r)、IGM/IGMH/aIGM、ESP/MEP、electron-only ESP、positive/negative ESP、
   electric-field magnitude、on-top pair density、information-gain/Shannon/Fisher/Ghosh/Renyi/disequilibrium、
-  USI/BNI、steric/SBL energy/potential/force/charge、ALIE/LEA/LEAE、
+  USI/BNI、shape function、average local ESP、bonding/energy diagnostics、
+  steric/SBL energy/potential/force/charge、ALIE/LEA/LEAE、
   userfunc/iuserfunc、selected KED variants、standalone vdW total/repulsion/dispersion potential、vdW map
 - `surface-extrema`: 把 Multiwfn `surfanalysis.pdb` 的分子表面极值点作为
   atoms-only phase 叠加到已有 `.vesta` 文件中
@@ -102,6 +103,8 @@ multiwfn2vesta trajectory-video --help
   ESP/MEP、electron-only ESP、positive/negative ESP、电场强度、ALIE、EDR(r;d)、D(r)、RDG/IRI-like、
   promolecular RDG/sign(lambda2)rho、function-100 alpha/beta density 和
   FOD、on-top pair density、information-theory/Ghosh/Renyi/USI/BNI、
+  shape-function、average local ESP、energy-density、bond-metallicity、SCI/stiffness 等
+  bonding/energy diagnostics、
   Thomas-Fermi/Weizsacker/Pauli KED、KED 差值/局域温度/KED potential diagnostics、steric/SBL/Pauli/quantum/electrostatic
   potential/force/charge/energy-density 等单 cube，并可自动接
   `cube-preset` 写 `.vesta`
@@ -270,6 +273,12 @@ multiwfn2vesta cube-preset orbital-overlap-distance EDRDmax.cub cube_products
 multiwfn2vesta cube-preset pair-function fermihole.cub cube_products
 multiwfn2vesta cube-preset source-function srcfunc.cub cube_products
 multiwfn2vesta cube-preset user-function userfunc.cub cube_products
+multiwfn2vesta cube-preset shape-function userfunc.cub cube_products
+multiwfn2vesta cube-preset average-local-electrostatic-potential userfunc.cub cube_products
+multiwfn2vesta cube-preset energy-density userfunc.cub cube_products
+multiwfn2vesta cube-preset local-energy-per-electron userfunc.cub cube_products
+multiwfn2vesta cube-preset bond-metallicity userfunc.cub cube_products
+multiwfn2vesta cube-preset sci userfunc.cub cube_products
 multiwfn2vesta cube-preset information-gain-density userfunc.cub cube_products
 multiwfn2vesta cube-preset shannon-entropy-density userfunc.cub cube_products
 multiwfn2vesta cube-preset fisher-information-density userfunc.cub cube_products
@@ -354,6 +363,31 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
   `uservar=0`，只有 local-temperature 路线的 `--ked-density-cutoff` 会覆盖它
 - `ked-potential`：正/负等值面，用于 function-100 `iuserfunc=1210`
   且源码显式支持的 `iKEDsel=3/5/7` KED potential；默认幅值 `0.05`
+- `shape-function`：单正值等值面，用于 function-100 `iuserfunc=9`
+  的 `rho/N` shape function；默认等值面 `0.001`，正式图前应检查数据范围
+- `average-local-electrostatic-potential`：正/负等值面，用于
+  function-100 `iuserfunc=8` 的 `totesp/rho`；默认幅值 `0.05`，
+  低密度区可能出现尖峰，常适合映射到 density surface
+- `energy-density`：正/负等值面，覆盖 `potential-energy-density`、
+  `energy-density`、`scaled-energy-density` 和
+  `local-nuclear-attraction-energy-density` 等 function-100
+  `iuserfunc=10/11/-11/12` 路线；默认幅值 `0.01`
+- `local-energy-per-electron`：正/负等值面，用于
+  `lagrangian-ked-per-electron` 和 `energy-density-per-electron`
+  `iuserfunc=13/17`；默认幅值 `0.05`，因为要除以电子密度，低密度区要谨慎
+- `bond-metallicity`：正/负等值面，用于
+  `bond-metallicity` / `dimensionless-bond-metallicity`
+  `iuserfunc=15/16`；默认幅值 `0.05`，Laplacian 分母附近要先看 cube range
+- `momentum-fluctuation`：单正值等值面，用于 function-100
+  `iuserfunc=25` 的电子动量涨落幅值；默认等值面 `0.05`
+- `density-ellipticity`：单正值等值面，用于 function-100
+  `iuserfunc=30` 的电子密度椭率；默认等值面 `0.1`
+- `eta-index`：正/负等值面，用于 function-100
+  `iuserfunc=31/32` 的 eta / modified eta 指标；默认幅值 `0.5`
+- `sci`：单正值等值面，用于 function-100 `iuserfunc=37` 的 SCI
+  指标；默认等值面 `0.5`
+- `stiffness`：单正值等值面，用于 function-100 `iuserfunc=115`
+  的 electron-density stiffness；默认等值面 `0.1`
 - `steric-energy-density`：单正值等值面，用于 function-100
   `iuserfunc=40` 的 steric/Weizsacker-like energy density；默认等值面
   `0.01`
@@ -451,8 +485,15 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
   `ghosh-entropy-density`、`ghosh-entropy-density-laplacian-corrected`、
   `renyi-quadratic-density`、`renyi-cubic-density`、
   `phase-space-fisher-information-density`、`disequilibrium-density`、
+  `shape-function`、`average-local-electrostatic-potential`、
+  `potential-energy-density`、`energy-density`、`scaled-energy-density`、
+  `local-nuclear-attraction-energy-density`、`lagrangian-ked-per-electron`、
+  `bond-metallicity`、`dimensionless-bond-metallicity`、
+  `energy-density-per-electron`、`momentum-fluctuation-magnitude`、
+  `electron-density-ellipticity`、`eta-index`、`modified-eta-index`、
+  `sci`、`stiffness`、
   `usi`、`bni` 会分别
-  自动 patch `iuserfunc=1/2/14/20/27/-27/28/29/93/94/101/102/103/90/1200/114/1201/1202/1203/1204/1210/95/96/97/98/49/50/51/52/53/54/55/56/70/100/819/820`。
+  自动 patch `iuserfunc=1/2/8/9/10/11/-11/12/13/14/15/16/17/20/25/27/-27/28/29/30/31/32/37/90/93/94/95/96/97/98/100/101/102/103/114/115/1200/1201/1202/1203/1204/1210/49/50/51/52/53/54/55/56/70/819/820`。
   KED 变体还会额外 patch run-local `iKEDsel`。
   runner 优先复制所选 Multiwfn 同目录的 `settings.ini`，只 patch
   当前路线需要的 run-local 键后通过 `-set` 传入；

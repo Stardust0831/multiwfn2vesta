@@ -664,6 +664,170 @@ PRESETS: Tuple[CubePreset, ...] = (
         ),
     ),
     CubePreset(
+        name="shape-function",
+        aliases=("shape", "density-shape-function"),
+        description="Single positive isosurface for the electron-density shape function rho/N.",
+        surface_mode="single",
+        isosurface=0.001,
+        positive_rgb=(255, 215, 80),
+        surface_opacity=(145, 255),
+        notes=(
+            "Use for Multiwfn function-100 userfunc.cub with iuserfunc=9. "
+            "The source evaluates rho divided by the total electron count, so the "
+            "field is density-like but smaller than rho; inspect the range before "
+            "using the default 0.001 isosurface."
+        ),
+    ),
+    CubePreset(
+        name="average-local-electrostatic-potential",
+        aliases=("average-local-esp", "local-average-esp", "average-local-mep", "totesp-over-rho"),
+        description="Signed isosurfaces for average local electrostatic potential ESP/rho.",
+        surface_mode="signed",
+        isosurface=0.05,
+        positive_rgb=(255, 105, 70),
+        negative_rgb=(70, 130, 255),
+        surface_opacity=(130, 255),
+        notes=(
+            "Use for Multiwfn function-100 userfunc.cub with iuserfunc=8. "
+            "The source evaluates total electrostatic potential divided by electron "
+            "density, useful for shell-like local potential structure; low-density "
+            "regions can be sharp, so tune the isosurface or map it to a density surface."
+        ),
+    ),
+    CubePreset(
+        name="energy-density",
+        aliases=(
+            "potential-energy-density",
+            "virial-field",
+            "local-energy-density",
+            "scaled-energy-density",
+            "local-nuclear-attraction-energy-density",
+            "nuclear-attraction-energy-density",
+        ),
+        description="Signed isosurfaces for Multiwfn local energy-density diagnostics.",
+        surface_mode="signed",
+        isosurface=0.01,
+        positive_rgb=(255, 180, 70),
+        negative_rgb=(75, 135, 255),
+        surface_opacity=(135, 255),
+        notes=(
+            "Use for Multiwfn function-100 energy-density userfunc.cub routes: "
+            "iuserfunc=10 potential energy density/virial field, 11 energy density, "
+            "-11 scaled energy density, and 12 local nuclear attraction potential energy. "
+            "These fields can be signed and system-dependent; inspect cube ranges before final figures."
+        ),
+    ),
+    CubePreset(
+        name="local-energy-per-electron",
+        aliases=(
+            "energy-density-per-electron",
+            "energy-per-electron",
+            "lagrangian-ked-per-electron",
+            "g-over-rho",
+            "lagkin-over-rho",
+        ),
+        description="Signed isosurfaces for local energy or kinetic-energy density per electron.",
+        surface_mode="signed",
+        isosurface=0.05,
+        positive_rgb=(255, 195, 80),
+        negative_rgb=(80, 135, 255),
+        surface_opacity=(135, 255),
+        notes=(
+            "Use for Multiwfn function-100 userfunc.cub routes iuserfunc=13 and 17. "
+            "iuserfunc=13 evaluates G(r)/rho(r), noted by the source as useful at BCPs "
+            "for distinguishing covalent and closed-shell interactions; iuserfunc=17 "
+            "evaluates energy density per electron.  Both divide by density, so avoid "
+            "overinterpreting low-density spikes."
+        ),
+    ),
+    CubePreset(
+        name="bond-metallicity",
+        aliases=("metallicity", "dimensionless-bond-metallicity", "dimensionless-metallicity", "rho-over-laplacian"),
+        description="Signed isosurfaces for Multiwfn bond-metallicity diagnostics.",
+        surface_mode="signed",
+        isosurface=0.05,
+        positive_rgb=(255, 210, 85),
+        negative_rgb=(70, 145, 255),
+        surface_opacity=(135, 255),
+        notes=(
+            "Use for Multiwfn function-100 userfunc.cub routes iuserfunc=15/16. "
+            "The source evaluates rho/Laplacian(rho) and a dimensionless scaled form; "
+            "the Laplacian denominator can make the field signed and sharp near zeros, "
+            "so the default +/-0.05 is only a starting point."
+        ),
+    ),
+    CubePreset(
+        name="momentum-fluctuation",
+        aliases=("momentum-fluctuation-magnitude", "electronic-momentum-fluctuation"),
+        description="Single positive isosurface for electronic momentum-fluctuation magnitude.",
+        surface_mode="single",
+        isosurface=0.05,
+        positive_rgb=(120, 210, 255),
+        surface_opacity=(145, 255),
+        notes=(
+            "Use for Multiwfn function-100 userfunc.cub with iuserfunc=25. "
+            "The source evaluates |grad rho|/(2 rho), a nonnegative diagnostic that "
+            "can become large in low-density regions; tune the isosurface per system."
+        ),
+    ),
+    CubePreset(
+        name="density-ellipticity",
+        aliases=("electron-density-ellipticity", "density-ellipticity", "rho-ellipticity", "ellipticity"),
+        description="Single positive isosurface for electron-density ellipticity.",
+        surface_mode="single",
+        isosurface=0.1,
+        positive_rgb=(190, 160, 255),
+        surface_opacity=(145, 255),
+        notes=(
+            "Use for Multiwfn function-100 userfunc.cub with iuserfunc=30. "
+            "The source calls densellip(...,1); the default 0.1 isosurface is a "
+            "starting value for visualizing anisotropy around bonding regions."
+        ),
+    ),
+    CubePreset(
+        name="eta-index",
+        aliases=("eta", "density-eta-index", "modified-eta-index", "eta-minus-one", "modified-eta"),
+        description="Signed isosurfaces for eta and modified eta density-anisotropy indices.",
+        surface_mode="signed",
+        isosurface=0.5,
+        positive_rgb=(255, 185, 85),
+        negative_rgb=(95, 145, 255),
+        surface_opacity=(135, 255),
+        notes=(
+            "Use for Multiwfn function-100 userfunc.cub routes iuserfunc=31/32. "
+            "The source evaluates the eta index and eta-1; the modified form can "
+            "be signed, so a signed preset is the cautious default."
+        ),
+    ),
+    CubePreset(
+        name="sci",
+        aliases=("strong-covalent-interaction", "sci-index"),
+        description="Single positive isosurface for Multiwfn SCI bonding indicator.",
+        surface_mode="single",
+        isosurface=0.5,
+        positive_rgb=(255, 190, 70),
+        surface_opacity=(145, 255),
+        notes=(
+            "Use for Multiwfn function-100 userfunc.cub with iuserfunc=37. "
+            "The source evaluates ELF_LOL(...,'SCI'), so this is treated as a "
+            "positive bonding indicator; tune the 0.5 starting isosurface after range inspection."
+        ),
+    ),
+    CubePreset(
+        name="stiffness",
+        aliases=("density-stiffness",),
+        description="Single positive isosurface for electron-density stiffness.",
+        surface_mode="single",
+        isosurface=0.1,
+        positive_rgb=(135, 220, 170),
+        surface_opacity=(145, 255),
+        notes=(
+            "Use for Multiwfn function-100 userfunc.cub with iuserfunc=115. "
+            "The source evaluates densellip(...,3), labelled stiffness. "
+            "Keep stress-tensor stiffness/polarizability/ellipticity as separate future routes."
+        ),
+    ),
+    CubePreset(
         name="user-function",
         aliases=(
             "userfunc",

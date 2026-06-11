@@ -1,5 +1,28 @@
 # Worklog
 
+## 2026-06-12: Bonding and local-energy diagnostic routes
+
+- Continued the feature-closure request by adding source-backed
+  bonding/local-energy/density-anisotropy diagnostics to the maintained
+  `grid-run` and `cube-preset` route set.
+- Local Multiwfn 2026.6.2 source evidence maps function-100
+  `iuserfunc=8/9/10/11/-11/12/13/15/16/17/25/30/31/32/37/115` to average
+  local electrostatic potential, shape function, potential/energy/local
+  nuclear-attraction energy-density terms, `G(r)/rho(r)`, bond metallicity,
+  energy density per electron, momentum-fluctuation magnitude, density
+  ellipticity/eta diagnostics, SCI, and stiffness.
+- Added named `grid-run` routes and dedicated VESTA presets for these fields,
+  all exporting `userfunc.cub` through run-local `iuserfunc` patching.  Routes
+  with density or Laplacian denominators are documented as range-sensitive and
+  should be checked before final figures.
+- Added curated example coverage and command aliases so
+  `multiwfn2vesta examples --command bond-metallicity`,
+  `--command shape-function`, and `--command sci` point to the new
+  `grid-run --function bonding/energy diagnostics` coverage record.
+- The new coverage remains `needs-render`.  Recommended first systems are
+  benzene/phenol dimer, GC base pair, and Ag(111)+benzene; no placeholder PNG
+  was added.
+
 ## 2026-06-12: Feature closure UX summary and valuable-system rationale
 
 - Continued the current feature-closure request by adding a compact closure

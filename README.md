@@ -150,6 +150,9 @@ then delete the temporary branch.
   on-top pair density,
   information-gain, Shannon/Fisher/Ghosh/Renyi, phase-space Fisher,
   disequilibrium, USI, and BNI function-100 diagnostics,
+  shape function, average local ESP, local energy-density/per-electron,
+  bond-metallicity, momentum-fluctuation, density-ellipticity, eta, SCI,
+  and stiffness function-100 bonding/energy diagnostics,
   steric/SBL energy-density, potential, force-magnitude, and charge fields,
   IGM/IGMH/aIGM weak-interaction maps, ALIE/LEA/LEAE, and vdW-potential
   mapped surfaces.
@@ -230,6 +233,9 @@ then delete the temporary branch.
   on-top pair density with `iuserfunc=36` and run-local `paircorrtype`,
   extended KED difference/local-temperature/KED-potential diagnostics with
   `iuserfunc=1201/1202/1203/1204/1210`,
+  and bonding/energy diagnostics such as shape function, average local ESP,
+  local energy density, bond metallicity, density anisotropy, SCI, and
+  stiffness with `iuserfunc=8/9/10/11/-11/12/13/15/16/17/25/30/31/32/37/115`,
   and related scalar cubes, export
   multiple orbitals through
   isolated batch runs, optionally write VESTA files through `cube-preset`,

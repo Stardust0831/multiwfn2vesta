@@ -652,6 +652,62 @@ basin type two
                     self.assertIn(f"effective_isosurface: `{isosurface}`", manifest)
                     self.assertIn(note, manifest)
 
+    def test_bonding_energy_diagnostic_presets_write_expected_surfaces(self):
+        cases = (
+            ("shape-function", SURFACE_CUBE, "shape-function", "single", "0.001", "iuserfunc=9"),
+            (
+                "average-local-esp",
+                SIGNED_CUBE,
+                "average-local-electrostatic-potential",
+                "signed",
+                "0.05",
+                "iuserfunc=8",
+            ),
+            ("potential-energy-density", SIGNED_CUBE, "energy-density", "signed", "0.01", "iuserfunc=10"),
+            ("scaled-energy-density", SIGNED_CUBE, "energy-density", "signed", "0.01", "-11"),
+            (
+                "energy-density-per-electron",
+                SIGNED_CUBE,
+                "local-energy-per-electron",
+                "signed",
+                "0.05",
+                "iuserfunc=13 and 17",
+            ),
+            ("bond-metallicity", SIGNED_CUBE, "bond-metallicity", "signed", "0.05", "iuserfunc=15/16"),
+            (
+                "momentum-fluctuation",
+                SURFACE_CUBE,
+                "momentum-fluctuation",
+                "single",
+                "0.05",
+                "iuserfunc=25",
+            ),
+            (
+                "electron-density-ellipticity",
+                SURFACE_CUBE,
+                "density-ellipticity",
+                "single",
+                "0.1",
+                "iuserfunc=30",
+            ),
+            ("modified-eta-index", WIDE_SIGNED_CUBE, "eta-index", "signed", "0.5", "iuserfunc=31/32"),
+            ("sci", SURFACE_CUBE, "sci", "single", "0.5", "iuserfunc=37"),
+            ("stiffness", SURFACE_CUBE, "stiffness", "single", "0.1", "iuserfunc=115"),
+        )
+        for requested, cube_text, canonical, mode, isosurface, note in cases:
+            with self.subTest(requested=requested):
+                with tempfile.TemporaryDirectory() as tmp:
+                    root = Path(tmp)
+                    cube = self.write_tmp(root, "userfunc.cub", cube_text)
+
+                    result = run_preset(requested, cube, root / "products")
+
+                    manifest = result.manifest_path.read_text(encoding="utf-8")
+                    self.assertIn(f"canonical_preset: `{canonical}`", manifest)
+                    self.assertIn(f"effective_surface_mode: `{mode}`", manifest)
+                    self.assertIn(f"effective_isosurface: `{isosurface}`", manifest)
+                    self.assertIn(note, manifest)
+
     def test_electron_delocalization_range_preset_writes_single_positive_surface(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

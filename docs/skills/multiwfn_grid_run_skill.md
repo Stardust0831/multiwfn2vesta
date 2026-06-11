@@ -155,6 +155,20 @@ multiwfn2vesta grid-run --list-functions
   `local-hardness` / `local-chemical-hardness` = `29`,
   `rose` / `region-of-slow-electrons` = `18`,
   `sedd` / `single-exponential-decay-detector` = `19`,
+  `shape-function` / `density-shape-function` = `9`,
+  `average-local-electrostatic-potential` / `average-local-esp` = `8`,
+  `potential-energy-density` = `10`, `energy-density` = `11`,
+  `scaled-energy-density` = `-11`,
+  `local-nuclear-attraction-energy-density` = `12`,
+  `lagrangian-ked-per-electron` / `g-over-rho` = `13`,
+  `bond-metallicity` = `15`,
+  `dimensionless-bond-metallicity` = `16`,
+  `energy-density-per-electron` = `17`,
+  `momentum-fluctuation-magnitude` = `25`,
+  `electron-density-ellipticity` = `30`,
+  `eta-index` = `31`, `modified-eta-index` = `32`,
+  `sci` / `strong-covalent-interaction` = `37`,
+  `stiffness` / `density-stiffness` = `115`,
   `positive-esp` / `positive-mep` = `101`,
   `negative-esp` / `negative-mep` = `102`,
   `electric-field-magnitude` / `electric-field` = `103`,
@@ -203,7 +217,7 @@ multiwfn2vesta grid-run --list-functions
   LEA/LEAE named routes
   also auto-select mapped presets `lea`/`leae` when `--surface-cube` is
   supplied; alpha/beta density, FOD, local Mulliken electronegativity, local
-  hardness, electron ESP/ESP component/electric-field routes, on-top pair density, steric/SBL
+  hardness, electron ESP/ESP component/electric-field routes, on-top pair density, bonding/energy diagnostics, steric/SBL
   routes, KED variants/diagnostics, and the orbital-weighted Fukui/dual routes, RoSE, and SEDD fall back to the generic `surface-map`
   mapped preset.  Alpha/beta density, FOD, and
   Fukui+/Fukui-/Fukui0 standalone products use `density`, selected positive KED variants use
@@ -213,7 +227,12 @@ multiwfn2vesta grid-run --list-functions
   signed information-density presets, normal/phase-space
   Fisher/Ghosh/Renyi/disequilibrium and BNI use single-positive presets, USI uses a signed preset, steric/SBL
   standalone routes use `steric-energy-density`, `sbl-energy-density`,
-  `sbl-potential`, `sbl-force-magnitude`, or `sbl-charge`, while orbital-weighted dual descriptor uses
+  `sbl-potential`, `sbl-force-magnitude`, or `sbl-charge`, bonding/energy
+  standalone routes use `shape-function`,
+  `average-local-electrostatic-potential`, `energy-density`,
+  `local-energy-per-electron`, `bond-metallicity`,
+  `momentum-fluctuation`, `density-ellipticity`, `eta-index`, `sci`, or
+  `stiffness`, while orbital-weighted dual descriptor uses
   `signed`.  The 95..98 routes are
   single-wavefunction approximations and should not be confused with
   charged-state `fukui-run`; the current runner leaves Multiwfn
