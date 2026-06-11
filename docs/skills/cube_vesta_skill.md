@@ -65,6 +65,8 @@ multiwfn2vesta cube-preset promolecular-delta-g Delta_g.cub cube_products
 multiwfn2vesta cube-preset hirshfeld-delta-g griddata.cub cube_products
 multiwfn2vesta cube-preset iri-scalar IRI.cub cube_products
 multiwfn2vesta cube-preset dori-scalar userfunc.cub cube_products
+multiwfn2vesta cube-preset rose userfunc.cub cube_products
+multiwfn2vesta cube-preset sedd userfunc.cub cube_products
 multiwfn2vesta cube-preset vdw-potential vdWpot.cub cube_products
 multiwfn2vesta cube-preset potential pot_es.cube cube_products
 multiwfn2vesta cube-preset partial-charge pchg.cube cube_products
@@ -299,6 +301,8 @@ passes it back through `cube-preset`.
   `local-electron-attachment-energy` / `leae` = `-27`,
   `local-mulliken-electronegativity` / `local-electronegativity` = `28`,
   `local-hardness` / `local-chemical-hardness` = `29`,
+  `rose` / `region-of-slow-electrons` = `18`,
+  `sedd` / `single-exponential-decay-detector` = `19`,
   `information-gain-density` = `49`, `shannon-entropy-density` = `50`,
   `fisher-information-density` / `second-fisher-information-density` =
   `51` / `52`, `fractional-occupation-density` / `fod` = `90`,
@@ -359,6 +363,14 @@ passes it back through `cube-preset`.
   surface for Multiwfn function-100 `userfunc.cub` with `iuserfunc=20`,
   default isosurface `0.95`.  Use `dori` with `--texture-cube` for DORI
   surfaces colored by sign(lambda2)rho.
+- `rose` aliases: `region-of-slow-electrons`, `slow-electrons`;
+  single positive surface for Multiwfn function-100 `userfunc.cub` with
+  `iuserfunc=18`, default isosurface `0.5`.  Multiwfn evaluates
+  `(Dh-G)/(Dh+G)`; tune the isosurface after inspecting the cube range.
+- `sedd` aliases: `single-exponential-decay-detector`,
+  `single-exponential-decay`; single positive surface for Multiwfn
+  function-100 `userfunc.cub` with `iuserfunc=19`, default isosurface `0.5`.
+  Multiwfn evaluates `log(1+epsilon)`, so the field is nonnegative.
 - `vdw-potential` aliases: `vdw`, `vdwpot`, `vdw-potential-cube`,
   `van-der-waals-potential`; positive/negative surfaces for standalone
   Multiwfn function `25` `vdWpot.cub`, default magnitude `1.0` kcal/mol.

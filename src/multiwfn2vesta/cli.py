@@ -228,6 +228,8 @@ Examples:
   multiwfn2vesta aigm-run trajectory.xyz aigm_products --fragment 1-48 --fragment 49-60 --frame-range 1 200
   multiwfn2vesta grid-run input.molden grid_products --function density
   multiwfn2vesta grid-run input.molden grid_products --function electron-esp
+  multiwfn2vesta grid-run input.molden grid_products --function rose
+  multiwfn2vesta grid-run input.molden grid_products --function sedd
   multiwfn2vesta fukui-run fukui_products --neutral neutral.molden --anion anion.molden --cation cation.molden
   multiwfn2vesta stm-run input.molden stm_products --grid-points 80 80 40
   multiwfn2vesta domain-run density.cub domain_products --criterion '<0.5'

@@ -199,8 +199,8 @@ then delete the temporary branch.
   run-local `ivdwprobe` probe selection, function-100 UFF vdW
   repulsion/dispersion components with `iuserfunc=93/94`, function-100
   electron-only ESP with `iuserfunc=14`, positive/negative ESP and
-  electric-field magnitude routes with `iuserfunc=101/102/103`, and related
-  scalar cubes, export
+  electric-field magnitude routes with `iuserfunc=101/102/103`, RoSE and
+  SEDD scalar fields with `iuserfunc=18/19`, and related scalar cubes, export
   multiple orbitals through
   isolated batch runs, optionally write VESTA files through `cube-preset`,
   and map generated ESP/ALIE/vdW/sign(lambda2)rho cubes as textures on a
@@ -358,6 +358,10 @@ multiwfn2vesta grid-run input.molden grid_products \
 multiwfn2vesta grid-run input.molden grid_products \
   --function electric-field-magnitude
 multiwfn2vesta grid-run input.molden grid_products \
+  --function rose
+multiwfn2vesta grid-run input.molden grid_products \
+  --function sedd
+multiwfn2vesta grid-run input.molden grid_products \
   --function edr \
   --edr-length 0.85
 multiwfn2vesta grid-run input.molden grid_products \
@@ -504,6 +508,8 @@ multiwfn2vesta cube-preset vdw-repulsion-potential userfunc.cub cube_products
 multiwfn2vesta cube-preset vdw-dispersion-potential userfunc.cub cube_products
 multiwfn2vesta cube-preset potential pot_es.cube cube_products
 multiwfn2vesta cube-preset electron-esp userfunc.cub cube_products
+multiwfn2vesta cube-preset rose userfunc.cub cube_products
+multiwfn2vesta cube-preset sedd userfunc.cub cube_products
 multiwfn2vesta cube-preset partial-charge pchg.cube cube_products
 multiwfn2vesta cube-preset wavefunction-norm wfc_norm.cube cube_products
 multiwfn2vesta cube-preset elf ELF.cub cube_products
@@ -946,6 +952,17 @@ Common functions:
   magnitude.  With `--surface-cube`, these routes use the generic
   `surface-map` preset; explicit `--tex-physical` is recommended when
   comparing systems.
+- `rose` / `region-of-slow-electrons`: function `100`, raw `userfunc.cub`,
+  run-local `iuserfunc=18`, default `rose` preset.  The inspected Multiwfn
+  source evaluates RoSE as `(Dh-G)/(Dh+G)`, highlighting slow-electron
+  regions.  The maintained VESTA preset uses a single positive `0.5`
+  isosurface; tune it after inspecting the cube range.
+- `sedd` / `single-exponential-decay-detector`: function `100`, raw
+  `userfunc.cub`, run-local `iuserfunc=19`, default `sedd` preset.  The
+  inspected Multiwfn source evaluates `log(1+epsilon)`, so the field is
+  nonnegative.  Use benzene dimer, GC base pair, or another real
+  weak-interaction/aromatic system for the first manual render instead of a
+  toy cube.
 - `vdw-potential` / `vdw`: function `25`, raw `vdWpot.cub`, preset
   `vdw-potential`, signed at `+/-1.0` kcal/mol by default.  With
   `--surface-cube`, it maps through `cube-preset vdw-map` instead so the

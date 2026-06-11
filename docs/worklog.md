@@ -1,5 +1,27 @@
 # Worklog
 
+## 2026-06-12: RoSE/SEDD scalar routes and feature-closure audit
+
+- Continued the ABACUS-compatible Multiwfn/VESTA analysis route survey by
+  adding source-backed RoSE and SEDD scalar routes.
+- Local Multiwfn 2026.6.2 source evidence: function `100` with
+  `iuserfunc=18` evaluates RoSE as `(Dh-G)/(Dh+G)`, and `iuserfunc=19`
+  evaluates SEDD as `log(1+epsilon)`; function-100 grids are exported as
+  `userfunc.cub`.
+- Added `grid-run --function rose` and `grid-run --function sedd` with
+  aliases, run-local `iuserfunc` patching through Multiwfn `-set`, and
+  `surface-map` fallback when a separate `--surface-cube` is provided.
+- Added `cube-preset rose` and `cube-preset sedd`, both using a single
+  positive `0.5` isosurface as a starting display value.  These defaults
+  should be tuned after inspecting real cube ranges.
+- Added the routes to focused tests, README, Chinese manual, usage docs,
+  research matrix, feature/example coverage, status matrix, and skill notes.
+- Read-only subagent audits confirmed the current true gallery state:
+  Ag(111)+benzene IGMH+AIM, GC/benzene AIM, and Cd/Cl trajectory are the
+  ready rendered examples; IRI, grid-run scalar suites, RoSE/SEDD,
+  surface-extrema, STM, domain, and atom coloring still need real manual
+  renders.  No new VESTA GUI render was launched in this pass.
+
 ## 2026-06-12: electron-only ESP route for ABACUS/Multiwfn/VESTA workflows
 
 - Continued the long-running ABACUS-compatible Multiwfn/VESTA route survey by

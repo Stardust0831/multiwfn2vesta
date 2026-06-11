@@ -25,6 +25,7 @@ mp4、临时 `.vesta` 留在 `smoke/`，项目内只提交 runbook、manifest、
 | 2 | GC 碱基对 | AIM paths/BCP overlay | `../../smoke/20260605_sob445_more_aim_examples/gc/`，已复制 gallery 图 | 做一个轻量 AIM 教程 example |
 | 3 | benzene | AIM 基础例和 NICS/vector misc | `../../smoke/20260605_sob445_more_aim_examples/benzene/`，`../../smoke/20260605_nics_vesta_vectors/` | AIM 可入主线；NICS/vector 仅放 misc |
 | 4 | Cd/Cl 轨迹 | XYZ/extXYZ trajectory -> VESTA frames -> PNG -> mp4 | `../../smoke/vesta_trajectory_video_1608/ase_nvt_refstyle_stride20_cdcl3p50/`，`cdcl_trajectory_video/cdcl_tiny.extxyz` | 已有 `trajectory-frames` 和 `trajectory-video`；下一步补 ASE `.traj` 读取和 VESTA PNG 渲染 |
+| 5 | benzene dimer / GC 碱基对 | RoSE/SEDD 慢电子和单指数衰减标量场 | 当前只有 CLI/preset/test；暂无正式 smoke 图 | 用 validated Molden 生成 `rose`/`sedd` 的 `userfunc.cub`，调等值面后渲染 paired figure |
 
 ## 暂不作为完成 example 的体系
 

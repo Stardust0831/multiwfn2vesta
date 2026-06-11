@@ -72,6 +72,7 @@ multiwfn2vesta examples --needs-render
 | ESP/ALIE/LEA/LEAE | `esp`, `electron-esp`, `positive-esp`, `negative-esp`, `electric-field-magnitude`, `alie`, `local-electron-affinity`, `local-electron-attachment-energy` | 芳香分子、极性分子、Ag(111)+benzene | 有 VESTA/cube | ESP H2O smoke 已有；电子贡献 ESP、正/负分量和电场强度路由已维护，缺正式 PNG 和 surface extrema 图 |
 | vdW | `vdw-potential`, `vdw-repulsion-potential`, `vdw-dispersion-potential` | Ag(111)+benzene 或分子复合物 | 有入口 | 适合做吸附相互作用外围图 |
 | 弱相互作用标量 | `rdg`, `iri`, `dori`, `delta-g`, `hirshfeld-delta-g` | H2O dimer、benzene dimer、Ag adsorbate | IGMH 已闭环；IRI 有调试图 | IRI/DORI/Delta-g standalone 缺手册级图 |
+| 慢电子/指数衰减标量 | `rose`, `sedd` | benzene dimer、GC 碱基对 | 有入口 | 已有 source-backed `iuserfunc=18/19` 路由和 preset，缺真实 paired render |
 | 反应性 | `fod`, `orbital-weighted-fukui-*`, `orbital-weighted-dual-descriptor` | 小分子反应位点 | 有入口 | 需要真实 closed-shell 测试体系 |
 | 信息论密度 | `local-information-entropy`, `information-gain-density`, `shannon-entropy-density`, `fisher-information-density` | 小分子/COF | 有入口 | 缺图，默认 isosurface 需调 |
 | 分区权重 | `becke`, `hirshfeld` | 分子内片段边界 | 有入口 | 缺图 |
@@ -85,6 +86,7 @@ multiwfn2vesta examples --needs-render
 | spin/potential/KED | `spin-density`, `potential`, `kinetic-energy-density` | 有入口 | open-shell 和 ABACUS out_pot |
 | ABACUS direct cube | `partial-charge`, `wavefunction-norm`, `elf` | 有入口 | 准备 ABACUS 小体系 direct cube |
 | IRI/DORI/IGMH/aIGM | `iri`, `dori`, `igmh`, `aigm` | IGMH 已闭环；IRI 有调试图 | IRI/DORI/aIGM 补手册级图 |
+| RoSE/SEDD | `rose`, `sedd` | 有入口 | 用 benzene dimer 或 GC 配对渲染慢电子/SEDD 等值面 |
 | ESP/ALIE/LEA/vdW map | `esp`, `alie`, `lea`, `leae`, `vdw-map` | 有 VESTA/cube | 先补 ESP/ALIE surface extrema |
 | domain/basin | `domain`, `basin`, `basin-type` | 有 VESTA/cube | 渲染 H2O domain 和 basin 示例 |
 | vdW components | `vdw-potential`, `vdw-repulsion-potential`, `vdw-dispersion-potential` | 有入口 | 用同一体系展示 total/repul/disp |

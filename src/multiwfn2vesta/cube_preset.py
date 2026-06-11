@@ -597,6 +597,48 @@ PRESETS: Tuple[CubePreset, ...] = (
         ),
     ),
     CubePreset(
+        name="rose",
+        aliases=(
+            "region-of-slow-electrons",
+            "region-slow-electrons",
+            "slow-electron-region",
+            "slow-electrons",
+            "rose-function",
+        ),
+        description="Single positive isosurface for Region of Slow Electrons (RoSE) cubes.",
+        surface_mode="single",
+        isosurface=0.5,
+        positive_rgb=(255, 190, 85),
+        surface_opacity=(135, 255),
+        notes=(
+            "Use for Multiwfn function-100 userfunc.cub with iuserfunc=18. "
+            "Multiwfn evaluates RoSE as (Dh-G)/(Dh+G), where Dh is the homogeneous-electron-gas "
+            "kinetic-energy term and G is Lagrangian kinetic energy density. "
+            "The maintained display uses a single positive 0.5 isosurface to highlight slow-electron regions; "
+            "inspect the value range and tune --isosurface per system."
+        ),
+    ),
+    CubePreset(
+        name="sedd",
+        aliases=(
+            "single-exponential-decay-detector",
+            "single-exponential-decay",
+            "single-exponential-decay-detection",
+            "sedd-function",
+        ),
+        description="Single positive isosurface for the single exponential decay detector.",
+        surface_mode="single",
+        isosurface=0.5,
+        positive_rgb=(120, 200, 255),
+        surface_opacity=(135, 255),
+        notes=(
+            "Use for Multiwfn function-100 userfunc.cub with iuserfunc=19. "
+            "Multiwfn's SEDD implementation evaluates log(1+epsilon) from density gradients and Hessians, "
+            "so the field is nonnegative. The default 0.5 isosurface is a starting point and should be "
+            "adjusted after inspecting the cube range."
+        ),
+    ),
+    CubePreset(
         name="stm",
         aliases=("ldos", "stm-ldos", "tunneling-current"),
         description="Constant-current STM/LDOS tunneling-current isosurface.",

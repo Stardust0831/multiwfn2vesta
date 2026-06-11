@@ -191,6 +191,7 @@ multiwfn2vesta grid-run --list-functions
 - `alie`, `local-electron-affinity`, `local-electron-attachment-energy`
 - `vdw-potential`, `vdw-repulsion-potential`, `vdw-dispersion-potential`
 - `iri`, `rdg`, `dori`
+- `rose`, `sedd`
 - `fod`, `orbital-weighted-fukui-plus/minus/zero`, `orbital-weighted-dual-descriptor`
 - `becke`, `hirshfeld`, `hirshfeld-delta-g`
 - `pair-function`, `source-function`
@@ -214,15 +215,20 @@ multiwfn2vesta grid-run input.molden esp_components --function electron-esp
 multiwfn2vesta grid-run input.molden esp_components --function positive-esp
 multiwfn2vesta grid-run input.molden esp_components --function negative-esp
 multiwfn2vesta grid-run input.molden efield --function electric-field-magnitude
+multiwfn2vesta grid-run input.molden slow_electron --function rose
+multiwfn2vesta grid-run input.molden sedd_field --function sedd
 ```
 
 这些命名路由都走 Multiwfn 函数 `100`，分别写 run-local
-`iuserfunc=14/101/102/103`，不会修改全局 Multiwfn 配置。`electron-esp`
+`iuserfunc=14/101/102/103` 或 RoSE/SEDD 的 `iuserfunc=18/19`，不会修改全局 Multiwfn 配置。`electron-esp`
 调用 Multiwfn 源码中的 `eleesp(x,y,z)`，即电子贡献静电势，通常按单负
 `-0.05` a.u. 等值面显示；正/负 ESP 分量适合在极性分子、吸附界面或电荷转移
 体系中快速分开看静电正负区域；电场强度适合看局域强场区域。若要映射到 density
 surface 上，再加
 `--surface-cube density.cub --tex-physical MIN MAX`。
+RoSE 用 `(Dh-G)/(Dh+G)` 描述慢电子区域，SEDD 用 `log(1+epsilon)` 描述单指数衰减偏离；
+两者当前已有 CLI 和 VESTA preset，但还缺真正适合手册的效果图。后续优先用 benzene dimer、
+GC 碱基对或类似弱相互作用/芳香体系生成 paired figure，而不是 toy cube。
 
 ## 8. AIM、IRI、IGMH 的组合图
 

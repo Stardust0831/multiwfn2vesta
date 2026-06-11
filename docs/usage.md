@@ -356,6 +356,7 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
   `local-mulliken-electronegativity`、`local-hardness`、
   `vdw-repulsion-potential`、`vdw-dispersion-potential`、
   `electron-esp`、`positive-esp`、`negative-esp`、`electric-field-magnitude`、
+  `rose`、`sedd`、
   `thomas-fermi-ked`、`weizsacker-ked`、`pauli-ked`、
   `orbital-weighted-fukui-plus`、`orbital-weighted-fukui-minus`、
   `orbital-weighted-fukui-zero`、`orbital-weighted-dual-descriptor`、
@@ -759,6 +760,15 @@ multiwfn2vesta grid-run --list-functions
   电场强度。standalone VESTA 默认分别用单正 `+0.05`、单负 `-0.05`、单正
   `0.05` 等值面；若加 `--surface-cube density.cub`，则作为 texture 走
   `surface-map`，建议显式给 `--tex-physical` 便于跨体系比较。
+- `rose` / `region-of-slow-electrons`：函数 `100`，原始输出
+  `userfunc.cub`，自动 patch run-local `iuserfunc=18`；Multiwfn 源码中
+  RoSE 由 `(Dh-G)/(Dh+G)` 计算。默认接 `cube-preset rose`，用单正
+  `0.5` 等值面显示慢电子区域；真实体系中应先看 cube 数值范围再调
+  `--isosurface`。建议第一批正式效果图用 benzene dimer 或 GC 碱基对。
+- `sedd` / `single-exponential-decay-detector`：函数 `100`，原始输出
+  `userfunc.cub`，自动 patch run-local `iuserfunc=19`；Multiwfn 源码中
+  SEDD 为 `log(1+epsilon)`，数值非负。默认接 `cube-preset sedd`，用
+  单正 `0.5` 等值面作为起点；后续应和 RoSE 在同一弱相互作用/芳香体系中配对渲染。
 - `vdw-potential` / `vdw`：函数 `25`，原始输出 `vdWpot.cub`，默认接
   `cube-preset vdw-potential`，按正/负 `1.0` kcal/mol 等值面显示；配合
   `--surface-cube` 时默认走 `cube-preset vdw-map`，把生成的 vdW potential

@@ -162,6 +162,8 @@ class TestCubePreset(unittest.TestCase):
         self.assertIn("hirshfeld-delta-g", text)
         self.assertIn("iri-scalar", text)
         self.assertIn("dori-scalar", text)
+        self.assertIn("rose", text)
+        self.assertIn("sedd", text)
         self.assertIn("stm", text)
         self.assertIn("domain", text)
         self.assertIn("basin", text)
@@ -687,6 +689,39 @@ basin type two
             self.assertIn("requested_preset: `standalone-dori`", manifest)
             self.assertIn("iuserfunc=20", manifest)
             self.assertIn("DORIfill.vmd", manifest)
+
+    def test_rose_sedd_presets_write_single_positive_surfaces(self):
+        cases = (
+            (
+                "region-of-slow-electrons",
+                r"ISURF\n  1   1\s+0\.5\s+255\s+190\s+85\s+135\s+255",
+                "rose",
+                "iuserfunc=18",
+            ),
+            (
+                "single-exponential-decay-detector",
+                r"ISURF\n  1   1\s+0\.5\s+120\s+200\s+255\s+135\s+255",
+                "sedd",
+                "iuserfunc=19",
+            ),
+        )
+        for requested, expected_surface, expected_preset, expected_note in cases:
+            with self.subTest(requested=requested):
+                with tempfile.TemporaryDirectory() as tmp:
+                    root = Path(tmp)
+                    cube = self.write_tmp(root, "userfunc.cub", SURFACE_CUBE)
+
+                    result = run_preset(requested, cube, root / "products")
+
+                    text = result.vesta_path.read_text(encoding="utf-8")
+                    manifest = result.manifest_path.read_text(encoding="utf-8")
+
+                    self.assertRegex(text, expected_surface)
+                    self.assertNotIn("IMPORT_TEXTURE", text)
+                    self.assertIn(f"canonical_preset: `{expected_preset}`", manifest)
+                    self.assertIn(f"requested_preset: `{requested}`", manifest)
+                    self.assertIn("effective_surface_mode: `single`", manifest)
+                    self.assertIn(expected_note, manifest)
 
     def test_abacus_direct_potential_preset_writes_signed_surfaces(self):
         with tempfile.TemporaryDirectory() as tmp:

@@ -156,6 +156,7 @@ multiwfn2vesta cube-preset iri h2o_hf_IRI2_surface.cub iri_products \
 3. IRI+AIM: 继续解析 VESTA `SURFS`/`SECTS`/`TEX3P`，直到 IRI 等值面和 AIM 叠图清楚。
 4. ABACUS 直接 cube: charge density、potential-on-density、ELF、partial charge、wavefunction norm。
 5. Multiwfn `grid-run`: density/orbital/spin/KED/ELF/LOL/ESP/ALIE/LEA/vdW/component vdW/FOD/OW-Fukui/信息论密度。
-6. `cube-arith` 和 `fukui-run`: density difference、spin density、Fukui+/-/0、dual descriptor。
-7. `stm-run`、`domain-run`、basin cube: 当前有 VESTA/cube 烟测，但缺真正渲染图。
-8. atom coloring: ABACUS Mulliken 和 Multiwfn 原子表染色已有 VESTA 烟测，缺对比 PNG。
+6. RoSE/SEDD: 用 benzene dimer 或 GC 碱基对渲染一组 paired figure，先试 `0.5` 等值面再按 cube 范围调参。
+7. `cube-arith` 和 `fukui-run`: density difference、spin density、Fukui+/-/0、dual descriptor。
+8. `stm-run`、`domain-run`、basin cube: 当前有 VESTA/cube 烟测，但缺真正渲染图。
+9. atom coloring: ABACUS Mulliken 和 Multiwfn 原子表染色已有 VESTA 烟测，缺对比 PNG。

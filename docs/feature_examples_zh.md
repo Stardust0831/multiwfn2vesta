@@ -35,6 +35,7 @@ multiwfn2vesta examples --coverage --json
 | `igmh-run` / `igm-run` / `migm-run` | Ag(111)+benzene | ready | Ag 三视图 | 保留 Ag 为周期体系主例，另补小分子快速例 |
 | `aigm-run` / `amigm-run` | benzene dimer 轨迹或 Ag(111)+benzene AIMD 片段 | needs-example | 无 | 生成短轨迹平均 IGM cube 并渲染 |
 | `grid-run` | H2O、benzene、Ag(111)+benzene、未来 COF | needs-render | 无手册级图 | 按函数组补 density/orbital/KED/ELF/ESP/vdW/FOD 等图 |
+| `grid-run --function rose/sedd` | benzene dimer、GC 碱基对或类似弱相互作用/芳香体系 | needs-render | 无 | 已有 RoSE/SEDD CLI 和 preset；下一步在同一真实体系中渲染 paired figure |
 | `fukui-run` | 带杂原子的芳香分子，中性/阴/阳离子三态 | needs-example | 无 | 先固定同一网格的三态 density cube |
 | `stm-run` | 表面吸附小分子或芳香分子局域态 | needs-render | 无 | 选择 LDOS 能窗并渲染 constant-current surface |
 | `domain-run` | H2O density domain 或 COF 孔道区域 | needs-render | 无 | 渲染二值 domain surface 并记录 criterion |
@@ -73,6 +74,7 @@ multiwfn2vesta examples --coverage --json
 | ALIE/LEA/LEAE | 芳香分子反应位点 | surface texture + `surface-extrema` |
 | vdW total/repulsion/dispersion | Ag(111)+benzene | density/interaction surface texture 或 standalone field |
 | IRI/RDG/DORI/Delta-g | H2O-HF、benzene dimer | mapped surface，关闭 sections |
+| RoSE/SEDD | benzene dimer、GC 碱基对 | 单正值等值面，先试 `0.5` 后按 cube 范围调参 |
 | FOD、orbital-weighted Fukui/dual | 反应性分子 | signed/single surface，配 condensed atom value coloring |
 | information-density、Becke/Hirshfeld weights | 小分子/COF | standalone diagnostic surface，先作为高级例 |
 | pair/source function | 选定键或孤对电子参考点 | 需要更好的参考点交互说明后再正式化 |
@@ -89,7 +91,6 @@ multiwfn2vesta examples --coverage --json
 
 只读源码审计建议的下一批 Multiwfn function-100 路线：
 
-- `RoSE` / `SEDD`: `iuserfunc=18/19`，适合慢电子区域、离域和弱相互作用区域分析。
 - 扩展 KED: `iuserfunc=1201/1202/1203/1204/1210`，适合 KED 差值、局域温度和 KED potential。
 - steric/SBL 场: `iuserfunc=40-47/60-67/110-113`，适合吸附排斥和界面相互作用解释。
 - on-top pair density: `iuserfunc=36`，适合电子对密度相关展示。

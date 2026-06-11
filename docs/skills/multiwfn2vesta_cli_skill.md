@@ -517,7 +517,8 @@ Common functions include `density`, `gradient`, `orbital --orbital h`,
 `fisher-information-density`, `second-fisher-information-density`, `edr`, `edrdmax`,
 `becke`, `hirshfeld`, `rdg`, `promolecular-rdg`, `delta-g`,
 `hirshfeld-delta-g`, `iri`, `signlambda2rho`,
-`promolecular-signlambda2rho`, `vdw-potential`, `repul`, and `disp`.
+`promolecular-signlambda2rho`, `rose`, `sedd`, `vdw-potential`, `repul`,
+and `disp`.
 The scalar display defaults are
 function-specific where possible: `gradient.cub` uses `gradient-norm`,
 `spindensity.cub` uses `cube-preset spin-density` for
@@ -554,6 +555,10 @@ function-100 `userfunc.cub` with `iuserfunc=93/94`, use the same run-local
 `vdw-dispersion-potential` presets unless `--surface-cube` requests
 `vdw-map`.  The dispersion standalone preset is a single negative surface, so
 override its color with the single-surface `--positive-rgb` option.
+`grid-run --function rose` and `grid-run --function sedd` write function-100
+`userfunc.cub` with `iuserfunc=18/19`, call standalone `rose` / `sedd`
+presets with a `0.5` starting isosurface, and fall back to `surface-map` when
+`--surface-cube` is supplied.
 `grid-run --function pair-function` requires
 `--reference-point X Y Z`; `--pair-function-type` and
 `--pair-correlation-type` patch Multiwfn `pairfunctype`/`paircorrtype`
@@ -582,6 +587,8 @@ IUSERFUNC`; named routes automatically patch common source-backed values:
 `local-electron-attachment-energy` / `leae` = `-27`,
 `local-mulliken-electronegativity` / `local-electronegativity` = `28`,
 `local-hardness` / `local-chemical-hardness` = `29`,
+`rose` / `region-of-slow-electrons` = `18`,
+`sedd` / `single-exponential-decay-detector` = `19`,
 `thomas-fermi-ked` / `tf-ked` = `1200` plus `iKEDsel=3`,
 `weizsacker-ked` / `vw-ked` = `1200` plus `iKEDsel=4`,
 `pauli-ked` = `114` plus `iKEDsel=2`,
@@ -598,11 +605,11 @@ into a run-local settings file copied from the selected Multiwfn
 `settings.ini` when available and passed with `-set`; KED routes also patch
 `iKEDsel`.  LEA/LEAE named routes also auto-select mapped presets
 `lea`/`leae` when `--surface-cube` is supplied; local electronegativity and
-local hardness plus alpha/beta density, FOD, KED variants, and the
+local hardness plus alpha/beta density, FOD, KED variants, RoSE/SEDD, and the
 orbital-weighted Fukui/dual routes use `surface-map`.  Alpha/beta density,
 FOD, and Fukui+/Fukui-/Fukui0 standalone products use `density`, KED variants
-use `kinetic-energy-density`, and orbital-weighted dual descriptor uses
-`signed`.  These 95..98 routes are single-wavefunction
+use `kinetic-energy-density`, RoSE/SEDD use `rose`/`sedd`, and
+orbital-weighted dual descriptor uses `signed`.  These 95..98 routes are single-wavefunction
 approximations, not
 `fukui-run` charged-state density differences; the current runner leaves
 Multiwfn `orbwei_delta` at its source default `0.1` a.u.

@@ -267,6 +267,16 @@ FEATURE_COVERAGE: List[Dict[str, object]] = [
         "next": "Render one compact suite covering density/orbital/spin/KED/ELF/ESP/vdW/FOD/information-density groups.",
     },
     {
+        "command": "grid-run --function rose/sedd",
+        "feature": "Region of Slow Electrons and single exponential decay detector scalar fields",
+        "status": "needs-render",
+        "example": "planned benzene dimer or GC weak-interaction scalar comparison",
+        "system": "benzene dimer, GC base pair, or another weak-interaction/aromatic system",
+        "runbook": "docs/feature_examples_zh.md",
+        "gallery": [],
+        "next": "Use validated Molden input to generate RoSE and SEDD cubes, tune the default 0.5 isosurface, and render a paired figure.",
+    },
+    {
         "command": "fukui-run",
         "feature": "Charged-state Fukui and dual descriptor maps",
         "status": "needs-example",

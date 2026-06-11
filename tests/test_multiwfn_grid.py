@@ -209,6 +209,18 @@ user function comment two
 """
 
 
+ROSE_SEDD_CUBE = """rose sedd comment one
+rose sedd comment two
+    2    -1.000000    -2.000000     0.500000
+    2     0.500000     0.000000     0.000000
+    2     0.000000     0.500000     0.000000
+    2     0.000000     0.000000     0.500000
+    8     8.000000    -1.000000    -2.000000     0.500000
+    1     1.000000    -0.500000    -2.000000     0.500000
+ 0.00 0.40 0.50 0.80 1.00 1.20 1.60 2.00
+"""
+
+
 class TestMultiwfnGridRunner(unittest.TestCase):
     def make_candidate(self, root):
         fake_exe = Path(root) / "Multiwfn_noGUI"
@@ -239,6 +251,8 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertIn("preset=hirshfeld-delta-g", text)
         self.assertIn("preset=iri-scalar", text)
         self.assertIn("preset=dori-scalar", text)
+        self.assertIn("preset=rose", text)
+        self.assertIn("preset=sedd", text)
         self.assertIn("preset=vdw-potential", text)
         self.assertIn("preset=electron-delocalization-range", text)
         self.assertIn("preset=orbital-overlap-distance", text)
@@ -256,6 +270,8 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertIn("default iuserfunc=101", text)
         self.assertIn("default iuserfunc=102", text)
         self.assertIn("default iuserfunc=103", text)
+        self.assertIn("default iuserfunc=18", text)
+        self.assertIn("default iuserfunc=19", text)
         self.assertIn("mapped preset with --surface-cube: alie", text)
         self.assertIn("mapped preset with --surface-cube: lea", text)
         self.assertIn("local-mulliken-electronegativity", text)
@@ -382,6 +398,12 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertEqual(resolve_grid_function("dori").preset, "dori-scalar")
         self.assertEqual(resolve_grid_function("dori-function").default_user_function_index, 20)
         self.assertEqual(resolve_grid_function("density-overlap-regions-indicator").name, "dori")
+        self.assertEqual(resolve_grid_function("rose").preset, "rose")
+        self.assertEqual(resolve_grid_function("region-of-slow-electrons").default_user_function_index, 18)
+        self.assertEqual(resolve_grid_function("slow-electrons").mapped_preset, "surface-map")
+        self.assertEqual(resolve_grid_function("sedd").preset, "sedd")
+        self.assertEqual(resolve_grid_function("single-exponential-decay-detector").default_user_function_index, 19)
+        self.assertEqual(resolve_grid_function("sedd-function").mapped_preset, "surface-map")
         self.assertEqual(
             resolve_grid_function("local-electronegativity").name,
             "local-mulliken-electronegativity",
@@ -604,6 +626,14 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         )
         self.assertEqual(
             build_grid_commands(resolve_grid_function("electron-esp"), grid_mode="low"),
+            ["5", "100", "1", "2", "0", "q"],
+        )
+        self.assertEqual(
+            build_grid_commands(resolve_grid_function("rose"), grid_mode="low"),
+            ["5", "100", "1", "2", "0", "q"],
+        )
+        self.assertEqual(
+            build_grid_commands(resolve_grid_function("sedd"), grid_mode="low"),
             ["5", "100", "1", "2", "0", "q"],
         )
         self.assertEqual(
@@ -1297,6 +1327,61 @@ class TestMultiwfnGridRunner(unittest.TestCase):
                     manifest = result.vesta_result.manifest_path.read_text(encoding="utf-8")
                     self.assertIn(f"canonical_preset: `{expected_preset}`", manifest)
                     self.assertIn(f"effective_isosurface: `{expected_isosurface}`", manifest)
+
+    def test_run_rose_sedd_routes_patch_iuserfunc(self):
+        cases = (
+            ("region-of-slow-electrons", 18, "rose"),
+            ("single-exponential-decay-detector", 19, "sedd"),
+        )
+        for function_name, expected_iuserfunc, expected_preset in cases:
+            with self.subTest(function_name=function_name):
+                with tempfile.TemporaryDirectory() as tmp:
+                    root = Path(tmp)
+                    wavefunction = root / "h2o.fch"
+                    wavefunction.write_text("wavefunction", encoding="utf-8")
+                    candidate = self.make_candidate(root)
+                    (candidate.path.parent / "settings.ini").write_text(
+                        "iuserfunc= 0 // stale userfunc\nother_setting= keep\n",
+                        encoding="utf-8",
+                    )
+
+                    def fake_run(command, **kwargs):
+                        cwd = Path(kwargs["cwd"])
+                        (cwd / "userfunc.cub").write_text(ROSE_SEDD_CUBE, encoding="utf-8")
+                        return subprocess.CompletedProcess(command, 0, stdout="ok", stderr="")
+
+                    with patch("multiwfn2vesta.multiwfn_grid.find_multiwfn", return_value=candidate):
+                        with patch("multiwfn2vesta.multiwfn_grid.subprocess.run", side_effect=fake_run):
+                            result = run_multiwfn_grid(
+                                wavefunction,
+                                root / "products",
+                                function_name=function_name,
+                                stem="case",
+                                grid_mode="low",
+                            )
+
+                    self.assertTrue(result.success)
+                    self.assertEqual(result.command_file.read_text(encoding="utf-8"), "5\n100\n1\n2\n0\nq\n")
+                    self.assertEqual(result.user_function_index, expected_iuserfunc)
+                    self.assertIsNotNone(result.settings_override)
+                    settings_text = result.settings_override.read_text(encoding="utf-8")
+                    self.assertIn(f"iuserfunc= {expected_iuserfunc} // stale userfunc", settings_text)
+                    self.assertIn("other_setting= keep", settings_text)
+                    self.assertEqual(result.raw_cube.name, "userfunc.cub")
+                    self.assertEqual(result.cube.name, f"case_{expected_preset}.cub")
+                    self.assertIsNotNone(result.vesta_result)
+                    self.assertEqual(
+                        result.vesta_result.vesta_path.name,
+                        f"case_{expected_preset}_{expected_preset}_cube.vesta",
+                    )
+                    recipe = result.recipe_path.read_text(encoding="utf-8")
+                    self.assertIn(f"function_name: `{expected_preset}`", recipe)
+                    self.assertIn("function_index: `100`", recipe)
+                    self.assertIn(f"user_function_index_iuserfunc: `{expected_iuserfunc}`", recipe)
+                    self.assertIn(f"auto_vesta_preset: `{expected_preset}`", recipe)
+                    manifest = result.vesta_result.manifest_path.read_text(encoding="utf-8")
+                    self.assertIn(f"canonical_preset: `{expected_preset}`", manifest)
+                    self.assertIn("effective_isosurface: `0.5`", manifest)
 
     def test_run_alpha_density_uses_named_iuserfunc_and_density_preset(self):
         with tempfile.TemporaryDirectory() as tmp:

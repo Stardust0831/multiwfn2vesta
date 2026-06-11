@@ -146,6 +146,8 @@ multiwfn2vesta grid-run --list-functions
   `local-electron-attachment-energy` / `leae` = `-27`,
   `local-mulliken-electronegativity` / `local-electronegativity` = `28`,
   `local-hardness` / `local-chemical-hardness` = `29`,
+  `rose` / `region-of-slow-electrons` = `18`,
+  `sedd` / `single-exponential-decay-detector` = `19`,
   `positive-esp` / `positive-mep` = `101`,
   `negative-esp` / `negative-mep` = `102`,
   `electric-field-magnitude` / `electric-field` = `103`,
@@ -164,7 +166,7 @@ multiwfn2vesta grid-run --list-functions
   also auto-select mapped presets `lea`/`leae` when `--surface-cube` is
   supplied; alpha/beta density, FOD, local Mulliken electronegativity, local
   hardness, electron ESP/ESP component/electric-field routes, KED variants, and the
-  orbital-weighted Fukui/dual routes fall back to the generic `surface-map`
+  orbital-weighted Fukui/dual routes, RoSE, and SEDD fall back to the generic `surface-map`
   mapped preset.  Alpha/beta density, FOD, and
   Fukui+/Fukui-/Fukui0 standalone products use `density`, KED variants use
   `kinetic-energy-density`, electron ESP uses `electron-esp`, while orbital-weighted dual descriptor uses
@@ -223,6 +225,13 @@ multiwfn2vesta grid-run --list-functions
   `--tex-percent`, `--tex-range-source surface-band`, `--surface-band`, or
   `--surface-nearest` from `grid-run` when the generic color scale is not
   chemically appropriate.
+- `rose` and `sedd`: function `100`, raw `userfunc.cub`, default
+  `iuserfunc=18` / `19`, standalone presets `rose` and `sedd`.  The inspected
+  Multiwfn source evaluates RoSE as `(Dh-G)/(Dh+G)` and SEDD as
+  `log(1+epsilon)`.  Both maintained presets use a single positive `0.5`
+  isosurface as a starting point; inspect the cube range and tune
+  `--isosurface` per real system.  With `--surface-cube`, they use
+  `surface-map`.
 - `alpha-density` and `beta-density`: function `100`, raw `userfunc.cub`,
   default `iuserfunc=1` / `2`, standalone preset `density`.  Multiwfn
   evaluates `fspindens(x,y,z,'a')` / `fspindens(x,y,z,'b')`; use these for

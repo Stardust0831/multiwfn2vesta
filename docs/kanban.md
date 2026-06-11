@@ -1,6 +1,14 @@
 # Project Kanban
 
-Updated: 2026-06-12 02:50 CST
+Updated: 2026-06-12 03:34 CST
+
+## Current Request: 2026-06-12 Feature Closure Phase 4 And RoSE/SEDD Closeout
+
+- [x] 需求入板: 继续把已有功能闭环成可复用体验；每个维护态功能都要有 example/runbook、代表体系、效果图或明确的待补图状态，并继续准备中文手册。所有回复继续包含看板摘要。
+- [x] 修复当前未完成的 RoSE/SEDD 增量测试失败: fake-run 使用的测试 cube 已调整为覆盖 `0.5` 等值面，focused `tests.test_cube_preset tests.test_multiwfn_grid` 已通过。
+- [x] 完成只读盘点: 子 agent 和主线均确认当前真正可作为手册效果图的项目内 gallery 是 Ag(111)+benzene IGMH+AIM、GC/benzene AIM 和 Cd/Cl 轨迹；H2O-HF IRI+AIM 是调试图，RoSE/SEDD、grid-run 细分函数、surface-extrema、STM、domain、atom coloring 仍缺真实手册级渲染。
+- [x] 同步代码索引、README、中文手册、usage、research matrix、skills、worklog 和看板，把 RoSE/SEDD 从候选路线提升为已有 CLI/preset/test 的维护路线，并把代表体系暂定为 benzene dimer 或 GC 碱基对。
+- [x] 运行 full no-GUI regression、CLI smokes、markdown link check、docs 镜像，明确不提交 `domain.cub` / `domain.pdb` 和大型 smoke 产物。验证通过：focused 204 tests、full 383 tests、route/preset CLI smoke、examples coverage/needs-render/verify、markdown local links、gallery required PNG、`git diff --check`、docs mirror dry-run。提交和 push 待最后执行。
 
 ## Active Goal Continuation: 2026-06-12 Next Source-Backed VESTA Analysis Increment
 
@@ -2391,3 +2399,13 @@ Updated: 2026-06-12 02:50 CST
   - [x] Recheck branch/worktree, current `grid-run`/`cube-preset` coverage, and local Multiwfn source evidence. Current branch started aligned with `origin/main`; only `docs/kanban.md` and untracked `domain.cub` / `domain.pdb` were present before this increment.
   - [x] Select one bounded source-backed route that is chemically useful, ABACUS Molden compatible, and VESTA friendly. Selected `electron-esp`: local Multiwfn `function.f90` maps function-100 `iuserfunc=14` to `eleesp(x,y,z)`, and function-100 exports `userfunc.cub`.
   - [x] Implement code, tests, docs, skill/worklog/status notes, mirror docs, validate, then commit and push with `Stardust0831` identity. Code and focused tests now cover `grid-run --function electron-esp` and `cube-preset electron-esp`; full no-GUI regression, Markdown link check, CLI route discovery, and `git diff --check` passed. Final commit/push details are reported in the assistant response.
+
+## Active Goal Continuation: 2026-06-12 RoSE/SEDD Scalar Route Increment
+
+- **User request:** Continue enriching ABACUS-compatible Multiwfn wavefunction analyses that can be rendered in VESTA.
+- **Scope guard:** Keep edits under `/mnt/g/work/multiwfn2vesta`; preserve untracked `domain.cub` / `domain.pdb`; do not modify system files.
+- **Immediate plan:**
+  - [x] Record this continuation in the kanban before implementation.
+  - [x] Recheck branch/worktree and source evidence for RoSE (`iuserfunc=18`) and SEDD (`iuserfunc=19`).  Local Multiwfn source maps function-100 `iuserfunc=18/19` to RoSE and SEDD, exported as `userfunc.cub`.
+  - [x] Add named `grid-run` routes and VESTA presets with focused tests.  Current focused test set passes after using a fake cube whose range covers the default `0.5` isosurface.
+  - [ ] Update docs/skills/research/worklog/status notes, mirror docs, validate, commit, and push with `Stardust0831` identity.  Documentation is being synchronized with the broader feature-closure audit; full validation is still pending.
