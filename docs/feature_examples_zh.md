@@ -14,6 +14,7 @@
 ## 快速命令
 
 ```bash
+multiwfn2vesta examples --summary
 multiwfn2vesta examples --coverage
 multiwfn2vesta examples --needs-render
 multiwfn2vesta examples --command grid-run
@@ -30,7 +31,7 @@ multiwfn2vesta examples --coverage --json
 | `discover` | 本工作区 Multiwfn/VESTA | linked | 无 | 如需教学截图，记录一段成功输出即可 |
 | `abacus-molden` | Ag(111)+benzene ABACUS LCAO | linked | `assets/gallery/ag111_benzene_igmh_aim_front.png` | 把真实 ABACUS 目录结构和成功输出片段补进 runbook |
 | `molden-check` | Ag(111)+benzene Molden，保留 `[Nval]` | linked | Ag 三视图间接覆盖 | 在中文手册加入一段成功检查输出 |
-| `cube-vesta` | H2O-HF IRI surface cube，后续换 direct density cube | needs-render | `assets/gallery/h2o_iri_aim_overlay.png` 仅作调试证据 | 补一张独立 cube 等值面图 |
+| `cube-vesta` | H2O-HF IRI surface cube，后续换 direct density cube | linked | `assets/gallery/h2o_iri_aim_overlay.png` 仅作调试证据；IGMH/IRI workflow 已间接覆盖 cube 写入 | 补一张独立 standalone cube 等值面图 |
 | `cube-preset` | Ag(111)+benzene IGMH、H2O-HF IRI、ABACUS direct cube | linked | Ag 三视图、IRI 调试图 | 补 ABACUS charge density/potential/ELF/wavefunction norm 图 |
 | `surface-extrema` | 极性芳香分子或吸附界面 ALIE/LEA/LEAE | needs-render | 无 | 真实生成 `surfanalysis.pdb` 后叠加 extrema |
 | `cube-arith` | 反应性分子的 Fukui/dual 或 open-shell spin density | needs-example | 无 | 准备 charged-state 或 spin-resolved cube |
@@ -42,6 +43,8 @@ multiwfn2vesta examples --coverage --json
 | `grid-run --function rose/sedd` | benzene dimer、GC 碱基对或类似弱相互作用/芳香体系 | needs-render | 无 | 已有 RoSE/SEDD CLI 和 preset；下一步在同一真实体系中渲染 paired figure |
 | `grid-run --function steric/sbl` | Ag(111)+benzene、benzene dimer、GC 碱基对 | needs-render | 无 | 已有 steric/SBL/Pauli/quantum/electrostatic CLI 和 preset；下一步在界面或弱相互作用体系中渲染成组图 |
 | `grid-run --function on-top-pair-density` | benzene dimer、GC 碱基对 | needs-render | 无 | 已有 `iuserfunc=36` CLI 和 preset；下一步比较 `paircorrtype` 后渲染电子对密度图 |
+| `grid-run --function information-theory` | benzene dimer、GC 碱基对、小极性分子或 COF | needs-render | 无 | 已有 `iuserfunc=49/50/51/52/53/54/55/56/70/100` CLI 和专用 preset；`information-gain-density` 会先执行 promolecular 初始化，second-Fisher 是 signed preset；下一步渲染信息增益、Shannon/Fisher/Ghosh/Renyi/disequilibrium 组合图 |
+| `grid-run --function usi/bni` | benzene/phenol dimer、GC 碱基对或 Ag(111)+benzene | needs-render | 无 | 已有 `iuserfunc=819/820` CLI 和 preset；下一步在弱相互作用或吸附界面体系中调 cube 范围后出图 |
 | `fukui-run` | 带杂原子的芳香分子，中性/阴/阳离子三态 | needs-example | 无 | 先固定同一网格的三态 density cube |
 | `stm-run` | 表面吸附小分子或芳香分子局域态 | needs-render | 无 | 选择 LDOS 能窗并渲染 constant-current surface |
 | `domain-run` | H2O density domain 或 COF 孔道区域 | needs-render | 无 | 渲染二值 domain surface 并记录 criterion |
@@ -57,6 +60,7 @@ multiwfn2vesta examples --coverage --json
 ## 推荐真实体系组合
 
 当前最有价值、且能覆盖最多功能的体系组合如下：
+选择依据另见 [真实算例体系选择依据](research/valuable_systems_for_examples_zh.md)。
 
 1. Ag(111)+benzene 周期性吸附体系：覆盖 ABACUS Molden、Molden 检查、IGMH、AIM、AIM+IGMH 三视图、vdW/ESP 类 grid-run 后续扩展。
 2. GC 碱基对：覆盖 AIM 氢键拓扑，适合继续补 IRI/RDG、ESP-on-density、surface extrema。
@@ -78,8 +82,8 @@ example id 落地。每个 example 都应先满足 `examples/_template/README_zh
 | 计划 example id | 体系 | 主要覆盖功能 | 当前可复用资产 | 验收缺口 |
 | --- | --- | --- | --- | --- |
 | `ag111_benzene_extended_fields` | Ag(111)+benzene 周期 slab | `abacus-molden`, `molden-check`, `igmh-run`, `aim-igmh`, vdW/ESP/steric/SBL/STM | 已有 Ag 三视图、ABACUS Molden、IGMH/AIM smoke | 为 vdW/ESP/steric/SBL/STM 生成同一视角下的真实 PNG，并记录 cube 范围和等值面 |
-| `benzene_dimer_scalar_suite` | benzene dimer；公开 fallback 可用 phenol dimer | `iri-run`, RDG/DORI/Delta-g, RoSE/SEDD, vdW components, on-top pair density | 目前无正式图 | 准备轻量 Molden/cube，渲染 paired weak-interaction/scalar figures |
-| `gc_weak_interaction_suite` | GC 碱基对 | `aim-run`, `aim-pdb`, IRI/RDG, ESP-on-density, on-top pair density, `surface-extrema` | `gc_aim_overlay.png` 和 GC AIM runbook | 在同一 GC 体系补 IRI/ESP/ALIE、LEA extrema 或 on-top pair density 图 |
+| `benzene_dimer_scalar_suite` | benzene dimer；公开 fallback 可用 phenol dimer | `iri-run`, RDG/DORI/Delta-g, RoSE/SEDD, vdW components, on-top pair density, information-density, USI/BNI | 目前无正式图 | 准备轻量 Molden/cube，渲染 paired weak-interaction/scalar figures |
+| `gc_weak_interaction_suite` | GC 碱基对 | `aim-run`, `aim-pdb`, IRI/RDG, ESP-on-density, on-top pair density, information-density, USI/BNI, `surface-extrema` | `gc_aim_overlay.png` 和 GC AIM runbook | 在同一 GC 体系补 IRI/ESP/ALIE、LEA extrema、information-density、USI/BNI 或 on-top pair density 图 |
 | `cof_direct_cube_suite` | COF_12000N2 单层或小 COF | `cube-vesta`, `cube-preset`, ABACUS density/potential/ELF/partial charge/wfc norm | 仅有 COF CIF 经验记录 | 跑 ABACUS 单点或复用 direct cube，渲染 density/potential/ELF 等图 |
 | `fukui_dual_reactivity` | coronene、nitro/hetero aromatic 或其它三态反应性分子 | `cube-arith`, `fukui-run`, orbital-weighted Fukui/dual, atom scalar coloring | 无正式图 | 准备同网格 neutral/anion/cation density cube 和 condensed atom values |
 | `spin_atom_coloring_suite` | C4H8 diradical、triplet 小分子、磁性氧化物或 spin-polarized adsorbate | spin density, `abacus-mulliken-color`, `multiwfn-atom-color` | 只有 toy/coloring smoke | 换真实 `mulliken.txt` 或 Multiwfn atom table，补 PNG 和色标说明 |
@@ -104,8 +108,10 @@ example id 落地。每个 example 都应先满足 `examples/_template/README_zh
 | IRI/RDG/DORI/Delta-g | H2O-HF、benzene dimer | mapped surface，关闭 sections |
 | RoSE/SEDD | benzene dimer、GC 碱基对 | 单正值等值面，先试 `0.5` 后按 cube 范围调参 |
 | on-top pair density | benzene dimer、GC 碱基对 | 单正值等值面；可比较 `paircorrtype=1/2/3` |
+| information gain / Shannon / Fisher / Ghosh / Renyi / disequilibrium | benzene dimer、GC、H2O 或 COF | 信息增益和 Shannon 用 signed surface；second-Fisher 用 signed surface；normal/phase-space Fisher、Ghosh/Renyi/disequilibrium 用单正值 surface |
+| USI/BNI | benzene/phenol dimer、GC 或 Ag(111)+benzene | USI signed、BNI 单正值；低密度尖峰需用真实 cube range 调等值面 |
 | FOD、orbital-weighted Fukui/dual | 反应性分子 | signed/single surface，配 condensed atom value coloring |
-| information-density、Becke/Hirshfeld weights | 小分子/COF | standalone diagnostic surface，先作为高级例 |
+| Becke/Hirshfeld weights | 小分子/COF | standalone diagnostic surface，先作为高级例 |
 | pair/source function | 选定键或孤对电子参考点 | 需要更好的参考点交互说明后再正式化 |
 
 ## 已渲染效果图
@@ -122,6 +128,7 @@ example id 落地。每个 example 都应先满足 `examples/_template/README_zh
 
 CLI 入口补充：
 
+- `multiwfn2vesta examples --summary`：快速汇总当前闭环度、ready examples、gallery 完整性和下一批优先体系。
 - `multiwfn2vesta examples --command <命令或关键词>`：从某个功能反查推荐体系、状态和下一步。
 - `multiwfn2vesta examples --gallery-assets`：只列出已提交的项目内 PNG，不检查本地大文件。
 - `multiwfn2vesta examples --systems`：列出当前推荐真体系，帮助新 example 避免 toy placeholder。
@@ -133,5 +140,6 @@ CLI 入口补充：
 - 扩展 KED 已维护: `iuserfunc=1201/1202/1203/1204/1210`，适合 KED 差值、局域温度和 KED potential；仍缺真实手册级 render。
 - steric/SBL 场已维护核心无额外交互路线：`iuserfunc=40-43/60-69/-69/110-113`，适合吸附排斥和界面相互作用解释；damped steric `44-47` 暂未维护。
 - on-top pair density 已维护：`iuserfunc=36`，适合电子对密度相关展示；需要真实 `benzene dimer` 或 GC 渲染后再标 ready。
+- 信息论/Ghosh/Renyi/USI/BNI 路线已维护：`iuserfunc=49/50/51/52/53/54/55/56/70/100/819/820`；需要 benzene dimer、GC、COF 或 Ag(111)+benzene 的真实 render 后再标 ready。
 
 这些候选暂时不阻塞当前“已有功能闭环”。优先级仍是先把 ready/needs-render 的现有功能补成清晰可复用算例。

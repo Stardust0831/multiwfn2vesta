@@ -107,7 +107,12 @@ Multiwfn evidence:
   electrostatic force/charge (`66-67`), SBL electronic electrostatic and
   quantum energy-density terms (`68`, `69`, `-69`), total SBL
   energy/potential/force/charge (`110-113`),
-  Fisher information density (`51/52`), and many other
+  Fisher information density (`51`), second Fisher information density
+  (`52`, `-Laplacian(rho)*log(rho)`), Ghosh entropy-density variants
+  (`53/54`), Renyi density integrands (`55/56`), phase-space Fisher
+  information density (`70`), disequilibrium/semi-similarity (`100`),
+  ultrastrong interaction indicator USI (`819`), bonding/noncovalent
+  interaction indicator BNI (`820`), and many other
   selectable functions;
   `0123dim.f90` exports `userfunc.cub`.
   Multiwfn main menu `1000 -> 2` can set `iuserfunc` interactively, but the
@@ -118,8 +123,9 @@ Multiwfn evidence:
   routes now imply common source-backed indices for DORI, LEA/LEAE, local
   Mulliken electronegativity/local hardness, selected KED variants,
   orbital-weighted Fukui/dual descriptor, FOD, spin-channel density, ESP
-  electron-only and positive/negative components, electric-field magnitude, and
-  information-theory densities, RoSE/SEDD, and core steric/SBL diagnostics.
+  electron-only and positive/negative components, electric-field magnitude,
+  information-theory/Ghosh/Renyi/disequilibrium densities, USI/BNI,
+  RoSE/SEDD, and core steric/SBL diagnostics.
   Multiwfn source computes the
   orbital-weighted descriptors with HOMO/LUMO chemical potential, Gaussian
   orbital-energy weights, and `orbwei_delta=0.1` a.u. by default; the current
@@ -271,7 +277,8 @@ occupations, and density derivatives from the wavefunction representation.
 | STM/LDOS | Full wavefunction with GTF information | Good candidate for Gamma LCAO Molden; metals and Fermi-level choices need care | `STM.cub` | Single positive LDOS/current isosurface or slices | `stm-run` now automates Multiwfn `300 -> 4`, switches to constant-current mode, exports `STM.cub`, and calls `cube-preset stm` |
 | Molecular surface mapped properties | Full wavefunction or cube pair | Feasible through Molden; ABACUS can provide density/potential cubes | `surf.cub`, `mapfunc.cub`, `density.cub`, `avglocion.cub`, `surfanalysis.pdb` | Surface cube plus texture; extrema as atoms-only overlay phase | `cube-preset surface-map` covers surface+texture display using `molsurfmap.vmd` defaults; `--surfanalysis-pdb` and `surface-extrema` overlay surface extrema |
 | ALIE / LEA / LEAE / local electronegativity / local hardness | Full wavefunction, occupied/virtual orbitals | Feasible only if ABACUS Molden orbitals/energies are adequate; virtual levels in metals risky | `avglocion.cub`, `userfunc.cub`, `surfanalysis.pdb` | Colored density surface plus extrema points | `grid-run --function alie --surface-cube density.cub` now generates ALIE texture maps directly; `grid-run --function local-electron-affinity` and `grid-run --function local-electron-attachment-energy` export LEA/LEAE `userfunc.cub` by automatically patching `iuserfunc=27/-27`; `grid-run --function local-mulliken-electronegativity` and `grid-run --function local-hardness` patch `iuserfunc=28/29` and use `surface-map` with `--surface-cube`; `grid-run --surface-cube` now forwards texture color-scale controls such as `--tex-physical` and `--tex-range-source surface-band`; `cube-preset alie/lea/leae/surface-map` remains the lower-level display layer |
-| Information-theory density functions | Full wavefunction Molden/FCH/WFN; local information entropy is a normal main-function-5 grid function | Feasible for Gamma LCAO Molden; interpretation depends on the NAO2GTO density quality | `infoentro.cub`, `userfunc.cub` | Signed scalar isosurfaces or slices | `grid-run --function local-information-entropy` now exports Multiwfn function `11` `infoentro.cub`; named function-100 routes `information-gain-density`, `shannon-entropy-density`, `fisher-information-density`, and `second-fisher-information-density` automatically patch `iuserfunc=49/50/51/52`; `cube-preset local-information-entropy` and `cube-preset user-function` provide signed display defaults |
+| Information-theory, Ghosh/Renyi, and disequilibrium density functions | Full wavefunction Molden/FCH/WFN; local information entropy is a normal main-function-5 grid function | Feasible for Gamma LCAO Molden; interpretation depends on the NAO2GTO density quality | `infoentro.cub`, `userfunc.cub` | Signed or single-positive scalar isosurfaces, optional slices or density-surface maps | `grid-run --function local-information-entropy` exports Multiwfn function `11` `infoentro.cub`; named function-100 routes now patch `iuserfunc=49/50/51/52/53/54/55/56/70/100` for information gain, Shannon/Fisher/Ghosh entropy-density diagnostics, Renyi `rho^2`/`rho^3` integrands, phase-space Fisher information, and disequilibrium/semi-similarity.  `information-gain-density` also runs `1000 -> 17` before grid generation because `relShannon` requires promolecular reference data.  Dedicated presets are `information-gain-density`, `shannon-entropy-density`, `fisher-information-density`, `second-fisher-information-density`, `ghosh-entropy-density`, and `renyi-entropy-density`; second-Fisher is signed, while normal/phase-space Fisher remains single-positive.  First formal figures should use benzene/phenol dimer, GC, H2O, or COF after cube-range inspection |
+| USI / BNI interaction indicators | Full wavefunction Molden/FCH/WFN | Feasible for Gamma LCAO Molden; low-density spikes require cautious isosurface tuning | `userfunc.cub` | USI signed isosurfaces; BNI single-positive scalar isosurfaces or optional surface maps | `grid-run --function usi` and `grid-run --function bni` patch function-100 `iuserfunc=819/820`, export `userfunc.cub`, and use dedicated `cube-preset usi` / `bni`.  Recommended first systems are benzene/phenol dimer, GC base pair, or Ag(111)+benzene adsorption interface |
 | Fractional occupation density FOD | Full wavefunction Molden/FCH/WFN with meaningful MO occupations | Feasible if ABACUS Molden occupations are correctly exported; metallic smearing, multi-k, SOC/noncollinear cases need caution | `userfunc.cub` | Single positive density-like isosurfaces or density-surface texture maps | `grid-run --function fractional-occupation-density` / `fod` now patches function-100 `iuserfunc=90`, exports `userfunc.cub`, uses `density` standalone, and falls back to `surface-map` with `--surface-cube`; integer-occupation single-reference inputs usually yield little or no FOD, and the shared `density` preset `0.01` isosurface may need lowering, e.g. `--isosurface 0.001` |
 | Pair/correlation function | Full wavefunction Molden/FCH/WFN plus a reference point | Feasible for Gamma LCAO Molden; pair density/correlation interpretation depends on orbitals and occupations | `fermihole.cub` | Signed scalar isosurfaces by default; pair-density modes can use a single positive preset | `grid-run --function pair-function --reference-point X Y Z` now exports Multiwfn function `17`; `--pair-function-type` patches `pairfunctype`, `--pair-correlation-type` patches `paircorrtype`, the runner copies the selected Multiwfn `settings.ini` when available, and `cube-preset pair-function` provides signed `+/-0.05` display defaults |
 | On-top pair density | Full wavefunction Molden/FCH/WFN | Feasible for Gamma LCAO Molden; most interpretable for compact molecular dimers or bonding regions with validated occupations | `userfunc.cub` | Single positive scalar isosurfaces, optionally texture maps on a supplied surface | `grid-run --function on-top-pair-density` / `ontop-pair-density` now patches function-100 `iuserfunc=36` and run-local `paircorrtype`, exports `userfunc.cub`, and uses `cube-preset on-top-pair-density` with a `0.01` starting isosurface.  The inspected Multiwfn source evaluates the `r1=r2` all-electron pair-density case by temporarily setting `pairfunctype=12`, so no reference point is required; `--pair-correlation-type 1/2/3` controls exchange, Coulomb correlation, or both |
@@ -514,12 +521,13 @@ Main gaps:
   LEA/LEAE, local Mulliken electronegativity/local hardness,
   selected and extended KED variants, UFF vdW repulsion/dispersion components, electron-only
   ESP, positive/negative ESP components, electric-field magnitude, orbital-weighted
-  Fukui/dual descriptor, FOD, and information-theory densities.
+  Fukui/dual descriptor, FOD, information-theory/Ghosh/Renyi/disequilibrium
+  densities, and USI/BNI indicators.
   Local
   Multiwfn source shows function `100`
   exports `userfunc.cub` and evaluates `userfunc(x,y,z)` according to
   `iuserfunc`; named routes patch
-  `1/2/14/20/27/-27/28/29/93/94/101/102/103/90/114/1200/1201/1202/1203/1204/1210/95/96/97/98/49/50/51/52` automatically
+  `1/2/14/20/27/-27/28/29/93/94/101/102/103/90/114/1200/1201/1202/1203/1204/1210/95/96/97/98/49/50/51/52/53/54/55/56/70/100/819/820` automatically
   through the same run-local `-set` settings file while leaving global
   settings untouched.  The KED routes additionally patch run-local `iKEDsel`.
   External-grid interpolation `-1/-3`

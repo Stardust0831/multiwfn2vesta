@@ -825,33 +825,109 @@ GRID_FUNCTIONS: Tuple[GridFunction, ...] = (
         "information-gain-density",
         100,
         "userfunc.cub",
-        "user-function",
+        "information-gain-density",
         ("relative-shannon-entropy", "information-gain"),
+        mapped_preset="surface-map",
         default_user_function_index=49,
     ),
     GridFunction(
         "shannon-entropy-density",
         100,
         "userfunc.cub",
-        "user-function",
+        "shannon-entropy-density",
         ("shannon-density",),
+        mapped_preset="surface-map",
         default_user_function_index=50,
     ),
     GridFunction(
         "fisher-information-density",
         100,
         "userfunc.cub",
-        "user-function",
+        "fisher-information-density",
         ("fisher-density",),
+        mapped_preset="surface-map",
         default_user_function_index=51,
     ),
     GridFunction(
         "second-fisher-information-density",
         100,
         "userfunc.cub",
-        "user-function",
+        "second-fisher-information-density",
         ("second-fisher-density",),
+        mapped_preset="surface-map",
         default_user_function_index=52,
+    ),
+    GridFunction(
+        "ghosh-entropy-density",
+        100,
+        "userfunc.cub",
+        "ghosh-entropy-density",
+        ("ghosh-entropy", "ghosh-entropy-g"),
+        mapped_preset="surface-map",
+        default_user_function_index=53,
+    ),
+    GridFunction(
+        "ghosh-entropy-density-laplacian-corrected",
+        100,
+        "userfunc.cub",
+        "ghosh-entropy-density",
+        ("ghosh-entropy-laplacian-corrected", "ghosh-entropy-g-laplacian-corrected"),
+        mapped_preset="surface-map",
+        default_user_function_index=54,
+    ),
+    GridFunction(
+        "renyi-quadratic-density",
+        100,
+        "userfunc.cub",
+        "renyi-entropy-density",
+        ("quadratic-renyi-density", "renyi-2-density", "density-squared"),
+        mapped_preset="surface-map",
+        default_user_function_index=55,
+    ),
+    GridFunction(
+        "renyi-cubic-density",
+        100,
+        "userfunc.cub",
+        "renyi-entropy-density",
+        ("cubic-renyi-density", "renyi-3-density", "density-cubed"),
+        mapped_preset="surface-map",
+        default_user_function_index=56,
+    ),
+    GridFunction(
+        "phase-space-fisher-information-density",
+        100,
+        "userfunc.cub",
+        "fisher-information-density",
+        ("phase-space-fisher-density", "phase-fisher-density"),
+        mapped_preset="surface-map",
+        default_user_function_index=70,
+    ),
+    GridFunction(
+        "disequilibrium-density",
+        100,
+        "userfunc.cub",
+        "renyi-entropy-density",
+        ("disequilibrium", "semi-similarity"),
+        mapped_preset="surface-map",
+        default_user_function_index=100,
+    ),
+    GridFunction(
+        "ultrastrong-interaction-indicator",
+        100,
+        "userfunc.cub",
+        "usi",
+        ("usi", "ultrastrong-interaction", "usi-indicator"),
+        mapped_preset="surface-map",
+        default_user_function_index=819,
+    ),
+    GridFunction(
+        "bonding-noncovalent-interaction-indicator",
+        100,
+        "userfunc.cub",
+        "bni",
+        ("bni", "bonding-noncovalent-interaction", "bonding-and-noncovalent-interaction", "bni-indicator"),
+        mapped_preset="surface-map",
+        default_user_function_index=820,
     ),
     GridFunction(
         "becke-weight",
@@ -1402,6 +1478,10 @@ def _normalize_hirshfeld_density_type(value: Optional[str]) -> str:
         )
 
 
+def _function_requires_promolecular_initialization(function: GridFunction) -> bool:
+    return function.default_user_function_index == 49
+
+
 def build_grid_commands(
     function: GridFunction,
     *,
@@ -1462,6 +1542,9 @@ def build_grid_commands(
         _normalize_ked_density_cutoff(ked_density_cutoff)
     elif ked_density_cutoff is not None:
         raise ValueError("--ked-density-cutoff is only valid for KED local-temperature routes")
+
+    if _function_requires_promolecular_initialization(function):
+        commands.extend(["1000", "17"])
 
     commands.extend(["5", str(function.index)])
     if function.requires_orbital:
@@ -1674,6 +1757,9 @@ def _write_recipe(
             "- Function `100` vdW component routes use `iuserfunc=93/94` for UFF repulsion/dispersion potential and also patch `ivdwprobe` through the run-local settings file.",
             "- Function `20` EDR(r;d) asks for length scale `d` in Bohr before grid setup and exports `EDR.cub`.",
             "- Function `21` D(r) can use Multiwfn's default EDR exponent set `20, 2.50, 1.50` or a manual count/start/increment set and exports `EDRDmax.cub`.",
+            "- Function `100` information-theory routes patch `iuserfunc=49/50/51/52/53/54/55/56/70/100` for information gain, Shannon/Fisher/Ghosh entropy-density diagnostics, Renyi density integrands, phase-space Fisher information, and disequilibrium.",
+            "- The `information-gain-density` route runs Multiwfn `1000 -> 17` before grid generation because the inspected `relShannon` source requires promolecular wavefunction initialization.",
+            "- Function `100` USI/BNI routes patch `iuserfunc=819/820` for ultrastrong interaction and bonding/noncovalent interaction indicators.",
             "- Function `100` KED named routes patch `iKEDsel` in the same run-local settings file: `3` selects Thomas-Fermi KED, `4` selects Weizsacker KED, and Pauli KED uses `iuserfunc=114` with selected KED minus Weizsacker KED.",
             "- Function `100` extended KED routes use source-backed `iuserfunc=1201/1202/1203/1204/1210` for selected KED differences, absolute differences, local temperature, and source-supported KED potentials.  The maintained KED potential routes only use `iKEDsel=3/5/7`, which the inspected source handles explicitly.",
             "- Maintained function-100 KED routes write run-local `uservar=0` by default so stale global Multiwfn settings do not affect KED evaluation.",
@@ -2561,7 +2647,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "36 for on-top pair density, "
             "49 for information gain, 90 for fractional occupation density, "
             "50 for Shannon entropy density, 51/52 for Fisher information "
-            "density, 28 for local Mulliken electronegativity, and 29 for "
+            "density, 53/54 for Ghosh entropy density, 55/56 for Renyi "
+            "density integrands, 70 for phase-space Fisher information "
+            "density, 100 for disequilibrium/semi-similarity "
+            "density, 819/820 for USI/BNI interaction indicators, "
+            "28 for local Mulliken electronegativity, and 29 for "
             "local hardness, 114 for Pauli KED, 1200 for selected KED, and "
             "93/94 for UFF vdW repulsion/dispersion potential components, "
             "95/96/97/98 for orbital-weighted "

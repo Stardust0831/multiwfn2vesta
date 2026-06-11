@@ -420,6 +420,34 @@ FEATURE_COVERAGE: List[Dict[str, object]] = [
         ),
     },
     {
+        "command": "grid-run --function information-theory",
+        "feature": "Information-gain, Shannon/Fisher/Ghosh/Renyi, phase-space Fisher, and disequilibrium density diagnostics",
+        "status": "needs-render",
+        "example": "benzene_dimer_scalar_suite; gc_weak_interaction_suite; cof_direct_cube_suite",
+        "system": "benzene dimer, GC base pair, small polar molecules, or COF monolayer direct/derived density diagnostics",
+        "runbook": "docs/feature_examples_zh.md",
+        "gallery": [],
+        "next": (
+            "Use validated Molden input to generate iuserfunc=49/50/51/52/53/54/55/56/70/100 "
+            "cubes, remember information-gain initializes the promolecular reference and second-Fisher is signed, "
+            "group signed information-gain/Shannon/second-Fisher surfaces separately from positive "
+            "normal/phase-space Fisher, Ghosh, Renyi, and disequilibrium fields, inspect cube ranges, and render one compact panel."
+        ),
+    },
+    {
+        "command": "grid-run --function usi/bni",
+        "feature": "USI and BNI interaction-indicator scalar fields",
+        "status": "needs-render",
+        "example": "benzene_dimer_scalar_suite; gc_weak_interaction_suite; ag111_benzene_extended_fields",
+        "system": "benzene/phenol dimer, GC hydrogen-bond pair, or Ag(111)+benzene adsorption interface",
+        "runbook": "docs/feature_examples_zh.md",
+        "gallery": [],
+        "next": (
+            "Use validated Molden input to generate USI iuserfunc=819 and BNI iuserfunc=820, "
+            "treat low-density spikes cautiously, and render a weak-interaction or adsorption-interface figure."
+        ),
+    },
+    {
         "command": "fukui-run",
         "feature": "Charged-state Fukui and dual descriptor maps",
         "status": "needs-example",
@@ -689,6 +717,31 @@ COVERAGE_COMMAND_ALIASES: Dict[str, str] = {
     "ontop-pair-density": "grid-run --function on-top-pair-density",
     "pair-density-ontop": "grid-run --function on-top-pair-density",
     "pair-density-on-top": "grid-run --function on-top-pair-density",
+    "information-theory": "grid-run --function information-theory",
+    "information-density": "grid-run --function information-theory",
+    "information-gain": "grid-run --function information-theory",
+    "information-gain-density": "grid-run --function information-theory",
+    "relative-shannon-entropy": "grid-run --function information-theory",
+    "shannon-entropy-density": "grid-run --function information-theory",
+    "fisher-information-density": "grid-run --function information-theory",
+    "second-fisher-information-density": "grid-run --function information-theory",
+    "ghosh": "grid-run --function information-theory",
+    "ghosh-entropy": "grid-run --function information-theory",
+    "ghosh-entropy-density": "grid-run --function information-theory",
+    "renyi": "grid-run --function information-theory",
+    "renyi-quadratic-density": "grid-run --function information-theory",
+    "renyi-cubic-density": "grid-run --function information-theory",
+    "phase-space-fisher": "grid-run --function information-theory",
+    "phase-space-fisher-information-density": "grid-run --function information-theory",
+    "disequilibrium": "grid-run --function information-theory",
+    "disequilibrium-density": "grid-run --function information-theory",
+    "semi-similarity": "grid-run --function information-theory",
+    "usi": "grid-run --function usi/bni",
+    "bni": "grid-run --function usi/bni",
+    "ultrastrong-interaction": "grid-run --function usi/bni",
+    "ultrastrong-interaction-indicator": "grid-run --function usi/bni",
+    "bonding-noncovalent-interaction": "grid-run --function usi/bni",
+    "bonding-noncovalent-interaction-indicator": "grid-run --function usi/bni",
     "multiwfn-fukui": "fukui-run",
     "multiwfn-fukui-run": "fukui-run",
     "dual-descriptor-run": "fukui-run",
@@ -913,6 +966,107 @@ def systems_for_json() -> List[Dict[str, object]]:
     return [dict(item) for item in sorted(SYSTEM_RECOMMENDATIONS, key=lambda item: int(item["priority"]))]
 
 
+def _status_counts(records: Iterable[Dict[str, object]]) -> Dict[str, int]:
+    counts: Dict[str, int] = {}
+    for record in records:
+        status = str(record["status"])
+        counts[status] = counts.get(status, 0) + 1
+    return dict(sorted(counts.items()))
+
+
+def summary_for_json(absolute: bool = False) -> Dict[str, object]:
+    examples_records = examples_for_json(absolute=absolute)
+    coverage_records = feature_coverage_for_json(absolute=absolute)
+    gallery_records = gallery_for_json(absolute=absolute)
+    needs_records = [
+        {
+            "command": item["command"],
+            "status": item["status"],
+            "example": item["example"],
+            "system": item["system"],
+            "next": item["next"],
+        }
+        for item in coverage_records
+        if item["status"] in {"needs-render", "needs-example"}
+    ]
+    return {
+        "docs": {key: _display_path(path, absolute=absolute) for key, path in DOCS.items()},
+        "examples": {
+            "total": len(examples_records),
+            "by_status": _status_counts(examples_records),
+            "ready_ids": [str(item["id"]) for item in examples_records if item["status"] == "ready"],
+            "needs_work_ids": [str(item["id"]) for item in examples_records if item["status"] == "needs-work"],
+            "misc_ids": [str(item["id"]) for item in examples_records if item["status"] == "misc"],
+        },
+        "coverage": {
+            "total": len(coverage_records),
+            "by_status": _status_counts(coverage_records),
+            "needs_closure": needs_records,
+        },
+        "gallery": {
+            "total_assets": len(gallery_records),
+            "present_assets": sum(1 for item in gallery_records if item["exists"]),
+            "missing_assets": [item["image"] for item in gallery_records if not item["exists"]],
+            "showcase": _display_path("docs/assets/gallery/feature_closure_showcase.png", absolute=absolute),
+        },
+        "recommended_systems": [
+            {
+                "id": item["id"],
+                "priority": item["priority"],
+                "title": item["title"],
+                "example": item["example"],
+                "status": item["status"],
+            }
+            for item in systems_for_json()
+        ],
+        "workflow": [
+            "Run examples --status ready for finished tutorials.",
+            "Run examples --coverage or --command NAME to find the recommended example for a feature.",
+            "Run examples --needs-render to find features that still need a real PNG or real input chain.",
+            "Run examples --gallery-assets to list committed render artifacts.",
+        ],
+    }
+
+
+def _print_summary(absolute: bool = False) -> None:
+    summary = summary_for_json(absolute=absolute)
+    examples_info = summary["examples"]  # type: ignore[assignment]
+    coverage_info = summary["coverage"]  # type: ignore[assignment]
+    gallery_info = summary["gallery"]  # type: ignore[assignment]
+    print("multiwfn2vesta example closure summary\n")
+    print(f"Manual: {_display_path('docs/manual_zh.md', absolute=absolute)}")
+    print(f"Feature index: {_display_path('docs/feature_examples_zh.md', absolute=absolute)}")
+    print(f"Showcase PNG: {gallery_info['showcase']}")  # type: ignore[index]
+    print()
+    print("Curated examples:")
+    print(f"  total: {examples_info['total']}")  # type: ignore[index]
+    print(f"  by status: {examples_info['by_status']}")  # type: ignore[index]
+    print("  ready: " + ", ".join(examples_info["ready_ids"]))  # type: ignore[index]
+    print()
+    print("Feature coverage:")
+    print(f"  total: {coverage_info['total']}")  # type: ignore[index]
+    print(f"  by status: {coverage_info['by_status']}")  # type: ignore[index]
+    needs_closure = coverage_info["needs_closure"]  # type: ignore[index]
+    if needs_closure:
+        print("  next closures:")
+        for item in needs_closure[:8]:
+            print(f"    - [{item['status']}] {item['command']} -> {item['example']}")
+    print()
+    print("Gallery:")
+    print(f"  assets: {gallery_info['present_assets']}/{gallery_info['total_assets']} present")  # type: ignore[index]
+    missing = gallery_info["missing_assets"]  # type: ignore[index]
+    if missing:
+        print("  missing:")
+        for item in missing:
+            print(f"    - {item}")
+    print()
+    print("Recommended systems:")
+    for item in summary["recommended_systems"][:5]:  # type: ignore[index]
+        print(f"  - {item['priority']}. {item['id']}: {item['title']} ({item['status']})")
+    print()
+    print("Next commands: examples --coverage, examples --needs-render, examples --gallery-assets, examples --systems")
+
+
 def _print_text(status: str = "all", absolute: bool = False, ids: Optional[Set[str]] = None) -> None:
     print("multiwfn2vesta curated examples\n")
     print("Docs:")
@@ -1110,6 +1264,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="List recommended real systems for closing examples instead of toy placeholders.",
     )
     parser.add_argument(
+        "--summary",
+        action="store_true",
+        help="Print a compact closure summary with status counts, ready examples, gallery state, and next priorities.",
+    )
+    parser.add_argument(
         "--verify",
         action="store_true",
         help="Check that project-local runbooks and gallery assets exist.",
@@ -1138,6 +1297,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         if args.verify_smoke:
             exit_code = max(exit_code, _verify_smoke_files(args.status, selected_ids))
         return exit_code
+    if args.summary:
+        if args.json:
+            print(json.dumps(summary_for_json(absolute=args.absolute), ensure_ascii=False, indent=2))
+        else:
+            _print_summary(absolute=args.absolute)
+        return 0
     if args.gallery_assets:
         if args.json:
             print(

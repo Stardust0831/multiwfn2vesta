@@ -309,9 +309,15 @@ requires `--user-function-index IUSERFUNC`, while named routes
 `vdw-repulsion-potential`, `vdw-dispersion-potential`,
 `thomas-fermi-ked`, `weizsacker-ked`, `pauli-ked`,
 `information-gain-density`, `shannon-entropy-density`,
-`fisher-information-density`, and `second-fisher-information-density`
-automatically patch `iuserfunc=20/27/-27/28/29/93/94/1200/114/49/50/51/52` through
-the same run-local `-set` route; the KED routes additionally patch
+`fisher-information-density`, `second-fisher-information-density`,
+`ghosh-entropy-density`, `ghosh-entropy-density-laplacian-corrected`,
+`renyi-quadratic-density`, `renyi-cubic-density`,
+`phase-space-fisher-information-density`, `disequilibrium-density`,
+`usi`, and `bni`
+automatically patch `iuserfunc=20/27/-27/28/29/93/94/1200/114/49/50/51/52/53/54/55/56/70/100/819/820` through
+the same run-local `-set` route; `information-gain-density` also runs
+Multiwfn `1000 -> 17` before grid generation because the inspected source
+requires promolecular reference data; the KED routes additionally patch
 `iKEDsel`;
 `grid-run --function becke` requires `--becke-atoms I J`,
 with `I J` for Becke overlap weight and `I 0` for Becke atomic weight;

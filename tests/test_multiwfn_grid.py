@@ -296,6 +296,13 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertIn("preset=pair-function", text)
         self.assertIn("preset=source-function", text)
         self.assertIn("preset=user-function", text)
+        self.assertIn("preset=information-gain-density", text)
+        self.assertIn("preset=shannon-entropy-density", text)
+        self.assertIn("preset=fisher-information-density", text)
+        self.assertIn("preset=ghosh-entropy-density", text)
+        self.assertIn("preset=renyi-entropy-density", text)
+        self.assertIn("preset=usi", text)
+        self.assertIn("preset=bni", text)
         self.assertIn("preset=becke-weight", text)
         self.assertIn("preset=hirshfeld-weight", text)
         self.assertIn("promolecular-rdg", text)
@@ -518,10 +525,23 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertEqual(resolve_grid_function("ow-dual").default_user_function_index, 98)
         self.assertEqual(resolve_grid_function("ow-dd").default_user_function_index, 98)
         self.assertEqual(resolve_grid_function("information-gain-density").default_user_function_index, 49)
+        self.assertEqual(resolve_grid_function("information-gain-density").preset, "information-gain-density")
         self.assertEqual(resolve_grid_function("relative-shannon-entropy").name, "information-gain-density")
         self.assertEqual(resolve_grid_function("shannon-entropy-density").default_user_function_index, 50)
+        self.assertEqual(resolve_grid_function("shannon-density").preset, "shannon-entropy-density")
         self.assertEqual(resolve_grid_function("fisher-information-density").default_user_function_index, 51)
         self.assertEqual(resolve_grid_function("second-fisher-information-density").default_user_function_index, 52)
+        self.assertEqual(resolve_grid_function("second-fisher-density").preset, "second-fisher-information-density")
+        self.assertEqual(resolve_grid_function("ghosh-entropy-density").default_user_function_index, 53)
+        self.assertEqual(resolve_grid_function("ghosh-entropy-laplacian-corrected").default_user_function_index, 54)
+        self.assertEqual(resolve_grid_function("density-squared").default_user_function_index, 55)
+        self.assertEqual(resolve_grid_function("density-cubed").default_user_function_index, 56)
+        self.assertEqual(resolve_grid_function("phase-space-fisher-density").default_user_function_index, 70)
+        self.assertEqual(resolve_grid_function("semi-similarity").default_user_function_index, 100)
+        self.assertEqual(resolve_grid_function("usi").default_user_function_index, 819)
+        self.assertEqual(resolve_grid_function("ultrastrong-interaction").preset, "usi")
+        self.assertEqual(resolve_grid_function("bni").default_user_function_index, 820)
+        self.assertEqual(resolve_grid_function("bonding-noncovalent-interaction").preset, "bni")
         self.assertEqual(resolve_grid_function("becke").index, 111)
         self.assertEqual(resolve_grid_function("becke").output_filename, "Becke.cub")
         self.assertEqual(resolve_grid_function("becke-overlap-weight").preset, "becke-weight")
@@ -1327,6 +1347,81 @@ class TestMultiwfnGridRunner(unittest.TestCase):
                 "user_function_index_iuserfunc: `49`",
                 result.recipe_path.read_text(encoding="utf-8"),
             )
+
+    def test_run_information_theory_routes_patch_iuserfunc(self):
+        cases = (
+            ("information-gain-density", 49, "information-gain-density", "signed"),
+            ("shannon-entropy-density", 50, "shannon-entropy-density", "signed"),
+            ("fisher-information-density", 51, "fisher-information-density", "single"),
+            ("second-fisher-information-density", 52, "second-fisher-information-density", "signed"),
+            ("ghosh-entropy-density", 53, "ghosh-entropy-density", "single"),
+            ("ghosh-entropy-laplacian-corrected", 54, "ghosh-entropy-density", "single"),
+            ("renyi-quadratic-density", 55, "renyi-entropy-density", "single"),
+            ("renyi-cubic-density", 56, "renyi-entropy-density", "single"),
+            ("phase-space-fisher-density", 70, "fisher-information-density", "single"),
+            ("disequilibrium", 100, "renyi-entropy-density", "single"),
+            ("usi", 819, "usi", "signed"),
+            ("bni", 820, "bni", "single"),
+        )
+        for function_name, expected_iuserfunc, expected_preset, expected_mode in cases:
+            with self.subTest(function_name=function_name):
+                with tempfile.TemporaryDirectory() as tmp:
+                    root = Path(tmp)
+                    wavefunction = root / "h2o.fch"
+                    wavefunction.write_text("wavefunction", encoding="utf-8")
+                    candidate = self.make_candidate(root)
+                    (candidate.path.parent / "settings.ini").write_text(
+                        "iuserfunc= 0 // stale userfunc\nother_setting= keep\n",
+                        encoding="utf-8",
+                    )
+
+                    def fake_run(command, **kwargs):
+                        cwd = Path(kwargs["cwd"])
+                        if expected_iuserfunc == 819:
+                            cube_text = VDW_POTENTIAL_CUBE
+                        elif expected_iuserfunc == 820:
+                            cube_text = VDW_REPULSION_CUBE
+                        elif "shannon" in function_name:
+                            cube_text = INFOENTRO_CUBE
+                        else:
+                            cube_text = USER_FUNCTION_CUBE
+                        (cwd / "userfunc.cub").write_text(cube_text, encoding="utf-8")
+                        return subprocess.CompletedProcess(command, 0, stdout="ok", stderr="")
+
+                    with patch("multiwfn2vesta.multiwfn_grid.find_multiwfn", return_value=candidate):
+                        with patch("multiwfn2vesta.multiwfn_grid.subprocess.run", side_effect=fake_run):
+                            result = run_multiwfn_grid(
+                                wavefunction,
+                                root / "products",
+                                function_name=function_name,
+                                stem="case",
+                                grid_mode="low",
+                            )
+
+                    self.assertTrue(result.success)
+                    expected_command_stream = "1000\n17\n5\n100\n1\n2\n0\nq\n" if expected_iuserfunc == 49 else "5\n100\n1\n2\n0\nq\n"
+                    self.assertEqual(result.command_file.read_text(encoding="utf-8"), expected_command_stream)
+                    self.assertEqual(result.user_function_index, expected_iuserfunc)
+                    self.assertIsNotNone(result.settings_override)
+                    settings_text = result.settings_override.read_text(encoding="utf-8")
+                    self.assertIn(f"iuserfunc= {expected_iuserfunc} // stale userfunc", settings_text)
+                    self.assertIn("other_setting= keep", settings_text)
+                    self.assertEqual(result.raw_cube.name, "userfunc.cub")
+                    self.assertIsNotNone(result.vesta_result)
+                    recipe = result.recipe_path.read_text(encoding="utf-8")
+                    self.assertIn(f"function_name: `{resolve_grid_function(function_name).name}`", recipe)
+                    self.assertIn("function_index: `100`", recipe)
+                    self.assertIn(f"user_function_index_iuserfunc: `{expected_iuserfunc}`", recipe)
+                    self.assertIn(f"auto_vesta_preset: `{expected_preset}`", recipe)
+                    if expected_iuserfunc in {819, 820}:
+                        self.assertIn("USI/BNI routes patch", recipe)
+                    else:
+                        self.assertIn("information-theory routes patch", recipe)
+                    if expected_iuserfunc == 49:
+                        self.assertIn("promolecular wavefunction initialization", recipe)
+                    manifest = result.vesta_result.manifest_path.read_text(encoding="utf-8")
+                    self.assertIn(f"canonical_preset: `{expected_preset}`", manifest)
+                    self.assertIn(f"effective_surface_mode: `{expected_mode}`", manifest)
 
     def test_run_orbital_weighted_dual_descriptor_uses_named_iuserfunc(self):
         with tempfile.TemporaryDirectory() as tmp:

@@ -57,6 +57,14 @@ multiwfn2vesta cube-preset orbital-overlap-distance EDRDmax.cub cube_products
 multiwfn2vesta cube-preset pair-function fermihole.cub cube_products
 multiwfn2vesta cube-preset source-function srcfunc.cub cube_products
 multiwfn2vesta cube-preset user-function userfunc.cub cube_products
+multiwfn2vesta cube-preset information-gain-density userfunc.cub cube_products
+multiwfn2vesta cube-preset shannon-entropy-density userfunc.cub cube_products
+multiwfn2vesta cube-preset fisher-information-density userfunc.cub cube_products
+multiwfn2vesta cube-preset second-fisher-information-density userfunc.cub cube_products
+multiwfn2vesta cube-preset ghosh-entropy-density userfunc.cub cube_products
+multiwfn2vesta cube-preset renyi-entropy-density userfunc.cub cube_products
+multiwfn2vesta cube-preset usi userfunc.cub cube_products
+multiwfn2vesta cube-preset bni userfunc.cub cube_products
 multiwfn2vesta cube-preset becke-weight Becke.cub cube_products
 multiwfn2vesta cube-preset hirshfeld-weight Hirshfeld.cub cube_products
 multiwfn2vesta cube-preset rdg-scalar RDG.cub cube_products
@@ -293,6 +301,26 @@ passes it back through `cube-preset`.
   for Multiwfn `infoentro.cub`, default magnitude `0.05`.  Multiwfn function
   `11` evaluates local information entropy as `-rho/N*ln(rho/N)` and keeps
   the global main-function-5 `sur_value`.
+- `information-gain-density` aliases: `relative-shannon-entropy`,
+  `information-gain`, `relative-information-density`; signed surfaces for
+  function-100 `iuserfunc=49`, default magnitude `0.02`.  `grid-run` first
+  runs Multiwfn `1000 -> 17` to initialize the promolecular reference
+  required by `relShannon`.
+- `shannon-entropy-density` aliases: `shannon-density`,
+  `shannon-information-density`; signed surfaces for function-100
+  `iuserfunc=50`, default magnitude `0.02`.
+- `fisher-information-density` aliases include
+  `phase-space-fisher-information-density`; single positive surfaces for
+  `iuserfunc=51/70`, default isosurface `0.05`.
+- `second-fisher-information-density` aliases: `second-fisher-density`;
+  signed surfaces for `iuserfunc=52`, default magnitude `0.05`.
+- `ghosh-entropy-density` aliases include
+  `ghosh-entropy-density-laplacian-corrected`; single positive surfaces for
+  `iuserfunc=53/54`, default isosurface `0.02`.
+- `renyi-entropy-density` aliases include `renyi-quadratic-density`,
+  `renyi-cubic-density`, `disequilibrium-density`, and `semi-similarity`;
+  single positive surfaces for `iuserfunc=55/56/100`, default isosurface
+  `0.01`.
 - `electron-delocalization-range` aliases: `edr`, `edr-r-d`,
   `electron-delocalization-range-function`; single positive surface for
   Multiwfn function `20` `EDR.cub`, default isosurface `0.05`.  When
@@ -318,6 +346,12 @@ passes it back through `cube-preset`.
   generating the cube with `grid-run`, `--pair-correlation-type 1|2|3`
   patches `paircorrtype`; no reference point is required because Multiwfn
   evaluates the `r1=r2` pair-density case internally.
+- `usi` aliases: `ultrastrong-interaction`,
+  `ultrastrong-interaction-indicator`; signed surfaces for function-100
+  `iuserfunc=819`, default magnitude `1.0`.
+- `bni` aliases: `bonding-noncovalent-interaction`,
+  `bonding-noncovalent-interaction-indicator`; single positive surface for
+  function-100 `iuserfunc=820`, default isosurface `1.0`.
 - `source-function` aliases: `source`, `srcfunc`, `source-func`;
   positive/negative surfaces for Multiwfn function `19` `srcfunc.cub`,
   default magnitude `0.05`.  When generating the cube with `grid-run`, pass
@@ -326,9 +360,7 @@ passes it back through `cube-preset`.
   run-local settings file copied from the selected Multiwfn `settings.ini`
   when available and passed with `-set`.
 - `user-function` aliases: `userfunc`, `user-defined-function`,
-  `custom-function`, `lea-function`, `leae-function`,
-  `information-gain-density`, `relative-shannon-entropy`,
-  `shannon-entropy-density`, `fisher-information-density`;
+  `custom-function`, `lea-function`, `leae-function`;
   positive/negative surfaces for Multiwfn function `100` `userfunc.cub`,
   default magnitude `0.05`.  When generating the cube with `grid-run`, the
   generic `--function user-function` route still requires
@@ -343,8 +375,13 @@ passes it back through `cube-preset`.
   `rose` / `region-of-slow-electrons` = `18`,
   `sedd` / `single-exponential-decay-detector` = `19`,
   `information-gain-density` = `49`, `shannon-entropy-density` = `50`,
-  `fisher-information-density` / `second-fisher-information-density` =
-  `51` / `52`, `fractional-occupation-density` / `fod` = `90`,
+  `fisher-information-density` = `51`,
+  `second-fisher-information-density` = `52`,
+  `ghosh-entropy-density` variants = `53` / `54`,
+  `renyi-quadratic-density` / `renyi-cubic-density` = `55` / `56`,
+  `phase-space-fisher-information-density` = `70`,
+  `disequilibrium-density` = `100`, `usi` / `bni` = `819` / `820`,
+  `fractional-occupation-density` / `fod` = `90`,
   `vdw-repulsion-potential` / `vdw-dispersion-potential` = `93` / `94`,
   ESP components = `101` / `102` / `103`, orbital-weighted Fukui/dual =
   `95` / `96` / `97` / `98`, selected KED routes = `1200` or `114`
@@ -406,6 +443,23 @@ passes it back through `cube-preset`.
   surfaces colored by sign(lambda2)rho.
 - `on-top-pair-density`; single positive surface for Multiwfn function-100
   `userfunc.cub` with `iuserfunc=36`, default isosurface `0.01`.
+- `information-gain-density`; signed surfaces for function-100
+  `iuserfunc=49`, default magnitude `0.02`.  `grid-run` initializes the
+  promolecular reference before generating this cube.
+- `shannon-entropy-density`; signed surfaces for function-100
+  `iuserfunc=50`, default magnitude `0.02`.
+- `fisher-information-density`; single positive surface for function-100
+  `iuserfunc=51/70`, default isosurface `0.05`.
+- `second-fisher-information-density`; signed surfaces for function-100
+  `iuserfunc=52`, default magnitude `0.05`.
+- `ghosh-entropy-density`; single positive surface for function-100
+  `iuserfunc=53/54`, default isosurface `0.02`.
+- `renyi-entropy-density`; single positive surface for function-100
+  `iuserfunc=55/56/100`, default isosurface `0.01`.
+- `usi`; signed surfaces for function-100 `iuserfunc=819`, default
+  magnitude `1.0`.
+- `bni`; single positive surface for function-100 `iuserfunc=820`, default
+  isosurface `1.0`.
 - `rose` aliases: `region-of-slow-electrons`, `slow-electrons`;
   single positive surface for Multiwfn function-100 `userfunc.cub` with
   `iuserfunc=18`, default isosurface `0.5`.  Multiwfn evaluates

@@ -170,6 +170,14 @@ class TestCubePreset(unittest.TestCase):
         self.assertIn("partial-charge", text)
         self.assertIn("wavefunction-norm", text)
         self.assertIn("local-information-entropy", text)
+        self.assertIn("information-gain-density", text)
+        self.assertIn("shannon-entropy-density", text)
+        self.assertIn("fisher-information-density", text)
+        self.assertIn("second-fisher-information-density", text)
+        self.assertIn("ghosh-entropy-density", text)
+        self.assertIn("renyi-entropy-density", text)
+        self.assertIn("usi", text)
+        self.assertIn("bni", text)
         self.assertIn("electron-delocalization-range", text)
         self.assertIn("orbital-overlap-distance", text)
         self.assertIn("source-function", text)
@@ -600,6 +608,49 @@ basin type two
             self.assertIn("LEA/LEAE", manifest)
             self.assertIn("system- and function-specific tuning", manifest)
             self.assertIn("-set", manifest)
+
+    def test_information_theory_presets_write_expected_surfaces(self):
+        cases = (
+            ("information-gain-density", SIGNED_CUBE, "information-gain-density", "signed", "0.02", "iuserfunc=49"),
+            ("shannon-entropy-density", SIGNED_CUBE, "shannon-entropy-density", "signed", "0.02", "iuserfunc=50"),
+            ("fisher-information-density", SURFACE_CUBE, "fisher-information-density", "single", "0.05", "iuserfunc=51"),
+            ("second-fisher-density", SIGNED_CUBE, "second-fisher-information-density", "signed", "0.05", "iuserfunc=52"),
+            ("phase-space-fisher-density", SURFACE_CUBE, "fisher-information-density", "single", "0.05", "phase-space Fisher"),
+            ("ghosh-entropy-density", SURFACE_CUBE, "ghosh-entropy-density", "single", "0.02", "iuserfunc=53/54"),
+            ("renyi-quadratic-density", SURFACE_CUBE, "renyi-entropy-density", "single", "0.01", "iuserfunc=55/56/100"),
+        )
+        for requested, cube_text, canonical, mode, isosurface, note in cases:
+            with self.subTest(requested=requested):
+                with tempfile.TemporaryDirectory() as tmp:
+                    root = Path(tmp)
+                    cube = self.write_tmp(root, "userfunc.cub", cube_text)
+
+                    result = run_preset(requested, cube, root / "products")
+
+                    manifest = result.manifest_path.read_text(encoding="utf-8")
+                    self.assertIn(f"canonical_preset: `{canonical}`", manifest)
+                    self.assertIn(f"effective_surface_mode: `{mode}`", manifest)
+                    self.assertIn(f"effective_isosurface: `{isosurface}`", manifest)
+                    self.assertIn(note, manifest)
+
+    def test_usi_bni_presets_write_expected_surfaces(self):
+        cases = (
+            ("usi", WIDE_SIGNED_CUBE, "usi", "signed", "1.0", "iuserfunc=819"),
+            ("bonding-noncovalent-interaction", SURFACE_CUBE, "bni", "single", "1.0", "iuserfunc=820"),
+        )
+        for requested, cube_text, canonical, mode, isosurface, note in cases:
+            with self.subTest(requested=requested):
+                with tempfile.TemporaryDirectory() as tmp:
+                    root = Path(tmp)
+                    cube = self.write_tmp(root, "userfunc.cub", cube_text)
+
+                    result = run_preset(requested, cube, root / "products")
+
+                    manifest = result.manifest_path.read_text(encoding="utf-8")
+                    self.assertIn(f"canonical_preset: `{canonical}`", manifest)
+                    self.assertIn(f"effective_surface_mode: `{mode}`", manifest)
+                    self.assertIn(f"effective_isosurface: `{isosurface}`", manifest)
+                    self.assertIn(note, manifest)
 
     def test_electron_delocalization_range_preset_writes_single_positive_surface(self):
         with tempfile.TemporaryDirectory() as tmp:

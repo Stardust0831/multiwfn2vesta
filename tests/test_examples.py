@@ -110,6 +110,8 @@ class TestExamplesIndex(unittest.TestCase):
         self.assertIn("rose/sedd", text)
         self.assertIn("steric/sbl", text)
         self.assertIn("on-top-pair-density", text)
+        self.assertIn("information-theory", text)
+        self.assertIn("usi/bni", text)
         self.assertIn("aim-igmh", text)
         self.assertIn("trajectory-video", text)
         self.assertIn("docs/feature_examples_zh.md", text)
@@ -155,6 +157,51 @@ class TestExamplesIndex(unittest.TestCase):
         records = json.loads(output.getvalue())
         commands = {item["command"] for item in records}
         self.assertEqual(commands, {"grid-run --function on-top-pair-density"})
+
+        output = io.StringIO()
+        with patch("sys.stdout", output):
+            code = examples.main(["--command", "information-gain-density", "--json"])
+
+        self.assertEqual(code, 0)
+        records = json.loads(output.getvalue())
+        commands = {item["command"] for item in records}
+        self.assertEqual(commands, {"grid-run --function information-theory"})
+
+        output = io.StringIO()
+        with patch("sys.stdout", output):
+            code = examples.main(["--command", "ghosh-entropy-density", "--json"])
+
+        self.assertEqual(code, 0)
+        records = json.loads(output.getvalue())
+        commands = {item["command"] for item in records}
+        self.assertEqual(commands, {"grid-run --function information-theory"})
+
+        output = io.StringIO()
+        with patch("sys.stdout", output):
+            code = examples.main(["--command", "renyi", "--json"])
+
+        self.assertEqual(code, 0)
+        records = json.loads(output.getvalue())
+        commands = {item["command"] for item in records}
+        self.assertEqual(commands, {"grid-run --function information-theory"})
+
+        output = io.StringIO()
+        with patch("sys.stdout", output):
+            code = examples.main(["--command", "usi", "--json"])
+
+        self.assertEqual(code, 0)
+        records = json.loads(output.getvalue())
+        commands = {item["command"] for item in records}
+        self.assertEqual(commands, {"grid-run --function usi/bni"})
+
+        output = io.StringIO()
+        with patch("sys.stdout", output):
+            code = examples.main(["--command", "bonding-noncovalent-interaction", "--json"])
+
+        self.assertEqual(code, 0)
+        records = json.loads(output.getvalue())
+        commands = {item["command"] for item in records}
+        self.assertEqual(commands, {"grid-run --function usi/bni"})
 
         output = io.StringIO()
         with patch("sys.stdout", output):
@@ -258,6 +305,34 @@ class TestExamplesIndex(unittest.TestCase):
         self.assertIn("aim-igmh", commands)
         self.assertIn("trajectory-video", commands)
         self.assertNotIn("grid-run", commands)
+
+    def test_summary_output_lists_closure_counts_and_priorities(self):
+        output = io.StringIO()
+        with patch("sys.stdout", output):
+            code = examples.main(["--summary"])
+
+        self.assertEqual(code, 0)
+        text = output.getvalue()
+        self.assertIn("example closure summary", text)
+        self.assertIn("ready: ag111_benzene_igmh_aim", text)
+        self.assertIn("next closures", text)
+        self.assertIn("grid-run", text)
+        self.assertIn("feature_closure_showcase.png", text)
+        self.assertIn("ag111_benzene", text)
+
+    def test_summary_json_is_machine_readable(self):
+        output = io.StringIO()
+        with patch("sys.stdout", output):
+            code = examples.main(["--summary", "--json"])
+
+        self.assertEqual(code, 0)
+        summary = json.loads(output.getvalue())
+        self.assertIn("examples", summary)
+        self.assertIn("coverage", summary)
+        self.assertIn("gallery", summary)
+        self.assertIn("ag111_benzene_igmh_aim", summary["examples"]["ready_ids"])
+        self.assertGreater(summary["coverage"]["by_status"]["needs-render"], 0)
+        self.assertEqual(summary["gallery"]["showcase"], "docs/assets/gallery/feature_closure_showcase.png")
 
     def test_unknown_id_is_an_error(self):
         error = io.StringIO()

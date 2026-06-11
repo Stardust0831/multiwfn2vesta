@@ -147,12 +147,15 @@ VESTA environment variables accepted:
 
 ```bash
 multiwfn2vesta examples
+multiwfn2vesta examples --summary
 multiwfn2vesta examples --status ready
 multiwfn2vesta examples --status needs-work
 multiwfn2vesta examples --id cdcl_trajectory_video
 multiwfn2vesta examples --coverage
 multiwfn2vesta examples --needs-render
 multiwfn2vesta examples --command grid-run
+multiwfn2vesta examples --command information-gain-density
+multiwfn2vesta examples --command usi
 multiwfn2vesta examples --gallery-assets
 multiwfn2vesta examples --systems
 multiwfn2vesta examples --json
@@ -160,7 +163,10 @@ multiwfn2vesta examples --verify
 multiwfn2vesta examples --id cdcl_trajectory_video --verify-smoke
 ```
 
-Use this before choosing a demonstration or regression target.  The command
+Use this before choosing a demonstration or regression target.  Start with
+`--summary` when you need a compact closure report: it counts curated example
+statuses, feature coverage statuses, committed gallery assets, and the next
+priority real systems.  The default command
 prints the Chinese manual, gallery, status matrix, formal runbook paths, and
 smoke evidence paths for curated real systems.  `--id` narrows the output to
 one curated system.  `--verify` checks only project-local runbooks, manifests,
@@ -252,6 +258,14 @@ multiwfn2vesta cube-preset orbital-overlap-distance EDRDmax.cub cube_products
 multiwfn2vesta cube-preset pair-function fermihole.cub cube_products
 multiwfn2vesta cube-preset source-function srcfunc.cub cube_products
 multiwfn2vesta cube-preset user-function userfunc.cub cube_products
+multiwfn2vesta cube-preset information-gain-density userfunc.cub cube_products
+multiwfn2vesta cube-preset shannon-entropy-density userfunc.cub cube_products
+multiwfn2vesta cube-preset fisher-information-density userfunc.cub cube_products
+multiwfn2vesta cube-preset second-fisher-information-density userfunc.cub cube_products
+multiwfn2vesta cube-preset ghosh-entropy-density userfunc.cub cube_products
+multiwfn2vesta cube-preset renyi-entropy-density userfunc.cub cube_products
+multiwfn2vesta cube-preset usi userfunc.cub cube_products
+multiwfn2vesta cube-preset bni userfunc.cub cube_products
 multiwfn2vesta cube-preset becke-weight Becke.cub cube_products
 multiwfn2vesta cube-preset hirshfeld-weight Hirshfeld.cub cube_products
 multiwfn2vesta cube-preset rdg-scalar RDG.cub cube_products
@@ -525,7 +539,9 @@ Common functions include `density`, `gradient`, `orbital --orbital h`,
 `orbital-weighted-fukui-plus`, `orbital-weighted-fukui-minus`,
 `orbital-weighted-fukui-zero`, `orbital-weighted-dual-descriptor`,
 `fractional-occupation-density`, `information-gain-density`, `shannon-entropy-density`,
-`fisher-information-density`, `second-fisher-information-density`, `edr`, `edrdmax`,
+`fisher-information-density`, `second-fisher-information-density`, `ghosh-entropy-density`,
+`renyi-quadratic-density`, `phase-space-fisher-information-density`,
+`disequilibrium-density`, `usi`, `bni`, `edr`, `edrdmax`,
 `becke`, `hirshfeld`, `rdg`, `promolecular-rdg`, `delta-g`,
 `hirshfeld-delta-g`, `iri`, `signlambda2rho`,
 `promolecular-signlambda2rho`, `rose`, `sedd`, `vdw-potential`, `repul`,
@@ -648,21 +664,30 @@ IUSERFUNC`; named routes automatically patch common source-backed values:
 `orbital-weighted-dual-descriptor` / `ow-dual` / `ow-dd` = `98`,
 `fractional-occupation-density` / `fod` /
 `fractional-occupancy-density` = `90`,
-`information-gain-density` = `49`, `shannon-entropy-density` = `50`, and
-`fisher-information-density` / `second-fisher-information-density` =
-`51` / `52`.  The runner writes route-specific values such as `iuserfunc`
+`information-gain-density` = `49` plus Multiwfn `1000 -> 17`
+promolecular initialization, `shannon-entropy-density` = `50`,
+`fisher-information-density` = `51`,
+`second-fisher-information-density` = `52`,
+`ghosh-entropy-density` variants = `53` / `54`,
+`renyi-quadratic-density` / `renyi-cubic-density` = `55` / `56`,
+`phase-space-fisher-information-density` = `70`,
+`disequilibrium-density` = `100`, and `usi` / `bni` = `819` / `820`.
+The runner writes route-specific values such as `iuserfunc`
 into a run-local settings file copied from the selected Multiwfn
 `settings.ini` when available and passed with `-set`; KED routes also patch
 `iKEDsel`.  LEA/LEAE named routes also auto-select mapped presets
 `lea`/`leae` when `--surface-cube` is supplied; local electronegativity and
 local hardness plus alpha/beta density, FOD, KED variants/diagnostics, RoSE/SEDD,
-on-top pair density, steric/SBL routes, and the
+on-top pair density, information-density, USI/BNI, steric/SBL routes, and the
 orbital-weighted Fukui/dual routes use `surface-map`.  Alpha/beta density,
 FOD, and Fukui+/Fukui-/Fukui0 standalone products use `density`, KED variants
 use `kinetic-energy-density`, extended KED diagnostics use `ked-difference`,
 `ked-absolute-difference`, `ked-local-temperature`, or `ked-potential`,
 RoSE/SEDD use `rose`/`sedd`, on-top pair density
-uses `on-top-pair-density`, steric/SBL routes use the five
+uses `on-top-pair-density`, information-gain/Shannon/second-Fisher use signed
+information-density presets, normal/phase-space Fisher,
+Ghosh/Renyi/disequilibrium and BNI use single-positive presets, USI uses a
+signed preset, steric/SBL routes use the five
 `steric-energy-density`/`sbl-*` presets, and
 orbital-weighted dual descriptor uses `signed`.  These 95..98 routes are single-wavefunction
 approximations, not

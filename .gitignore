@@ -23,6 +23,8 @@ wheels/
 # 项目特定
 /output/
 /temp/
+/domain.cub
+/domain.pdb
 *.cube
 *.vti
 *.vtk

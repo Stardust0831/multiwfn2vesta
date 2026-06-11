@@ -1,6 +1,29 @@
 # Project Kanban
 
-Updated: 2026-06-12 07:32 CST
+Updated: 2026-06-12 09:42 CST
+
+## Current Request: 2026-06-12 Feature Closure Phase 8, Real Examples, Renders, UX, And Chinese Manual
+
+- [x] 需求入板: 继续把当前已有功能闭环；每个维护态功能都要配可发现 example、推荐真实有价值体系、可复现命令、效果图或明确 `needs-render` 原因，并进一步优化统一 CLI/中文手册体验。
+- [x] 盘点当前代码/CLI/examples/docs/gallery 状态，确认哪些功能已有可复用真实图，哪些只有 planned runbook，哪些需要补真实算例或渲染产物。继续保护未跟踪 `domain.cub` / `domain.pdb`。当前真实项目内 PNG 资产 12/12 present；ready 主线仍是 Ag(111)+benzene IGMH+AIM、GC/benzene AIM 和 Cd/Cl 轨迹，H2O-HF IRI+AIM/phenanthrene/NICS 保持调试或杂项定位。
+- [x] 选择优先级最高的一批真实体系补闭环：Ag(111)+benzene IGMH+AIM、GC/benzene weak interaction、COF 单层 direct cube、Cd/Cl 轨迹，以及信息论/USI/BNI/steric/KED 等标量场的手册级 examples。新增 `docs/research/valuable_systems_for_examples_zh.md` 记录体系选择依据，避免后续回退到 toy examples。
+- [x] 优化用户体验：让 `examples` / 中文手册 / status matrix 更容易按功能找到命令、输入、输出、效果图和缺口；必要时补 CLI 子命令或校验脚本。新增 `multiwfn2vesta examples --summary` 和 JSON 输出，汇总 example/coverage/gallery 状态、ready ids 和下一批优先体系。
+- [x] 尽可能渲染或复用真实效果图；不能在本轮稳定渲染的功能保持 `needs-render`，不使用 toy/placeholder 图冒充成品。本轮复用并索引已有真实 VESTA PNG，不新增假图；grid-run 标量场、surface-extrema、Fukui/cube-arith、atom coloring、STM、domain、aIGM/amIGM 仍明确待渲染或待真实体系。
+- [ ] 同步 README、中文手册、feature/status matrix、skills、worklog、看板和根 docs 镜像，运行 no-GUI regression/CLI smokes/docs checks 后用 `Stardust0831` 身份提交推送。当前已同步主要项目文档和 CLI skill；focused `tests.test_examples` 24 tests、`tests.test_examples tests.test_cli` 87 tests、full no-GUI 405 tests、`examples --verify`、`examples --summary --json`、markdown local-link check 和 `git diff --check` 已通过；只读子 agent 审计无阻塞，已修正 trajectory ready 状态和 `cube-vesta` linked/standalone-render-pending 口径。待最终 docs mirror dry-run/commit/push。
+
+## Current Request: 2026-06-12 Feature Closure Phase 7, Information-Density Routes, Examples, And Manual
+
+- [x] 需求入板: 继续把当前已有功能闭环；每个维护态功能都要能从统一 CLI 找到 example、推荐真实体系、效果图或明确 `needs-render` 原因，并同步中文手册/skill/worklog。继续保护未跟踪 `domain.cub` / `domain.pdb`。
+- [x] 收口当前未提交的 source-backed 信息论/USI/BNI 增量: `grid-run` 和 `cube-preset` 已覆盖 `iuserfunc=49/50/51/52/53/54/55/56/70/100/819/820`，包括 information gain、Shannon/Fisher/Ghosh/Renyi、phase-space Fisher、disequilibrium、USI 和 BNI。
+- [x] 补 examples coverage 和 CLI discoverability: 新增 `grid-run --function information-theory` 与 `grid-run --function usi/bni` 两条 coverage；`examples --command information-gain-density`、`--command ghosh-entropy-density`、`--command renyi`、`--command usi`、`--command bni` 可反查 planned examples。
+- [x] 同步 README、中文手册、usage、feature/status matrices、research matrix、skills、worklog 和看板；新增路线全部保持 `needs-render`，推荐真实体系为 benzene/phenol dimer、GC 碱基对、COF 单层、H2O baseline 和 Ag(111)+benzene，不添加 toy/placeholder PNG。
+- [x] 运行 focused/full no-GUI tests、CLI smokes、`examples --verify`、markdown/link 或 docs checks、`git diff --check` 和 docs 镜像 dry-run；审查前后均已验证，最终通过 focused 224 tests、full 403 no-GUI tests、`grid-run --list-functions`、`cube-preset --list-presets`、`examples --command information-gain-density/second-fisher-information-density/ghosh/renyi/usi/bni --json`、`examples --verify`、markdown local-link check、`git diff --check`。子 agent 只读审查已完成；阻塞点已处理：根目录 `domain.cub`/`domain.pdb` 加入 `.gitignore` 保护，`information-gain-density` 补 Multiwfn `1000 -> 17` promolecular 初始化，`second-fisher-information-density` 拆为 signed preset。待最终状态检查后用 `Stardust0831` 身份提交推送。
+
+## Active Goal Continuation: 2026-06-12 Next ABACUS/Multiwfn VESTA Analysis Increment
+
+- [x] 需求入板: 继续长期目标，调研 Multiwfn 中有价值且可由 VESTA 表达的波函数分析，重点关注 ABACUS LCAO Molden 或 ABACUS direct cube 可支撑的路线；本轮先审计当前覆盖和源码证据，再选择一个可测试、可文档化的功能增量。
+- [ ] 审计当前 `grid-run`、`cube-preset`、example coverage、research matrix 和本地 Multiwfn 源码，避免重复实现已有路线。继续保护未跟踪 `domain.cub` / `domain.pdb`。
+- [ ] 实现选定路线的代码、测试、README/中文手册/usage/skill/research/worklog/kanban，同步 docs，运行 no-GUI regression，提交并推送。
 
 ## Current Request: 2026-06-12 Feature Closure Phase 6, Examples, Renders, And Chinese Manual
 

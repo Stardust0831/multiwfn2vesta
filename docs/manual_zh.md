@@ -12,6 +12,7 @@ VESTA 可打开、可渲染、可复用视角的文件。当前项目仍是实�
 cd /mnt/g/work/multiwfn2vesta/project
 export PATH=/mnt/g/work/multiwfn2vesta/project/bin:$PATH
 multiwfn2vesta --help
+multiwfn2vesta examples --summary
 multiwfn2vesta examples
 ```
 
@@ -31,11 +32,12 @@ multiwfn2vesta <command> [options]
 从零到第一张图建议走这条顺序：
 
 1. 运行 `multiwfn2vesta discover`，确认当前 Multiwfn 和 VESTA 候选路径。
-2. 运行 `multiwfn2vesta examples --status ready`，只看已经有真实体系和效果图的算例。
-3. 运行 `multiwfn2vesta examples --coverage`，按功能查推荐体系、runbook、效果图和缺口。
-4. 运行 `multiwfn2vesta examples --id ag111_benzene_igmh_aim --verify`，检查项目内 runbook 和 gallery 图是否齐全。
-5. 打开对应 `examples/<example_id>/README_zh.md`，先复用已有命令和输出目录。
-6. 若只是查看效果，直接看 `docs/assets/gallery/` 下的 PNG；若要复跑，则按 runbook 重新生成 `.cub`、`.vesta`、recipe 和可选 PNG/MP4。
+2. 运行 `multiwfn2vesta examples --summary`，先看 ready/needs-render/needs-example 的数量、当前可用效果图和下一批优先体系。
+3. 运行 `multiwfn2vesta examples --status ready`，只看已经有真实体系和效果图的算例。
+4. 运行 `multiwfn2vesta examples --coverage`，按功能查推荐体系、runbook、效果图和缺口。
+5. 运行 `multiwfn2vesta examples --id ag111_benzene_igmh_aim --verify`，检查项目内 runbook 和 gallery 图是否齐全。
+6. 打开对应 `examples/<example_id>/README_zh.md`，先复用已有命令和输出目录。
+7. 若只是查看效果，直接看 `docs/assets/gallery/` 下的 PNG；若要复跑，则按 runbook 重新生成 `.cub`、`.vesta`、recipe 和可选 PNG/MP4。
 
 目前最适合先看的三个 ready examples 是：
 
@@ -73,6 +75,7 @@ VESTA 查找顺序同理，常见环境变量包括：
 
 ```bash
 multiwfn2vesta examples
+multiwfn2vesta examples --summary
 multiwfn2vesta examples --status ready
 multiwfn2vesta examples --status needs-work
 multiwfn2vesta examples --id cdcl_trajectory_video
@@ -92,6 +95,7 @@ mp4、PNG 序列或中间 VESTA frame，这些大文件默认不提交。需要�
 ```bash
 multiwfn2vesta examples --json
 multiwfn2vesta examples --coverage --json
+multiwfn2vesta examples --summary --json
 multiwfn2vesta examples --command aim-igmh --json
 multiwfn2vesta examples --gallery-assets --json
 ```
@@ -117,6 +121,8 @@ multiwfn2vesta examples --command trajectory-video
 multiwfn2vesta examples --systems
 ```
 
+这些体系的选择依据单独记录在 [真实算例体系选择依据](research/valuable_systems_for_examples_zh.md)。
+
 当前推荐体系的取舍是：
 
 - Ag(111)+benzene：周期性 ABACUS LCAO Molden 主线，适合 IGMH/AIM、vdW、ESP、电场、后续 steric/SBL。
@@ -134,6 +140,7 @@ multiwfn2vesta examples --systems
 | --- | --- | --- |
 | Ag 表面吸附的 ESP/vdW/steric/SBL/STM | `ag111_benzene_extended_fields` | 复用 Ag(111)+benzene IGMH+AIM 三视图相机 |
 | IRI/RDG/DORI/RoSE/SEDD/on-top pair density | `benzene_dimer_scalar_suite` | 弱相互作用标量场主 planned example |
+| 信息论/Ghosh/Renyi/USI/BNI 标量诊断 | `benzene_dimer_scalar_suite` / `gc_weak_interaction_suite` / `ag111_benzene_extended_fields` | 先作为高级 `grid-run` planned render，不标 ready |
 | GC AIM 扩展到 IRI/ESP/extrema/on-top pair density | `gc_weak_interaction_suite` | 在已 ready 的 GC AIM 上继续补图 |
 | ABACUS direct cube | `cof_direct_cube_suite` | COF 单层 density/potential/ELF 等 |
 | Fukui/dual descriptor/cube-arith/原子反应性染色 | `fukui_dual_reactivity` | 需要中性/阳离子/阴离子同网格 cube |
@@ -254,6 +261,8 @@ multiwfn2vesta grid-run --list-functions
 - `iri`, `rdg`, `dori`
 - `rose`, `sedd`
 - `fod`, `orbital-weighted-fukui-plus/minus/zero`, `orbital-weighted-dual-descriptor`
+- `information-gain-density`, `shannon-entropy-density`, `fisher-information-density`, `ghosh-entropy-density`, `renyi-quadratic-density`, `disequilibrium-density`
+- `usi`, `bni`
 - `becke`, `hirshfeld`, `hirshfeld-delta-g`
 - `pair-function`, `source-function`
 
@@ -282,6 +291,11 @@ multiwfn2vesta grid-run input.molden steric --function steric-potential
 multiwfn2vesta grid-run input.molden sbl --function sbl-total-potential
 multiwfn2vesta grid-run input.molden sbl_force --function sbl-total-force-magnitude
 multiwfn2vesta grid-run input.molden ontop_pair --function on-top-pair-density --pair-correlation-type 3
+multiwfn2vesta grid-run input.molden info_gain --function information-gain-density
+multiwfn2vesta grid-run input.molden ghosh --function ghosh-entropy-density
+multiwfn2vesta grid-run input.molden renyi2 --function renyi-quadratic-density
+multiwfn2vesta grid-run input.molden usi --function usi
+multiwfn2vesta grid-run input.molden bni --function bni
 ```
 
 这些命名路由都走 Multiwfn 函数 `100`，分别写 run-local
@@ -322,6 +336,22 @@ Steric/SBL 路线适合看吸附界面、分子间排斥/束缚区域和能量�
 correlation only，`3` 为两者都包含。默认 VESTA preset 是单正值
 `on-top-pair-density`，等值面 `0.01` 只是起点；正式图建议用 benzene dimer
 或 GC 碱基对，先检查 cube 范围。
+
+信息论和相互作用指标路线也走 function `100`。维护态命名路线包括：
+
+- `information-gain-density` / `relative-shannon-entropy`: `iuserfunc=49`，会先执行 Multiwfn `1000 -> 17` 初始化 promolecular reference，再用 signed preset。
+- `shannon-entropy-density`: `iuserfunc=50`，signed preset。
+- `fisher-information-density` / `phase-space-fisher-information-density`: `iuserfunc=51/70`，单正值 preset。
+- `second-fisher-information-density`: `iuserfunc=52`，源码为 `-Laplacian(rho)*log(rho)`，可带符号，使用 signed preset。
+- `ghosh-entropy-density` / `ghosh-entropy-density-laplacian-corrected`: `iuserfunc=53/54`，单正值 preset。
+- `renyi-quadratic-density` / `renyi-cubic-density`: `iuserfunc=55/56`，即 `rho^2` / `rho^3` 型 Renyi integrand，单正值 preset。
+- `disequilibrium-density` / `semi-similarity`: `iuserfunc=100`，单正值 preset。
+- `usi`: `iuserfunc=819`，`laplacian(rho)/rho^(5/3)`，signed preset。
+- `bni`: `iuserfunc=820`，`(tau-tau_w)/tau_w`，单正值 preset。
+
+这些路线都有 CLI、preset 和测试，但还没有手册级真实 PNG。推荐先用 benzene/phenol dimer 或 GC
+碱基对做弱相互作用示例，USI/BNI 也可放到 Ag(111)+benzene 吸附界面；正式出图必须记录 cube
+最小/最大值、等值面和是否映射到 density/interaction surface。
 
 扩展 KED diagnostics 也走 function `100` 和 run-local `-set`，不会改全局
 `settings.ini`：

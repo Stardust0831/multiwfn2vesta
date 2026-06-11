@@ -17,6 +17,7 @@
 按功能反查推荐体系、runbook、效果图和下一步见 `feature_examples_zh.md`，也可以运行：
 
 ```bash
+multiwfn2vesta examples --summary
 multiwfn2vesta examples --coverage
 multiwfn2vesta examples --needs-render
 multiwfn2vesta examples --command aim-igmh
@@ -31,6 +32,8 @@ multiwfn2vesta examples --systems
 - `needs-render` 表示代码路径或 smoke 经验存在，但还必须真实渲染后才能进入手册主图。
 - `needs-example` 表示还缺真实输入链路；只能先给推荐体系和 runbook 计划。
 - 新功能闭环时先运行 `multiwfn2vesta examples --systems` 选体系，再用 `--command` 检查同类功能已有状态。
+- 需要快速汇报当前闭环度时先运行 `multiwfn2vesta examples --summary`；它会统计 ready/linked/needs-render/needs-example，
+  并列出当前 gallery 是否齐全和下一批优先体系。
 
 ## 顶层 CLI 功能
 
@@ -47,8 +50,8 @@ multiwfn2vesta examples --systems
 | IRI/RDG runner | `iri-run` | H2O-HF 或后续二聚体 | `smoke/20260605_iri_aim_h2o_hf/` 有调试 PNG/cube | 有 VESTA/cube | 当前图不够清楚，需继续修 VESTA surface/texture 样式后再作为手册成品 |
 | IGM/IGMH/mIGM runner | `igmh-run` / `igm-run` / `migm-run` | Ag(111)+benzene，H2O | Ag(111)+benzene 三视图；H2O smoke | 已闭环 | 保留 Ag 作为主展示，H2O 作为快速测试 |
 | aIGM/amIGM runner | `aigm-run` / `amigm-run` | 轨迹平均弱相互作用 | 文档/测试，部分轨迹经验 | 有入口 | 准备短 XYZ 轨迹并渲染平均 IGM |
-| trajectory frame writer | `trajectory-frames` | Cd/Cl extXYZ 轨迹 | `examples/cdcl_trajectory_video/cdcl_tiny.extxyz`、单元测试和 smoke 命令 | 有入口 | 补 ASE `.traj` 直接读取，并把 reference `.vesta` 到 PNG 渲染层串起来 |
-| trajectory video encoder | `trajectory-video` | Cd/Cl VESTA PNG frame 序列 | Cd/Cl manifest dry-run、frame list/recipe 测试 | 有入口 | 与 `trajectory-frames` manifest 和后续 PNG 渲染层衔接 |
+| trajectory frame writer | `trajectory-frames` | Cd/Cl extXYZ 轨迹 | `examples/cdcl_trajectory_video/cdcl_tiny.extxyz`、单元测试、gallery poster 和 smoke 命令 | 已闭环 | 补 ASE `.traj` 直接读取，并把 reference `.vesta` 到 PNG 渲染层串起来 |
+| trajectory video encoder | `trajectory-video` | Cd/Cl VESTA PNG frame 序列 | Cd/Cl manifest dry-run、frame list/recipe 测试、gallery poster 和本地 mp4 证据 | 已闭环 | 与 `trajectory-frames` manifest 和后续 PNG 渲染层衔接 |
 | STM runner | `stm-run` | 表面/分子轨道态 | `smoke/multiwfn_stm_run_smoke_20260610/` | 有 VESTA/cube | 选有物理意义的表面或分子轨道补 PNG |
 | domain runner | `domain-run` | H2O density domain | `smoke/multiwfn_domain_run_smoke_20260610/` | 有 VESTA/cube | 渲染二值域等值面 |
 | AIM runner | `aim-run` | GC 碱基对、benzene | Sob/AIM smoke PNG | 已闭环 | `gc` 作为手册主例，benzene 作基础例；phenanthrene 需重调视角 |
@@ -86,8 +89,10 @@ multiwfn2vesta examples --systems
 | 慢电子/指数衰减标量 | `rose`, `sedd` | benzene dimer、GC 碱基对 | 有入口 | 已有 source-backed `iuserfunc=18/19` 路由和 preset，缺真实 paired render |
 | steric/SBL/Pauli/quantum 诊断场 | `steric-*`, `pauli-*`, `quantum-*`, `electrostatic-*`, `sbl-*` | Ag(111)+benzene、benzene dimer、GC 碱基对 | 有入口 | 已有 source-backed `iuserfunc=40-43/60-69/-69/110-113` 路由和 preset，缺真实界面/弱相互作用 render |
 | 电子对密度 | `on-top-pair-density` | benzene dimer、GC 碱基对 | 有入口 | 已有 source-backed `iuserfunc=36` 路由、`paircorrtype` 控制和 preset，缺真实 pair-density render |
+| 信息论/Ghosh/Renyi/disequilibrium | `information-gain-density`, `shannon-entropy-density`, `fisher-information-density`, `second-fisher-information-density`, `ghosh-entropy-density`, `renyi-quadratic-density`, `disequilibrium-density` | benzene dimer、GC 碱基对、H2O 或 COF | 有入口 | 已有 source-backed `iuserfunc=49/50/51/52/53/54/55/56/70/100` 路由和 preset；information gain 自动做 promolecular 初始化，second-Fisher 为 signed preset，缺真实解释型 render |
+| USI/BNI 相互作用指标 | `usi`, `bni` | benzene/phenol dimer、GC 碱基对、Ag(111)+benzene | 有入口 | 已有 source-backed `iuserfunc=819/820` 路由和 preset，低密度尖峰需真实 cube range 调参后再出图 |
 | 反应性 | `fod`, `orbital-weighted-fukui-*`, `orbital-weighted-dual-descriptor` | 小分子反应位点 | 有入口 | 需要真实 closed-shell 测试体系 |
-| 信息论密度 | `local-information-entropy`, `information-gain-density`, `shannon-entropy-density`, `fisher-information-density` | 小分子/COF | 有入口 | 缺图，默认 isosurface 需调 |
+| 局部信息熵 | `local-information-entropy` | 小分子/COF | 有入口 | 缺图，默认 isosurface 需调 |
 | 分区权重 | `becke`, `hirshfeld` | 分子内片段边界 | 有入口 | 缺图 |
 | pair/source function | `pair-function`, `source-function` | 选参考点的键/孤对电子区域 | 有入口 | 缺交互式参考点选择体验 |
 
@@ -100,6 +105,7 @@ multiwfn2vesta examples --systems
 | ABACUS direct cube | `partial-charge`, `wavefunction-norm`, `elf` | 有入口 | 准备 ABACUS 小体系 direct cube |
 | IRI/DORI/IGMH/aIGM | `iri`, `dori`, `igmh`, `aigm` | IGMH 已闭环；IRI 有调试图 | IRI/DORI/aIGM 补手册级图 |
 | RoSE/SEDD | `rose`, `sedd` | 有入口 | 用 benzene dimer 或 GC 配对渲染慢电子/SEDD 等值面 |
+| information/Ghosh/Renyi/USI/BNI | `information-gain-density`, `shannon-entropy-density`, `fisher-information-density`, `second-fisher-information-density`, `ghosh-entropy-density`, `renyi-entropy-density`, `usi`, `bni` | 有入口 | 用 benzene dimer、GC、COF 或 Ag(111)+benzene 调 cube range 后补图 |
 | ESP/ALIE/LEA/vdW map | `esp`, `alie`, `lea`, `leae`, `vdw-map` | 有 VESTA/cube | 先补 ESP/ALIE surface extrema |
 | domain/basin | `domain`, `basin`, `basin-type` | 有 VESTA/cube | 渲染 H2O domain 和 basin 示例 |
 | vdW components | `vdw-potential`, `vdw-repulsion-potential`, `vdw-dispersion-potential` | 有入口 | 用同一体系展示 total/repul/disp |

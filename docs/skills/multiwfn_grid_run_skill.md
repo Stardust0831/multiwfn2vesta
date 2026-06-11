@@ -189,9 +189,18 @@ multiwfn2vesta grid-run --list-functions
   `orbital-weighted-dual-descriptor` / `ow-dual` / `ow-dd` = `98`,
   `fractional-occupation-density` / `fod` /
   `fractional-occupancy-density` = `90`,
-  `information-gain-density` / `relative-shannon-entropy` = `49`,
+  `information-gain-density` / `relative-shannon-entropy` = `49` plus
+  Multiwfn `1000 -> 17` promolecular initialization,
   `shannon-entropy-density` = `50`, `fisher-information-density` = `51`,
-  and `second-fisher-information-density` = `52`.  LEA/LEAE named routes
+  `second-fisher-information-density` = `52`,
+  `ghosh-entropy-density` = `53`,
+  `ghosh-entropy-density-laplacian-corrected` = `54`,
+  `renyi-quadratic-density` = `55`, `renyi-cubic-density` = `56`,
+  `phase-space-fisher-information-density` = `70`,
+  `disequilibrium-density` = `100`,
+  `usi` / `ultrastrong-interaction-indicator` = `819`,
+  and `bni` / `bonding-noncovalent-interaction-indicator` = `820`.
+  LEA/LEAE named routes
   also auto-select mapped presets `lea`/`leae` when `--surface-cube` is
   supplied; alpha/beta density, FOD, local Mulliken electronegativity, local
   hardness, electron ESP/ESP component/electric-field routes, on-top pair density, steric/SBL
@@ -200,7 +209,9 @@ multiwfn2vesta grid-run --list-functions
   Fukui+/Fukui-/Fukui0 standalone products use `density`, selected positive KED variants use
   `kinetic-energy-density`, KED diagnostics use `ked-difference`, `ked-absolute-difference`,
   `ked-local-temperature`, or `ked-potential`, electron ESP uses `electron-esp`, on-top pair density uses
-  `on-top-pair-density`, steric/SBL
+  `on-top-pair-density`, information-gain/Shannon/second-Fisher use their
+  signed information-density presets, normal/phase-space
+  Fisher/Ghosh/Renyi/disequilibrium and BNI use single-positive presets, USI uses a signed preset, steric/SBL
   standalone routes use `steric-energy-density`, `sbl-energy-density`,
   `sbl-potential`, `sbl-force-magnitude`, or `sbl-charge`, while orbital-weighted dual descriptor uses
   `signed`.  The 95..98 routes are
@@ -258,6 +269,20 @@ multiwfn2vesta grid-run --list-functions
   `--tex-percent`, `--tex-range-source surface-band`, `--surface-band`, or
   `--surface-nearest` from `grid-run` when the generic color scale is not
   chemically appropriate.
+- Information-theory/Ghosh/Renyi/disequilibrium diagnostics: function `100`,
+  raw `userfunc.cub`, standalone presets `information-gain-density`,
+  `shannon-entropy-density`, `fisher-information-density`,
+  `second-fisher-information-density`,
+  `ghosh-entropy-density`, or `renyi-entropy-density`.  These patch
+  `iuserfunc=49/50/51/52/53/54/55/56/70/100`.  The information-gain route
+  also runs Multiwfn `1000 -> 17` first because `relShannon` requires the
+  promolecular reference.  Second-Fisher is signed because the source uses
+  `-Laplacian(rho)*log(rho)`.  Treat defaults as display starting points and
+  prefer benzene/phenol dimer, GC, H2O, or COF examples over toy cubes.
+- USI/BNI: function `100`, raw `userfunc.cub`, standalone presets `usi` and
+  `bni`, patching `iuserfunc=819/820`.  USI is signed, BNI is single
+  positive; both may spike in low-density regions, so formal figures should
+  record cube range and isosurface.
 - `rose` and `sedd`: function `100`, raw `userfunc.cub`, default
   `iuserfunc=18` / `19`, standalone presets `rose` and `sedd`.  The inspected
   Multiwfn source evaluates RoSE as `(Dh-G)/(Dh+G)` and SEDD as
@@ -505,6 +530,11 @@ multiwfn2vesta grid-run input.fch products --function thomas-fermi-ked-potential
 multiwfn2vesta grid-run input.fch products --function alie --no-vesta
 multiwfn2vesta grid-run input.fch products --function pair-function --reference-point 0 0 0 --pair-function-type 1 --pair-correlation-type 3
 multiwfn2vesta grid-run input.fch products --function on-top-pair-density --pair-correlation-type 3
+multiwfn2vesta grid-run input.fch products --function information-gain-density
+multiwfn2vesta grid-run input.fch products --function ghosh-entropy-density
+multiwfn2vesta grid-run input.fch products --function renyi-quadratic-density
+multiwfn2vesta grid-run input.fch products --function usi
+multiwfn2vesta grid-run input.fch products --function bni
 multiwfn2vesta grid-run input.fch products --function source-function --reference-point 0 0 0 --source-function-mode 1
 multiwfn2vesta grid-run input.fch products --function dori
 multiwfn2vesta grid-run input.fch products --function local-electron-affinity

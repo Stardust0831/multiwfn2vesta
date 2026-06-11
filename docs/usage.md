@@ -23,6 +23,7 @@ multiwfn2vesta
 ```bash
 multiwfn2vesta discover
 multiwfn2vesta examples --help
+multiwfn2vesta examples --summary
 multiwfn2vesta examples --coverage
 multiwfn2vesta abacus-molden --help
 multiwfn2vesta molden-check --help
@@ -54,7 +55,8 @@ multiwfn2vesta trajectory-video --help
 - `discover`: 报告 Multiwfn 和 VESTA 可执行文件候选，以及当前会选择的路径
 - `examples`: 列出当前已整理的真实算例、gallery 图、runbook、状态矩阵；支持
   `--status ready/needs-work/misc`、`--id`、`--json`、`--verify` 和
-  `--verify-smoke`；`--coverage` 按功能列出推荐真实体系、runbook、效果图状态和下一步；
+  `--verify-smoke`；`--summary` 汇总 ready/needs-render/needs-example 数量、gallery 状态和下一批优先体系；
+  `--coverage` 按功能列出推荐真实体系、runbook、效果图状态和下一步；
   `--needs-render` 只列出缺手册级渲染或缺真实体系的功能；`--command` 按命令或功能关键词筛选；
   `--gallery-assets` 只列出已经提交到项目内的 PNG 效果图；`--systems` 列出当前推荐用于闭环示例的真体系；
   `--verify` 检查仓库内
@@ -70,7 +72,8 @@ multiwfn2vesta trajectory-video --help
   orbital/signed、spin density、Laplacian、K(r)/G(r)、ABACUS direct
   potential、partial charge、wavefunction norm、ELF/LOL、IRI/RDG/NCI、DORI、
   EDR(r;d)、D(r)、IGM/IGMH/aIGM、ESP/MEP、electron-only ESP、positive/negative ESP、
-  electric-field magnitude、on-top pair density、steric/SBL energy/potential/force/charge、ALIE/LEA/LEAE、
+  electric-field magnitude、on-top pair density、information-gain/Shannon/Fisher/Ghosh/Renyi/disequilibrium、
+  USI/BNI、steric/SBL energy/potential/force/charge、ALIE/LEA/LEAE、
   userfunc/iuserfunc、selected KED variants、standalone vdW total/repulsion/dispersion potential、vdW map
 - `surface-extrema`: 把 Multiwfn `surfanalysis.pdb` 的分子表面极值点作为
   atoms-only phase 叠加到已有 `.vesta` 文件中
@@ -98,7 +101,8 @@ multiwfn2vesta trajectory-video --help
   及其 `ELFLOL_type` 变体、
   ESP/MEP、electron-only ESP、positive/negative ESP、电场强度、ALIE、EDR(r;d)、D(r)、RDG/IRI-like、
   promolecular RDG/sign(lambda2)rho、function-100 alpha/beta density 和
-  FOD、on-top pair density、Thomas-Fermi/Weizsacker/Pauli KED、KED 差值/局域温度/KED potential diagnostics、steric/SBL/Pauli/quantum/electrostatic
+  FOD、on-top pair density、information-theory/Ghosh/Renyi/USI/BNI、
+  Thomas-Fermi/Weizsacker/Pauli KED、KED 差值/局域温度/KED potential diagnostics、steric/SBL/Pauli/quantum/electrostatic
   potential/force/charge/energy-density 等单 cube，并可自动接
   `cube-preset` 写 `.vesta`
 - `fukui-run`: 从中性、阴离子、阳离子波函数分别生成共享格点的 density
@@ -138,6 +142,7 @@ multiwfn2vesta --help
 
 ```bash
 multiwfn2vesta discover
+multiwfn2vesta examples --summary
 multiwfn2vesta examples --status ready
 multiwfn2vesta examples --coverage
 multiwfn2vesta examples --command grid-run
@@ -265,6 +270,14 @@ multiwfn2vesta cube-preset orbital-overlap-distance EDRDmax.cub cube_products
 multiwfn2vesta cube-preset pair-function fermihole.cub cube_products
 multiwfn2vesta cube-preset source-function srcfunc.cub cube_products
 multiwfn2vesta cube-preset user-function userfunc.cub cube_products
+multiwfn2vesta cube-preset information-gain-density userfunc.cub cube_products
+multiwfn2vesta cube-preset shannon-entropy-density userfunc.cub cube_products
+multiwfn2vesta cube-preset fisher-information-density userfunc.cub cube_products
+multiwfn2vesta cube-preset second-fisher-information-density userfunc.cub cube_products
+multiwfn2vesta cube-preset ghosh-entropy-density userfunc.cub cube_products
+multiwfn2vesta cube-preset renyi-entropy-density userfunc.cub cube_products
+multiwfn2vesta cube-preset usi userfunc.cub cube_products
+multiwfn2vesta cube-preset bni userfunc.cub cube_products
 multiwfn2vesta cube-preset becke-weight Becke.cub cube_products
 multiwfn2vesta cube-preset hirshfeld-weight Hirshfeld.cub cube_products
 multiwfn2vesta cube-preset rdg-scalar RDG.cub cube_products
@@ -358,6 +371,22 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
   Multiwfn `infoentro.cub`；Multiwfn 函数 `11` 计算局部信息熵
   `-rho/N*ln(rho/N)`，源码没有重设等值面，因此默认幅值沿用全局
   `sur_value=0.05`
+- `information-gain-density`：正/负等值面，别名包括
+  `relative-shannon-entropy`、`information-gain`，用于 function-100
+  `iuserfunc=49` 的 `userfunc.cub`；`grid-run` 会先执行 Multiwfn
+  `1000 -> 17` 初始化 promolecular reference；默认幅值 `0.02`
+- `shannon-entropy-density`：正/负等值面，用于 function-100
+  `iuserfunc=50` 的 `userfunc.cub`；默认幅值 `0.02`
+- `fisher-information-density`：单正值等值面，也覆盖
+  `phase-space-fisher-information-density`，用于 `iuserfunc=51/70`；
+  默认等值面 `0.05`
+- `second-fisher-information-density`：正/负等值面，用于
+  `iuserfunc=52`；源码公式为 `-Laplacian(rho)*log(rho)`，默认幅值 `0.05`
+- `ghosh-entropy-density`：单正值等值面，用于 Ghosh entropy-density
+  `iuserfunc=53/54`；默认等值面 `0.02`
+- `renyi-entropy-density`：单正值等值面，覆盖 `renyi-quadratic-density`、
+  `renyi-cubic-density` 和 `disequilibrium-density`，用于
+  `iuserfunc=55/56/100`；默认等值面 `0.01`
 - `electron-delocalization-range`：单正值等值面，别名包括 `edr`、
   `edr-r-d`，用于 Multiwfn 函数 `20` 的 `EDR.cub`；`grid-run` 需要
   `--edr-length D_BOHR`，因为 Multiwfn 在格点设置前询问 EDR 长度标度
@@ -382,6 +411,12 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
   all-electron pair density，并临时使用 `pairfunctype=12`，所以不需要
   reference point。`--pair-correlation-type 1|2|3` 仍会 patch run-local
   `paircorrtype`，默认 `3`；默认等值面 `0.01`
+- `usi`：正/负等值面，别名包括 `ultrastrong-interaction-indicator`，
+  用于 function-100 `iuserfunc=819` 的 `userfunc.cub`；默认幅值 `1.0`，
+  低密度区可能出现尖峰
+- `bni`：单正值等值面，别名包括
+  `bonding-noncovalent-interaction-indicator`，用于 function-100
+  `iuserfunc=820` 的 `userfunc.cub`；默认等值面 `1.0`
 - `source-function`：正/负等值面，别名包括 `source`、`srcfunc`、
   `source-func`，用于 Multiwfn 函数 `19` 的 `srcfunc.cub`；`grid-run`
   需要 `--reference-point X Y Z`，默认 Bohr，若坐标为 Angstrom 则加
@@ -392,7 +427,7 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
   `settings.ini`；默认幅值沿用全局 `sur_value=0.05`
 - `user-function`：正/负等值面，cube-preset 别名包括 `userfunc`、
   `user-defined-function`、`custom-function`、`lea-function`、
-  `leae-function`、`shannon-entropy-density`、`fisher-information-density`；
+  `leae-function`；
   用于 Multiwfn 函数 `100` 的 `userfunc.cub`；通用
   `grid-run --function user-function` 需要
   `--user-function-index IUSERFUNC`。命名路由 `alpha-density`、
@@ -412,8 +447,12 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
   `orbital-weighted-fukui-zero`、`orbital-weighted-dual-descriptor`、
   `fractional-occupation-density`、
   `information-gain-density`、`shannon-entropy-density`、
-  `fisher-information-density`、`second-fisher-information-density` 会分别
-  自动 patch `iuserfunc=1/2/14/20/27/-27/28/29/93/94/101/102/103/90/1200/114/1201/1202/1203/1204/1210/95/96/97/98/49/50/51/52`。
+  `fisher-information-density`、`second-fisher-information-density`、
+  `ghosh-entropy-density`、`ghosh-entropy-density-laplacian-corrected`、
+  `renyi-quadratic-density`、`renyi-cubic-density`、
+  `phase-space-fisher-information-density`、`disequilibrium-density`、
+  `usi`、`bni` 会分别
+  自动 patch `iuserfunc=1/2/14/20/27/-27/28/29/93/94/101/102/103/90/1200/114/1201/1202/1203/1204/1210/95/96/97/98/49/50/51/52/53/54/55/56/70/100/819/820`。
   KED 变体还会额外 patch run-local `iKEDsel`。
   runner 优先复制所选 Multiwfn 同目录的 `settings.ini`，只 patch
   当前路线需要的 run-local 键后通过 `-set` 传入；
@@ -746,6 +785,17 @@ multiwfn2vesta grid-run --list-functions
 - `local-information-entropy` / `information-entropy`：函数 `11`，原始
   输出 `infoentro.cub`，默认接 `cube-preset local-information-entropy`，
   按正/负等值面显示，默认幅值 `0.05`
+- 信息论/Ghosh/Renyi/USI/BNI 路线：函数 `100`，原始输出
+  `userfunc.cub`。`information-gain-density`、`shannon-entropy-density`、
+  `fisher-information-density`、`second-fisher-information-density`、
+  `ghosh-entropy-density`、`ghosh-entropy-density-laplacian-corrected`、
+  `renyi-quadratic-density`、`renyi-cubic-density`、
+  `phase-space-fisher-information-density`、`disequilibrium-density`、
+  `usi` 和 `bni` 分别设置
+  `iuserfunc=49/50/51/52/53/54/55/56/70/100/819/820`。信息增益和 Shannon
+  entropy-density 和 second-Fisher 默认 signed surface；normal/phase-space
+  Fisher、Ghosh/Renyi/disequilibrium 与 BNI 默认单正值；USI 默认 signed surface。正式图推荐 benzene/phenol
+  dimer、GC 碱基对、Ag(111)+benzene 或 COF，而不是 toy cube。
 - `pair-function` / `fermihole` / `correlation-hole`：函数 `17`，原始
   输出 `fermihole.cub`，默认接 `cube-preset pair-function`，按正/负等值面
   显示；必须传 `--reference-point X Y Z`，默认 Bohr，Angstrom 坐标用
@@ -778,8 +828,12 @@ multiwfn2vesta grid-run --list-functions
   `orbital-weighted-fukui-zero`、`orbital-weighted-dual-descriptor`、
   `fractional-occupation-density`、
   `information-gain-density`、`shannon-entropy-density`、
-  `fisher-information-density`、`second-fisher-information-density`，这些会
-  自动设置 `iuserfunc=1/2/14/20/27/-27/28/29/93/94/101/102/103/90/1200/114/95/96/97/98/49/50/51/52`；
+  `fisher-information-density`、`second-fisher-information-density`、
+  `ghosh-entropy-density`、`ghosh-entropy-density-laplacian-corrected`、
+  `renyi-quadratic-density`、`renyi-cubic-density`、
+  `phase-space-fisher-information-density`、`disequilibrium-density`、
+  `usi`、`bni`，这些会
+  自动设置 `iuserfunc=1/2/14/20/27/-27/28/29/93/94/101/102/103/90/1200/114/95/96/97/98/49/50/51/52/53/54/55/56/70/100/819/820`；
   KED 变体还会额外设置 run-local `iKEDsel`；
   LEA/LEAE 若要画成 density surface 上的染色图，可在 `grid-run` 中加
   `--surface-cube density.cub` 自动选 `lea` / `leae` mapped preset，也可

@@ -1,5 +1,62 @@
 # Worklog
 
+## 2026-06-12: Feature closure UX summary and valuable-system rationale
+
+- Continued the current feature-closure request by adding a compact closure
+  report to the maintained examples CLI.  `multiwfn2vesta examples --summary`
+  now reports curated example status counts, feature coverage status counts,
+  committed gallery asset completeness, ready example ids, and the next
+  priority real systems.  `--summary --json` provides the same information for
+  scripts or future dashboards.
+- Added focused tests for text and JSON summary output.  The summary is driven
+  by the existing curated example, coverage, gallery, and system registries so
+  it does not create a second status source.
+- Updated README, Chinese manual, usage guide, example gallery, feature/status
+  matrices, examples planning page, and CLI skill notes so the recommended
+  discovery flow is now: `examples --summary`, then `--coverage` or
+  `--command`, then `--gallery-assets` or `--needs-render`.
+- Added `docs/research/valuable_systems_for_examples_zh.md` to record why the
+  non-toy example queue prioritizes Ag(111)+benzene, GC base pair, benzene or
+  phenol dimers, COF monolayer, reactive aromatics, open-shell/magnetic
+  systems, and Cd/Cl trajectories.  The document is only a rationale note;
+  formal readiness still comes from the examples CLI and status matrix.
+- The gallery rule remains strict: existing real VESTA PNGs are indexed and
+  reused, but grid-run scalar suites, surface extrema, Fukui/cube-arith,
+  atom coloring, STM, domain, and aIGM/amIGM remain `needs-render` or
+  `needs-example` until real figures are generated.
+- Read-only audit found no blocking issue.  Two documentation status
+  mismatches were corrected: `trajectory-frames` / `trajectory-video` are
+  consistently ready through the Cd/Cl example, while `cube-vesta` is
+  consistently linked through existing cube-writing workflows but still
+  pending an independent standalone cube render.
+
+## 2026-06-12: Information-density and USI/BNI closure pass
+
+- Continued the feature-closure goal by promoting source-backed information
+  density, Ghosh/Renyi/disequilibrium, and USI/BNI routes from generic
+  `userfunc.cub` handling into named `grid-run` routes, dedicated
+  `cube-preset` display defaults, curated example coverage, and docs.
+- Local Multiwfn 2026.6.2 source evidence maps function-100
+  `iuserfunc=49/50/51/52/53/54/55/56/70/100` to information gain,
+  Shannon/Fisher/Ghosh entropy-density diagnostics, Renyi density integrands,
+  phase-space Fisher information, and disequilibrium/semi-similarity.
+  `iuserfunc=819/820` maps to USI and BNI indicators.
+- The new feature coverage records remain `needs-render`: recommended first
+  real systems are benzene/phenol dimer, GC base pair, small polar molecules,
+  COF monolayer for information-density diagnostics, and Ag(111)+benzene for
+  USI/BNI adsorption-interface tests.  No placeholder PNG was added.
+- Documentation synchronized the README, Chinese manual, usage guide,
+  feature/status matrices, research matrix, and skills so
+  `multiwfn2vesta examples --command information-gain-density`, `--command
+  usi`, and `--command bni` all point to planned real-system examples instead
+  of generic prose.
+- Read-only review found two scientific details that were corrected before
+  commit: `information-gain-density` now inserts Multiwfn `1000 -> 17`
+  promolecular initialization before main function `5`, matching the
+  `relShannon` source requirement; `second-fisher-information-density` now
+  has its own signed preset because the inspected formula
+  `-Laplacian(rho)*log(rho)` can change sign.
+
 ## 2026-06-12: Feature closure showcase pass
 
 - Continued the current feature-closure request by treating gallery figures as

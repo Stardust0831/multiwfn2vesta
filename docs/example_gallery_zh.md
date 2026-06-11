@@ -12,7 +12,13 @@
 ![feature closure showcase](assets/gallery/feature_closure_showcase.png)
 
 按功能反查 example 覆盖状态见 `feature_examples_zh.md`，命令入口是
-`multiwfn2vesta examples --coverage`。只想列出已经提交到项目内的 PNG 时用：
+`multiwfn2vesta examples --coverage`。想先看当前闭环概况、缺图数量和下一批优先体系时用：
+
+```bash
+multiwfn2vesta examples --summary
+```
+
+只想列出已经提交到项目内的 PNG 时用：
 
 ```bash
 multiwfn2vesta examples --gallery-assets
@@ -23,6 +29,8 @@ multiwfn2vesta examples --gallery-assets
 ```bash
 multiwfn2vesta examples --systems
 ```
+
+体系选择依据见 [真实算例体系选择依据](research/valuable_systems_for_examples_zh.md)。
 
 ## 高价值代表体系
 

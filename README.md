@@ -26,7 +26,7 @@ point.
   an editable install.  Direct module execution from inside
   `src/multiwfn2vesta` is intentionally not the supported path.
 - Curated real-system examples are discoverable with
-  `multiwfn2vesta examples`.  The ready gallery currently uses
+  `multiwfn2vesta examples --summary` and `multiwfn2vesta examples`.  The ready gallery currently uses
   Ag(111)+benzene, GC AIM, and Cd/Cl trajectory figures; planned closure
   runbooks for Ag extended fields, benzene dimer scalar fields, GC weak
   interactions, COF direct cubes, Fukui/dual reactivity, spin/atom coloring,
@@ -148,6 +148,8 @@ then delete the temporary branch.
   wavefunction norm cubes, ELF/LOL, IRI/RDG/NCI, DORI, ESP/MEP,
   electron-only ESP, positive/negative ESP components, electric-field magnitude,
   on-top pair density,
+  information-gain, Shannon/Fisher/Ghosh/Renyi, phase-space Fisher,
+  disequilibrium, USI, and BNI function-100 diagnostics,
   steric/SBL energy-density, potential, force-magnitude, and charge fields,
   IGM/IGMH/aIGM weak-interaction maps, ALIE/LEA/LEAE, and vdW-potential
   mapped surfaces.
@@ -213,7 +215,8 @@ then delete the temporary branch.
   orbital-overlap distance D(r), pair/correlation functions with run-local
   `pairfunctype`/`paircorrtype`, source function with run-local
   `srcfuncmode`, user-defined `iuserfunc` cubes such as DORI, LEA/LEAE, and
-  information-theory densities, spin-resolved alpha/beta density, Becke
+  information-theory/Ghosh/Renyi/disequilibrium densities plus USI/BNI
+  interaction indicators, spin-resolved alpha/beta density, Becke
   atomic/overlap weight, Hirshfeld weight, fractional occupation density,
   selected Thomas-Fermi/Weizsacker/Pauli kinetic-energy-density variants,
   promolecular Delta-g,
@@ -264,6 +267,7 @@ From this repository:
 cd /mnt/g/work/multiwfn2vesta/project
 export PATH=/mnt/g/work/multiwfn2vesta/project/bin:$PATH
 multiwfn2vesta --help
+multiwfn2vesta examples --summary
 multiwfn2vesta examples --status ready
 multiwfn2vesta examples --coverage
 multiwfn2vesta examples --command grid-run
@@ -298,6 +302,7 @@ For day-to-day use, start from the Chinese manual and the example gallery:
 - [效果图库和真实算例索引](docs/example_gallery_zh.md)
 - [功能 example 状态矩阵](docs/example_status_matrix_zh.md)
 - [功能到算例闭环索引](docs/feature_examples_zh.md)
+- [真实算例体系选择依据](docs/research/valuable_systems_for_examples_zh.md)
 - [examples 规划](examples/README_zh.md)
 - [example 模板](examples/_template/README_zh.md)
 
@@ -305,6 +310,7 @@ The same index is available from the CLI:
 
 ```bash
 multiwfn2vesta examples
+multiwfn2vesta examples --summary
 multiwfn2vesta examples --status needs-work
 multiwfn2vesta examples --id cdcl_trajectory_video
 multiwfn2vesta examples --coverage
@@ -407,6 +413,16 @@ multiwfn2vesta grid-run input.molden grid_products \
 multiwfn2vesta grid-run input.molden grid_products \
   --function on-top-pair-density \
   --pair-correlation-type 3
+multiwfn2vesta grid-run input.molden grid_products \
+  --function information-gain-density
+multiwfn2vesta grid-run input.molden grid_products \
+  --function ghosh-entropy-density
+multiwfn2vesta grid-run input.molden grid_products \
+  --function renyi-quadratic-density
+multiwfn2vesta grid-run input.molden grid_products \
+  --function usi
+multiwfn2vesta grid-run input.molden grid_products \
+  --function bni
 multiwfn2vesta grid-run input.molden grid_products \
   --function edr \
   --edr-length 0.85
@@ -541,6 +557,14 @@ multiwfn2vesta cube-preset orbital-overlap-distance EDRDmax.cub cube_products
 multiwfn2vesta cube-preset pair-function fermihole.cub cube_products
 multiwfn2vesta cube-preset source-function srcfunc.cub cube_products
 multiwfn2vesta cube-preset user-function userfunc.cub cube_products
+multiwfn2vesta cube-preset information-gain-density userfunc.cub cube_products
+multiwfn2vesta cube-preset shannon-entropy-density userfunc.cub cube_products
+multiwfn2vesta cube-preset fisher-information-density userfunc.cub cube_products
+multiwfn2vesta cube-preset second-fisher-information-density userfunc.cub cube_products
+multiwfn2vesta cube-preset ghosh-entropy-density userfunc.cub cube_products
+multiwfn2vesta cube-preset renyi-entropy-density userfunc.cub cube_products
+multiwfn2vesta cube-preset usi userfunc.cub cube_products
+multiwfn2vesta cube-preset bni userfunc.cub cube_products
 multiwfn2vesta cube-preset becke-weight Becke.cub cube_products
 multiwfn2vesta cube-preset hirshfeld-weight Hirshfeld.cub cube_products
 multiwfn2vesta cube-preset rdg-scalar RDG.cub cube_products
@@ -663,9 +687,14 @@ IUSERFUNC`.  Source-backed named routes now imply common `iuserfunc` values:
 `vdw-repulsion-potential` / `vdw-dispersion-potential` set `93` / `94`,
 `positive-esp` / `negative-esp` / `electric-field-magnitude` set
 `101` / `102` / `103`,
-`information-gain-density` sets `49`, `shannon-entropy-density` sets `50`,
-and `fisher-information-density` / `second-fisher-information-density` set
-`51` / `52`.  The runner copies the selected Multiwfn `settings.ini` when
+`information-gain-density` sets `49` and runs `1000 -> 17` promolecular
+initialization, `shannon-entropy-density` sets `50`,
+`fisher-information-density` sets `51`, `second-fisher-information-density`
+sets `52`, `ghosh-entropy-density` variants set `53` / `54`,
+`renyi-quadratic-density` / `renyi-cubic-density` set `55` / `56`,
+`phase-space-fisher-information-density` sets `70`,
+`disequilibrium-density` sets `100`, and USI/BNI set `819` / `820`.
+The runner copies the selected Multiwfn `settings.ini` when
 available, patches route-specific run-local settings such as `iuserfunc`, and
 for KED variants also patches `iKEDsel`, then passes the settings file with
 `-set`.  Generic standalone `userfunc.cub` uses signed `+/-0.05`
@@ -676,10 +705,13 @@ density.cub` is supplied.  Local Mulliken electronegativity and local
 hardness use the generic `surface-map` mapped preset when `--surface-cube`
 is supplied; pass `--tex-physical`, `--tex-range-source surface-band`,
 `--surface-band`, or `--tex-percent` to tune the texture scale from
-`grid-run`.  Alpha/beta density, FOD, and orbital-weighted
-Fukui+/Fukui-/Fukui0 use the `density` preset, KED variants use the
-`kinetic-energy-density` preset, the orbital-weighted dual descriptor uses the
-`signed` preset, and these routes can use the generic
+`grid-run`.  Information-gain, Shannon entropy-density, second Fisher, and
+USI routes have dedicated signed presets; normal/phase-space
+Fisher, Ghosh/Renyi/disequilibrium, and BNI use single positive presets.
+Alpha/beta density,
+FOD, and orbital-weighted Fukui+/Fukui-/Fukui0 use the `density` preset, KED variants
+use the `kinetic-energy-density` preset, the orbital-weighted dual descriptor
+uses the `signed` preset, and these routes can use the generic
 `surface-map` mapped preset with `--surface-cube`;
 explicit `--tex-physical MIN MAX` is recommended for mapped dual-descriptor
 figures.  These orbital-weighted routes are single-wavefunction approximations,
@@ -913,6 +945,27 @@ Common functions:
   setting `pairfunctype=12`, so no reference point is required.  Use
   `--pair-correlation-type 1|2|3` to choose exchange only, Coulomb
   correlation only, or exchange plus Coulomb correlation; the default is `3`.
+- Information-theory and related diagnostics: function `100`, raw
+  `userfunc.cub`.  `information-gain-density` / `relative-shannon-entropy`
+  uses `iuserfunc=49`, first runs Multiwfn `1000 -> 17` to initialize the
+  promolecular reference required by `relShannon`, and then uses a signed
+  `information-gain-density` preset;
+  `shannon-entropy-density` uses `50` and a signed preset;
+  `fisher-information-density` / `phase-space-fisher-information-density`
+  use `51` / `70` and the single positive `fisher-information-density`
+  preset; `second-fisher-information-density` uses `52` and a signed preset
+  because the inspected source evaluates `-Laplacian(rho)*log(rho)`;
+  Ghosh entropy-density
+  variants use `53` / `54`; Renyi quadratic/cubic integrands use `55` / `56`;
+  `disequilibrium-density` / `semi-similarity` uses `100`.  Formal examples
+  should use benzene/phenol dimers, GC, small polar molecules, or COF instead
+  of toy cubes, and tune isosurfaces after range inspection.
+- `usi` / `ultrastrong-interaction-indicator` and `bni` /
+  `bonding-noncovalent-interaction-indicator`: function `100`, raw
+  `userfunc.cub`, run-local `iuserfunc=819` / `820`, presets `usi` and `bni`.
+  USI is treated as a signed field; BNI uses a single positive surface.  Both
+  can be sharp in low-density regions, so weak-interaction or adsorption
+  figures must record the chosen cube range and isosurface.
 - `source-function` / `source` / `srcfunc`: function `19`, raw
   `srcfunc.cub`, preset `source-function`, signed by default.  Pass
   `--reference-point X Y Z`; add `--reference-unit angstrom` when those
@@ -932,8 +985,12 @@ Common functions:
   `orbital-weighted-fukui-zero`, `orbital-weighted-dual-descriptor`,
   `fractional-occupation-density`,
   `information-gain-density`, `shannon-entropy-density`,
-  `fisher-information-density`, and `second-fisher-information-density`
-  automatically patch `iuserfunc=1/2/14/20/27/-27/28/29/93/94/101/102/103/90/1200/114/95/96/97/98/49/50/51/52`
+  `fisher-information-density`, `second-fisher-information-density`,
+  `ghosh-entropy-density`, `ghosh-entropy-density-laplacian-corrected`,
+  `renyi-quadratic-density`, `renyi-cubic-density`,
+  `phase-space-fisher-information-density`, `disequilibrium-density`,
+  `usi`, and `bni`
+  automatically patch `iuserfunc=1/2/14/20/27/-27/28/29/93/94/101/102/103/90/1200/114/95/96/97/98/49/50/51/52/53/54/55/56/70/100/819/820`
   into a run-local `-set` settings file, leaving global Multiwfn settings
   untouched.  The KED variants also patch run-local `iKEDsel`.
 - `alpha-density` and `beta-density`: function `100`, raw `userfunc.cub`,

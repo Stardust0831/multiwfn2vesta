@@ -671,10 +671,6 @@ PRESETS: Tuple[CubePreset, ...] = (
             "custom-function",
             "lea-function",
             "leae-function",
-            "information-gain-density",
-            "relative-shannon-entropy",
-            "shannon-entropy-density",
-            "fisher-information-density",
         ),
         description="Generic positive/negative isosurfaces for Multiwfn userfunc.cub.",
         surface_mode="signed",
@@ -690,6 +686,140 @@ PRESETS: Tuple[CubePreset, ...] = (
             "This generic standalone preset uses signed +/-0.05 surfaces and usually needs "
             "system- and function-specific tuning. For LEA/LEAE colored density surfaces, "
             "use preset `lea` or `leae` with density.cub as the surface and userfunc.cub as texture."
+        ),
+    ),
+    CubePreset(
+        name="information-gain-density",
+        aliases=("relative-shannon-entropy", "information-gain", "relative-information-density"),
+        description="Signed isosurfaces for Multiwfn relative Shannon entropy / information-gain density.",
+        surface_mode="signed",
+        isosurface=0.02,
+        positive_rgb=(255, 190, 70),
+        negative_rgb=(80, 145, 255),
+        surface_opacity=(135, 255),
+        notes=(
+            "Use for Multiwfn function-100 userfunc.cub with iuserfunc=49. "
+            "The field can be signed because it compares the molecular density with "
+            "the promolecular reference; inspect the range before accepting +/-0.02."
+        ),
+    ),
+    CubePreset(
+        name="shannon-entropy-density",
+        aliases=("shannon-density", "shannon-information-density"),
+        description="Signed isosurfaces for Multiwfn Shannon entropy density.",
+        surface_mode="signed",
+        isosurface=0.02,
+        positive_rgb=(245, 180, 85),
+        negative_rgb=(75, 150, 255),
+        surface_opacity=(135, 255),
+        notes=(
+            "Use for Multiwfn function-100 userfunc.cub with iuserfunc=50. "
+            "The source evaluates infoentro(2,x,y,z); dense regions may change sign "
+            "depending on the density scale, so a signed display is the cautious default."
+        ),
+    ),
+    CubePreset(
+        name="fisher-information-density",
+        aliases=(
+            "fisher-density",
+            "phase-space-fisher-information-density",
+            "phase-space-fisher-density",
+        ),
+        description="Single positive isosurface for Fisher-type information-density diagnostics.",
+        surface_mode="single",
+        isosurface=0.05,
+        positive_rgb=(115, 195, 245),
+        surface_opacity=(145, 255),
+        notes=(
+            "Use for Multiwfn function-100 userfunc.cub route iuserfunc=51 and "
+            "phase-space Fisher iuserfunc=70.  These fields are normally inspected as "
+            "positive scalar diagnostics, but the default 0.05 is only a starting value."
+        ),
+    ),
+    CubePreset(
+        name="second-fisher-information-density",
+        aliases=("second-fisher-density",),
+        description="Signed isosurfaces for the second Fisher information-density diagnostic.",
+        surface_mode="signed",
+        isosurface=0.05,
+        positive_rgb=(255, 190, 70),
+        negative_rgb=(90, 150, 255),
+        surface_opacity=(135, 255),
+        notes=(
+            "Use for Multiwfn function-100 userfunc.cub route iuserfunc=52. "
+            "The inspected source evaluates -Laplacian(rho)*log(rho), so the field "
+            "can be signed; inspect the cube range before using +/-0.05."
+        ),
+    ),
+    CubePreset(
+        name="ghosh-entropy-density",
+        aliases=(
+            "ghosh-entropy",
+            "ghosh-entropy-g",
+            "ghosh-entropy-laplacian-corrected",
+            "ghosh-entropy-density-laplacian-corrected",
+        ),
+        description="Single positive isosurface for Ghosh entropy-density diagnostics.",
+        surface_mode="single",
+        isosurface=0.02,
+        positive_rgb=(150, 220, 125),
+        surface_opacity=(145, 255),
+        notes=(
+            "Use for Multiwfn function-100 userfunc.cub routes iuserfunc=53/54. "
+            "The two maintained routes differ by the kinetic-energy-density expression "
+            "inside Ghoshentro; inspect cube ranges before using the default 0.02."
+        ),
+    ),
+    CubePreset(
+        name="renyi-entropy-density",
+        aliases=(
+            "renyi-density",
+            "renyi-quadratic-density",
+            "quadratic-renyi-density",
+            "renyi-cubic-density",
+            "cubic-renyi-density",
+            "disequilibrium-density",
+            "semi-similarity",
+        ),
+        description="Single positive isosurface for Renyi/disequilibrium density integrands.",
+        surface_mode="single",
+        isosurface=0.01,
+        positive_rgb=(195, 150, 255),
+        surface_opacity=(145, 255),
+        notes=(
+            "Use for Multiwfn function-100 userfunc.cub routes iuserfunc=55/56/100, "
+            "which evaluate rho^2, rho^3, or disequilibrium/semi-similarity. "
+            "These are density-like nonnegative scalar fields."
+        ),
+    ),
+    CubePreset(
+        name="usi",
+        aliases=("ultrastrong-interaction", "ultrastrong-interaction-indicator", "usi-indicator"),
+        description="Signed isosurfaces for the ultrastrong interaction indicator.",
+        surface_mode="signed",
+        isosurface=1.0,
+        positive_rgb=(255, 165, 70),
+        negative_rgb=(80, 130, 255),
+        surface_opacity=(135, 255),
+        notes=(
+            "Use for Multiwfn function-100 userfunc.cub with iuserfunc=819. "
+            "The inspected source evaluates Laplacian(rho)/rho^(5/3), so the field "
+            "can be signed and may spike in low-density regions; tune +/-1.0 after "
+            "range inspection."
+        ),
+    ),
+    CubePreset(
+        name="bni",
+        aliases=("bonding-noncovalent-interaction", "bonding-and-noncovalent-interaction", "bni-indicator"),
+        description="Single positive isosurface for the BNI bonding/noncovalent interaction indicator.",
+        surface_mode="single",
+        isosurface=1.0,
+        positive_rgb=(120, 220, 145),
+        surface_opacity=(145, 255),
+        notes=(
+            "Use for Multiwfn function-100 userfunc.cub with iuserfunc=820. "
+            "The source evaluates (tau-tau_w)/tau_w, a positive interaction diagnostic "
+            "that can become sharp where tau_w is small; the default 1.0 is a starting value."
         ),
     ),
     CubePreset(
