@@ -1,5 +1,21 @@
 # Worklog
 
+## 2026-06-11: README branch-state refresh after vdW component routes
+
+- Rechecked the branch topology for the user-requested one-branch closeout:
+  `git fetch --prune origin`, `git branch --all --verbose --no-abbrev`, and
+  `git ls-remote --heads origin` show only local `main`, `origin/main`, and
+  `origin/HEAD -> origin/main`; there is no extra feature branch to merge
+  back.
+- Reapplied the repository-local Git identity as
+  `Stardust0831 <13862180016@163.com>` before editing or staging.
+- Refreshed README with a current snapshot, the single-branch audit result,
+  the supported `multiwfn2vesta` CLI entry-point note, and the latest
+  validation summary from the vdW repulsion/dispersion component-route
+  closeout.
+- Preserved untracked local probe artifacts `domain.cub` and `domain.pdb`;
+  they remain workspace files rather than maintained fixtures.
+
 ## 2026-06-11: UFF vdW repulsion and dispersion component routes
 
 - Continued the ABACUS/Multiwfn/VESTA analysis survey after the selected KED

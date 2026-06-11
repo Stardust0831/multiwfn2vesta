@@ -1,6 +1,32 @@
 # Project Kanban
 
-Updated: 2026-06-11 23:35 CST
+Updated: 2026-06-11 23:51 CST
+
+## Current Request: 2026-06-11 README Refresh And Main-Only Branch Closeout
+
+- [x] Record the new user request immediately: refresh README, inspect the
+  unusual-looking branch state, merge back to one maintained branch if needed,
+  and use identity `Stardust0831`.
+- [x] Recheck branch topology and identity before staging.  `git fetch
+  --prune origin`, `git branch --all --verbose --no-abbrev`, and
+  `git ls-remote --heads origin` show only local `main`, `origin/main`, and
+  `origin/HEAD -> origin/main`; repository-local identity is
+  `Stardust0831 <13862180016@163.com>`.  No real merge-back is needed.
+- [x] Refresh README with the current branch snapshot, supported global CLI
+  entry point, and latest vdW component-route validation summary.
+- [x] Run documentation-focused validation: `git diff --check` passed,
+  `bin/multiwfn2vesta --help` displayed the unified CLI, and branch recheck
+  still showed only `main`, `origin/main`, and `origin/HEAD -> origin/main`.
+  Mirror docs to the workspace docs folder, explicitly stage only maintained
+  files, commit, push, and verify final `main`/`origin/main` alignment.
+  Preserve untracked `domain.cub` and `domain.pdb`.
+
+## Active Goal Continuation: 2026-06-11 Next ABACUS/Multiwfn VESTA Analysis Route
+
+- 2026-06-11 继续项：自动续跑长期目标，继续调研并实现适合 VESTA 可视化的 Multiwfn 波函数分析，优先选择 ABACUS LCAO Molden 或 ABACUS cube 能支撑的路线；本轮先审计现有矩阵和源码，再做一个边界清晰的功能增量。
+- [x] Record continuation immediately in the kanban before other work.
+- [ ] Recheck repository state, current README/docs/analysis matrix, current `grid-run`/`cube-preset` route coverage, and local Multiwfn source evidence.  Preserve untracked `domain.cub` and `domain.pdb`.
+- [ ] Select the next source-backed visualization route or control, implement focused code/tests/docs, mirror root docs, validate, commit, push, and verify branch state.
 
 ## Active Goal Continuation: 2026-06-11 Next ABACUS/Multiwfn VESTA Analysis Survey Increment
 - 2026-06-11 继续项：收到 README 更新、分支归并检查、Git 身份统一为 Stardust0831 的需求；本轮先补 README/文档，再验证并合并回 main。

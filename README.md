@@ -13,6 +13,20 @@ multi-phase VESTA figures.
 The project is still experimental, but the CLI below is the maintained entry
 point.
 
+## Current Snapshot
+
+- Use `main` as the maintained branch.  A fresh `git fetch --prune origin`
+  on 2026-06-11 found no extra local or remote feature branches to merge back.
+- The current remote exposes only `refs/heads/main`, and `origin/HEAD` points
+  to `origin/main`.
+- Repository-local Git identity is fixed to
+  `Stardust0831 <13862180016@163.com>`.
+- The recommended user entry point is `multiwfn2vesta` from `project/bin` or
+  an editable install.  Direct module execution from inside
+  `src/multiwfn2vesta` is intentionally not the supported path.
+- Untracked local probe files such as `domain.cub` and `domain.pdb` are
+  workspace artifacts and should stay out of normal commits.
+
 ## Repository Status
 
 - Maintained branch: `main`; this is the only branch currently exposed by the
@@ -24,8 +38,9 @@ point.
   for project commits.
 - Branch audit on 2026-06-11, after `git fetch --prune origin`, found only
   local `main`, `origin/main`, and `origin/HEAD`; `git ls-remote --heads
-  origin` returned only `refs/heads/main`.  No merge-back was needed because
-  there was no extra local or remote feature branch to consolidate.
+  origin` returned only `refs/heads/main`.  The audit was repeated during the
+  README refresh after the vdW component-route closeout, again with no extra
+  branch to consolidate.
 - Feature closeouts, including the user-function, spin-polarization,
   ELF/LOL definition-control, vdW-probe, DORI, and local-reactivity grid
   routes, are kept on the maintained `main` branch.  Use
@@ -1567,8 +1582,7 @@ Routine no-GUI regression for this project is:
 PYTHONPATH=src python3 -m unittest discover -s tests
 ```
 
-Focused validation for the current `grid-run --surface-cube` texture controls
-and local reactivity routes uses:
+Focused validation for grid-route or CLI changes usually starts with:
 
 ```bash
 PYTHONPATH=src python3 -m py_compile src/multiwfn2vesta/multiwfn_grid.py src/multiwfn2vesta/cli.py tests/test_multiwfn_grid.py tests/test_cli.py
@@ -1578,10 +1592,11 @@ bin/multiwfn2vesta grid-run --list-functions
 bin/multiwfn2vesta grid-run --help
 ```
 
-At the 2026-06-11 local-reactivity closeout, focused validation passed with
-121 `tests.test_multiwfn_grid tests.test_cli` tests and full no-GUI
-regression passed with 332 tests, plus `git diff --check` and the CLI smoke
-commands above.
+At the 2026-06-11 vdW component-route closeout, focused validation passed
+with 179 focused `tests.test_cube_preset tests.test_multiwfn_grid
+tests.test_cli` tests and full no-GUI regression passed with 344 tests, plus
+`git diff --check` and CLI smokes for top-level help, `grid-run
+--list-functions`, `grid-run --help`, and `cube-preset --list-presets`.
 
 For documentation-only refreshes, the minimum local validation is:
 
