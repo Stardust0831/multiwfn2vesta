@@ -312,13 +312,15 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
 - `user-function`：正/负等值面，cube-preset 别名包括 `userfunc`、
   `user-defined-function`、`custom-function`、`lea-function`、
   `leae-function`、`shannon-entropy-density`、`fisher-information-density`；
-  用于 Multiwfn 函数 `100` 的 `userfunc.cub`；`grid-run` 还接受
-  `local-electron-affinity`、`local-electron-attachment-energy` 等函数别名，
-  且必须传
-  `--user-function-index IUSERFUNC`，例如 `27` 是 LEA，`-27` 是 LEAE，
-  `49` 是 information gain，`50` 是 Shannon entropy density，`51/52`
-  是 Fisher information density；runner 优先复制所选 Multiwfn 同目录的
-  `settings.ini`，只 patch `iuserfunc` 后通过 run-local `-set` 传入；
+  用于 Multiwfn 函数 `100` 的 `userfunc.cub`；通用
+  `grid-run --function user-function` 需要
+  `--user-function-index IUSERFUNC`。命名路由
+  `local-electron-affinity`、`local-electron-attachment-energy`、
+  `information-gain-density`、`shannon-entropy-density`、
+  `fisher-information-density`、`second-fisher-information-density` 会分别
+  自动 patch `iuserfunc=27/-27/49/50/51/52`。runner 优先复制所选
+  Multiwfn 同目录的 `settings.ini`，只 patch `iuserfunc` 后通过
+  run-local `-set` 传入；
   `-1/-3` 外部格点插值和 `57/58/59` Shubin 特殊模式暂不走这个通用路线
 - `becke-weight`：单正值等值面，别名包括 `becke`、
   `becke-overlap-weight`、`becke-atomic-weight`，用于 Multiwfn 函数
@@ -600,11 +602,15 @@ multiwfn2vesta grid-run --list-functions
   run-local settings 文件和 Multiwfn `-set` 控制 `srcfuncmode`，该文件优先
   从所选 Multiwfn 的 `settings.ini` 复制后 patch
 - `user-function` / `userfunc`：函数 `100`，原始输出 `userfunc.cub`，
-  默认接 `cube-preset user-function`，按正/负等值面显示；必须传
-  `--user-function-index IUSERFUNC`，由 run-local settings 文件和 Multiwfn
-  `-set` 控制 `iuserfunc`，不改全局 `settings.ini`；LEA/LEAE 若要画成
-  density surface 上的染色图，应把 `userfunc.cub` 当 texture，继续使用
-  `cube-preset lea` / `cube-preset leae`
+  默认接 `cube-preset user-function`，按正/负等值面显示；通用路由必须传
+  `--user-function-index IUSERFUNC`。也可直接用命名路由
+  `local-electron-affinity`、`local-electron-attachment-energy`、
+  `information-gain-density`、`shannon-entropy-density`、
+  `fisher-information-density`、`second-fisher-information-density`，这些会
+  自动设置 `iuserfunc=27/-27/49/50/51/52`；LEA/LEAE 若要画成 density
+  surface 上的染色图，可在 `grid-run` 中加 `--surface-cube density.cub`
+  自动选 `lea` / `leae` mapped preset，也可手动用 `cube-preset lea` /
+  `cube-preset leae`
 - `electron-delocalization-range` / `edr`：函数 `20`，原始输出
   `EDR.cub`，默认接 `cube-preset electron-delocalization-range`，按单正值
   等值面显示；必须传 `--edr-length D_BOHR`
@@ -630,6 +636,10 @@ multiwfn2vesta grid-run --list-functions
 - `alie` / `avglocion`：函数 `18`，原始输出 `avglocion.cub`；常规 ALIE
   表面图可以用 `--surface-cube density.cub` 自动把生成的 ALIE cube 作为
   `cube-preset alie` 的 texture
+- `local-electron-affinity` / `local-electron-attachment-energy`：函数
+  `100`，原始输出 `userfunc.cub`；配合 `--surface-cube density.cub` 时，
+  自动把生成的 LEA/LEAE cube 作为 `cube-preset lea` / `cube-preset leae`
+  的 texture
 - `elf` / `lol`：局域化函数等值面
 - `rdg` / `promolecular-rdg`：函数 `13` / `14`，原始输出 `RDG.cub` /
   `RDGprodens.cub`，默认分别接 `cube-preset rdg-scalar` /
@@ -687,8 +697,13 @@ multiwfn2vesta grid-run input.fch grid_products \
   --grid-points 120 120 120
 
 multiwfn2vesta grid-run input.fch grid_products \
+  --function local-electron-affinity \
+  --grid-mode points \
+  --grid-points 120 120 120
+
+multiwfn2vesta grid-run input.fch grid_products \
   --function user-function \
-  --user-function-index 27 \
+  --user-function-index 49 \
   --grid-mode points \
   --grid-points 120 120 120
 
@@ -766,11 +781,18 @@ multiwfn2vesta grid-run input.fch alie_map \
   --surface-cube density.cub \
   --grid-mode cube \
   --grid-cube density.cub
+
+multiwfn2vesta grid-run input.fch lea_map \
+  --function local-electron-affinity \
+  --surface-cube density.cub \
+  --grid-mode cube \
+  --grid-cube density.cub
 ```
 
 `--preset auto` 时，ESP/nuclear ESP 选 `esp`，ALIE 选 `alie`，
-sign(lambda2)rho 选 `iri`，vdW potential 选 `vdw-map`，其它函数回退到
-`surface-map`。批量轨道导出暂不支持 `--surface-cube`。
+LEA/LEAE 选 `lea`/`leae`，sign(lambda2)rho 选 `iri`，vdW potential 选
+`vdw-map`，其它函数回退到 `surface-map`。批量轨道导出暂不支持
+`--surface-cube`。
 
 默认输出：
 

@@ -31,6 +31,7 @@ class GridFunction:
     aliases: Tuple[str, ...] = ()
     requires_orbital: bool = False
     mapped_preset: Optional[str] = None
+    default_user_function_index: Optional[int] = None
 
 
 GRID_FUNCTIONS: Tuple[GridFunction, ...] = (
@@ -150,20 +151,57 @@ GRID_FUNCTIONS: Tuple[GridFunction, ...] = (
         100,
         "userfunc.cub",
         "user-function",
-        (
-            "userfunc",
-            "user-defined-function",
-            "custom-function",
-            "local-electron-affinity",
-            "lea-function",
-            "local-electron-attachment-energy",
-            "leae-function",
-            "information-gain-density",
-            "relative-shannon-entropy",
-            "shannon-entropy-density",
-            "fisher-information-density",
-            "second-fisher-information-density",
-        ),
+        ("userfunc", "user-defined-function", "custom-function"),
+    ),
+    GridFunction(
+        "local-electron-affinity",
+        100,
+        "userfunc.cub",
+        "user-function",
+        ("lea", "lea-function"),
+        mapped_preset="lea",
+        default_user_function_index=27,
+    ),
+    GridFunction(
+        "local-electron-attachment-energy",
+        100,
+        "userfunc.cub",
+        "user-function",
+        ("leae", "leae-function"),
+        mapped_preset="leae",
+        default_user_function_index=-27,
+    ),
+    GridFunction(
+        "information-gain-density",
+        100,
+        "userfunc.cub",
+        "user-function",
+        ("relative-shannon-entropy", "information-gain"),
+        default_user_function_index=49,
+    ),
+    GridFunction(
+        "shannon-entropy-density",
+        100,
+        "userfunc.cub",
+        "user-function",
+        ("shannon-density",),
+        default_user_function_index=50,
+    ),
+    GridFunction(
+        "fisher-information-density",
+        100,
+        "userfunc.cub",
+        "user-function",
+        ("fisher-density",),
+        default_user_function_index=51,
+    ),
+    GridFunction(
+        "second-fisher-information-density",
+        100,
+        "userfunc.cub",
+        "user-function",
+        ("second-fisher-density",),
+        default_user_function_index=52,
     ),
     GridFunction(
         "becke-weight",
@@ -186,7 +224,7 @@ FUNCTION_BY_NAME: Dict[str, GridFunction] = {}
 FUNCTION_BY_INDEX: Dict[int, GridFunction] = {}
 for _function in GRID_FUNCTIONS:
     FUNCTION_BY_NAME[_function.name] = _function
-    FUNCTION_BY_INDEX[_function.index] = _function
+    FUNCTION_BY_INDEX.setdefault(_function.index, _function)
     for _alias in _function.aliases:
         FUNCTION_BY_NAME[_alias] = _function
 
@@ -241,9 +279,14 @@ def available_functions_text() -> str:
         aliases = f" (aliases: {', '.join(function.aliases)})" if function.aliases else ""
         orbital = "; requires --orbital" if function.requires_orbital else ""
         mapped = f"; mapped preset with --surface-cube: {function.mapped_preset}" if function.mapped_preset else ""
+        user_default = (
+            f"; default iuserfunc={function.default_user_function_index}"
+            if function.default_user_function_index is not None
+            else ""
+        )
         lines.append(
             f"- {function.name}{aliases}: index={function.index}, "
-            f"Multiwfn output={function.output_filename}, preset={function.preset}{orbital}{mapped}"
+            f"Multiwfn output={function.output_filename}, preset={function.preset}{orbital}{mapped}{user_default}"
         )
     return "\n".join(lines) + "\n"
 
@@ -411,6 +454,19 @@ def _normalize_user_function_index(value: Optional[int]) -> int:
             "the maintained user-function route only supports direct iuserfunc functions"
         )
     return index
+
+
+def _effective_user_function_index(function: GridFunction, value: Optional[int]) -> int:
+    if value is None and function.default_user_function_index is not None:
+        return function.default_user_function_index
+    try:
+        return _normalize_user_function_index(value)
+    except ValueError as exc:
+        if value is None:
+            raise ValueError(
+                f"Multiwfn function `{function.name}` requires --user-function-index IUSERFUNC"
+            ) from exc
+        raise
 
 
 def _write_run_local_settings(
@@ -656,7 +712,7 @@ def build_grid_commands(
         raise ValueError("--source-function-mode is only valid for source-function")
 
     if function.index == 100:
-        _normalize_user_function_index(user_function_index)
+        _effective_user_function_index(function, user_function_index)
     elif user_function_index is not None:
         raise ValueError("--user-function-index is only valid for user-function")
 
@@ -1006,7 +1062,7 @@ def run_multiwfn_grid(
         raise ValueError("--source-function-mode is only valid for source-function")
 
     if function.index == 100:
-        normalized_user_function_index = _normalize_user_function_index(user_function_index)
+        normalized_user_function_index = _effective_user_function_index(function, user_function_index)
     elif user_function_index is not None:
         raise ValueError("--user-function-index is only valid for user-function")
     candidate = find_multiwfn(multiwfn_path)
@@ -1599,9 +1655,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         type=int,
         default=None,
         help=(
-            "Multiwfn iuserfunc value for function 100 user-function, e.g. "
+            "Multiwfn iuserfunc value for generic function 100 user-function, e.g. "
             "27 for LEA, -27 for LEAE, 49 for information gain, 50 for "
             "Shannon entropy density, 51/52 for Fisher information density. "
+            "Named function-100 routes such as local-electron-affinity provide defaults. "
             "Special external-grid modes -1, -3, and 57/58/59 are not "
             "handled by this generic route."
         ),
@@ -1639,7 +1696,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         type=Path,
         help=(
             "Use the generated grid cube as a texture on this surface cube. "
-            "With --preset auto, ESP/ALIE/vdW/sign(lambda2)rho functions choose a mapped-surface preset."
+            "With --preset auto, ESP/ALIE/LEA/LEAE/vdW/sign(lambda2)rho "
+            "functions choose a mapped-surface preset."
         ),
     )
     parser.add_argument("--preset", default="auto", help="Cube preset for VESTA output; default auto from function")

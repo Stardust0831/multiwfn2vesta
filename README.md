@@ -238,8 +238,7 @@ multiwfn2vesta grid-run input.molden grid_products \
   --reference-point 0 0 0 \
   --source-function-mode 1
 multiwfn2vesta grid-run input.molden grid_products \
-  --function user-function \
-  --user-function-index 27
+  --function local-electron-affinity
 multiwfn2vesta grid-run input.molden grid_products \
   --function becke \
   --becke-atoms 1 4
@@ -425,17 +424,18 @@ run-local `multiwfn_grid_settings.ini` with `-set`, so the global Multiwfn
 installation settings are not modified.  The VESTA preset shows signed
 `+/-0.05` isosurfaces by default.
 
-Use `user-function`/`userfunc` for Multiwfn function `100` `userfunc.cub`.
-`grid-run` requires `--user-function-index IUSERFUNC`; common choices from
-the inspected Multiwfn source include `27` for local electron affinity,
-`-27` for local electron attachment energy, `49` for information gain,
-`50` for Shannon entropy density, and `51`/`52` for Fisher information
-density.  The runner copies the selected Multiwfn `settings.ini` when
-available, patches only `iuserfunc`, and passes the run-local settings file
-with `-set`.  Generic standalone `userfunc.cub` uses signed `+/-0.05`
-surfaces by default; for LEA/LEAE mapped density surfaces, generate or
-provide `density.cub` and use `cube-preset lea`/`leae` with `userfunc.cub`
-as the texture cube.
+Use `user-function`/`userfunc` for generic Multiwfn function `100`
+`userfunc.cub`; this generic route requires `--user-function-index
+IUSERFUNC`.  Source-backed named routes now imply common `iuserfunc` values:
+`local-electron-affinity` sets `27`, `local-electron-attachment-energy`
+sets `-27`, `information-gain-density` sets `49`,
+`shannon-entropy-density` sets `50`, and `fisher-information-density` /
+`second-fisher-information-density` set `51` / `52`.  The runner copies the
+selected Multiwfn `settings.ini` when available, patches only `iuserfunc`,
+and passes the run-local settings file with `-set`.  Generic standalone
+`userfunc.cub` uses signed `+/-0.05` surfaces by default; LEA/LEAE named
+routes automatically select the `lea`/`leae` mapped-surface preset when
+`--surface-cube density.cub` is supplied.
 
 Use `becke-weight`/`becke` for Multiwfn function `111` `Becke.cub`;
 `grid-run` requires `--becke-atoms I J` because Multiwfn asks for atom
@@ -647,12 +647,14 @@ Common functions:
   coordinates are Angstrom.  `--source-function-mode` controls
   `srcfuncmode` through a run-local `-set` settings file copied from the
   selected Multiwfn `settings.ini` when available.
-- `user-function` / `userfunc`: function `100`, raw `userfunc.cub`, preset
-  `user-function`, signed by default.  Pass `--user-function-index
-  IUSERFUNC`; examples include `27` for LEA, `-27` for LEAE, `49` for
-  information gain, and `50`/`51`/`52` for Shannon/Fisher information
-  densities.  The selected `iuserfunc` is written to a run-local `-set`
-  settings file, leaving the global Multiwfn settings untouched.
+- `user-function` / `userfunc`: generic function `100`, raw `userfunc.cub`,
+  preset `user-function`, signed by default.  Pass `--user-function-index
+  IUSERFUNC` unless using a named route below.  Named routes
+  `local-electron-affinity`, `local-electron-attachment-energy`,
+  `information-gain-density`, `shannon-entropy-density`,
+  `fisher-information-density`, and `second-fisher-information-density`
+  automatically patch `iuserfunc=27/-27/49/50/51/52` into a run-local `-set`
+  settings file, leaving global Multiwfn settings untouched.
 - `electron-delocalization-range` / `edr`: function `20`, raw `EDR.cub`,
   preset `electron-delocalization-range`, single positive surface by default.
   Pass `--edr-length D_BOHR`; Multiwfn asks for this EDR length scale before
@@ -683,6 +685,10 @@ Common functions:
 - `alie` / `avglocion`: function `18`, raw `avglocion.cub`.  With
   `--surface-cube density.cub`, the generated ALIE cube is used as the
   texture for `cube-preset alie`.
+- `local-electron-affinity` and `local-electron-attachment-energy`: function
+  `100`, raw `userfunc.cub`.  With `--surface-cube density.cub`, the
+  generated LEA/LEAE cube is used as the texture for `cube-preset lea` or
+  `cube-preset leae`.
 - `rdg` / `promolecular-rdg`: functions `13` and `14`, raw `RDG.cub` and
   `RDGprodens.cub`, presets `rdg-scalar` and `promolecular-rdg`.
   IRI/RDG mapped surfaces that need two coupled cubes should still use
@@ -739,8 +745,13 @@ multiwfn2vesta grid-run input.fch grid_products \
   --grid-points 120 120 120
 
 multiwfn2vesta grid-run input.fch grid_products \
+  --function local-electron-affinity \
+  --grid-mode points \
+  --grid-points 120 120 120
+
+multiwfn2vesta grid-run input.fch grid_products \
   --function user-function \
-  --user-function-index 27 \
+  --user-function-index 49 \
   --grid-mode points \
   --grid-points 120 120 120
 
@@ -787,11 +798,17 @@ multiwfn2vesta grid-run input.fch alie_map \
   --surface-cube density.cub \
   --grid-mode cube \
   --grid-cube density.cub
+
+multiwfn2vesta grid-run input.fch lea_map \
+  --function local-electron-affinity \
+  --surface-cube density.cub \
+  --grid-mode cube \
+  --grid-cube density.cub
 ```
 
 With `--preset auto`, mapped defaults are `esp` for ESP/nuclear ESP, `alie`
-for ALIE, `iri` for sign(lambda2)rho, `vdw-map` for vdW potential, and
-`surface-map` for other functions.  Batch orbital export rejects
+for ALIE, `lea`/`leae` for LEA/LEAE, `iri` for sign(lambda2)rho, `vdw-map`
+for vdW potential, and `surface-map` for other functions.  Batch orbital export rejects
 `--surface-cube`.
 
 For frontier-orbital batches, use `--orbitals`.  If `--function` is omitted in

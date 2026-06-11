@@ -247,10 +247,13 @@ through `--pair-function-type`, and patches `paircorrtype` through
 `--pair-correlation-type`; `grid-run --function source-function` requires
 `--reference-point X Y Z`; `--source-function-mode` is patched into a
 run-local settings file copied from the selected Multiwfn `settings.ini` when
-available and passed with `-set`; `grid-run --function user-function`
-requires `--user-function-index IUSERFUNC` and patches `iuserfunc` through
-the same run-local `-set` route; common values include `27` LEA, `-27` LEAE,
-`49` information gain, and `50/51/52` Shannon/Fisher information densities;
+available and passed with `-set`; generic `grid-run --function user-function`
+requires `--user-function-index IUSERFUNC`, while named routes
+`local-electron-affinity`, `local-electron-attachment-energy`,
+`information-gain-density`, `shannon-entropy-density`,
+`fisher-information-density`, and `second-fisher-information-density`
+automatically patch `iuserfunc=27/-27/49/50/51/52` through the same
+run-local `-set` route;
 `grid-run --function becke` requires `--becke-atoms I J`,
 with `I J` for Becke overlap weight and `I 0` for Becke atomic weight;
 `grid-run --function hirshfeld` requires

@@ -1,6 +1,43 @@
 # Project Kanban
 
-Updated: 2026-06-11 18:12 CST
+Updated: 2026-06-11 18:51 CST
+
+## Active Goal Continuation: 2026-06-11 Next ABACUS-Compatible Analysis Survey
+
+- [x] Record automatic continuation of the long-running objective: keep
+  surveying and implementing valuable Multiwfn wavefunction analyses that can
+  become VESTA products, prioritizing ABACUS LCAO Molden-compatible routes
+  and ABACUS direct cube products.
+- [x] Recheck repository state, current `grid-run`/`cube-preset` coverage,
+  and local Multiwfn 2026.6.2 source before selecting the next bounded
+  feature increment.  Current worktree started from `main...origin/main`;
+  only the new kanban edit plus local untracked `domain.cub`/`domain.pdb`
+  were present.  Source review confirmed main-function-5 functions 1-25,
+  44, 100, 111, and 112 coverage, and identified `iuserfunc` named analyses
+  as the safest next ergonomics gap.
+- [x] Select a source-backed analysis route that is useful for VESTA
+  visualization and not already maintained.  Selected increment: dedicated
+  named routes for high-value Multiwfn `iuserfunc` analyses already confirmed
+  in `function.f90`, so `local-electron-affinity`, LEAE, information gain,
+  Shannon entropy density, and Fisher information density can imply their
+  `iuserfunc` values instead of requiring redundant manual indices.
+- [x] Implement the selected route with focused tests and synchronized
+  README/usage/research/worklog/skill notes.  Added per-route default
+  `iuserfunc` handling for function-100 named analyses while preserving the
+  generic `user-function --user-function-index` route; LEA/LEAE named routes
+  auto-select mapped presets `lea`/`leae` when `--surface-cube` is supplied.
+- [x] Sync root docs mirror, validate, review, and prepare explicit
+  commit/push closeout.  Full no-GUI regression passed once with 312
+  tests, CLI smoke passed, docs mirror dry-run was empty, and `git diff
+  --check` passed.  Read-only subagent review found no blocker and three low
+  follow-ups: mention LEA/LEAE in `--surface-cube` help, update mapped-default
+  summary docs, and add tests for explicit `iuserfunc` override plus LEA/LEAE
+  mapped preset selection; all three follow-ups were patched before final
+  validation.  Final validation after those patches passed: focused
+  `py_compile`, full 314-test no-GUI regression, `grid-run --list-functions`,
+  `grid-run --help`, root docs checksum mirror dry-run, and
+  `git diff --check`.  Final commit hash and post-push alignment are reported
+  in the assistant response to avoid a self-referential docs loop.
 
 ## Current Request: 2026-06-11 README Refresh And Branch Consolidation Recheck
 
@@ -22,10 +59,13 @@ Updated: 2026-06-11 18:12 CST
   `bin/multiwfn2vesta --help`, root docs checksum mirror dry-run, and
   `git diff --check`; read-only subagent review found one documentation
   status problem about premature commit/push wording, fixed in this update.
-- [ ] Stage only intended tracked files, commit/push the real update, and
+- [x] Stage only intended tracked files, commit/push the real update, and
   verify `main`/`origin/main` alignment.  Final commit hash and post-push
-  branch alignment are reported in the assistant response to avoid a
-  self-referential docs loop.
+  branch alignment were reported in the assistant response; the actual
+  pushed commit was `0e587a076b136ad86fdba81fbd51939dc56f99d1`
+  (`Add user-function grid preset`), with local `main`, `origin/main`, and
+  `origin/HEAD` aligned and only `domain.cub`/`domain.pdb` remaining
+  untracked.
 
 ## Active Goal Continuation: 2026-06-11 User-Function Grid Route
 

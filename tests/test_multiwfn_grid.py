@@ -209,6 +209,9 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertIn("alie", text)
         self.assertIn("mapped preset with --surface-cube: esp", text)
         self.assertIn("mapped preset with --surface-cube: alie", text)
+        self.assertIn("mapped preset with --surface-cube: lea", text)
+        self.assertIn("default iuserfunc=27", text)
+        self.assertIn("default iuserfunc=-27", text)
         self.assertIn("requires --orbital", text)
         self.assertEqual(resolve_grid_function("rho").name, "density")
         self.assertEqual(resolve_grid_function("rho-gradient").name, "gradient")
@@ -255,9 +258,18 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertEqual(resolve_grid_function("source").preset, "source-function")
         self.assertEqual(resolve_grid_function("user-function").index, 100)
         self.assertEqual(resolve_grid_function("userfunc").output_filename, "userfunc.cub")
+        self.assertEqual(resolve_grid_function(None, 100).name, "user-function")
         self.assertEqual(resolve_grid_function("local-electron-affinity").preset, "user-function")
-        self.assertEqual(resolve_grid_function("leae-function").name, "user-function")
-        self.assertEqual(resolve_grid_function("shannon-entropy-density").index, 100)
+        self.assertEqual(resolve_grid_function("local-electron-affinity").default_user_function_index, 27)
+        self.assertEqual(resolve_grid_function("local-electron-affinity").mapped_preset, "lea")
+        self.assertEqual(resolve_grid_function("leae-function").name, "local-electron-attachment-energy")
+        self.assertEqual(resolve_grid_function("leae-function").default_user_function_index, -27)
+        self.assertEqual(resolve_grid_function("leae-function").mapped_preset, "leae")
+        self.assertEqual(resolve_grid_function("information-gain-density").default_user_function_index, 49)
+        self.assertEqual(resolve_grid_function("relative-shannon-entropy").name, "information-gain-density")
+        self.assertEqual(resolve_grid_function("shannon-entropy-density").default_user_function_index, 50)
+        self.assertEqual(resolve_grid_function("fisher-information-density").default_user_function_index, 51)
+        self.assertEqual(resolve_grid_function("second-fisher-information-density").default_user_function_index, 52)
         self.assertEqual(resolve_grid_function("becke").index, 111)
         self.assertEqual(resolve_grid_function("becke").output_filename, "Becke.cub")
         self.assertEqual(resolve_grid_function("becke-overlap-weight").preset, "becke-weight")
@@ -401,6 +413,23 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         )
         with self.assertRaisesRegex(ValueError, "--user-function-index is only valid"):
             build_grid_commands(resolve_grid_function("density"), user_function_index=27)
+
+    def test_build_named_user_function_uses_default_iuserfunc(self):
+        function = resolve_grid_function("local-electron-affinity")
+
+        self.assertEqual(
+            build_grid_commands(function, grid_points=(10, 11, 12)),
+            ["5", "100", "4", "10,11,12", "2", "0", "q"],
+        )
+        self.assertEqual(
+            build_grid_commands(
+                resolve_grid_function("shannon-entropy-density"),
+                grid_mode="low",
+            ),
+            ["5", "100", "1", "2", "0", "q"],
+        )
+        with self.assertRaisesRegex(ValueError, "special external-grid"):
+            build_grid_commands(function, user_function_index=-1)
 
     def test_build_edr_command_stream_requires_length_scale(self):
         function = resolve_grid_function("edr")
@@ -783,7 +812,6 @@ class TestMultiwfnGridRunner(unittest.TestCase):
                         wavefunction,
                         root / "products",
                         function_name="local-electron-affinity",
-                        user_function_index=27,
                         stem="case",
                         grid_points=(10, 11, 12),
                     )
@@ -810,13 +838,14 @@ class TestMultiwfnGridRunner(unittest.TestCase):
             self.assertNotIn("iuserfunc= 0", settings_text)
             self.assertIn("other_setting= keep", settings_text)
             self.assertEqual(result.raw_cube.name, "userfunc.cub")
-            self.assertEqual(result.cube.name, "case_user-function.cub")
+            self.assertEqual(result.cube.name, "case_local-electron-affinity.cub")
             self.assertIsNotNone(result.vesta_result)
             self.assertEqual(
                 result.vesta_result.vesta_path.name,
-                "case_user-function_user-function_cube.vesta",
+                "case_local-electron-affinity_user-function_cube.vesta",
             )
             recipe = result.recipe_path.read_text(encoding="utf-8")
+            self.assertIn("function_name: `local-electron-affinity`", recipe)
             self.assertIn("function_index: `100`", recipe)
             self.assertIn("user_function_index_iuserfunc: `27`", recipe)
             self.assertIn("local_settings_file:", recipe)
@@ -826,6 +855,76 @@ class TestMultiwfnGridRunner(unittest.TestCase):
             self.assertIn("userfunc.cub", manifest)
             self.assertIn("iuserfunc", manifest)
             self.assertIn("-set", manifest)
+
+    def test_run_named_user_function_can_override_default_iuserfunc(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            wavefunction = root / "h2o.fch"
+            wavefunction.write_text("wavefunction", encoding="utf-8")
+            candidate = self.make_candidate(root)
+            (candidate.path.parent / "settings.ini").write_text("iuserfunc= 0\n", encoding="utf-8")
+
+            def fake_run(command, **kwargs):
+                cwd = Path(kwargs["cwd"])
+                (cwd / "userfunc.cub").write_text(USER_FUNCTION_CUBE, encoding="utf-8")
+                return subprocess.CompletedProcess(command, 0, stdout="ok", stderr="")
+
+            with patch("multiwfn2vesta.multiwfn_grid.find_multiwfn", return_value=candidate):
+                with patch("multiwfn2vesta.multiwfn_grid.subprocess.run", side_effect=fake_run):
+                    result = run_multiwfn_grid(
+                        wavefunction,
+                        root / "products",
+                        function_name="local-electron-affinity",
+                        user_function_index=49,
+                        stem="case",
+                        grid_points=(10, 11, 12),
+                    )
+
+            self.assertTrue(result.success)
+            self.assertEqual(result.user_function_index, 49)
+            self.assertIn("iuserfunc= 49", result.settings_override.read_text(encoding="utf-8"))
+            self.assertEqual(result.cube.name, "case_local-electron-affinity.cub")
+            self.assertIn(
+                "user_function_index_iuserfunc: `49`",
+                result.recipe_path.read_text(encoding="utf-8"),
+            )
+
+    def test_named_lea_leae_user_functions_select_mapped_presets(self):
+        for function_name, expected_preset in (
+            ("local-electron-affinity", "lea"),
+            ("local-electron-attachment-energy", "leae"),
+        ):
+            with self.subTest(function_name=function_name):
+                with tempfile.TemporaryDirectory() as tmp:
+                    root = Path(tmp)
+                    wavefunction = root / "h2o.fch"
+                    wavefunction.write_text("wavefunction", encoding="utf-8")
+                    surface_cube = root / "density.cub"
+                    surface_cube.write_text(DENSITY_CUBE, encoding="utf-8")
+                    candidate = self.make_candidate(root)
+
+                    def fake_run(command, **kwargs):
+                        cwd = Path(kwargs["cwd"])
+                        (cwd / "userfunc.cub").write_text(USER_FUNCTION_CUBE, encoding="utf-8")
+                        return subprocess.CompletedProcess(command, 0, stdout="ok", stderr="")
+
+                    with patch("multiwfn2vesta.multiwfn_grid.find_multiwfn", return_value=candidate):
+                        with patch("multiwfn2vesta.multiwfn_grid.subprocess.run", side_effect=fake_run):
+                            result = run_multiwfn_grid(
+                                wavefunction,
+                                root / "products",
+                                function_name=function_name,
+                                surface_cube=surface_cube,
+                                stem="case",
+                                grid_points=(10, 11, 12),
+                            )
+
+                    self.assertTrue(result.success)
+                    self.assertEqual(result.mapped_preset, expected_preset)
+                    self.assertIsNotNone(result.vesta_result)
+                    manifest = result.vesta_result.manifest_path.read_text(encoding="utf-8")
+                    self.assertIn(f"canonical_preset: `{expected_preset}`", manifest)
+                    self.assertIn("texture_cube:", manifest)
 
     def test_run_multiwfn_grid_iri_uses_standalone_iri_scalar_preset(self):
         with tempfile.TemporaryDirectory() as tmp:

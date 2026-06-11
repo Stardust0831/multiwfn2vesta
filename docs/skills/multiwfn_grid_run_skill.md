@@ -88,17 +88,20 @@ multiwfn2vesta grid-run --list-functions
   `settings.ini` when available and passed with `-set`, so global Multiwfn
   settings are not modified.
 - `user-function`, aliases `userfunc`, `user-defined-function`,
-  `custom-function`, `local-electron-affinity`, `lea-function`,
-  `local-electron-attachment-energy`, `leae-function`,
-  `information-gain-density`, `relative-shannon-entropy`,
-  `shannon-entropy-density`, `fisher-information-density`: function `100`,
-  raw `userfunc.cub`, preset `user-function` with signed positive/negative
-  isosurfaces.  Pass `--user-function-index IUSERFUNC`; examples are `27`
-  for LEA, `-27` for LEAE, `49` for information gain, `50` for Shannon
-  entropy density, and `51/52` for Fisher information densities.  The runner
-  patches `iuserfunc` into a run-local `multiwfn_grid_settings.ini`, copied
-  from the selected Multiwfn `settings.ini` when available and passed with
-  `-set`.  Special external-grid modes `-1`, `-3`, and Shubin `57/58/59`
+  `custom-function`: generic function `100`, raw `userfunc.cub`, preset
+  `user-function` with signed positive/negative isosurfaces.  Pass
+  `--user-function-index IUSERFUNC` unless using a named route.
+- Named `iuserfunc` routes use the same function `100` command stream and
+  `userfunc.cub` output, but automatically patch the source-backed
+  `iuserfunc` value into a run-local `multiwfn_grid_settings.ini` copied
+  from the selected Multiwfn `settings.ini` when available:
+  `local-electron-affinity` / `lea` = `27`,
+  `local-electron-attachment-energy` / `leae` = `-27`,
+  `information-gain-density` / `relative-shannon-entropy` = `49`,
+  `shannon-entropy-density` = `50`, `fisher-information-density` = `51`,
+  and `second-fisher-information-density` = `52`.  LEA/LEAE named routes
+  also auto-select mapped presets `lea`/`leae` when `--surface-cube` is
+  supplied.  Special external-grid modes `-1`, `-3`, and Shubin `57/58/59`
   are intentionally rejected by this generic route.
 - `electron-delocalization-range`, aliases `edr`, `edr-r-d`,
   `electron-delocalization-range-function`: function `20`, raw `EDR.cub`,
@@ -226,8 +229,8 @@ multiwfn2vesta grid-run input.fch esp_map \
 ```
 
 With `--preset auto`, mapped defaults are `esp` for ESP/nuclear ESP, `alie`
-for ALIE, `iri` for sign(lambda2)rho, `vdw-map` for vdW potential, and
-`surface-map` for other functions.  Batch orbital export rejects
+for ALIE, `lea`/`leae` for LEA/LEAE, `iri` for sign(lambda2)rho, `vdw-map`
+for vdW potential, and `surface-map` for other functions.  Batch orbital export rejects
 `--surface-cube`.
 
 ## Outputs
@@ -270,7 +273,8 @@ multiwfn2vesta grid-run input.fch products --function hamiltonian-ked --no-vesta
 multiwfn2vesta grid-run input.fch products --function alie --no-vesta
 multiwfn2vesta grid-run input.fch products --function pair-function --reference-point 0 0 0 --pair-function-type 1 --pair-correlation-type 3
 multiwfn2vesta grid-run input.fch products --function source-function --reference-point 0 0 0 --source-function-mode 1
-multiwfn2vesta grid-run input.fch products --function user-function --user-function-index 27
+multiwfn2vesta grid-run input.fch products --function local-electron-affinity
+multiwfn2vesta grid-run input.fch products --function user-function --user-function-index 49
 multiwfn2vesta grid-run input.fch products --function edr --edr-length 0.85
 multiwfn2vesta grid-run input.fch products --function edrdmax --edr-exponents 12 3.0 1.2
 multiwfn2vesta grid-run input.fch products --function becke --becke-atoms 1 4

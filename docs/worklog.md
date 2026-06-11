@@ -1,5 +1,30 @@
 # Worklog
 
+## 2026-06-11: Named iuserfunc grid routes
+
+- Continued the long-running ABACUS/Multiwfn/VESTA analysis objective by
+  improving the function-100 user-defined route into source-backed named
+  analyses.
+- Rechecked local Multiwfn 2026.6.2 source evidence: `function.f90` lists
+  `iuserfunc=27` for local electron affinity, `-27` for local electron
+  attachment energy, `49` for information gain / relative Shannon entropy,
+  `50` for Shannon entropy density, and `51/52` for Fisher information
+  densities; `0123dim.f90` exports them through `userfunc.cub`.
+- Added dedicated `grid-run` names for those high-value routes so
+  `local-electron-affinity`, `local-electron-attachment-energy`,
+  `information-gain-density`, `shannon-entropy-density`,
+  `fisher-information-density`, and `second-fisher-information-density`
+  automatically patch `iuserfunc=27/-27/49/50/51/52` into the run-local
+  `multiwfn_grid_settings.ini`.  The generic `user-function` route still
+  requires `--user-function-index` for arbitrary direct `iuserfunc` values.
+- LEA/LEAE named routes also set mapped presets `lea`/`leae` when
+  `--surface-cube` is supplied, preserving standalone `userfunc.cub` signed
+  isosurfaces as the default display.
+- Deferred Multiwfn function `504/505` relative Onicescu information cubes:
+  source inspection showed they call `genentrocub` and `setpromol`, which can
+  require an `atomwfn`/Gaussian setup and should be scripted separately
+  rather than exposed as a hidden-prompt route.
+
 ## 2026-06-11: README branch refresh before user-function closeout
 
 - User requested another README update, a check of the unusual-looking branch

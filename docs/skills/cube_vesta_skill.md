@@ -259,13 +259,17 @@ passes it back through `cube-preset`.
   `information-gain-density`, `relative-shannon-entropy`,
   `shannon-entropy-density`, `fisher-information-density`;
   positive/negative surfaces for Multiwfn function `100` `userfunc.cub`,
-  default magnitude `0.05`.  When generating the cube with `grid-run`, pass
-  `--user-function-index IUSERFUNC`; `27` is LEA, `-27` is LEAE, `49` is
-  information gain, `50` is Shannon entropy density, and `51/52` are Fisher
-  information densities.  The index is patched into a run-local settings file
-  copied from the selected Multiwfn `settings.ini` when available and passed
-  with `-set`.  For LEA/LEAE density-surface maps, use the separate
-  `lea`/`leae` texture presets with `density.cub` plus `userfunc.cub`.
+  default magnitude `0.05`.  When generating the cube with `grid-run`, the
+  generic `--function user-function` route still requires
+  `--user-function-index IUSERFUNC`, while named routes automatically patch
+  common values: `local-electron-affinity` / `lea` = `27`,
+  `local-electron-attachment-energy` / `leae` = `-27`,
+  `information-gain-density` = `49`, `shannon-entropy-density` = `50`, and
+  `fisher-information-density` / `second-fisher-information-density` =
+  `51` / `52`.  For LEA/LEAE density-surface maps, use
+  `grid-run --function local-electron-affinity --surface-cube density.cub`
+  or the lower-level `lea`/`leae` texture presets with `density.cub` plus
+  `userfunc.cub`.
 - `becke-weight` aliases: `becke`, `becke-overlap-weight`,
   `becke-atomic-weight`, `beckewei`; single positive surface for Multiwfn
   function `111` `Becke.cub`, default isosurface `0.5`.  When generating the

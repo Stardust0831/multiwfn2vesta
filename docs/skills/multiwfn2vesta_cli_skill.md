@@ -422,7 +422,10 @@ multiwfn2vesta grid-run --list-functions
 Common functions include `density`, `gradient`, `orbital --orbital h`,
 `orbital-density`, `spin-density`, `laplacian`, `hamiltonian-ked`,
 `lagrangian-ked`, `local-information-entropy`, `elf`, `lol`, `esp`, `alie`,
-`pair-function`, `source-function`, `user-function`, `edr`, `edrdmax`,
+`pair-function`, `source-function`, `user-function`,
+`local-electron-affinity`, `local-electron-attachment-energy`,
+`information-gain-density`, `shannon-entropy-density`,
+`fisher-information-density`, `second-fisher-information-density`, `edr`, `edrdmax`,
 `becke`, `hirshfeld`, `rdg`, `promolecular-rdg`, `delta-g`,
 `hirshfeld-delta-g`, `iri`, `signlambda2rho`,
 `promolecular-signlambda2rho`, and `vdw-potential`.
@@ -449,11 +452,16 @@ through a run-local settings file copied from the selected Multiwfn
 `--source-function-mode` is patched into a run-local settings file copied
 from the selected Multiwfn `settings.ini` when available and passed with
 `-set`.
-`grid-run --function user-function` requires `--user-function-index
-IUSERFUNC`; the runner patches `iuserfunc` into a run-local settings file
+Generic `grid-run --function user-function` requires `--user-function-index
+IUSERFUNC`; named routes automatically patch common source-backed values:
+`local-electron-affinity` / `lea` = `27`,
+`local-electron-attachment-energy` / `leae` = `-27`,
+`information-gain-density` = `49`, `shannon-entropy-density` = `50`, and
+`fisher-information-density` / `second-fisher-information-density` =
+`51` / `52`.  The runner writes `iuserfunc` into a run-local settings file
 copied from the selected Multiwfn `settings.ini` when available and passed
-with `-set`.  Typical values include `27` LEA, `-27` LEAE, `49`
-information gain, and `50/51/52` Shannon/Fisher information densities.
+with `-set`.  LEA/LEAE named routes also auto-select mapped presets
+`lea`/`leae` when `--surface-cube` is supplied.
 `grid-run --function becke` requires
 `--becke-atoms I J`; `I J` requests Becke overlap weight and `I 0` requests
 Becke atomic weight.  `grid-run --function hirshfeld` requires
@@ -502,9 +510,10 @@ multiwfn2vesta grid-run input.fch esp_map \
 ```
 
 With `--preset auto`, ESP/nuclear ESP use `cube-preset esp`, ALIE uses
-`cube-preset alie`, sign(lambda2)rho uses `cube-preset iri`, vdW potential
-uses `cube-preset vdw-map`, and other functions fall back to `surface-map`.
-Batch orbital export rejects `--surface-cube`.
+`cube-preset alie`, LEA/LEAE use `cube-preset lea`/`cube-preset leae`,
+sign(lambda2)rho uses `cube-preset iri`, vdW potential uses
+`cube-preset vdw-map`, and other functions fall back to `surface-map`.  Batch
+orbital export rejects `--surface-cube`.
 
 ### Wavefunction to Multiwfn STM/LDOS to VESTA
 
