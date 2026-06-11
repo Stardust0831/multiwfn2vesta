@@ -7,7 +7,7 @@ Updated: 2026-06-12 02:45 CST
 - [x] 需求入板: 继续长期目标，调研并完善 Multiwfn/ABACUS 到 VESTA 的有价值可视化能力；在上一轮 examples artifact verification 后，继续补真实功能闭环，优先考虑 trajectory video 正式 CLI、atom value coloring 真体系图、IRI+AIM 成品图或 ABACUS 支撑的波函数分析路线。
 - [x] 审计当前工作区、未提交文件、已有 trajectory/atom-color/IRI/AIM+IGMH 代码和 docs 状态；保护未跟踪 `domain.cub` / `domain.pdb`。当前只看到本轮 `docs/kanban.md` 修改和未跟踪 probe 文件，trajectory video 缺维护态 CLI，atom coloring/IRI+AIM 主要缺真实渲染图。
 - [x] 选择本轮最能推进长期目标的可验证增量，避免只做文档表面整理。选定 `trajectory-video`：先维护“已渲染 VESTA PNG 帧 -> 高码率 MP4”的合成层，后续再接 ASE/XYZ -> VESTA/PNG 帧生成。
-- [ ] 实现代码/文档/测试，镜像 docs，验证后用 `Stardust0831` 身份提交推送。当前已新增 `src/multiwfn2vesta/trajectory_video.py`、统一 CLI/entry point、tests、README/中文手册/usage/runbook/gallery/status matrix/skill/worklog 更新；`trajectory-video` 已维护 PNG->MP4 合成层，上游轨迹->VESTA/PNG 帧渲染仍待做。验证通过：focused `py_compile`、`tests.test_trajectory_video tests.test_cli tests.test_examples`、Cd/Cl manifest dry-run、`bin/multiwfn2vesta --help`、365-test full no-GUI regression、`git diff --check`、markdown local-link check、`examples --id cdcl_trajectory_video --verify` 和 `--verify-smoke`。docs 镜像、提交推送待执行。
+- [x] 实现代码/文档/测试，镜像 docs，验证后用 `Stardust0831` 身份提交推送。已新增 `src/multiwfn2vesta/trajectory_video.py`、统一 CLI/entry point、tests、README/中文手册/usage/runbook/gallery/status matrix/skill/worklog 更新；`trajectory-video` 已维护 PNG->MP4 合成层，上游轨迹->VESTA/PNG 帧渲染仍待做。验证通过：focused `py_compile`、`tests.test_trajectory_video tests.test_cli tests.test_examples`、Cd/Cl manifest dry-run、`bin/multiwfn2vesta --help`、365-test full no-GUI regression、`git diff --check`、markdown local-link check、`examples --id cdcl_trajectory_video --verify` 和 `--verify-smoke`。docs 镜像 dry-run 为空；功能提交 `9ae57cb`，最终看板同步提交和 push 由本轮回复报告。
 
 ## Current Request: 2026-06-12 Feature Closure Phase 2
 
