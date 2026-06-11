@@ -478,14 +478,21 @@ IUSERFUNC`; named routes automatically patch common source-backed values:
 `dori` / `density-overlap-regions-indicator` = `20`,
 `local-electron-affinity` / `lea` = `27`,
 `local-electron-attachment-energy` / `leae` = `-27`,
+`local-mulliken-electronegativity` / `local-electronegativity` = `28`,
+`local-hardness` / `local-chemical-hardness` = `29`,
 `information-gain-density` = `49`, `shannon-entropy-density` = `50`, and
 `fisher-information-density` / `second-fisher-information-density` =
 `51` / `52`.  The runner writes `iuserfunc` into a run-local settings file
 copied from the selected Multiwfn `settings.ini` when available and passed
 with `-set`.  LEA/LEAE named routes also auto-select mapped presets
-`lea`/`leae` when `--surface-cube` is supplied.  DORI+sign(lambda2)rho uses
-the lower-level `cube-preset dori DORI.cub ... --texture-cube sl2r.cub`
-direction from Multiwfn `DORIfill.vmd`, not `grid-run --surface-cube`.
+`lea`/`leae` when `--surface-cube` is supplied; local electronegativity and
+local hardness use `surface-map`.  `grid-run --surface-cube` forwards
+`--tex-physical`, `--tex-percent`, `--tex-range-source`, `--surface-band`,
+and `--surface-nearest` to the downstream `cube-preset`; the interactive
+global CLI prompts for these after a surface cube is entered.  DORI+
+sign(lambda2)rho uses the lower-level `cube-preset dori DORI.cub ...
+--texture-cube sl2r.cub` direction from Multiwfn `DORIfill.vmd`, not
+`grid-run --surface-cube`.
 `grid-run --function becke` requires
 `--becke-atoms I J`; `I J` requests Becke overlap weight and `I 0` requests
 Becke atomic weight.  `grid-run --function hirshfeld` requires
@@ -531,13 +538,23 @@ multiwfn2vesta grid-run input.fch esp_map \
   --surface-cube density.cub \
   --grid-mode cube \
   --grid-cube density.cub
+
+multiwfn2vesta grid-run input.fch hardness_map \
+  --function local-hardness \
+  --surface-cube density.cub \
+  --grid-mode cube \
+  --grid-cube density.cub \
+  --tex-physical -0.2 0.2 \
+  --tex-range-source surface-band \
+  --surface-band 0.25
 ```
 
 With `--preset auto`, ESP/nuclear ESP use `cube-preset esp`, ALIE uses
 `cube-preset alie`, LEA/LEAE use `cube-preset lea`/`cube-preset leae`,
 sign(lambda2)rho uses `cube-preset iri`, vdW potential uses
-`cube-preset vdw-map`, and other functions fall back to `surface-map`.  Batch
-orbital export rejects `--surface-cube`.
+`cube-preset vdw-map`, and local electronegativity, local hardness, and other
+functions fall back to `surface-map`.  Batch orbital export rejects
+`--surface-cube`.
 
 ### Wavefunction to Multiwfn STM/LDOS to VESTA
 

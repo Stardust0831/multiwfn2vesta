@@ -188,9 +188,10 @@ passes it back through `cube-preset`.
 - `--tex-range-source full-cube` uses the full texture cube min/max.
 - `--tex-range-source surface-band` uses texture values from grid points whose
   surface-cube values are close to the requested `--isosurface`.  Use
-  `--surface-band` to set the half-width manually; otherwise a conservative
-  automatic band is used.  If the band has no non-degenerate texture range,
-  `--surface-nearest` nearest grid points are used as a fallback.
+  `--surface-band` to set the non-negative half-width manually; otherwise a
+  conservative automatic band is used.  If the band has no non-degenerate
+  texture range, `--surface-nearest` nearest grid points are used as a
+  fallback and must be positive.
 
 ## Cube and Structure Rules
 
@@ -272,12 +273,18 @@ passes it back through `cube-preset`.
   common values: `dori` / `density-overlap-regions-indicator` = `20`,
   `local-electron-affinity` / `lea` = `27`,
   `local-electron-attachment-energy` / `leae` = `-27`,
+  `local-mulliken-electronegativity` / `local-electronegativity` = `28`,
+  `local-hardness` / `local-chemical-hardness` = `29`,
   `information-gain-density` = `49`, `shannon-entropy-density` = `50`, and
   `fisher-information-density` / `second-fisher-information-density` =
   `51` / `52`.  For LEA/LEAE density-surface maps, use
   `grid-run --function local-electron-affinity --surface-cube density.cub`
   or the lower-level `lea`/`leae` texture presets with `density.cub` plus
-  `userfunc.cub`.
+  `userfunc.cub`.  For local electronegativity/local hardness maps, use
+  `grid-run --surface-cube` with `surface-map` and pass `--tex-physical`,
+  `--tex-percent`, `--tex-range-source surface-band`, `--surface-band`, or
+  `--surface-nearest` directly through `grid-run` when the generic color
+  scale needs tuning.
 - `becke-weight` aliases: `becke`, `becke-overlap-weight`,
   `becke-atomic-weight`, `beckewei`; single positive surface for Multiwfn
   function `111` `Becke.cub`, default isosurface `0.5`.  When generating the

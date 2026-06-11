@@ -1,6 +1,54 @@
 # Project Kanban
 
-Updated: 2026-06-11 20:23 CST
+Updated: 2026-06-11 20:53 CST
+
+## Active Goal Continuation: 2026-06-11 Next ABACUS/Molden Visualization Increment
+
+- [x] Record automatic continuation of the long-running objective: survey and
+  implement valuable Multiwfn wavefunction analyses that can be visualized in
+  VESTA, prioritizing analyses ABACUS can feed through LCAO Molden files or
+  direct cube outputs.
+- [x] Recheck current repository state, existing grid/preset coverage, and
+  local Multiwfn source/templates before selecting the next bounded increment.
+  Current branch is `main` aligned with `origin/main` after the DORI commit;
+  only `docs/kanban.md` plus local untracked `domain.cub` and `domain.pdb`
+  were present before this increment.  Source review found that
+  function-100 `iuserfunc=28` is local Mulliken electronegativity and
+  `iuserfunc=29` is local hardness, both exported as `userfunc.cub`; bundled
+  examples provide generic `molsurfmap.vmd` but no dedicated color scale.
+- [ ] Select and implement one source-backed route that moves the project
+  closer to broad Multiwfn-to-VESTA coverage.  Selected increment:
+  `grid-run --surface-cube` mapped texture controls plus named local
+  reactivity routes.  Implementation now adds `local-mulliken-
+  electronegativity` and `local-hardness` (`iuserfunc=28/29`), forwards
+  `--tex-physical`, `--tex-percent`, `--tex-range-source`, `--surface-band`,
+  and `--surface-nearest` from `grid-run` to `cube-preset`, records these
+  controls in recipes, and exposes them in the interactive CLI.  Focused
+  validation passed with `tests.test_multiwfn_grid tests.test_cli` (121
+  tests), full no-GUI validation passed with 332 tests, CLI smokes and
+  `git diff --check` passed, read-only subagent review found no blocker, and
+  root docs are queued for a final checksum mirror.  Remaining: commit, push,
+  and verify branch alignment while preserving untracked `domain.cub` and
+  `domain.pdb`.
+
+## Current Request: 2026-06-11 README Refresh And One-Branch Closeout For Local Reactivity Route
+
+- [x] Record user request immediately: update README, inspect the unusual
+  branch state, converge back to one maintained branch if needed, and keep
+  repository-local Git identity as `Stardust0831`.
+- [x] Confirm branch topology and identity before staging.  Current branch is
+  `main`; upstream is `origin/main`; `origin/HEAD` points to `origin/main`;
+  after `git fetch --prune origin`, `git ls-remote --heads origin` exposes
+  only `refs/heads/main`; repository-local identity is
+  `Stardust0831 <13862180016@163.com>`.  There is no feature branch that
+  needs a real merge-back right now.
+- [x] Finish the in-progress local reactivity / mapped texture route on
+  `main`: README/usage/skills/research/worklog are synchronized; focused
+  `py_compile`, focused 121-test grid/CLI validation, full 332-test no-GUI
+  validation, CLI smokes, `git diff --check`, and read-only subagent review
+  have passed.  Root docs are queued for final checksum mirror.  Final commit
+  hash, push result, and branch verification are reported in the assistant
+  response.  Preserve untracked `domain.cub` and `domain.pdb`.
 
 ## Current Request: 2026-06-11 README Refresh And One-Branch Closeout For DORI
 

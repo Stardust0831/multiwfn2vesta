@@ -1,5 +1,51 @@
 # Worklog
 
+## 2026-06-11: grid-run mapped texture controls and local reactivity routes
+
+- Continued the ABACUS/Multiwfn/VESTA analysis survey after the DORI closeout,
+  looking for a bounded route that improves multiple wavefunction-to-VESTA
+  workflows rather than only adding one display preset.
+- Rechecked local Multiwfn 2026.6.2 source evidence.  `function.f90` defines
+  function-100 `iuserfunc=28` as local Mulliken electronegativity
+  `(avglocion+loceleaff)/2` and `iuserfunc=29` as local hardness
+  `(avglocion-loceleaff)/2`; `0123dim.f90` exports function `100` as
+  `userfunc.cub`.  Bundled examples provide generic `molsurfmap.vmd` defaults
+  but no dedicated VMD color scale for these two fields, so color scaling must
+  remain user-tunable.
+- Added named `grid-run --function local-mulliken-electronegativity` and
+  `grid-run --function local-hardness` routes.  They patch run-local
+  `iuserfunc=28` / `29`, export `userfunc.cub`, use the standalone
+  `user-function` preset by default, and use `surface-map` when
+  `--surface-cube` is supplied.
+- Extended `grid-run --surface-cube` to forward mapped texture controls to
+  `cube-preset`: `--tex-physical`, `--tex-percent`, `--tex-range-source`,
+  `--surface-band`, and `--surface-nearest`.  The selected controls are
+  recorded in the grid recipe and the downstream cube-preset manifest, so
+  ALIE/LEA/LEAE/ESP/vdW/sign(lambda2)rho/local-hardness maps can be scaled
+  without manually rerunning `cube-preset`.
+- Updated the global interactive CLI so the `grid-run` path asks for a surface
+  cube and optional texture scaling controls when VESTA generation is enabled.
+- Rechecked the README/branch-consolidation request after
+  `git fetch --prune origin`: current branch is `main`, upstream is
+  `origin/main`, `origin/HEAD` points to `origin/main`, GitHub currently
+  exposes only `refs/heads/main`, repository-local identity is
+  `Stardust0831 <13862180016@163.com>`, and no feature branch needs a real
+  merge-back for this pass.
+- Refreshed README, usage notes, reusable skill notes, research matrix,
+  worklog, and kanban for the local reactivity routes, mapped texture controls,
+  one-branch state, and global CLI entry-point guidance.
+- Tightened `grid-run` input validation so negative `--surface-band` values
+  are rejected before launching Multiwfn; added a focused unit test for this
+  boundary.
+- Read-only subagent review found no blocking issue.  It flagged stale
+  focused-test counts in kanban/worklog, which were corrected after rerunning
+  validation; it also confirmed `domain.cub` and `domain.pdb` remain untracked.
+- Validation passed before commit: focused `py_compile`, focused
+  `tests.test_multiwfn_grid tests.test_cli` with 121 tests, full no-GUI
+  `unittest discover -s tests -v` with 332 tests, CLI smoke for
+  `bin/multiwfn2vesta --help`, `grid-run --list-functions`, `grid-run --help`,
+  and `cube-preset --list-presets`, plus `git diff --check`.
+
 ## 2026-06-11: DORI function-100 route and DORIfill preset
 
 - Continued the ABACUS/Multiwfn/VESTA analysis survey by adding a

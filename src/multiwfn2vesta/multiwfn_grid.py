@@ -230,6 +230,24 @@ GRID_FUNCTIONS: Tuple[GridFunction, ...] = (
         default_user_function_index=20,
     ),
     GridFunction(
+        "local-mulliken-electronegativity",
+        100,
+        "userfunc.cub",
+        "user-function",
+        ("local-electronegativity", "mulliken-electronegativity", "electronegativity"),
+        mapped_preset="surface-map",
+        default_user_function_index=28,
+    ),
+    GridFunction(
+        "local-hardness",
+        100,
+        "userfunc.cub",
+        "user-function",
+        ("local-chemical-hardness", "mulliken-hardness"),
+        mapped_preset="surface-map",
+        default_user_function_index=29,
+    ),
+    GridFunction(
         "information-gain-density",
         100,
         "userfunc.cub",
@@ -319,6 +337,11 @@ class MultiwfnGridResult(NamedTuple):
     user_function_index: Optional[int]
     elflol_type: Optional[int]
     vdw_probe: Optional[int]
+    tex_percent: Optional[Tuple[float, float]]
+    tex_physical: Optional[Tuple[float, float]]
+    tex_range_source: Optional[str]
+    surface_band: Optional[float]
+    surface_nearest: Optional[int]
     settings_override: Optional[Path]
 
 
@@ -583,6 +606,41 @@ def _normalize_vdw_probe(value: Optional[object]) -> Optional[int]:
     if atomic_number < 1 or atomic_number >= len(VDW_PROBE_SYMBOLS):
         raise ValueError("--vdw-probe atomic number must be in the range 1..103")
     return atomic_number
+
+
+def _normalize_float_pair(value: Optional[Sequence[float]], label: str) -> Optional[Tuple[float, float]]:
+    if value is None:
+        return None
+    if len(value) != 2:
+        raise ValueError(f"{label} requires exactly two values")
+    return (float(value[0]), float(value[1]))
+
+
+def _normalize_tex_range_source(value: Optional[str]) -> Optional[str]:
+    if value is None:
+        return None
+    key = value.strip().lower()
+    if key not in {"full-cube", "surface-band"}:
+        raise ValueError("--tex-range-source must be full-cube or surface-band")
+    return key
+
+
+def _normalize_surface_nearest(value: Optional[int]) -> Optional[int]:
+    if value is None:
+        return None
+    count = int(value)
+    if count <= 0:
+        raise ValueError("--surface-nearest must be positive")
+    return count
+
+
+def _normalize_surface_band(value: Optional[float]) -> Optional[float]:
+    if value is None:
+        return None
+    band = float(value)
+    if band < 0:
+        raise ValueError("--surface-band must be non-negative")
+    return band
 
 
 def _write_run_local_settings(
@@ -896,6 +954,11 @@ def _write_recipe(
     user_function_index: Optional[int] = None,
     elflol_type: Optional[int] = None,
     vdw_probe: Optional[int] = None,
+    tex_percent: Optional[Tuple[float, float]] = None,
+    tex_physical: Optional[Tuple[float, float]] = None,
+    tex_range_source: Optional[str] = None,
+    surface_band: Optional[float] = None,
+    surface_nearest: Optional[int] = None,
     settings_override: Optional[Path] = None,
     error: Optional[str] = None,
 ) -> None:
@@ -925,6 +988,11 @@ def _write_recipe(
         user_function_index = result.user_function_index
         elflol_type = result.elflol_type
         vdw_probe = result.vdw_probe
+        tex_percent = result.tex_percent
+        tex_physical = result.tex_physical
+        tex_range_source = result.tex_range_source
+        surface_band = result.surface_band
+        surface_nearest = result.surface_nearest
         settings_override = result.settings_override
 
     lines = [
@@ -964,6 +1032,11 @@ def _write_recipe(
             f"- user_function_index_iuserfunc: `{user_function_index}`",
             f"- elflol_type: `{elflol_type}`",
             f"- vdw_probe_atomic_number_ivdwprobe: `{vdw_probe}`",
+            f"- mapped_tex_percent: `{tex_percent}`",
+            f"- mapped_tex_physical: `{tex_physical}`",
+            f"- mapped_tex_range_source: `{tex_range_source}`",
+            f"- mapped_surface_band: `{surface_band}`",
+            f"- mapped_surface_nearest: `{surface_nearest}`",
             f"- local_settings_file: `{settings_override}`",
             f"- vesta_file: `{vesta_result.vesta_path if vesta_result is not None else None}`",
             f"- vesta_recipe: `{vesta_result.manifest_path if vesta_result is not None else None}`",
@@ -1100,6 +1173,11 @@ def run_multiwfn_grid(
     surface_cube: Optional[Path] = None,
     preset: str = "auto",
     isosurface: Optional[float] = None,
+    tex_percent: Optional[Sequence[float]] = None,
+    tex_physical: Optional[Sequence[float]] = None,
+    tex_range_source: Optional[str] = None,
+    surface_band: Optional[float] = None,
+    surface_nearest: Optional[int] = None,
     structure: Optional[str] = None,
     boundary: Optional[Sequence[float]] = None,
     copy_cubes: bool = True,
@@ -1122,6 +1200,27 @@ def run_multiwfn_grid(
     normalized_user_function_index: Optional[int] = None
     normalized_elflol_type: Optional[int] = None
     normalized_vdw_probe: Optional[int] = None
+    normalized_tex_percent = _normalize_float_pair(tex_percent, "--tex-percent")
+    normalized_tex_physical = _normalize_float_pair(tex_physical, "--tex-physical")
+    normalized_tex_range_source = _normalize_tex_range_source(tex_range_source)
+    normalized_surface_band = _normalize_surface_band(surface_band)
+    normalized_surface_nearest = _normalize_surface_nearest(surface_nearest)
+    if normalized_tex_percent is not None and normalized_tex_physical is not None:
+        raise ValueError("--tex-percent and --tex-physical cannot be used together")
+    if (
+        surface_cube is None
+        and (
+            normalized_tex_percent is not None
+            or normalized_tex_physical is not None
+            or normalized_tex_range_source is not None
+            or normalized_surface_band is not None
+            or normalized_surface_nearest is not None
+        )
+    ):
+        raise ValueError(
+            "--tex-percent, --tex-physical, --tex-range-source, "
+            "--surface-band, and --surface-nearest require --surface-cube"
+        )
     if function.index in {17, 19}:
         normalized_reference_point = _normalize_reference_point(reference_point)
         normalized_reference_unit = _normalize_reference_unit(reference_unit)
@@ -1317,6 +1416,11 @@ def run_multiwfn_grid(
             user_function_index=normalized_user_function_index,
             elflol_type=effective_elflol_type,
             vdw_probe=effective_vdw_probe,
+            tex_percent=normalized_tex_percent,
+            tex_physical=normalized_tex_physical,
+            tex_range_source=normalized_tex_range_source,
+            surface_band=normalized_surface_band,
+            surface_nearest=normalized_surface_nearest,
             settings_override=settings_override,
             error=error,
         )
@@ -1352,6 +1456,11 @@ def run_multiwfn_grid(
             user_function_index=normalized_user_function_index,
             elflol_type=effective_elflol_type,
             vdw_probe=effective_vdw_probe,
+            tex_percent=normalized_tex_percent,
+            tex_physical=normalized_tex_physical,
+            tex_range_source=normalized_tex_range_source,
+            surface_band=normalized_surface_band,
+            surface_nearest=normalized_surface_nearest,
             settings_override=settings_override,
         )
     except OSError as exc:
@@ -1382,6 +1491,11 @@ def run_multiwfn_grid(
             user_function_index=normalized_user_function_index,
             elflol_type=effective_elflol_type,
             vdw_probe=effective_vdw_probe,
+            tex_percent=normalized_tex_percent,
+            tex_physical=normalized_tex_physical,
+            tex_range_source=normalized_tex_range_source,
+            surface_band=normalized_surface_band,
+            surface_nearest=normalized_surface_nearest,
             settings_override=settings_override,
             error=error,
         )
@@ -1417,6 +1531,11 @@ def run_multiwfn_grid(
             user_function_index=normalized_user_function_index,
             elflol_type=effective_elflol_type,
             vdw_probe=effective_vdw_probe,
+            tex_percent=normalized_tex_percent,
+            tex_physical=normalized_tex_physical,
+            tex_range_source=normalized_tex_range_source,
+            surface_band=normalized_surface_band,
+            surface_nearest=normalized_surface_nearest,
             settings_override=settings_override,
         )
 
@@ -1458,6 +1577,11 @@ def run_multiwfn_grid(
                     stem=f"{output_stem}_{function.name}_{preset_name}",
                     title=f"{mapped_surface_cube.stem} colored by {function.name}",
                     isosurface=isosurface,
+                    tex_percent=normalized_tex_percent,
+                    tex_physical=normalized_tex_physical,
+                    tex_range_source=normalized_tex_range_source,
+                    surface_band=normalized_surface_band,
+                    surface_nearest=normalized_surface_nearest or 1024,
                     structure=structure,
                     boundary=boundary,
                     copy_cubes=copy_cubes,
@@ -1511,6 +1635,11 @@ def run_multiwfn_grid(
         user_function_index=normalized_user_function_index,
         elflol_type=effective_elflol_type,
         vdw_probe=effective_vdw_probe,
+        tex_percent=normalized_tex_percent,
+        tex_physical=normalized_tex_physical,
+        tex_range_source=normalized_tex_range_source,
+        surface_band=normalized_surface_band,
+        surface_nearest=normalized_surface_nearest,
         settings_override=settings_override,
     )
     _write_recipe(recipe_path, result=result)
@@ -1781,8 +1910,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "Multiwfn iuserfunc value for generic function 100 user-function, e.g. "
             "20 for DORI, 27 for LEA, -27 for LEAE, 49 for information gain, "
             "50 for Shannon entropy density, 51/52 for Fisher information "
-            "density. Named function-100 routes such as dori and "
-            "local-electron-affinity provide defaults. "
+            "density, 28 for local Mulliken electronegativity, and 29 for "
+            "local hardness. Named function-100 routes such as dori, "
+            "local-electron-affinity, and local-hardness provide defaults. "
             "Special external-grid modes -1, -3, and 57/58/59 are not "
             "handled by this generic route."
         ),
@@ -1845,6 +1975,44 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     )
     parser.add_argument("--preset", default="auto", help="Cube preset for VESTA output; default auto from function")
     parser.add_argument("--isosurface", type=float)
+    parser.add_argument(
+        "--tex-percent",
+        nargs=2,
+        type=float,
+        metavar=("MIN", "MAX"),
+        help=(
+            "Explicit VESTA texture percentage range for --surface-cube mapped "
+            "outputs; forwarded to cube-preset."
+        ),
+    )
+    parser.add_argument(
+        "--tex-physical",
+        nargs=2,
+        type=float,
+        metavar=("MIN", "MAX"),
+        help=(
+            "Physical texture value range for --surface-cube mapped outputs; "
+            "forwarded to cube-preset and converted to VESTA percentages."
+        ),
+    )
+    parser.add_argument(
+        "--tex-range-source",
+        choices=["full-cube", "surface-band"],
+        help=(
+            "Reference texture range for --tex-physical in --surface-cube "
+            "mapped outputs."
+        ),
+    )
+    parser.add_argument(
+        "--surface-band",
+        type=float,
+        help="Surface-cube half-band used when --tex-range-source surface-band is selected.",
+    )
+    parser.add_argument(
+        "--surface-nearest",
+        type=int,
+        help="Nearest grid-point fallback count for surface-band texture scaling.",
+    )
     parser.add_argument("--structure", choices=["auto", "none", "molecule", "crystal"])
     parser.add_argument(
         "--boundary",
@@ -1888,6 +2056,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 or args.user_function_index is not None
                 or args.elflol_type is not None
                 or args.vdw_probe is not None
+                or args.tex_percent is not None
+                or args.tex_physical is not None
+                or args.tex_range_source is not None
+                or args.surface_band is not None
+                or args.surface_nearest is not None
             ):
                 raise ValueError(
                     "--edr-length, --edr-exponents, --becke-atoms, "
@@ -1895,8 +2068,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     "--reference-point, --reference-unit, "
                     "--pair-function-type, --pair-correlation-type, and "
                     "--source-function-mode, --user-function-index, and "
-                    "--elflol-type, and --vdw-probe are not supported with "
-                    "--orbitals"
+                    "--elflol-type, --vdw-probe, and mapped texture controls "
+                    "are not supported with --orbitals"
                 )
             result = run_multiwfn_grid_batch(
                 args.wavefunction,
@@ -1978,6 +2151,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             surface_cube=args.surface_cube,
             preset=args.preset,
             isosurface=args.isosurface,
+            tex_percent=args.tex_percent,
+            tex_physical=args.tex_physical,
+            tex_range_source=args.tex_range_source,
+            surface_band=args.surface_band,
+            surface_nearest=args.surface_nearest,
             structure=args.structure,
             boundary=args.boundary,
             copy_cubes=not args.no_copy_cubes,

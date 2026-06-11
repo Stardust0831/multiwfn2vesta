@@ -625,6 +625,7 @@ class TestUnifiedCli(unittest.TestCase):
                 "n",
                 "signed",
                 "0.03",
+                "",
                 "molecule",
                 "n",
             ]
@@ -664,6 +665,70 @@ class TestUnifiedCli(unittest.TestCase):
                 "--structure",
                 "molecule",
                 "--no-copy-cubes",
+            ]
+        )
+
+    def test_interactive_grid_run_builds_mapped_texture_scaling_args(self):
+        answers = iter(
+            [
+                "10",
+                "input.molden",
+                "grid_products",
+                "",
+                "local-hardness",
+                "",
+                "",
+                "",
+                "case",
+                "points",
+                "12 13 14",
+                "n",
+                "auto",
+                "",
+                "density.cub",
+                "-0.1 0.1",
+                "surface-band",
+                "0.25",
+                "4",
+                "crystal",
+                "y",
+            ]
+        )
+        with patch("builtins.input", lambda _prompt: next(answers)):
+            with patch("sys.stdout", io.StringIO()):
+                with patch("multiwfn2vesta.cli.multiwfn_grid.main", return_value=0) as mocked:
+                    code = cli.main([])
+
+        self.assertEqual(code, 0)
+        mocked.assert_called_once_with(
+            [
+                "input.molden",
+                "grid_products",
+                "--function",
+                "local-hardness",
+                "--stem",
+                "case",
+                "--grid-mode",
+                "points",
+                "--grid-points",
+                "12",
+                "13",
+                "14",
+                "--preset",
+                "auto",
+                "--surface-cube",
+                "density.cub",
+                "--tex-physical",
+                "-0.1",
+                "0.1",
+                "--tex-range-source",
+                "surface-band",
+                "--surface-band",
+                "0.25",
+                "--surface-nearest",
+                "4",
+                "--structure",
+                "crystal",
             ]
         )
 

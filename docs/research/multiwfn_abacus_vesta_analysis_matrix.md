@@ -73,7 +73,8 @@ Multiwfn evidence:
   with `-set`, leaving global Multiwfn settings untouched.
 - Multiwfn main-function-5 function `100` evaluates `userfunc(x,y,z)` using
   `iuserfunc` from settings.  The inspected source shows DORI
-  (`iuserfunc=20`), LEA (`27`), LEAE (`-27`), information gain (`49`),
+  (`iuserfunc=20`), LEA (`27`), LEAE (`-27`), local Mulliken
+  electronegativity (`28`), local hardness (`29`), information gain (`49`),
   Shannon entropy density (`50`), Fisher information density (`51/52`), and
   many other selectable functions; `0123dim.f90` exports `userfunc.cub`.
   Multiwfn main menu `1000 -> 2` can set `iuserfunc` interactively, but the
@@ -81,9 +82,10 @@ Multiwfn evidence:
   available, patches `iuserfunc` into a run-local
   `multiwfn_grid_settings.ini`, and passes it with `-set`.  The generic
   `user-function` route still accepts any direct `iuserfunc`, while named
-  routes now imply common source-backed indices for DORI, LEA/LEAE, and
-  information-theory densities.  Special external-grid interpolation modes
-  `-1/-3` and Shubin `57/58/59` are excluded from the generic route.
+  routes now imply common source-backed indices for DORI, LEA/LEAE, local
+  Mulliken electronegativity/local hardness, and information-theory
+  densities.  Special external-grid interpolation modes `-1/-3` and Shubin
+  `57/58/59` are excluded from the generic route.
 - Multiwfn weak-interaction `DORIfill.vmd` uses DORI as the isosurface cube
   at `0.95` and sign(lambda2)rho as the texture cube with range
   `-0.04..0.02`.  The maintained project therefore separates
@@ -220,7 +222,7 @@ occupations, and density derivatives from the wavefunction representation.
 | ESP/MEP on density surface | Full wavefunction or ABACUS `out_pot` plus density cube | Strong direct cube route; Molden route for Multiwfn ESP | `density.cub`, `totesp.cub`, `pot_es.cube`, `pots*.cube` | Density isosurface colored by potential texture | `grid-run --function esp --surface-cube density.cub --grid-mode cube --grid-cube density.cub` now generates the ESP texture and writes the mapped-surface VESTA file directly |
 | STM/LDOS | Full wavefunction with GTF information | Good candidate for Gamma LCAO Molden; metals and Fermi-level choices need care | `STM.cub` | Single positive LDOS/current isosurface or slices | `stm-run` now automates Multiwfn `300 -> 4`, switches to constant-current mode, exports `STM.cub`, and calls `cube-preset stm` |
 | Molecular surface mapped properties | Full wavefunction or cube pair | Feasible through Molden; ABACUS can provide density/potential cubes | `surf.cub`, `mapfunc.cub`, `density.cub`, `avglocion.cub`, `surfanalysis.pdb` | Surface cube plus texture; extrema as atoms-only overlay phase | `cube-preset surface-map` covers surface+texture display using `molsurfmap.vmd` defaults; `--surfanalysis-pdb` and `surface-extrema` overlay surface extrema |
-| ALIE / LEA / LEAE | Full wavefunction, occupied/virtual orbitals | Feasible only if ABACUS Molden orbitals/energies are adequate; virtual levels in metals risky | `avglocion.cub`, `userfunc.cub`, `surfanalysis.pdb` | Colored density surface plus extrema points | `grid-run --function alie --surface-cube density.cub` now generates ALIE texture maps directly; `grid-run --function local-electron-affinity` and `grid-run --function local-electron-attachment-energy` export LEA/LEAE `userfunc.cub` by automatically patching `iuserfunc=27/-27`; with `--surface-cube density.cub` they auto-select mapped presets `lea`/`leae`; `cube-preset alie/lea/leae` remains the lower-level density-surface display layer |
+| ALIE / LEA / LEAE / local electronegativity / local hardness | Full wavefunction, occupied/virtual orbitals | Feasible only if ABACUS Molden orbitals/energies are adequate; virtual levels in metals risky | `avglocion.cub`, `userfunc.cub`, `surfanalysis.pdb` | Colored density surface plus extrema points | `grid-run --function alie --surface-cube density.cub` now generates ALIE texture maps directly; `grid-run --function local-electron-affinity` and `grid-run --function local-electron-attachment-energy` export LEA/LEAE `userfunc.cub` by automatically patching `iuserfunc=27/-27`; `grid-run --function local-mulliken-electronegativity` and `grid-run --function local-hardness` patch `iuserfunc=28/29` and use `surface-map` with `--surface-cube`; `grid-run --surface-cube` now forwards texture color-scale controls such as `--tex-physical` and `--tex-range-source surface-band`; `cube-preset alie/lea/leae/surface-map` remains the lower-level display layer |
 | Information-theory density functions | Full wavefunction Molden/FCH/WFN; local information entropy is a normal main-function-5 grid function | Feasible for Gamma LCAO Molden; interpretation depends on the NAO2GTO density quality | `infoentro.cub`, `userfunc.cub` | Signed scalar isosurfaces or slices | `grid-run --function local-information-entropy` now exports Multiwfn function `11` `infoentro.cub`; named function-100 routes `information-gain-density`, `shannon-entropy-density`, `fisher-information-density`, and `second-fisher-information-density` automatically patch `iuserfunc=49/50/51/52`; `cube-preset local-information-entropy` and `cube-preset user-function` provide signed display defaults |
 | Pair/correlation function | Full wavefunction Molden/FCH/WFN plus a reference point | Feasible for Gamma LCAO Molden; pair density/correlation interpretation depends on orbitals and occupations | `fermihole.cub` | Signed scalar isosurfaces by default; pair-density modes can use a single positive preset | `grid-run --function pair-function --reference-point X Y Z` now exports Multiwfn function `17`; `--pair-function-type` patches `pairfunctype`, `--pair-correlation-type` patches `paircorrtype`, the runner copies the selected Multiwfn `settings.ini` when available, and `cube-preset pair-function` provides signed `+/-0.05` display defaults |
 | Source function | Full wavefunction Molden/FCH/WFN plus a reference point | Feasible for Gamma LCAO Molden; reference-point choice controls the chemical meaning | `srcfunc.cub` | Signed scalar isosurfaces or slices | `grid-run --function source-function --reference-point X Y Z` now exports Multiwfn function `19` `srcfunc.cub`; `--reference-unit angstrom` supports Angstrom reference coordinates, `--source-function-mode` is patched into a run-local settings file copied from the selected Multiwfn `settings.ini` when available, and `cube-preset source-function` provides signed `+/-0.05` display defaults |
@@ -458,13 +460,19 @@ Main gaps:
   a later tuning layer.
 - User-defined function now has `cube-preset user-function`, a generic
   `grid-run --function user-function --user-function-index IUSERFUNC` route,
-  and dedicated named function-100 routes for DORI, LEA/LEAE, and
-  information-theory densities.  Local Multiwfn source shows function `100`
+  and dedicated named function-100 routes for DORI, LEA/LEAE, local Mulliken
+  electronegativity/local hardness, and information-theory densities.  Local
+  Multiwfn source shows function `100`
   exports `userfunc.cub` and evaluates `userfunc(x,y,z)` according to
-  `iuserfunc`; named routes patch `20/27/-27/49/50/51/52` automatically
-  through the same run-local `-set` settings file while leaving global
-  settings untouched.  External-grid interpolation `-1/-3` and Shubin
-  `57/58/59` remain deferred special modes.
+  `iuserfunc`; named routes patch `20/27/-27/28/29/49/50/51/52`
+  automatically through the same run-local `-set` settings file while
+  leaving global settings untouched.  External-grid interpolation `-1/-3`
+  and Shubin `57/58/59` remain deferred special modes.
+- `grid-run --surface-cube` now forwards mapped texture controls
+  (`--tex-physical`, `--tex-percent`, `--tex-range-source`,
+  `--surface-band`, `--surface-nearest`) to `cube-preset`, so ABACUS/Molden
+  generated textures can be color-scaled in the same command that generates
+  the Multiwfn cube.
 - DORI visualization now has `cube-preset dori-scalar` for standalone
   `iuserfunc=20` `userfunc.cub` and `cube-preset dori` for DORI surfaces
   colored by sign(lambda2)rho, following Multiwfn `DORIfill.vmd`

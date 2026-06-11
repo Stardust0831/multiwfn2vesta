@@ -26,8 +26,8 @@ point.
   origin` returned only `refs/heads/main`.  No merge-back was needed because
   there was no extra local or remote feature branch to consolidate.
 - Feature closeouts, including the user-function, spin-polarization,
-  ELF/LOL definition-control, vdW-probe, and DORI grid routes, are kept on
-  the maintained `main` branch.  Use
+  ELF/LOL definition-control, vdW-probe, DORI, and local-reactivity grid
+  routes, are kept on the maintained `main` branch.  Use
   `git log --oneline --decorate -5` after pulling if an exact current commit
   hash is needed.
 - Local untracked probe files such as `domain.cub` and `domain.pdb` are not
@@ -45,7 +45,8 @@ point.
   promolecular RDG, promolecular Delta-g,
   Hirshfeld-partition Delta-g, standalone IRI scalar, standalone DORI scalar
   and DORI+sign(lambda2)rho mapped surfaces, and standalone vdW potential
-  cubes with run-local probe-atom control, ABACUS direct cube presets for potential,
+  cubes with run-local probe-atom control, local Mulliken electronegativity
+  and local hardness function-100 routes, ABACUS direct cube presets for potential,
   partial-charge, and wavefunction-norm cubes,
   charged-state `fukui-run` orchestration, aIGM/amIGM trajectory-average
   weak-interaction generation, cube/grid domain extraction, basin cube VESTA
@@ -54,7 +55,8 @@ point.
   surface extrema overlays for
   `surfanalysis.pdb`, surface-map/grid expansion, generic Multiwfn atom table
   coloring, batch orbital export, `cube-arith`, `grid-run`,
-  `grid-run --surface-cube` mapped-surface handoff, `stm-run`
+  `grid-run --surface-cube` mapped-surface handoff with texture color-scale
+  controls, `stm-run`
   constant-current STM/LDOS cube export, and earlier AIM/IRI/RDG/AIM+IGMH
   VESTA workflows.
 - Future experiment branches should be short-lived: merge or fast-forward the
@@ -183,8 +185,10 @@ export PATH=/mnt/g/work/multiwfn2vesta/project/bin:$PATH
 multiwfn2vesta --help
 ```
 
-The workspace launcher automatically adds `src/` to Python's import path.  An
-editable install also provides console scripts:
+After the `PATH` line above, `multiwfn2vesta` can be run from any directory.
+The workspace launcher automatically adds `project/src/` to Python's import
+path, so no `PYTHONPATH` export is needed for normal use.  An editable install
+also provides console scripts:
 
 ```bash
 pip install -e .
@@ -193,7 +197,8 @@ multiwfn2vesta --help
 
 The supported day-to-day entry point is the global `multiwfn2vesta` command.
 Avoid running package modules from inside `src/multiwfn2vesta`; from the repo
-root, either add `project/bin` to `PATH` as above or run with
+root, either add `project/bin` to `PATH` as above, run
+`bin/multiwfn2vesta ...`, or, for a one-off module invocation, use
 `PYTHONPATH=src python3 -m multiwfn2vesta.cli`.
 
 ## Find Multiwfn and VESTA
@@ -448,6 +453,7 @@ Use `user-function`/`userfunc` for generic Multiwfn function `100`
 IUSERFUNC`.  Source-backed named routes now imply common `iuserfunc` values:
 `dori` sets `20`, `local-electron-affinity` sets `27`,
 `local-electron-attachment-energy` sets `-27`,
+`local-mulliken-electronegativity` sets `28`, `local-hardness` sets `29`,
 `information-gain-density` sets `49`, `shannon-entropy-density` sets `50`,
 and `fisher-information-density` / `second-fisher-information-density` set
 `51` / `52`.  The runner copies the selected Multiwfn `settings.ini` when
@@ -456,7 +462,11 @@ with `-set`.  Generic standalone `userfunc.cub` uses signed `+/-0.05`
 surfaces by default; `grid-run --function dori` uses the `dori-scalar`
 single-surface preset at `0.95`, and LEA/LEAE named routes automatically
 select the `lea`/`leae` mapped-surface preset when `--surface-cube
-density.cub` is supplied.  For DORI surfaces colored by sign(lambda2)rho,
+density.cub` is supplied.  Local Mulliken electronegativity and local
+hardness use the generic `surface-map` mapped preset when `--surface-cube`
+is supplied; pass `--tex-physical`, `--tex-range-source surface-band`,
+`--surface-band`, or `--tex-percent` to tune the texture scale from
+`grid-run`.  For DORI surfaces colored by sign(lambda2)rho,
 generate the DORI cube and sign(lambda2)rho cube separately, then run
 `cube-preset dori DORI.cub ... --texture-cube sl2r.cub`; the existing
 `grid-run --surface-cube` option keeps its older direction of supplied
@@ -684,10 +694,11 @@ Common functions:
   preset `user-function`, signed by default.  Pass `--user-function-index
   IUSERFUNC` unless using a named route below.  Named routes
   `dori`, `local-electron-affinity`, `local-electron-attachment-energy`,
+  `local-mulliken-electronegativity`, `local-hardness`,
   `information-gain-density`, `shannon-entropy-density`,
   `fisher-information-density`, and `second-fisher-information-density`
-  automatically patch `iuserfunc=20/27/-27/49/50/51/52` into a run-local
-  `-set` settings file, leaving global Multiwfn settings untouched.
+  automatically patch `iuserfunc=20/27/-27/28/29/49/50/51/52` into a
+  run-local `-set` settings file, leaving global Multiwfn settings untouched.
 - `electron-delocalization-range` / `edr`: function `20`, raw `EDR.cub`,
   preset `electron-delocalization-range`, single positive surface by default.
   Pass `--edr-length D_BOHR`; Multiwfn asks for this EDR length scale before
@@ -729,6 +740,11 @@ Common functions:
   `100`, raw `userfunc.cub`.  With `--surface-cube density.cub`, the
   generated LEA/LEAE cube is used as the texture for `cube-preset lea` or
   `cube-preset leae`.
+- `local-mulliken-electronegativity` and `local-hardness`: function `100`,
+  raw `userfunc.cub`, run-local `iuserfunc=28` / `29`.  With
+  `--surface-cube density.cub`, the generated cube is used as a texture for
+  the generic `cube-preset surface-map`; tune the color scale with
+  `--tex-physical`, `--tex-percent`, or `--tex-range-source surface-band`.
 - `dori`: function `100`, raw `userfunc.cub`, run-local `iuserfunc=20`,
   preset `dori-scalar` with a single `0.95` isosurface.  For the classic
   DORI surface colored by sign(lambda2)rho, use explicit
@@ -857,12 +873,26 @@ multiwfn2vesta grid-run input.fch lea_map \
   --surface-cube density.cub \
   --grid-mode cube \
   --grid-cube density.cub
+
+multiwfn2vesta grid-run input.fch hardness_map \
+  --function local-hardness \
+  --surface-cube density.cub \
+  --grid-mode cube \
+  --grid-cube density.cub \
+  --tex-physical -0.2 0.2 \
+  --tex-range-source surface-band \
+  --surface-band 0.25
 ```
 
 With `--preset auto`, mapped defaults are `esp` for ESP/nuclear ESP, `alie`
 for ALIE, `lea`/`leae` for LEA/LEAE, `iri` for sign(lambda2)rho, `vdw-map`
-for vdW potential, and `surface-map` for other functions.  Batch orbital export rejects
-`--surface-cube`.
+for vdW potential, and `surface-map` for local electronegativity, local
+hardness, and other functions.  `grid-run --surface-cube` forwards
+`--tex-physical`, `--tex-percent`, `--tex-range-source`, `--surface-band`,
+and `--surface-nearest` to `cube-preset`, so mapped figures can be scaled
+without rerunning `cube-preset` manually.  `--surface-band` is a non-negative
+half-width around the requested isosurface; `--surface-nearest` must be
+positive.  Batch orbital export rejects `--surface-cube`.
 
 For frontier-orbital batches, use `--orbitals`.  If `--function` is omitted in
 batch mode, it defaults to `orbital`; use `--function orbital-density` for
@@ -1398,22 +1428,27 @@ views by VESTA CLI rotations, rather than writing persistent front/right/top
 
 ## Validation
 
-Current no-GUI regression passed as a 242-test suite after the `fukui-run`
-increment:
+Routine no-GUI regression for this project is:
 
 ```bash
 PYTHONPATH=src python3 -m unittest discover -s tests
 ```
 
-Focused `fukui-run` validation used:
+Focused validation for the current `grid-run --surface-cube` texture controls
+and local reactivity routes uses:
 
 ```bash
-PYTHONPATH=src python3 -m py_compile src/multiwfn2vesta/multiwfn_fukui.py src/multiwfn2vesta/cli.py tests/test_multiwfn_fukui.py tests/test_cli.py
-PYTHONPATH=src python3 -m unittest tests.test_multiwfn_fukui tests.test_cli tests.test_cube_arith tests.test_multiwfn_grid
+PYTHONPATH=src python3 -m py_compile src/multiwfn2vesta/multiwfn_grid.py src/multiwfn2vesta/cli.py tests/test_multiwfn_grid.py tests/test_cli.py
+PYTHONPATH=src python3 -m unittest tests.test_multiwfn_grid tests.test_cli -v
 bin/multiwfn2vesta --help
-bin/multiwfn2vesta fukui-run --help
-bin/multiwfn2vesta cube-preset --list-presets
+bin/multiwfn2vesta grid-run --list-functions
+bin/multiwfn2vesta grid-run --help
 ```
+
+At the 2026-06-11 local-reactivity closeout, focused validation passed with
+121 `tests.test_multiwfn_grid tests.test_cli` tests and full no-GUI
+regression passed with 332 tests, plus `git diff --check` and the CLI smoke
+commands above.
 
 For documentation-only refreshes, the minimum local validation is:
 

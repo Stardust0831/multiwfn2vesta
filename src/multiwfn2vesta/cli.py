@@ -789,6 +789,27 @@ def interactive_grid_run() -> int:
         isosurface = _prompt("override isosurface value (empty for preset default)")
         if isosurface:
             argv.extend(["--isosurface", isosurface])
+        surface_cube = _prompt("surface cube for mapped texture (empty to use generated cube as surface)")
+        if surface_cube:
+            argv.extend(["--surface-cube", surface_cube])
+            tex_range = _prompt("physical texture range, e.g. -0.04 0.04 (empty for preset default)")
+            if tex_range:
+                parts = tex_range.split()
+                if len(parts) != 2:
+                    print("Texture range needs exactly two numbers.")
+                    return 2
+                argv.extend(["--tex-physical", parts[0], parts[1]])
+            tex_range_source = _prompt("texture range source (full-cube/surface-band, empty for preset default)")
+            if tex_range_source:
+                tex_range_source = tex_range_source.strip().lower()
+                argv.extend(["--tex-range-source", tex_range_source])
+                if tex_range_source == "surface-band":
+                    surface_band = _prompt("surface-band half width (empty for automatic)")
+                    if surface_band:
+                        argv.extend(["--surface-band", surface_band])
+                    surface_nearest = _prompt("surface nearest fallback count (empty for default)")
+                    if surface_nearest:
+                        argv.extend(["--surface-nearest", surface_nearest])
         structure = _prompt("structure phase (empty for preset default)")
         if structure:
             argv.extend(["--structure", structure])

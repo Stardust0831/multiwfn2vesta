@@ -268,9 +268,10 @@ run-local settings file copied from the selected Multiwfn `settings.ini` when
 available and passed with `-set`; generic `grid-run --function user-function`
 requires `--user-function-index IUSERFUNC`, while named routes
 `dori`, `local-electron-affinity`, `local-electron-attachment-energy`,
+`local-mulliken-electronegativity`, `local-hardness`,
 `information-gain-density`, `shannon-entropy-density`,
 `fisher-information-density`, and `second-fisher-information-density`
-automatically patch `iuserfunc=20/27/-27/49/50/51/52` through the same
+automatically patch `iuserfunc=20/27/-27/28/29/49/50/51/52` through the same
 run-local `-set` route;
 `grid-run --function becke` requires `--becke-atoms I J`,
 with `I J` for Becke overlap weight and `I 0` for Becke atomic weight;
@@ -296,6 +297,12 @@ Multiwfn `DORIfill.vmd`; use `vdw-map` when a vdW potential cube should
 color a density/surface cube.  IGM/IGMH fragment
 `dg_inter.cub` remains a separate mapped-surface workflow through
 `cube-preset igmh`/`igm`.
+When `grid-run --surface-cube` is used for mapped surfaces, pass
+`--tex-physical`, `--tex-percent`, `--tex-range-source surface-band`,
+`--surface-band`, or `--surface-nearest` directly to `grid-run` to tune the
+downstream VESTA color scale.  This is especially useful for local Mulliken
+electronegativity and local hardness because no dedicated Multiwfn VMD color
+range was found in the bundled examples.
 
 For ABACUS LCAO Molden frontier orbital inspection, batch export is now the
 maintained route:

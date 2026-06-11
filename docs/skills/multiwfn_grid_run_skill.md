@@ -114,12 +114,16 @@ multiwfn2vesta grid-run --list-functions
   `dori` / `density-overlap-regions-indicator` = `20`,
   `local-electron-affinity` / `lea` = `27`,
   `local-electron-attachment-energy` / `leae` = `-27`,
+  `local-mulliken-electronegativity` / `local-electronegativity` = `28`,
+  `local-hardness` / `local-chemical-hardness` = `29`,
   `information-gain-density` / `relative-shannon-entropy` = `49`,
   `shannon-entropy-density` = `50`, `fisher-information-density` = `51`,
   and `second-fisher-information-density` = `52`.  LEA/LEAE named routes
   also auto-select mapped presets `lea`/`leae` when `--surface-cube` is
-  supplied.  Special external-grid modes `-1`, `-3`, and Shubin `57/58/59`
-  are intentionally rejected by this generic route.
+  supplied; local Mulliken electronegativity and local hardness fall back to
+  the generic `surface-map` mapped preset.  Special external-grid modes
+  `-1`, `-3`, and Shubin `57/58/59` are intentionally rejected by this
+  generic route.
 - `electron-delocalization-range`, aliases `edr`, `edr-r-d`,
   `electron-delocalization-range-function`: function `20`, raw `EDR.cub`,
   preset `electron-delocalization-range` with a single positive isosurface.
@@ -162,6 +166,13 @@ multiwfn2vesta grid-run --list-functions
   sign(lambda2)rho, run explicit `cube-preset dori DORI.cub ...` with
   `--texture-cube sl2r.cub`; this follows Multiwfn `DORIfill.vmd`, where
   DORI is the surface and sign(lambda2)rho is the texture.
+- `local-mulliken-electronegativity` and `local-hardness`: function `100`,
+  raw `userfunc.cub`, default `iuserfunc=28` / `29`, standalone preset
+  `user-function`.  With `--surface-cube`, use the generated cube as a
+  texture on the supplied surface via `surface-map`; set `--tex-physical`,
+  `--tex-percent`, `--tex-range-source surface-band`, `--surface-band`, or
+  `--surface-nearest` from `grid-run` when the generic color scale is not
+  chemically appropriate.
 - `vdw-potential`, aliases `vdw`, `vdwpot`,
   `van-der-waals-potential`: function `25`, raw `vdWpot.cub`, preset
   `vdw-potential` with signed `+/-1.0` kcal/mol isosurfaces.  Multiwfn
@@ -251,12 +262,25 @@ multiwfn2vesta grid-run input.fch esp_map \
   --surface-cube density.cub \
   --grid-mode cube \
   --grid-cube density.cub
+
+multiwfn2vesta grid-run input.fch hardness_map \
+  --function local-hardness \
+  --surface-cube density.cub \
+  --grid-mode cube \
+  --grid-cube density.cub \
+  --tex-physical -0.2 0.2 \
+  --tex-range-source surface-band \
+  --surface-band 0.25
 ```
 
 With `--preset auto`, mapped defaults are `esp` for ESP/nuclear ESP, `alie`
 for ALIE, `lea`/`leae` for LEA/LEAE, `iri` for sign(lambda2)rho, `vdw-map`
-for vdW potential, and `surface-map` for other functions.  Batch orbital export rejects
-`--surface-cube`.
+for vdW potential, and `surface-map` for local electronegativity, local
+hardness, and other functions.  `grid-run --surface-cube` forwards
+`--tex-physical`, `--tex-percent`, `--tex-range-source`, `--surface-band`,
+and `--surface-nearest` to `cube-preset`.  `--surface-band` is a non-negative
+half-width around the requested isosurface; `--surface-nearest` must be
+positive.  Batch orbital export rejects `--surface-cube`.
 
 ## Outputs
 
@@ -315,7 +339,8 @@ multiwfn2vesta grid-run input.fch products --function vdw-potential
 For two-cube mapped surfaces, use `--surface-cube` when the new grid cube
 should color an existing density/surface cube.  Use manual `cube-preset` when
 the surface and texture cubes are both already available or need special
-handling.
+handling.  Texture scaling options are recorded in both the grid recipe and
+the downstream cube-preset manifest.
 
 ## Validation
 

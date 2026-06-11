@@ -325,9 +325,10 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
   `grid-run --function user-function` 需要
   `--user-function-index IUSERFUNC`。命名路由 `dori`、
   `local-electron-affinity`、`local-electron-attachment-energy`、
+  `local-mulliken-electronegativity`、`local-hardness`、
   `information-gain-density`、`shannon-entropy-density`、
   `fisher-information-density`、`second-fisher-information-density` 会分别
-  自动 patch `iuserfunc=20/27/-27/49/50/51/52`。runner 优先复制所选
+  自动 patch `iuserfunc=20/27/-27/28/29/49/50/51/52`。runner 优先复制所选
   Multiwfn 同目录的 `settings.ini`，只 patch `iuserfunc` 后通过
   run-local `-set` 传入；
   `-1/-3` 外部格点插值和 `57/58/59` Shubin 特殊模式暂不走这个通用路线
@@ -633,12 +634,15 @@ multiwfn2vesta grid-run --list-functions
   默认接 `cube-preset user-function`，按正/负等值面显示；通用路由必须传
   `--user-function-index IUSERFUNC`。也可直接用命名路由 `dori`、
   `local-electron-affinity`、`local-electron-attachment-energy`、
+  `local-mulliken-electronegativity`、`local-hardness`、
   `information-gain-density`、`shannon-entropy-density`、
   `fisher-information-density`、`second-fisher-information-density`，这些会
-  自动设置 `iuserfunc=20/27/-27/49/50/51/52`；LEA/LEAE 若要画成 density
-  surface 上的染色图，可在 `grid-run` 中加 `--surface-cube density.cub`
-  自动选 `lea` / `leae` mapped preset，也可手动用 `cube-preset lea` /
-  `cube-preset leae`
+  自动设置 `iuserfunc=20/27/-27/28/29/49/50/51/52`；LEA/LEAE 若要画成
+  density surface 上的染色图，可在 `grid-run` 中加
+  `--surface-cube density.cub` 自动选 `lea` / `leae` mapped preset，也可
+  手动用 `cube-preset lea` / `cube-preset leae`；局域 Mulliken
+  electronegativity 和 local hardness 默认走通用 `surface-map`，需要时用
+  `--tex-physical` 或 `--tex-percent` 调整色标
 - `electron-delocalization-range` / `edr`：函数 `20`，原始输出
   `EDR.cub`，默认接 `cube-preset electron-delocalization-range`，按单正值
   等值面显示；必须传 `--edr-length D_BOHR`
@@ -669,6 +673,12 @@ multiwfn2vesta grid-run --list-functions
   `100`，原始输出 `userfunc.cub`；配合 `--surface-cube density.cub` 时，
   自动把生成的 LEA/LEAE cube 作为 `cube-preset lea` / `cube-preset leae`
   的 texture
+- `local-mulliken-electronegativity` / `local-hardness`：函数 `100`，原始
+  输出 `userfunc.cub`，自动写 run-local `iuserfunc=28` / `29`；配合
+  `--surface-cube density.cub` 时默认走 `cube-preset surface-map`，可以用
+  `--tex-physical MIN MAX`、`--tex-percent MIN MAX`、
+  `--tex-range-source surface-band`、`--surface-band` 和
+  `--surface-nearest` 直接控制 texture 色标
 - `dori`：函数 `100`，原始输出 `userfunc.cub`，自动写 run-local
   `iuserfunc=20`，默认接 `cube-preset dori-scalar`，按单正值 `0.95`
   等值面显示；若要 DORI surface 按 sign(lambda2)rho 染色，显式运行
@@ -820,11 +830,25 @@ multiwfn2vesta grid-run input.fch lea_map \
   --surface-cube density.cub \
   --grid-mode cube \
   --grid-cube density.cub
+
+multiwfn2vesta grid-run input.fch hardness_map \
+  --function local-hardness \
+  --surface-cube density.cub \
+  --grid-mode cube \
+  --grid-cube density.cub \
+  --tex-physical -0.2 0.2 \
+  --tex-range-source surface-band \
+  --surface-band 0.25
 ```
 
 `--preset auto` 时，ESP/nuclear ESP 选 `esp`，ALIE 选 `alie`，
 LEA/LEAE 选 `lea`/`leae`，sign(lambda2)rho 选 `iri`，vdW potential 选
-`vdw-map`，其它函数回退到 `surface-map`。批量轨道导出暂不支持
+`vdw-map`，local electronegativity、local hardness 和其它函数回退到
+`surface-map`。`grid-run --surface-cube` 会把 `--tex-physical`、
+`--tex-percent`、`--tex-range-source`、`--surface-band` 和
+`--surface-nearest` 透传给 `cube-preset`，因此不必手动再跑一遍
+`cube-preset` 也能调整 mapped surface 色标。`--surface-band` 是围绕目标
+等值面的非负半宽，`--surface-nearest` 必须为正数。批量轨道导出暂不支持
 `--surface-cube`。
 
 默认输出：

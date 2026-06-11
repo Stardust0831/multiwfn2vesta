@@ -228,9 +228,14 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertIn("mapped preset with --surface-cube: esp", text)
         self.assertIn("mapped preset with --surface-cube: alie", text)
         self.assertIn("mapped preset with --surface-cube: lea", text)
+        self.assertIn("local-mulliken-electronegativity", text)
+        self.assertIn("local-hardness", text)
+        self.assertIn("mapped preset with --surface-cube: surface-map", text)
         self.assertIn("default iuserfunc=20", text)
         self.assertIn("default iuserfunc=27", text)
         self.assertIn("default iuserfunc=-27", text)
+        self.assertIn("default iuserfunc=28", text)
+        self.assertIn("default iuserfunc=29", text)
         self.assertIn("requires --orbital", text)
         self.assertEqual(resolve_grid_function("rho").name, "density")
         self.assertEqual(resolve_grid_function("rho-gradient").name, "gradient")
@@ -294,6 +299,13 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertEqual(resolve_grid_function("dori").preset, "dori-scalar")
         self.assertEqual(resolve_grid_function("dori-function").default_user_function_index, 20)
         self.assertEqual(resolve_grid_function("density-overlap-regions-indicator").name, "dori")
+        self.assertEqual(
+            resolve_grid_function("local-electronegativity").name,
+            "local-mulliken-electronegativity",
+        )
+        self.assertEqual(resolve_grid_function("electronegativity").default_user_function_index, 28)
+        self.assertEqual(resolve_grid_function("local-hardness").mapped_preset, "surface-map")
+        self.assertEqual(resolve_grid_function("local-chemical-hardness").default_user_function_index, 29)
         self.assertEqual(resolve_grid_function("information-gain-density").default_user_function_index, 49)
         self.assertEqual(resolve_grid_function("relative-shannon-entropy").name, "information-gain-density")
         self.assertEqual(resolve_grid_function("shannon-entropy-density").default_user_function_index, 50)
@@ -466,6 +478,10 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         )
         self.assertEqual(
             build_grid_commands(resolve_grid_function("dori"), grid_mode="low"),
+            ["5", "100", "1", "2", "0", "q"],
+        )
+        self.assertEqual(
+            build_grid_commands(resolve_grid_function("local-hardness"), grid_mode="low"),
             ["5", "100", "1", "2", "0", "q"],
         )
         with self.assertRaisesRegex(ValueError, "special external-grid"):
@@ -1625,6 +1641,84 @@ class TestMultiwfnGridRunner(unittest.TestCase):
             recipe = result.recipe_path.read_text(encoding="utf-8")
             self.assertIn("surface_cube_for_texture_map:", recipe)
             self.assertIn("mapped_vesta_preset: `esp`", recipe)
+
+    def test_run_multiwfn_grid_surface_cube_passes_texture_scaling_options(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            wavefunction = root / "h2o.fch"
+            wavefunction.write_text("wavefunction", encoding="utf-8")
+            surface_cube = root / "density_surface.cub"
+            surface_cube.write_text(DENSITY_CUBE, encoding="utf-8")
+            candidate = self.make_candidate(root)
+
+            def fake_run(command, **kwargs):
+                cwd = Path(kwargs["cwd"])
+                (cwd / "userfunc.cub").write_text(USER_FUNCTION_CUBE, encoding="utf-8")
+                return subprocess.CompletedProcess(command, 0, stdout="ok", stderr="")
+
+            with patch("multiwfn2vesta.multiwfn_grid.find_multiwfn", return_value=candidate):
+                with patch("multiwfn2vesta.multiwfn_grid.subprocess.run", side_effect=fake_run):
+                    result = run_multiwfn_grid(
+                        wavefunction,
+                        root / "products",
+                        function_name="local-hardness",
+                        surface_cube=surface_cube,
+                        tex_physical=(-0.1, 0.1),
+                        tex_range_source="surface-band",
+                        surface_band=0.25,
+                        surface_nearest=4,
+                        stem="case",
+                        grid_points=(8, 8, 8),
+                    )
+
+            self.assertTrue(result.success)
+            self.assertEqual(result.user_function_index, 29)
+            self.assertEqual(result.mapped_preset, "surface-map")
+            self.assertEqual(result.tex_physical, (-0.1, 0.1))
+            self.assertEqual(result.tex_range_source, "surface-band")
+            self.assertEqual(result.surface_band, 0.25)
+            self.assertEqual(result.surface_nearest, 4)
+            self.assertIsNotNone(result.vesta_result)
+            manifest = result.vesta_result.manifest_path.read_text(encoding="utf-8")
+            self.assertIn("canonical_preset: `surface-map`", manifest)
+            self.assertIn("effective_tex_physical: `-0.1` to `0.1`", manifest)
+            self.assertIn("tex_reference_source: `surface-band`", manifest)
+            self.assertIn("surface_band: `0.25`", manifest)
+            recipe = result.recipe_path.read_text(encoding="utf-8")
+            self.assertIn("user_function_index_iuserfunc: `29`", recipe)
+            self.assertIn("mapped_tex_physical: `(-0.1, 0.1)`", recipe)
+            self.assertIn("mapped_tex_range_source: `surface-band`", recipe)
+            self.assertIn("mapped_surface_nearest: `4`", recipe)
+
+    def test_run_multiwfn_grid_rejects_texture_scaling_without_surface_cube(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            wavefunction = root / "h2o.fch"
+            wavefunction.write_text("wavefunction", encoding="utf-8")
+
+            with self.assertRaisesRegex(ValueError, "require --surface-cube"):
+                run_multiwfn_grid(
+                    wavefunction,
+                    root / "products",
+                    tex_physical=(-0.1, 0.1),
+                )
+
+    def test_run_multiwfn_grid_rejects_negative_surface_band(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            wavefunction = root / "h2o.fch"
+            surface_cube = root / "density_surface.cub"
+            wavefunction.write_text("wavefunction", encoding="utf-8")
+            surface_cube.write_text(DENSITY_CUBE, encoding="utf-8")
+
+            with self.assertRaisesRegex(ValueError, "--surface-band must be non-negative"):
+                run_multiwfn_grid(
+                    wavefunction,
+                    root / "products",
+                    surface_cube=surface_cube,
+                    tex_range_source="surface-band",
+                    surface_band=-0.1,
+                )
 
     def test_run_multiwfn_grid_can_skip_vesta_generation(self):
         with tempfile.TemporaryDirectory() as tmp:
