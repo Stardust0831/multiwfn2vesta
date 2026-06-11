@@ -236,6 +236,10 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertIn("default iuserfunc=-27", text)
         self.assertIn("default iuserfunc=28", text)
         self.assertIn("default iuserfunc=29", text)
+        self.assertIn("orbital-weighted-fukui-plus", text)
+        self.assertIn("orbital-weighted-dual-descriptor", text)
+        self.assertIn("default iuserfunc=95", text)
+        self.assertIn("default iuserfunc=98", text)
         self.assertIn("requires --orbital", text)
         self.assertEqual(resolve_grid_function("rho").name, "density")
         self.assertEqual(resolve_grid_function("rho-gradient").name, "gradient")
@@ -306,6 +310,13 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertEqual(resolve_grid_function("electronegativity").default_user_function_index, 28)
         self.assertEqual(resolve_grid_function("local-hardness").mapped_preset, "surface-map")
         self.assertEqual(resolve_grid_function("local-chemical-hardness").default_user_function_index, 29)
+        self.assertEqual(resolve_grid_function("ow-fukui-plus").preset, "density")
+        self.assertEqual(resolve_grid_function("orbital-weighted-fplus").default_user_function_index, 95)
+        self.assertEqual(resolve_grid_function("ow-fukui-minus").default_user_function_index, 96)
+        self.assertEqual(resolve_grid_function("ow-f0").default_user_function_index, 97)
+        self.assertEqual(resolve_grid_function("orbital-weighted-dual").preset, "signed")
+        self.assertEqual(resolve_grid_function("ow-dual").default_user_function_index, 98)
+        self.assertEqual(resolve_grid_function("ow-dd").default_user_function_index, 98)
         self.assertEqual(resolve_grid_function("information-gain-density").default_user_function_index, 49)
         self.assertEqual(resolve_grid_function("relative-shannon-entropy").name, "information-gain-density")
         self.assertEqual(resolve_grid_function("shannon-entropy-density").default_user_function_index, 50)
@@ -482,6 +493,10 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         )
         self.assertEqual(
             build_grid_commands(resolve_grid_function("local-hardness"), grid_mode="low"),
+            ["5", "100", "1", "2", "0", "q"],
+        )
+        self.assertEqual(
+            build_grid_commands(resolve_grid_function("orbital-weighted-dual-descriptor"), grid_mode="low"),
             ["5", "100", "1", "2", "0", "q"],
         )
         with self.assertRaisesRegex(ValueError, "special external-grid"):
@@ -1072,6 +1087,92 @@ class TestMultiwfnGridRunner(unittest.TestCase):
                 "user_function_index_iuserfunc: `49`",
                 result.recipe_path.read_text(encoding="utf-8"),
             )
+
+    def test_run_orbital_weighted_dual_descriptor_uses_named_iuserfunc(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            wavefunction = root / "h2o.fch"
+            wavefunction.write_text("wavefunction", encoding="utf-8")
+            candidate = self.make_candidate(root)
+            (candidate.path.parent / "settings.ini").write_text("iuserfunc= 0\n", encoding="utf-8")
+
+            def fake_run(command, **kwargs):
+                cwd = Path(kwargs["cwd"])
+                (cwd / "userfunc.cub").write_text(USER_FUNCTION_CUBE, encoding="utf-8")
+                return subprocess.CompletedProcess(command, 0, stdout="ok", stderr="")
+
+            with patch("multiwfn2vesta.multiwfn_grid.find_multiwfn", return_value=candidate):
+                with patch("multiwfn2vesta.multiwfn_grid.subprocess.run", side_effect=fake_run):
+                    result = run_multiwfn_grid(
+                        wavefunction,
+                        root / "products",
+                        function_name="orbital-weighted-dual-descriptor",
+                        stem="case",
+                        grid_mode="low",
+                    )
+
+            self.assertTrue(result.success)
+            self.assertEqual(result.user_function_index, 98)
+            self.assertIn("iuserfunc= 98", result.settings_override.read_text(encoding="utf-8"))
+            self.assertEqual(result.raw_cube.name, "userfunc.cub")
+            self.assertEqual(result.cube.name, "case_orbital-weighted-dual-descriptor.cub")
+            self.assertIsNotNone(result.vesta_result)
+            self.assertEqual(
+                result.vesta_result.vesta_path.name,
+                "case_orbital-weighted-dual-descriptor_signed_cube.vesta",
+            )
+            recipe = result.recipe_path.read_text(encoding="utf-8")
+            self.assertIn("function_name: `orbital-weighted-dual-descriptor`", recipe)
+            self.assertIn("function_index: `100`", recipe)
+            self.assertIn("user_function_index_iuserfunc: `98`", recipe)
+            self.assertIn("auto_vesta_preset: `signed`", recipe)
+            manifest = result.vesta_result.manifest_path.read_text(encoding="utf-8")
+            self.assertIn("canonical_preset: `signed`", manifest)
+            self.assertIn("effective_surface_mode: `signed`", manifest)
+
+    def test_run_orbital_weighted_dual_descriptor_surface_map_passes_texture_scale(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            wavefunction = root / "h2o.fch"
+            wavefunction.write_text("wavefunction", encoding="utf-8")
+            surface_cube = root / "density.cub"
+            surface_cube.write_text(DENSITY_CUBE, encoding="utf-8")
+            candidate = self.make_candidate(root)
+            (candidate.path.parent / "settings.ini").write_text("iuserfunc= 0\n", encoding="utf-8")
+
+            def fake_run(command, **kwargs):
+                cwd = Path(kwargs["cwd"])
+                (cwd / "userfunc.cub").write_text(USER_FUNCTION_CUBE, encoding="utf-8")
+                return subprocess.CompletedProcess(command, 0, stdout="ok", stderr="")
+
+            with patch("multiwfn2vesta.multiwfn_grid.find_multiwfn", return_value=candidate):
+                with patch("multiwfn2vesta.multiwfn_grid.subprocess.run", side_effect=fake_run):
+                    result = run_multiwfn_grid(
+                        wavefunction,
+                        root / "products",
+                        function_name="ow-dd",
+                        surface_cube=surface_cube,
+                        tex_physical=(-0.04, 0.04),
+                        tex_range_source="surface-band",
+                        stem="case",
+                        grid_points=(10, 11, 12),
+                    )
+
+            self.assertTrue(result.success)
+            self.assertEqual(result.user_function_index, 98)
+            self.assertEqual(result.mapped_preset, "surface-map")
+            self.assertEqual(result.tex_physical, (-0.04, 0.04))
+            self.assertEqual(result.tex_range_source, "surface-band")
+            self.assertIsNotNone(result.vesta_result)
+            recipe = result.recipe_path.read_text(encoding="utf-8")
+            self.assertIn("function_name: `orbital-weighted-dual-descriptor`", recipe)
+            self.assertIn("user_function_index_iuserfunc: `98`", recipe)
+            self.assertIn("auto_vesta_preset: `signed`", recipe)
+            self.assertIn("mapped_vesta_preset: `surface-map`", recipe)
+            self.assertIn("mapped_tex_physical: `(-0.04, 0.04)`", recipe)
+            manifest = result.vesta_result.manifest_path.read_text(encoding="utf-8")
+            self.assertIn("canonical_preset: `surface-map`", manifest)
+            self.assertIn("effective_tex_physical: `-0.04` to `0.04`", manifest)
 
     def test_run_multiwfn_grid_dori_uses_named_iuserfunc_and_scalar_preset(self):
         with tempfile.TemporaryDirectory() as tmp:

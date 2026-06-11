@@ -429,6 +429,8 @@ Common functions include `density`, `gradient`, `orbital --orbital h`,
 `lol`, `esp`, `alie`,
 `pair-function`, `source-function`, `user-function`, `dori`,
 `local-electron-affinity`, `local-electron-attachment-energy`,
+`orbital-weighted-fukui-plus`, `orbital-weighted-fukui-minus`,
+`orbital-weighted-fukui-zero`, `orbital-weighted-dual-descriptor`,
 `information-gain-density`, `shannon-entropy-density`,
 `fisher-information-density`, `second-fisher-information-density`, `edr`, `edrdmax`,
 `becke`, `hirshfeld`, `rdg`, `promolecular-rdg`, `delta-g`,
@@ -480,13 +482,22 @@ IUSERFUNC`; named routes automatically patch common source-backed values:
 `local-electron-attachment-energy` / `leae` = `-27`,
 `local-mulliken-electronegativity` / `local-electronegativity` = `28`,
 `local-hardness` / `local-chemical-hardness` = `29`,
+`orbital-weighted-fukui-plus` / `ow-fplus` = `95`,
+`orbital-weighted-fukui-minus` / `ow-fminus` = `96`,
+`orbital-weighted-fukui-zero` / `ow-f0` = `97`,
+`orbital-weighted-dual-descriptor` / `ow-dual` / `ow-dd` = `98`,
 `information-gain-density` = `49`, `shannon-entropy-density` = `50`, and
 `fisher-information-density` / `second-fisher-information-density` =
 `51` / `52`.  The runner writes `iuserfunc` into a run-local settings file
 copied from the selected Multiwfn `settings.ini` when available and passed
 with `-set`.  LEA/LEAE named routes also auto-select mapped presets
 `lea`/`leae` when `--surface-cube` is supplied; local electronegativity and
-local hardness use `surface-map`.  `grid-run --surface-cube` forwards
+local hardness plus the orbital-weighted Fukui/dual routes use
+`surface-map`.  Fukui+/Fukui-/Fukui0 standalone products use `density`, and
+orbital-weighted dual descriptor uses `signed`.  These 95..98 routes are
+single-wavefunction approximations, not `fukui-run` charged-state density
+differences; the current runner leaves Multiwfn `orbwei_delta` at its source
+default `0.1` a.u.  `grid-run --surface-cube` forwards
 `--tex-physical`, `--tex-percent`, `--tex-range-source`, `--surface-band`,
 and `--surface-nearest` to the downstream `cube-preset`; the interactive
 global CLI prompts for these after a surface cube is entered.  DORI+
@@ -547,13 +558,22 @@ multiwfn2vesta grid-run input.fch hardness_map \
   --tex-physical -0.2 0.2 \
   --tex-range-source surface-band \
   --surface-band 0.25
+
+multiwfn2vesta grid-run input.fch ow_dual_map \
+  --function ow-dd \
+  --surface-cube density.cub \
+  --grid-mode cube \
+  --grid-cube density.cub \
+  --tex-physical -0.04 0.04 \
+  --tex-range-source surface-band
 ```
 
 With `--preset auto`, ESP/nuclear ESP use `cube-preset esp`, ALIE uses
 `cube-preset alie`, LEA/LEAE use `cube-preset lea`/`cube-preset leae`,
 sign(lambda2)rho uses `cube-preset iri`, vdW potential uses
-`cube-preset vdw-map`, and local electronegativity, local hardness, and other
-functions fall back to `surface-map`.  Batch orbital export rejects
+`cube-preset vdw-map`, and local electronegativity, local hardness,
+orbital-weighted Fukui/dual, and other functions fall back to `surface-map`.
+Batch orbital export rejects
 `--surface-cube`.
 
 ### Wavefunction to Multiwfn STM/LDOS to VESTA

@@ -326,11 +326,13 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
   `--user-function-index IUSERFUNC`。命名路由 `dori`、
   `local-electron-affinity`、`local-electron-attachment-energy`、
   `local-mulliken-electronegativity`、`local-hardness`、
+  `orbital-weighted-fukui-plus`、`orbital-weighted-fukui-minus`、
+  `orbital-weighted-fukui-zero`、`orbital-weighted-dual-descriptor`、
   `information-gain-density`、`shannon-entropy-density`、
   `fisher-information-density`、`second-fisher-information-density` 会分别
-  自动 patch `iuserfunc=20/27/-27/28/29/49/50/51/52`。runner 优先复制所选
-  Multiwfn 同目录的 `settings.ini`，只 patch `iuserfunc` 后通过
-  run-local `-set` 传入；
+  自动 patch `iuserfunc=20/27/-27/28/29/95/96/97/98/49/50/51/52`。
+  runner 优先复制所选 Multiwfn 同目录的 `settings.ini`，只 patch
+  `iuserfunc` 后通过 run-local `-set` 传入；
   `-1/-3` 外部格点插值和 `57/58/59` Shubin 特殊模式暂不走这个通用路线
 - `becke-weight`：单正值等值面，别名包括 `becke`、
   `becke-overlap-weight`、`becke-atomic-weight`，用于 Multiwfn 函数
@@ -568,6 +570,30 @@ multiwfn2vesta fukui-run fminus_products \
 背景电荷的体系在物理解释上要谨慎；如果三个 density cube 已经由别的流程
 生成好，直接用 `cube-arith` 更透明。
 
+如果没有可靠的 N+1/N/N-1 波函数，或周期带电态不适合直接比较，可以先用
+Multiwfn 的 orbital-weighted Fukui/dual descriptor 单波函数近似：
+
+```bash
+multiwfn2vesta grid-run input.molden ow_dual_products \
+  --function orbital-weighted-dual-descriptor \
+  --grid-mode points \
+  --grid-points 120 120 120
+
+multiwfn2vesta grid-run input.molden ow_dual_map \
+  --function ow-dd \
+  --surface-cube density.cub \
+  --grid-mode cube \
+  --grid-cube density.cub \
+  --tex-physical -0.04 0.04 \
+  --tex-range-source surface-band
+```
+
+这不是 `fukui-run` 的替代品，而是 function `100` 的
+`iuserfunc=95/96/97/98` 路线。源码里要求完整轨道信息；更适合闭壳层、
+single-determinant、HOMO/LUMO 能量和虚轨道信息可信的体系。当前 runner
+只通过 run-local settings patch `iuserfunc`，不改 Multiwfn 的
+`orbwei_delta`；本地 2026.6.2 源码默认值为 `0.1` a.u.
+
 ## 波函数文件到 Multiwfn 单 cube / VESTA
 
 如果起点是 Molden/FCHK/WFN/WFX 等 Multiwfn 可读波函数文件，而目标是一个
@@ -635,10 +661,12 @@ multiwfn2vesta grid-run --list-functions
   `--user-function-index IUSERFUNC`。也可直接用命名路由 `dori`、
   `local-electron-affinity`、`local-electron-attachment-energy`、
   `local-mulliken-electronegativity`、`local-hardness`、
+  `orbital-weighted-fukui-plus`、`orbital-weighted-fukui-minus`、
+  `orbital-weighted-fukui-zero`、`orbital-weighted-dual-descriptor`、
   `information-gain-density`、`shannon-entropy-density`、
   `fisher-information-density`、`second-fisher-information-density`，这些会
-  自动设置 `iuserfunc=20/27/-27/28/29/49/50/51/52`；LEA/LEAE 若要画成
-  density surface 上的染色图，可在 `grid-run` 中加
+  自动设置 `iuserfunc=20/27/-27/28/29/95/96/97/98/49/50/51/52`；
+  LEA/LEAE 若要画成 density surface 上的染色图，可在 `grid-run` 中加
   `--surface-cube density.cub` 自动选 `lea` / `leae` mapped preset，也可
   手动用 `cube-preset lea` / `cube-preset leae`；局域 Mulliken
   electronegativity 和 local hardness 默认走通用 `surface-map`，需要时用
@@ -679,6 +707,16 @@ multiwfn2vesta grid-run --list-functions
   `--tex-physical MIN MAX`、`--tex-percent MIN MAX`、
   `--tex-range-source surface-band`、`--surface-band` 和
   `--surface-nearest` 直接控制 texture 色标
+- `orbital-weighted-fukui-plus` / `orbital-weighted-fukui-minus` /
+  `orbital-weighted-fukui-zero`：函数 `100`，原始输出 `userfunc.cub`，
+  自动写 run-local `iuserfunc=95` / `96` / `97`，默认接 `density`
+  preset；Multiwfn 按 HOMO/LUMO 化学势附近的轨道权重构造 Fukui
+  近似，`orbwei_delta` 在本地源码中的默认值为 `0.1` a.u.
+- `orbital-weighted-dual-descriptor`：函数 `100`，原始输出
+  `userfunc.cub`，自动写 run-local `iuserfunc=98`，默认接 `signed`
+  preset，别名包括 `ow-dual` 和 `ow-dd`；配合 `--surface-cube` 时走通用
+  `surface-map`，建议显式给 `--tex-physical MIN MAX`，例如
+  `--tex-physical -0.04 0.04`
 - `dori`：函数 `100`，原始输出 `userfunc.cub`，自动写 run-local
   `iuserfunc=20`，默认接 `cube-preset dori-scalar`，按单正值 `0.95`
   等值面显示；若要 DORI surface 按 sign(lambda2)rho 染色，显式运行

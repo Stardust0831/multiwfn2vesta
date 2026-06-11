@@ -248,6 +248,64 @@ GRID_FUNCTIONS: Tuple[GridFunction, ...] = (
         default_user_function_index=29,
     ),
     GridFunction(
+        "orbital-weighted-fukui-plus",
+        100,
+        "userfunc.cub",
+        "density",
+        (
+            "ow-fukui-plus",
+            "ow-fplus",
+            "orbital-weighted-fplus",
+            "orbwei-fukui-plus",
+        ),
+        mapped_preset="surface-map",
+        default_user_function_index=95,
+    ),
+    GridFunction(
+        "orbital-weighted-fukui-minus",
+        100,
+        "userfunc.cub",
+        "density",
+        (
+            "ow-fukui-minus",
+            "ow-fminus",
+            "orbital-weighted-fminus",
+            "orbwei-fukui-minus",
+        ),
+        mapped_preset="surface-map",
+        default_user_function_index=96,
+    ),
+    GridFunction(
+        "orbital-weighted-fukui-zero",
+        100,
+        "userfunc.cub",
+        "density",
+        (
+            "ow-fukui-zero",
+            "ow-fukui-radical",
+            "ow-f0",
+            "orbital-weighted-f0",
+            "orbital-weighted-fukui-radical",
+        ),
+        mapped_preset="surface-map",
+        default_user_function_index=97,
+    ),
+    GridFunction(
+        "orbital-weighted-dual-descriptor",
+        100,
+        "userfunc.cub",
+        "signed",
+        (
+            "ow-dual-descriptor",
+            "ow-dual",
+            "ow-dd",
+            "orbital-weighted-dd",
+            "orbital-weighted-dual",
+        ),
+        mapped_preset="surface-map",
+        default_user_function_index=98,
+    ),
+    GridFunction(
         "information-gain-density",
         100,
         "userfunc.cub",
@@ -1911,8 +1969,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "20 for DORI, 27 for LEA, -27 for LEAE, 49 for information gain, "
             "50 for Shannon entropy density, 51/52 for Fisher information "
             "density, 28 for local Mulliken electronegativity, and 29 for "
-            "local hardness. Named function-100 routes such as dori, "
-            "local-electron-affinity, and local-hardness provide defaults. "
+            "local hardness, and 95/96/97/98 for orbital-weighted "
+            "Fukui+/Fukui-/Fukui0/dual descriptor. Named function-100 routes "
+            "such as dori, local-electron-affinity, local-hardness, and "
+            "orbital-weighted-dual-descriptor provide defaults. "
             "Special external-grid modes -1, -3, and 57/58/59 are not "
             "handled by this generic route."
         ),

@@ -141,6 +141,12 @@ multiwfn2vesta cube-arith cube_arith_products \
 is the maintained bottom layer for density-difference, alpha-minus-beta spin
 density, Fukui, and dual-descriptor maps.  If Multiwfn already exported
 `spindensity.cub`, use `cube-preset spin-density` directly.
+If Multiwfn function `100` already exported orbital-weighted Fukui
+`userfunc.cub` (`iuserfunc=95/96/97`), display it with `cube-preset density`
+or regenerate it through `grid-run --function orbital-weighted-fukui-*`.
+For orbital-weighted dual descriptor (`iuserfunc=98`), use
+`cube-preset signed` for standalone positive/negative surfaces or
+`cube-preset surface-map` when it should color a density/surface cube.
 
 If starting from a Multiwfn-readable wavefunction instead of an existing cube,
 use `grid-run` for single real-space function cubes:

@@ -235,7 +235,10 @@ Useful `grid-run` functions for ABACUS-compatible Molden files include
 `lagrangian-ked`, `elf`, `lol`, `local-information-entropy`, `esp`, `rdg`,
 `promolecular-rdg`,
 `pair-function`, `source-function`, `edr`, `edrdmax`, `becke`, `hirshfeld`,
-`delta-g`, `hirshfeld-delta-g`, `iri`, `dori`, `vdw-potential`, and
+`delta-g`, `hirshfeld-delta-g`, `iri`, `dori`,
+`orbital-weighted-fukui-plus`, `orbital-weighted-fukui-minus`,
+`orbital-weighted-fukui-zero`, `orbital-weighted-dual-descriptor`,
+`vdw-potential`, and
 `signlambda2rho`.
 The single-cube display presets for `gradient.cub`, `spindensity.cub`,
 `orbdens.cub`, `infoentro.cub`, `fermihole.cub`, `EDR.cub`,
@@ -257,6 +260,14 @@ For Multiwfn function `5`, `grid-run --function spin-density` forces
 `ipolarpara=0`, while `grid-run --function spin-polarization` forces
 `ipolarpara=1`; both settings are written to a run-local file copied from the
 selected Multiwfn `settings.ini` when available and passed with `-set`.
+For orbital-weighted Fukui and dual descriptor, use the function-100 named
+routes (`iuserfunc=95/96/97/98`) only when the ABACUS Molden file contains
+complete occupied/virtual orbital information and the single-determinant
+frontier-orbital approximation is chemically meaningful.  They are useful
+when charged periodic calculations would be risky, but they do not replace
+`fukui-run` density differences for well-behaved finite charged states.
+The current wrapper does not change Multiwfn `orbwei_delta`; the inspected
+source default is `0.1` a.u.
 `grid-run --function edr` requires `--edr-length D_BOHR`; `grid-run
 --function edrdmax` uses Multiwfn's default exponent set unless
 `--edr-exponents COUNT START INCREMENT` is supplied; `grid-run --function

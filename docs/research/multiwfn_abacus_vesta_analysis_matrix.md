@@ -75,17 +75,23 @@ Multiwfn evidence:
   `iuserfunc` from settings.  The inspected source shows DORI
   (`iuserfunc=20`), LEA (`27`), LEAE (`-27`), local Mulliken
   electronegativity (`28`), local hardness (`29`), information gain (`49`),
-  Shannon entropy density (`50`), Fisher information density (`51/52`), and
-  many other selectable functions; `0123dim.f90` exports `userfunc.cub`.
+  orbital-weighted Fukui+/Fukui-/Fukui0 (`95/96/97`),
+  orbital-weighted dual descriptor (`98`), Shannon entropy density (`50`),
+  Fisher information density (`51/52`), and many other selectable functions;
+  `0123dim.f90` exports `userfunc.cub`.
   Multiwfn main menu `1000 -> 2` can set `iuserfunc` interactively, but the
   maintained runner copies the selected Multiwfn `settings.ini` when
   available, patches `iuserfunc` into a run-local
   `multiwfn_grid_settings.ini`, and passes it with `-set`.  The generic
   `user-function` route still accepts any direct `iuserfunc`, while named
   routes now imply common source-backed indices for DORI, LEA/LEAE, local
-  Mulliken electronegativity/local hardness, and information-theory
-  densities.  Special external-grid interpolation modes `-1/-3` and Shubin
-  `57/58/59` are excluded from the generic route.
+  Mulliken electronegativity/local hardness, orbital-weighted Fukui/dual
+  descriptor, and information-theory densities.  Multiwfn source computes the
+  orbital-weighted descriptors with HOMO/LUMO chemical potential, Gaussian
+  orbital-energy weights, and `orbwei_delta=0.1` a.u. by default; the current
+  wrapper only patches `iuserfunc`, not `orbwei_delta`.  Special external-grid
+  interpolation modes `-1/-3` and Shubin `57/58/59` are excluded from the
+  generic route.
 - Multiwfn weak-interaction `DORIfill.vmd` uses DORI as the isosurface cube
   at `0.95` and sign(lambda2)rho as the texture cube with range
   `-0.04..0.02`.  The maintained project therefore separates
@@ -240,7 +246,7 @@ occupations, and density derivatives from the wavefunction representation.
 | Domain extraction from cube/grid | Any current grid/cube data | Strong for ABACUS/Multiwfn cubes; mostly cube post-processing | `domain.cub`, `domain.pdb`, `domain.txt` | Binary domain isosurfaces and boundary-grid atoms-only layer | Implemented as `domain-run` for existing cube input plus `cube-preset domain` for binary `domain.cub` isosurfaces; `domain.pdb` is retained as boundary-grid evidence |
 | Excited-state hole/electron/CDD/transition density | Wavefunction plus excited-state information | Not a primary ABACUS ground-state route; LR-TDDFT outputs need separate study | `hole.cub`, `electron.cub`, `CDD.cub`, `transdens.cub` | Positive/negative isosurfaces | Defer until ABACUS excited-state interface is clear |
 | ETS-NOCV / AdNDP / EDA-related orbitals | Specialized wavefunctions/fragments | Weak for ABACUS periodic slabs; possible for molecule-like cases | `NOCV_*.cub`, `NOCVpair.cub`, `AdNDPorb*.cub` | Orbital-like positive/negative surfaces | Defer |
-| Fukui / dual descriptor | Multiple charge-state wavefunctions or orbital-weighted approximation | Possible for finite molecules or charged supercells; periodic charged systems risky | `userfunc.cub`, density-difference cubes | Positive/negative surfaces and atom scalar coloring | `multiwfn2vesta fukui-run` now generates shared-grid charged-state density cubes through `grid-run`, then delegates formulae to `cube-arith`; real chemistry smokes remain needed |
+| Fukui / dual descriptor | Multiple charge-state wavefunctions or orbital-weighted approximation | Possible for finite molecules or charged supercells; periodic charged systems risky; orbital-weighted route needs complete frontier orbitals | `userfunc.cub`, density-difference cubes | Positive/negative surfaces, density-surface texture maps, and atom scalar coloring | `multiwfn2vesta fukui-run` generates shared-grid charged-state density cubes through `grid-run`, then delegates formulae to `cube-arith`; `grid-run --function orbital-weighted-fukui-plus/minus/zero` and `grid-run --function orbital-weighted-dual-descriptor` now patch function-100 `iuserfunc=95/96/97/98` for single-wavefunction approximations, using `density` for Fukui+/Fukui-/Fukui0, `signed` for dual descriptor, and `surface-map` with `--surface-cube` |
 | NICS/current/arrows | Magnetic-response data | Not main maintained route | vector/text data, if available | Arrows/text overlays | Keep as misc, not main code |
 
 ## ABACUS Molden Rules
@@ -461,10 +467,11 @@ Main gaps:
 - User-defined function now has `cube-preset user-function`, a generic
   `grid-run --function user-function --user-function-index IUSERFUNC` route,
   and dedicated named function-100 routes for DORI, LEA/LEAE, local Mulliken
-  electronegativity/local hardness, and information-theory densities.  Local
+  electronegativity/local hardness, orbital-weighted Fukui/dual descriptor,
+  and information-theory densities.  Local
   Multiwfn source shows function `100`
   exports `userfunc.cub` and evaluates `userfunc(x,y,z)` according to
-  `iuserfunc`; named routes patch `20/27/-27/28/29/49/50/51/52`
+  `iuserfunc`; named routes patch `20/27/-27/28/29/95/96/97/98/49/50/51/52`
   automatically through the same run-local `-set` settings file while
   leaving global settings untouched.  External-grid interpolation `-1/-3`
   and Shubin `57/58/59` remain deferred special modes.

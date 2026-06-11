@@ -3,9 +3,9 @@
 `multiwfn2vesta` is a workspace-local Python interface for running selected
 Multiwfn workflows and preparing VESTA visualization files.  The currently
 maintained path covers ABACUS Molden handoff, cube-to-VESTA files, Multiwfn
-real-space grid, charged-state Fukui/dual-descriptor maps, STM/LDOS,
-cube-domain extraction, basin cube display, AIM, IRI/RDG, and IGM/IGMH
-command streams, aIGM/amIGM trajectory-average weak-interaction maps,
+real-space grid, charged-state and orbital-weighted Fukui/dual-descriptor
+maps, STM/LDOS, cube-domain extraction, basin cube display, AIM, IRI/RDG,
+and IGM/IGMH command streams, aIGM/amIGM trajectory-average weak-interaction maps,
 atoms-only topology overlays, surface extrema overlays, and AIM+IGMH
 multi-phase VESTA figures.
 
@@ -48,7 +48,8 @@ point.
   cubes with run-local probe-atom control, local Mulliken electronegativity
   and local hardness function-100 routes, ABACUS direct cube presets for potential,
   partial-charge, and wavefunction-norm cubes,
-  charged-state `fukui-run` orchestration, aIGM/amIGM trajectory-average
+  charged-state `fukui-run` orchestration, orbital-weighted Fukui/dual
+  function-100 routes, aIGM/amIGM trajectory-average
   weak-interaction generation, cube/grid domain extraction, basin cube VESTA
   presets,
   IGM/mIGM/IGMH command-stream automation, IGMH/aIGM VESTA cube presets,
@@ -123,6 +124,9 @@ then delete the temporary branch.
 - Run high-level Fukui/dual-descriptor maps from neutral, anion, and cation
   wavefunction files by generating Multiwfn density cubes on a shared neutral
   grid and then delegating the map arithmetic to `cube-arith`.
+- Run single-wavefunction orbital-weighted Fukui+/Fukui-/Fukui0 and dual
+  descriptor cubes through Multiwfn function `100` `iuserfunc=95/96/97/98`,
+  useful when charged-state wavefunctions are unavailable or physically risky.
 - Run Multiwfn IRI/RDG cube generation from a wavefunction file, process
   `func1.cub`/`func2.cub` into VESTA-ready `IRI1`/`IRI2` cubes, and write a
   mapped-surface `.vesta` through `cube-preset iri`.
@@ -255,6 +259,8 @@ multiwfn2vesta grid-run input.molden grid_products \
 multiwfn2vesta grid-run input.molden grid_products \
   --function local-electron-affinity
 multiwfn2vesta grid-run input.molden grid_products \
+  --function orbital-weighted-dual-descriptor
+multiwfn2vesta grid-run input.molden grid_products \
   --function dori
 multiwfn2vesta grid-run input.molden grid_products \
   --function becke \
@@ -269,6 +275,13 @@ multiwfn2vesta grid-run input.molden esp_map \
   --surface-cube density.cub \
   --grid-mode cube \
   --grid-cube density.cub
+multiwfn2vesta grid-run input.molden ow_dual_map \
+  --function ow-dd \
+  --surface-cube density.cub \
+  --grid-mode cube \
+  --grid-cube density.cub \
+  --tex-physical -0.04 0.04 \
+  --tex-range-source surface-band
 multiwfn2vesta stm-run input.molden stm_products --grid-points 80 80 40
 multiwfn2vesta domain-run density.cub domain_products --criterion '<0.5'
 ```
@@ -454,6 +467,8 @@ IUSERFUNC`.  Source-backed named routes now imply common `iuserfunc` values:
 `dori` sets `20`, `local-electron-affinity` sets `27`,
 `local-electron-attachment-energy` sets `-27`,
 `local-mulliken-electronegativity` sets `28`, `local-hardness` sets `29`,
+`orbital-weighted-fukui-plus` / `minus` / `zero` set `95` / `96` / `97`,
+`orbital-weighted-dual-descriptor` sets `98`,
 `information-gain-density` sets `49`, `shannon-entropy-density` sets `50`,
 and `fisher-information-density` / `second-fisher-information-density` set
 `51` / `52`.  The runner copies the selected Multiwfn `settings.ini` when
@@ -466,7 +481,17 @@ density.cub` is supplied.  Local Mulliken electronegativity and local
 hardness use the generic `surface-map` mapped preset when `--surface-cube`
 is supplied; pass `--tex-physical`, `--tex-range-source surface-band`,
 `--surface-band`, or `--tex-percent` to tune the texture scale from
-`grid-run`.  For DORI surfaces colored by sign(lambda2)rho,
+`grid-run`.  Orbital-weighted Fukui+/Fukui-/Fukui0 use the `density` preset,
+the orbital-weighted dual descriptor uses the `signed` preset, and all four
+can use the generic `surface-map` mapped preset with `--surface-cube`;
+explicit `--tex-physical MIN MAX` is recommended for mapped dual-descriptor
+figures.  These orbital-weighted routes are single-wavefunction approximations,
+not replacements for `fukui-run` charged-state density differences.  Use them
+mainly for closed-shell, single-determinant inputs with complete occupied and
+virtual orbital energies and coefficients.  The runner currently leaves
+Multiwfn's `orbwei_delta` at its source default of `0.1` a.u.; it is not
+patched through the run-local `settings.ini`.
+For DORI surfaces colored by sign(lambda2)rho,
 generate the DORI cube and sign(lambda2)rho cube separately, then run
 `cube-preset dori DORI.cub ... --texture-cube sl2r.cub`; the existing
 `grid-run --surface-cube` option keeps its older direction of supplied
@@ -695,10 +720,13 @@ Common functions:
   IUSERFUNC` unless using a named route below.  Named routes
   `dori`, `local-electron-affinity`, `local-electron-attachment-energy`,
   `local-mulliken-electronegativity`, `local-hardness`,
+  `orbital-weighted-fukui-plus`, `orbital-weighted-fukui-minus`,
+  `orbital-weighted-fukui-zero`, `orbital-weighted-dual-descriptor`,
   `information-gain-density`, `shannon-entropy-density`,
   `fisher-information-density`, and `second-fisher-information-density`
-  automatically patch `iuserfunc=20/27/-27/28/29/49/50/51/52` into a
-  run-local `-set` settings file, leaving global Multiwfn settings untouched.
+  automatically patch `iuserfunc=20/27/-27/28/29/95/96/97/98/49/50/51/52`
+  into a run-local `-set` settings file, leaving global Multiwfn settings
+  untouched.
 - `electron-delocalization-range` / `edr`: function `20`, raw `EDR.cub`,
   preset `electron-delocalization-range`, single positive surface by default.
   Pass `--edr-length D_BOHR`; Multiwfn asks for this EDR length scale before
@@ -745,6 +773,17 @@ Common functions:
   `--surface-cube density.cub`, the generated cube is used as a texture for
   the generic `cube-preset surface-map`; tune the color scale with
   `--tex-physical`, `--tex-percent`, or `--tex-range-source surface-band`.
+- `orbital-weighted-fukui-plus`, `orbital-weighted-fukui-minus`, and
+  `orbital-weighted-fukui-zero`: function `100`, raw `userfunc.cub`,
+  run-local `iuserfunc=95` / `96` / `97`, default `density` preset.  Multiwfn
+  weights virtual/occupied frontier orbitals around the chemical potential
+  using its `orbwei_delta` parameter, default `0.1` a.u. in the inspected
+  source.  The current runner does not expose an `orbwei_delta` override.
+- `orbital-weighted-dual-descriptor`: function `100`, raw `userfunc.cub`,
+  run-local `iuserfunc=98`, default `signed` preset; aliases include
+  `ow-dual` and `ow-dd`.  Use this as a single-wavefunction approximation
+  when charged-state density differences are unavailable; tune surfaces and
+  texture ranges per system, especially for `--surface-cube` mapped figures.
 - `dori`: function `100`, raw `userfunc.cub`, run-local `iuserfunc=20`,
   preset `dori-scalar` with a single `0.95` isosurface.  For the classic
   DORI surface colored by sign(lambda2)rho, use explicit

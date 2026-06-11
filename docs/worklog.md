@@ -1,5 +1,51 @@
 # Worklog
 
+## 2026-06-11: orbital-weighted Fukui and dual descriptor routes
+
+- Continued the ABACUS/Multiwfn/VESTA analysis survey by adding a
+  single-wavefunction local-reactivity route that ABACUS LCAO Molden files can
+  feed without requiring charged periodic calculations.
+- Rechecked local Multiwfn 2026.6.2 source evidence.  `function.f90` maps
+  function-100 `iuserfunc=95/96/97/98` to orbital-weighted
+  Fukui+/Fukui-/Fukui0/dual descriptor through `orbwei_Fukui(1..4)`;
+  `define.f90` defaults `orbwei_delta=0.1D0`; `CDFT.f90` describes the route
+  as requiring complete orbital information and closed-shell single-determinant
+  inputs; `0123dim.f90` exports function `100` as `userfunc.cub`.
+- Added named `grid-run` functions:
+  `orbital-weighted-fukui-plus`, `orbital-weighted-fukui-minus`,
+  `orbital-weighted-fukui-zero`, and `orbital-weighted-dual-descriptor`,
+  with short aliases such as `ow-fplus`, `ow-fminus`, `ow-f0`, `ow-dual`,
+  and `ow-dd`.
+- The new routes patch only `iuserfunc` through a run-local
+  `multiwfn_grid_settings.ini` passed with Multiwfn `-set`.  They leave
+  global Multiwfn settings untouched and do not currently expose an
+  `orbwei_delta` override.
+- Fukui+/Fukui-/Fukui0 standalone products use the existing `density` preset;
+  orbital-weighted dual descriptor uses `signed`.  All four use
+  `surface-map` when `--surface-cube` is supplied, so mapped figures can be
+  tuned through `--tex-physical`, `--tex-percent`, `--tex-range-source`,
+  `--surface-band`, and `--surface-nearest`.
+- Updated README, usage notes, reusable skill notes, research matrix, worklog,
+  and kanban to distinguish this single-wavefunction approximation from
+  charged-state `fukui-run` density-difference workflows.
+- Read-only subagent review confirmed the route choice and flagged the same
+  caveats: do not present 95..98 as a `fukui-run` replacement; require complete
+  occupied/virtual orbital information; keep `orbwei_delta=0.1` a.u. as a
+  documented Multiwfn source default until a dedicated CDFT/menu runner exists.
+- Validation passed before commit: focused `py_compile`, focused
+  `tests.test_multiwfn_grid` with 70 tests, focused
+  `tests.test_multiwfn_grid tests.test_cli` with 123 tests, full no-GUI
+  `unittest discover -s tests -v` with 334 tests, CLI smokes for
+  `bin/multiwfn2vesta --help`, `grid-run --list-functions`,
+  `grid-run --help`, and `cube-preset --list-presets`, plus
+  `git diff --check`.
+- Rechecked the README/branch-consolidation request after
+  `git fetch --prune origin`: current branch is `main`, upstream is
+  `origin/main`, `origin/HEAD` points to `origin/main`, GitHub currently
+  exposes only `refs/heads/main`, repository-local identity is
+  `Stardust0831 <13862180016@163.com>`, and no feature branch needs a real
+  merge-back for this pass.
+
 ## 2026-06-11: grid-run mapped texture controls and local reactivity routes
 
 - Continued the ABACUS/Multiwfn/VESTA analysis survey after the DORI closeout,

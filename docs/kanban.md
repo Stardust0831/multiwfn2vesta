@@ -1,6 +1,57 @@
 # Project Kanban
 
-Updated: 2026-06-11 20:53 CST
+Updated: 2026-06-11 21:15 CST
+
+## Current Request: 2026-06-11 README Refresh And Branch Closeout For Orbital-Weighted Fukui Routes
+
+- [x] Record user request immediately: update README, inspect the unusual
+  branch state, converge back to one maintained branch if needed, and keep
+  repository-local Git identity as `Stardust0831`.
+- [x] Confirm local branch and identity before staging anything.  Current
+  branch is `main`, tracking `origin/main`; repository-local identity is
+  `Stardust0831 <13862180016@163.com>`.  Current uncommitted work is the
+  orbital-weighted Fukui/dual descriptor increment plus docs; local untracked
+  `domain.cub` and `domain.pdb` must stay uncommitted.
+- [x] Finish README/docs/tests/review for the orbital-weighted
+  Fukui+/Fukui-/Fukui0/dual-descriptor route, mirror root docs, fetch/prune
+  and confirm whether any real merge-back is needed, then commit/push to the
+  maintained branch.  Code/tests/README/usage/skills/research/worklog now
+  cover function-100 `iuserfunc=95/96/97/98`, aliases including `ow-dd`,
+  standalone `density`/`signed` presets, mapped `surface-map`, and the
+  source caveat that `orbwei_delta=0.1` a.u. remains a Multiwfn default.
+  Validation passed: `py_compile`, 70 focused `tests.test_multiwfn_grid`
+  tests, 123 focused `tests.test_multiwfn_grid tests.test_cli` tests, 334
+  full no-GUI tests, CLI smokes, and `git diff --check`.  `git fetch --prune
+  origin` still shows only the maintained `main` branch, so no merge-back is
+  needed before committing.  Root docs checksum mirror dry-run is empty.
+  Final commit hash, push result, and post-push branch verification are
+  reported in the assistant response.
+
+## Active Goal Continuation: 2026-06-11 Next ABACUS/Multiwfn VESTA Analysis Increment
+
+- [x] Record automatic continuation of the long-running objective: keep
+  surveying valuable Multiwfn wavefunction analyses that can be visualized in
+  VESTA, prioritizing routes that ABACUS can feed through LCAO Molden files or
+  direct cube outputs.
+- [x] Recheck current repository state, existing analysis matrix, and local
+  Multiwfn source/templates before selecting the next bounded increment.
+  Current `main` is aligned with `origin/main`; only this kanban update plus
+  untracked `domain.cub` and `domain.pdb` are present.  Selected increment:
+  named orbital-weighted Fukui+/Fukui-/Fukui0/dual-descriptor routes from
+  Multiwfn function `100` `iuserfunc=95/96/97/98`.
+- [x] Implement one source-backed improvement that materially broadens the
+  maintained ABACUS/Multiwfn/VESTA workflow, with focused tests and synced
+  README/usage/skill/worklog/kanban notes.  Source evidence: local Multiwfn
+  `function.f90` maps cases `95..98` to `orbwei_Fukui(1..4)` and exports
+  function `100` as `userfunc.cub`; `define.f90` defaults `orbwei_delta` to
+  `0.1` a.u.  Implementation/docs are now staged for validation: four named
+  routes, short aliases, standalone and mapped presets, and focused resolver,
+  command-stream, standalone, and mapped-surface tests are present.  Read-only
+  subagent review confirmed the route and caveats, and validation passed.
+- [x] Mirror root docs, commit, push, and verify `main` alignment while
+  preserving untracked `domain.cub` and `domain.pdb`.  Root docs checksum
+  mirror dry-run is empty; final commit hash and post-push branch verification
+  are reported in the assistant response.
 
 ## Active Goal Continuation: 2026-06-11 Next ABACUS/Molden Visualization Increment
 

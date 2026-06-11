@@ -116,13 +116,22 @@ multiwfn2vesta grid-run --list-functions
   `local-electron-attachment-energy` / `leae` = `-27`,
   `local-mulliken-electronegativity` / `local-electronegativity` = `28`,
   `local-hardness` / `local-chemical-hardness` = `29`,
+  `orbital-weighted-fukui-plus` / `ow-fplus` = `95`,
+  `orbital-weighted-fukui-minus` / `ow-fminus` = `96`,
+  `orbital-weighted-fukui-zero` / `ow-f0` = `97`,
+  `orbital-weighted-dual-descriptor` / `ow-dual` / `ow-dd` = `98`,
   `information-gain-density` / `relative-shannon-entropy` = `49`,
   `shannon-entropy-density` = `50`, `fisher-information-density` = `51`,
   and `second-fisher-information-density` = `52`.  LEA/LEAE named routes
   also auto-select mapped presets `lea`/`leae` when `--surface-cube` is
-  supplied; local Mulliken electronegativity and local hardness fall back to
-  the generic `surface-map` mapped preset.  Special external-grid modes
-  `-1`, `-3`, and Shubin `57/58/59` are intentionally rejected by this
+  supplied; local Mulliken electronegativity, local hardness, and the
+  orbital-weighted Fukui/dual routes fall back to the generic `surface-map`
+  mapped preset.  Fukui+/Fukui-/Fukui0 standalone products use `density`,
+  while orbital-weighted dual descriptor uses `signed`.  These 95..98 routes
+  are single-wavefunction approximations and should not be confused with
+  charged-state `fukui-run`; the current runner leaves Multiwfn
+  `orbwei_delta` at its source default `0.1` a.u.  Special external-grid
+  modes `-1`, `-3`, and Shubin `57/58/59` are intentionally rejected by this
   generic route.
 - `electron-delocalization-range`, aliases `edr`, `edr-r-d`,
   `electron-delocalization-range-function`: function `20`, raw `EDR.cub`,
@@ -173,6 +182,16 @@ multiwfn2vesta grid-run --list-functions
   `--tex-percent`, `--tex-range-source surface-band`, `--surface-band`, or
   `--surface-nearest` from `grid-run` when the generic color scale is not
   chemically appropriate.
+- `orbital-weighted-fukui-plus`, `orbital-weighted-fukui-minus`, and
+  `orbital-weighted-fukui-zero`: function `100`, raw `userfunc.cub`, default
+  `iuserfunc=95` / `96` / `97`, standalone preset `density`.  Use these when
+  one closed-shell, single-determinant wavefunction with complete orbital
+  information is available and a charged-state density-difference workflow is
+  not appropriate.
+- `orbital-weighted-dual-descriptor`, aliases `ow-dual` and `ow-dd`:
+  function `100`, raw `userfunc.cub`, default `iuserfunc=98`, standalone
+  preset `signed`.  With `--surface-cube`, it uses `surface-map`; provide
+  explicit `--tex-physical MIN MAX` for useful color scales.
 - `vdw-potential`, aliases `vdw`, `vdwpot`,
   `van-der-waals-potential`: function `25`, raw `vdWpot.cub`, preset
   `vdw-potential` with signed `+/-1.0` kcal/mol isosurfaces.  Multiwfn
