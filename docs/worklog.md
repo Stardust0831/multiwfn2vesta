@@ -1,5 +1,28 @@
 # Worklog
 
+## 2026-06-12: Feature-to-example coverage index and rendered overview
+
+- Continued the current feature-closure request by adding a function-centric
+  example coverage layer instead of adding another analysis route.
+- Added `multiwfn2vesta examples --coverage`, `--coverage-status`, and
+  `--needs-render`.  The view maps each maintained top-level command to a
+  recommended real system, current figure/runbook status, gallery assets when
+  present, and the next closure step.
+- Added `docs/feature_examples_zh.md` as the Chinese command-to-example
+  closure index.  It records ready, linked, needs-render, and needs-example
+  states; it also groups `grid-run` functions by physical meaning so future
+  examples can cover many functions without one oversized tutorial per scalar.
+- Generated `docs/assets/gallery/current_feature_overview.png` from existing
+  real VESTA-rendered gallery assets.  No new VESTA GUI render was launched in
+  this pass to avoid stealing desktop focus.
+- Updated README, Chinese manual, usage docs, gallery, status matrix,
+  examples plan, CLI help, and CLI skill notes so users can choose examples by
+  feature and immediately see which functions still need better renders.
+- Recorded read-only subagent findings for future source-backed route work:
+  electron-only ESP, RoSE/SEDD, advanced KED variants, steric/SBL fields, and
+  on-top pair density are good candidates after the existing feature examples
+  are more complete.
+
 ## 2026-06-12: ESP component routes and feature-closure UX pass
 
 - Continued the long-running Multiwfn/ABACUS/VESTA route expansion while

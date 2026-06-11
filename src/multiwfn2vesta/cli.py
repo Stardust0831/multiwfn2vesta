@@ -238,6 +238,8 @@ Examples:
   multiwfn2vesta trajectory-frames traj.xyz frames_out --bond Cd Cl 0 3.5 --boundary -0.05 1.05 -0.05 1.05 -0.05 1.05
   multiwfn2vesta trajectory-video png_frames out.mp4 --bitrate 20M
   multiwfn2vesta examples --status ready
+  multiwfn2vesta examples --coverage
+  multiwfn2vesta examples --needs-render
   multiwfn2vesta examples --id cdcl_trajectory_video --verify-smoke
   multiwfn2vesta examples --verify
 

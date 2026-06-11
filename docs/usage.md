@@ -23,6 +23,7 @@ multiwfn2vesta
 ```bash
 multiwfn2vesta discover
 multiwfn2vesta examples --help
+multiwfn2vesta examples --coverage
 multiwfn2vesta abacus-molden --help
 multiwfn2vesta molden-check --help
 multiwfn2vesta cube-vesta --help
@@ -53,8 +54,9 @@ multiwfn2vesta trajectory-video --help
 - `discover`: 报告 Multiwfn 和 VESTA 可执行文件候选，以及当前会选择的路径
 - `examples`: 列出当前已整理的真实算例、gallery 图、runbook、状态矩阵；支持
   `--status ready/needs-work/misc`、`--id`、`--json`、`--verify` 和
-  `--verify-smoke`；`--verify` 检查仓库内 runbook/gallery/manifest，
-  `--verify-smoke` 检查工作区本地大文件或历史渲染证据
+  `--verify-smoke`；`--coverage` 按功能列出推荐真实体系、runbook、效果图状态和下一步；
+  `--needs-render` 只列出缺手册级渲染或缺真实体系的功能；`--verify` 检查仓库内
+  runbook/gallery/manifest，`--verify-smoke` 检查工作区本地大文件或历史渲染证据
 - `abacus-molden`: 从 ABACUS LCAO 计算目录调用最新
   `interfaces/Multiwfn_interface/molden.py`，生成并验证给 Multiwfn 用的
   Molden 文件
@@ -134,6 +136,7 @@ multiwfn2vesta --help
 ```bash
 multiwfn2vesta discover
 multiwfn2vesta examples --status ready
+multiwfn2vesta examples --coverage
 ```
 
 Multiwfn 查找顺序：

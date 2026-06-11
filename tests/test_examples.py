@@ -73,6 +73,42 @@ class TestExamplesIndex(unittest.TestCase):
         records = json.loads(output.getvalue())
         self.assertEqual(records[0]["manifest"], "examples/cdcl_trajectory_video/artifact_manifest.json")
 
+    def test_coverage_output_lists_feature_status(self):
+        output = io.StringIO()
+        with patch("sys.stdout", output):
+            code = examples.main(["--coverage"])
+
+        self.assertEqual(code, 0)
+        text = output.getvalue()
+        self.assertIn("feature example coverage", text)
+        self.assertIn("grid-run", text)
+        self.assertIn("aim-igmh", text)
+        self.assertIn("trajectory-video", text)
+        self.assertIn("docs/feature_examples_zh.md", text)
+
+    def test_needs_render_filters_coverage_records(self):
+        output = io.StringIO()
+        with patch("sys.stdout", output):
+            code = examples.main(["--needs-render"])
+
+        self.assertEqual(code, 0)
+        text = output.getvalue()
+        self.assertIn("grid-run", text)
+        self.assertIn("surface-extrema", text)
+        self.assertNotIn("aim-igmh", text)
+
+    def test_coverage_json_filter(self):
+        output = io.StringIO()
+        with patch("sys.stdout", output):
+            code = examples.main(["--coverage", "--coverage-status", "ready", "--json"])
+
+        self.assertEqual(code, 0)
+        records = json.loads(output.getvalue())
+        commands = {item["command"] for item in records}
+        self.assertIn("aim-igmh", commands)
+        self.assertIn("trajectory-video", commands)
+        self.assertNotIn("grid-run", commands)
+
     def test_unknown_id_is_an_error(self):
         error = io.StringIO()
         with patch("sys.stderr", error):

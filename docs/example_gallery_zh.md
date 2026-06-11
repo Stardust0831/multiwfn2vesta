@@ -3,6 +3,13 @@
 本文件只收录已经在当前工作区真实生成过的 VESTA/PNG 结果。没有真实渲染过的功能不在这里冒充完成，而是在
 `example_status_matrix_zh.md` 中标为待补图。
 
+当前总览图把已经整理进项目的真实渲染图拼在一起，方便快速确认可展示资产：
+
+![current feature overview](assets/gallery/current_feature_overview.png)
+
+按功能反查 example 覆盖状态见 `feature_examples_zh.md`，命令入口是
+`multiwfn2vesta examples --coverage`。
+
 ## 高价值代表体系
 
 | 体系 | 用途 | 为什么有价值 | 当前状态 |

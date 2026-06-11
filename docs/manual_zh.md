@@ -32,9 +32,10 @@ multiwfn2vesta <command> [options]
 
 1. 运行 `multiwfn2vesta discover`，确认当前 Multiwfn 和 VESTA 候选路径。
 2. 运行 `multiwfn2vesta examples --status ready`，只看已经有真实体系和效果图的算例。
-3. 运行 `multiwfn2vesta examples --id ag111_benzene_igmh_aim --verify`，检查项目内 runbook 和 gallery 图是否齐全。
-4. 打开对应 `examples/<example_id>/README_zh.md`，先复用已有命令和输出目录。
-5. 若只是查看效果，直接看 `docs/assets/gallery/` 下的 PNG；若要复跑，则按 runbook 重新生成 `.cub`、`.vesta`、recipe 和可选 PNG/MP4。
+3. 运行 `multiwfn2vesta examples --coverage`，按功能查推荐体系、runbook、效果图和缺口。
+4. 运行 `multiwfn2vesta examples --id ag111_benzene_igmh_aim --verify`，检查项目内 runbook 和 gallery 图是否齐全。
+5. 打开对应 `examples/<example_id>/README_zh.md`，先复用已有命令和输出目录。
+6. 若只是查看效果，直接看 `docs/assets/gallery/` 下的 PNG；若要复跑，则按 runbook 重新生成 `.cub`、`.vesta`、recipe 和可选 PNG/MP4。
 
 目前最适合先看的三个 ready examples 是：
 
@@ -75,6 +76,8 @@ multiwfn2vesta examples
 multiwfn2vesta examples --status ready
 multiwfn2vesta examples --status needs-work
 multiwfn2vesta examples --id cdcl_trajectory_video
+multiwfn2vesta examples --coverage
+multiwfn2vesta examples --needs-render
 multiwfn2vesta examples --verify
 multiwfn2vesta examples --id cdcl_trajectory_video --verify-smoke
 ```
@@ -85,6 +88,14 @@ mp4、PNG 序列或中间 VESTA frame，这些大文件默认不提交。需要�
 
 ```bash
 multiwfn2vesta examples --json
+multiwfn2vesta examples --coverage --json
+```
+
+`--coverage` 的粒度是功能，而不是单个体系。它会回答某个 CLI 命令现在应该用什么体系演示、
+有没有手册级 PNG、缺的是渲染还是缺真实体系。只想看还没闭环的功能时用：
+
+```bash
+multiwfn2vesta examples --needs-render
 ```
 
 ## 4. 推荐工作流总览
@@ -334,6 +345,7 @@ multiwfn2vesta trajectory-video \
 详见：
 
 - `docs/example_status_matrix_zh.md`
+- `docs/feature_examples_zh.md`
 
 原则：
 

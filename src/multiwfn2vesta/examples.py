@@ -17,6 +17,7 @@ DOCS = {
     "manual_zh": "docs/manual_zh.md",
     "gallery_zh": "docs/example_gallery_zh.md",
     "status_matrix_zh": "docs/example_status_matrix_zh.md",
+    "feature_examples_zh": "docs/feature_examples_zh.md",
     "examples_plan_zh": "examples/README_zh.md",
 }
 
@@ -147,6 +148,234 @@ EXAMPLES: List[Dict[str, object]] = [
 ]
 
 
+FEATURE_COVERAGE: List[Dict[str, object]] = [
+    {
+        "command": "discover",
+        "feature": "Multiwfn/VESTA executable discovery",
+        "status": "linked",
+        "example": "Ag(111)+benzene and all local workflows",
+        "system": "workspace-local executables",
+        "runbook": "docs/manual_zh.md",
+        "gallery": [],
+        "next": "Add a short Chinese command-output fixture if screenshots become useful.",
+    },
+    {
+        "command": "abacus-molden",
+        "feature": "ABACUS LCAO Molden handoff",
+        "status": "linked",
+        "example": "ag111_benzene_igmh_aim",
+        "system": "Ag(111)+benzene periodic slab",
+        "runbook": "examples/ag111_benzene_igmh_aim/README_zh.md",
+        "gallery": ["docs/assets/gallery/ag111_benzene_igmh_aim_front.png"],
+        "next": "Promote the full ABACUS directory transcript into the runbook without committing large wavefunction files.",
+    },
+    {
+        "command": "molden-check",
+        "feature": "Molden structure and ABACUS [Nval] validation",
+        "status": "linked",
+        "example": "ag111_benzene_igmh_aim",
+        "system": "Ag(111)+benzene ABACUS Molden",
+        "runbook": "examples/ag111_benzene_igmh_aim/README_zh.md",
+        "gallery": ["docs/assets/gallery/ag111_benzene_igmh_aim_front.png"],
+        "next": "Record one successful check output block in the Chinese manual.",
+    },
+    {
+        "command": "cube-vesta",
+        "feature": "Generic cube to VESTA isosurface",
+        "status": "linked",
+        "example": "h2o_hf_iri_aim_debug",
+        "system": "H2O-HF IRI surface cube",
+        "runbook": "docs/example_gallery_zh.md",
+        "gallery": ["docs/assets/gallery/h2o_iri_aim_overlay.png"],
+        "next": "Render a cleaner standalone cube figure that is not tied to IRI debugging.",
+    },
+    {
+        "command": "cube-preset",
+        "feature": "Analysis presets for scalar/signed/mapped cube display",
+        "status": "linked",
+        "example": "ag111_benzene_igmh_aim; h2o_hf_iri_aim_debug",
+        "system": "Ag(111)+benzene IGMH and H2O-HF IRI",
+        "runbook": "docs/example_status_matrix_zh.md",
+        "gallery": [
+            "docs/assets/gallery/ag111_benzene_igmh_aim_front.png",
+            "docs/assets/gallery/h2o_iri_aim_overlay.png",
+        ],
+        "next": "Add direct ABACUS cube examples for charge density, potential, ELF, and wavefunction norm.",
+    },
+    {
+        "command": "surface-extrema",
+        "feature": "Multiwfn surfanalysis extrema overlay",
+        "status": "needs-render",
+        "example": "planned ALIE/LEA surface extrema",
+        "system": "polar aromatic molecule or adsorption interface",
+        "runbook": "docs/skills/surface_extrema_vesta_skill.md",
+        "gallery": [],
+        "next": "Generate ALIE/LEA/LEAE surface extrema from a real molecule and render minima/maxima markers.",
+    },
+    {
+        "command": "cube-arith",
+        "feature": "Density difference, spin density, Fukui, and dual cube arithmetic",
+        "status": "needs-example",
+        "example": "planned Fukui/dual descriptor molecule",
+        "system": "reactive aromatic or heteroatom-rich molecule with neutral/anion/cation states",
+        "runbook": "docs/usage.md",
+        "gallery": [],
+        "next": "Prepare charged-state cubes and render Fukui+/Fukui-/dual maps.",
+    },
+    {
+        "command": "iri-run",
+        "feature": "IRI/RDG cube generation and VESTA mapped surface",
+        "status": "needs-render",
+        "example": "h2o_hf_iri_aim_debug",
+        "system": "H2O-HF hydrogen-bond complex",
+        "runbook": "docs/iri_vesta_coloring.md",
+        "gallery": ["docs/assets/gallery/h2o_iri_aim_overlay.png"],
+        "next": "Rerender with a clear IRI isosurface and validated texture range before marking ready.",
+    },
+    {
+        "command": "igmh-run/igm-run/migm-run",
+        "feature": "Fragment weak-interaction cubes",
+        "status": "ready",
+        "example": "ag111_benzene_igmh_aim",
+        "system": "Ag(111)+benzene periodic slab",
+        "runbook": "examples/ag111_benzene_igmh_aim/README_zh.md",
+        "gallery": [
+            "docs/assets/gallery/ag111_benzene_igmh_aim_front.png",
+            "docs/assets/gallery/ag111_benzene_igmh_aim_right.png",
+            "docs/assets/gallery/ag111_benzene_igmh_aim_top.png",
+        ],
+        "next": "Keep Ag(111)+benzene as the main periodic showcase; add a small molecular dimer for fast smoke reruns.",
+    },
+    {
+        "command": "aigm-run/amigm-run",
+        "feature": "Trajectory-average weak-interaction cubes",
+        "status": "needs-example",
+        "example": "planned short trajectory averaged IGM",
+        "system": "Cd/Cl trajectory or Ag(111)+benzene AIMD excerpt",
+        "runbook": "docs/usage.md",
+        "gallery": [],
+        "next": "Use a short real trajectory to generate averaged cubes and a VESTA mapped surface.",
+    },
+    {
+        "command": "grid-run",
+        "feature": "Multiwfn real-space scalar functions",
+        "status": "needs-render",
+        "example": "planned H2O/benzene/Ag(111)+benzene grid suite",
+        "system": "H2O for density/KED/ESP, benzene for orbital/Fukui, Ag(111)+benzene for vdW/ESP",
+        "runbook": "docs/feature_examples_zh.md",
+        "gallery": [],
+        "next": "Render one compact suite covering density/orbital/spin/KED/ELF/ESP/vdW/FOD/information-density groups.",
+    },
+    {
+        "command": "fukui-run",
+        "feature": "Charged-state Fukui and dual descriptor maps",
+        "status": "needs-example",
+        "example": "planned electrophilic/nucleophilic molecule",
+        "system": "heteroatom-rich aromatic molecule with neutral, anion, and cation wavefunctions",
+        "runbook": "docs/usage.md",
+        "gallery": [],
+        "next": "Compute aligned charged-state density cubes and render Fukui+/Fukui-/dual descriptor surfaces.",
+    },
+    {
+        "command": "stm-run",
+        "feature": "Constant-current STM/LDOS cube export",
+        "status": "needs-render",
+        "example": "planned surface or adsorbate STM",
+        "system": "Ag(111)+benzene or a smaller aromatic molecule near a surface",
+        "runbook": "docs/skills/multiwfn_stm_run_skill.md",
+        "gallery": [],
+        "next": "Choose a physically meaningful LDOS window and render the constant-current isosurface.",
+    },
+    {
+        "command": "domain-run",
+        "feature": "Cube domain extraction and binary domain display",
+        "status": "needs-render",
+        "example": "planned H2O density domain",
+        "system": "H2O electron-density domain",
+        "runbook": "docs/skills/multiwfn_domain_run_skill.md",
+        "gallery": [],
+        "next": "Render the domain cube and document the selected domain criterion.",
+    },
+    {
+        "command": "abacus-mulliken-color",
+        "feature": "ABACUS Mulliken charge/magnetism atom coloring",
+        "status": "needs-render",
+        "example": "planned charged or magnetic ABACUS system",
+        "system": "magnetic oxide/metal cluster or charged adsorbate system",
+        "runbook": "docs/vesta_atom_value_coloring.md",
+        "gallery": [],
+        "next": "Replace the toy Fe smoke with a real charge or spin-density coloring figure and legend.",
+    },
+    {
+        "command": "multiwfn-atom-color",
+        "feature": "Generic atom scalar table coloring",
+        "status": "needs-render",
+        "example": "planned Multiwfn charge/Fukui atom table",
+        "system": "reactive molecule with atom charges or condensed Fukui values",
+        "runbook": "docs/vesta_atom_value_coloring.md",
+        "gallery": [],
+        "next": "Connect a real Multiwfn population table and render a colored molecular structure.",
+    },
+    {
+        "command": "aim-run",
+        "feature": "Multiwfn AIM topology generation",
+        "status": "ready",
+        "example": "gc_aim",
+        "system": "GC base pair",
+        "runbook": "examples/gc_aim/README_zh.md",
+        "gallery": ["docs/assets/gallery/gc_aim_overlay.png"],
+        "next": "Use GC as the main hydrogen-bond topology tutorial and keep benzene as the basic check.",
+    },
+    {
+        "command": "aim-pdb",
+        "feature": "AIM paths.pdb/CPs.pdb atoms-only VESTA conversion",
+        "status": "ready",
+        "example": "gc_aim; benzene_aim",
+        "system": "GC base pair and benzene",
+        "runbook": "examples/gc_aim/README_zh.md",
+        "gallery": [
+            "docs/assets/gallery/gc_aim_overlay.png",
+            "docs/assets/gallery/benzene_aim_overlay.png",
+        ],
+        "next": "Add a compact CP color/type legend to the manual.",
+    },
+    {
+        "command": "aim-igmh",
+        "feature": "Saved AIM+IGMH overlay styling and three-view rendering",
+        "status": "ready",
+        "example": "ag111_benzene_igmh_aim",
+        "system": "Ag(111)+benzene periodic slab",
+        "runbook": "examples/ag111_benzene_igmh_aim/README_zh.md",
+        "gallery": [
+            "docs/assets/gallery/ag111_benzene_igmh_aim_front.png",
+            "docs/assets/gallery/ag111_benzene_igmh_aim_right.png",
+            "docs/assets/gallery/ag111_benzene_igmh_aim_top.png",
+        ],
+        "next": "Continue improving non-focus-stealing rendering and camera presets.",
+    },
+    {
+        "command": "trajectory-frames",
+        "feature": "XYZ/extXYZ trajectory to VESTA frame files",
+        "status": "ready",
+        "example": "cdcl_trajectory_video",
+        "system": "Cd/Cl NVT/NPT trajectory",
+        "runbook": "examples/cdcl_trajectory_video/README_zh.md",
+        "gallery": ["docs/assets/gallery/cdcl_nvt_trajectory_frame.png"],
+        "next": "Add direct ASE .traj reading when a stable dependency policy is chosen.",
+    },
+    {
+        "command": "trajectory-video",
+        "feature": "Rendered PNG frame sequence to high-bitrate MP4",
+        "status": "ready",
+        "example": "cdcl_trajectory_video",
+        "system": "Cd/Cl VESTA trajectory frames",
+        "runbook": "examples/cdcl_trajectory_video/README_zh.md",
+        "gallery": ["docs/assets/gallery/cdcl_nvt_trajectory_frame.png"],
+        "next": "Add an optional VESTA PNG rendering layer that does not steal focus when possible.",
+    },
+]
+
+
 def _project_path(path_text: str) -> Path:
     path = Path(path_text)
     if path.is_absolute():
@@ -214,6 +443,25 @@ def examples_for_json(
     return records
 
 
+def feature_coverage_for_json(
+    status: str = "all",
+    absolute: bool = False,
+    needs_render: bool = False,
+) -> List[Dict[str, object]]:
+    records: List[Dict[str, object]] = []
+    for item in FEATURE_COVERAGE:
+        item_status = str(item["status"])
+        if status != "all" and item_status != status:
+            continue
+        if needs_render and item_status not in {"needs-render", "needs-example"}:
+            continue
+        record = dict(item)
+        record["runbook"] = _display_path(str(record["runbook"]), absolute=absolute)
+        record["gallery"] = [_display_path(str(path), absolute=absolute) for path in record.get("gallery", [])]  # type: ignore[arg-type]
+        records.append(record)
+    return records
+
+
 def _print_text(status: str = "all", absolute: bool = False, ids: Optional[Set[str]] = None) -> None:
     print("multiwfn2vesta curated examples\n")
     print("Docs:")
@@ -248,6 +496,30 @@ def _print_text(status: str = "all", absolute: bool = False, ids: Optional[Set[s
     print()
     print("Use --id EXAMPLE_ID and --status ready/needs-work/misc to filter.")
     print("Use --json for machine-readable output.")
+
+
+def _print_coverage(status: str = "all", absolute: bool = False, needs_render: bool = False) -> None:
+    records = feature_coverage_for_json(status=status, absolute=absolute, needs_render=needs_render)
+    print("multiwfn2vesta feature example coverage\n")
+    print(f"Docs: {_display_path('docs/feature_examples_zh.md', absolute=absolute)}")
+    print()
+    if not records:
+        print("No feature coverage records match the selected filters.")
+        return
+    for record in records:
+        print(f"- [{record['status']}] {record['command']}: {record['feature']}")
+        print(f"  example: {record['example']}")
+        print(f"  system: {record['system']}")
+        print(f"  runbook: {record['runbook']}")
+        gallery = record.get("gallery") or []
+        if gallery:
+            print("  gallery:")
+            for item in gallery:  # type: ignore[assignment]
+                print(f"    - {item}")
+        print(f"  next: {record['next']}")
+    print()
+    print("Status: ready means example + project gallery image; linked means covered through another ready workflow;")
+    print("needs-render means workflow exists but needs a better project-local figure; needs-example means a real system is still missing.")
 
 
 def _verify_project_files(status: str = "all", ids: Optional[Set[str]] = None) -> int:
@@ -314,6 +586,22 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--json", action="store_true", help="Print machine-readable JSON.")
     parser.add_argument("--absolute", action="store_true", help="Print absolute paths.")
     parser.add_argument(
+        "--coverage",
+        action="store_true",
+        help="List maintained commands/features with their recommended example systems and figure status.",
+    )
+    parser.add_argument(
+        "--coverage-status",
+        choices=["all", "ready", "linked", "needs-render", "needs-example", "misc"],
+        default="all",
+        help="Filter --coverage records by feature coverage status.",
+    )
+    parser.add_argument(
+        "--needs-render",
+        action="store_true",
+        help="Shortcut for --coverage records that still need a real render or real example.",
+    )
+    parser.add_argument(
         "--verify",
         action="store_true",
         help="Check that project-local runbooks and gallery assets exist.",
@@ -342,6 +630,26 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         if args.verify_smoke:
             exit_code = max(exit_code, _verify_smoke_files(args.status, selected_ids))
         return exit_code
+    if args.coverage or args.needs_render:
+        if args.json:
+            print(
+                json.dumps(
+                    feature_coverage_for_json(
+                        args.coverage_status,
+                        absolute=args.absolute,
+                        needs_render=args.needs_render,
+                    ),
+                    ensure_ascii=False,
+                    indent=2,
+                )
+            )
+        else:
+            _print_coverage(
+                args.coverage_status,
+                absolute=args.absolute,
+                needs_render=args.needs_render,
+            )
+        return 0
     if args.json:
         print(
             json.dumps(

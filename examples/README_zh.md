@@ -8,6 +8,8 @@
 ```bash
 multiwfn2vesta examples
 multiwfn2vesta examples --status ready
+multiwfn2vesta examples --coverage
+multiwfn2vesta examples --needs-render
 multiwfn2vesta examples --verify
 ```
 
@@ -37,3 +39,4 @@ mp4、临时 `.vesta` 留在 `smoke/`，项目内只提交 runbook、manifest、
 - 中文手册: `../docs/manual_zh.md`
 - 效果图库: `../docs/example_gallery_zh.md`
 - 功能 example 状态矩阵: `../docs/example_status_matrix_zh.md`
+- 功能到算例闭环索引: `../docs/feature_examples_zh.md`

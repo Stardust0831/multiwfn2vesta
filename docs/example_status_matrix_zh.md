@@ -14,6 +14,13 @@
 - 至少有一个项目内轻量 gallery PNG；大 cube、mp4、临时 `.vesta` 可以留在 `smoke/`，通过 manifest 或 `examples --verify-smoke` 引用。
 - 若图仍只是调试证据，状态必须保持 `needs-work` 或 `有 VESTA/cube`，不能标为 `已闭环`。
 
+按功能反查推荐体系、runbook、效果图和下一步见 `feature_examples_zh.md`，也可以运行：
+
+```bash
+multiwfn2vesta examples --coverage
+multiwfn2vesta examples --needs-render
+```
+
 ## 顶层 CLI 功能
 
 | 功能 | 代表命令 | 推荐体系 | 当前证据 | 状态 | 下一步 |

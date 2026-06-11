@@ -1,6 +1,13 @@
 # Project Kanban
 
-Updated: 2026-06-12 02:54 CST
+Updated: 2026-06-12 02:50 CST
+
+## Active Goal Continuation: 2026-06-12 Next Source-Backed VESTA Analysis Increment
+
+- [x] 需求入板: 自动续跑长期目标，继续调研 Multiwfn 中有价值且可用 VESTA 表达的波函数分析，优先关注 ABACUS LCAO Molden 或 ABACUS direct cube 可支撑的路线。
+- [x] 审计当前仓库状态: `main` 与 `origin/main` 当前对齐在 `52cf577`；本地仅有未跟踪 `domain.cub` / `domain.pdb`，继续保护，不提交。
+- [ ] 审计现有研究矩阵、`grid-run`/`cube-preset` 覆盖和本地 Multiwfn 源码，选择一个边界清晰、可测试、能进入 VESTA 的下一个增量。
+- [ ] 实现代码、测试、中文/英文文档、skill/worklog/kanban，同步 docs，验证后用 `Stardust0831` 身份提交并推送。
 
 ## Current Request: 2026-06-12 Existing Feature Closure With Valuable Examples
 
@@ -2362,3 +2369,15 @@ Updated: 2026-06-12 02:54 CST
 - If the user asks for fresh PNGs, either run an explicitly accepted
   focus-stealing VESTA CLI export or continue the Linux/local-library
   non-focus route first.
+## Active Goal: 2026-06-12 Close Existing Features With Examples, Figures, and Chinese Manual
+
+- **User request:** Close the currently implemented feature set into reusable workflows, prepare valuable real-system examples for every maintained feature, improve CLI/user experience, write a Chinese manual, and render effect figures for the examples.
+- **Scope guard:** All edits and generated artifacts stay under `/mnt/g/work/multiwfn2vesta`; preserve user files and avoid system-level changes.
+- **Immediate plan:**
+  - [x] Inventory maintained CLI/features and current examples. Current ready formal examples are Ag(111)+benzene IGMH+AIM, GC AIM, and Cd/Cl trajectory video; several other workflows have smoke/cube evidence but not hand-manual figures.
+  - [x] Map each feature to at least one valuable chemistry/materials example. Added `docs/feature_examples_zh.md` and `multiwfn2vesta examples --coverage` / `--needs-render`.
+  - [x] Fill missing examples with runnable smoke data or documented commands. Current pass records recommended systems and commands; workflows without real renders remain explicitly `needs-render` or `needs-example`.
+  - [x] Render or regenerate representative effect figures where local assets/tools allow. Generated `docs/assets/gallery/current_feature_overview.png` from existing real VESTA-rendered PNG assets without launching VESTA.
+  - [x] Improve rough UX surfaces found during example closure. Added feature-centric example discovery and top-level help examples.
+  - [x] Expand Chinese manual and keep docs mirrored.
+  - [x] Verify tests/examples and commit/push after review. Focused examples/CLI tests, full no-GUI regression, Markdown links, image check, `examples --verify`, `git diff --check`, and docs mirror dry-run passed; commit/push details are recorded in the final response.

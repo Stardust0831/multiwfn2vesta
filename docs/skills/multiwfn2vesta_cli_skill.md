@@ -150,6 +150,8 @@ multiwfn2vesta examples
 multiwfn2vesta examples --status ready
 multiwfn2vesta examples --status needs-work
 multiwfn2vesta examples --id cdcl_trajectory_video
+multiwfn2vesta examples --coverage
+multiwfn2vesta examples --needs-render
 multiwfn2vesta examples --json
 multiwfn2vesta examples --verify
 multiwfn2vesta examples --id cdcl_trajectory_video --verify-smoke
@@ -163,6 +165,11 @@ and gallery assets, so it remains useful even when old workspace smoke
 directories are absent.  `--verify-smoke` checks workspace-local smoke
 evidence such as large videos or PNG sequences; those files are not expected
 to be committed.
+
+Use `--coverage` when selecting a workflow by feature instead of by system.
+It prints the recommended real system, runbook, gallery image status, and next
+closure step for each maintained command.  Use `--needs-render` to list only
+commands that still need a better figure or a real example.
 
 ### Rendered trajectory frames to MP4
 

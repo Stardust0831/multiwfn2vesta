@@ -237,6 +237,7 @@ cd /mnt/g/work/multiwfn2vesta/project
 export PATH=/mnt/g/work/multiwfn2vesta/project/bin:$PATH
 multiwfn2vesta --help
 multiwfn2vesta examples --status ready
+multiwfn2vesta examples --coverage
 multiwfn2vesta examples --verify
 ```
 
@@ -265,6 +266,7 @@ For day-to-day use, start from the Chinese manual and the example gallery:
 - [中文手册](docs/manual_zh.md)
 - [效果图库和真实算例索引](docs/example_gallery_zh.md)
 - [功能 example 状态矩阵](docs/example_status_matrix_zh.md)
+- [功能到算例闭环索引](docs/feature_examples_zh.md)
 - [examples 规划](examples/README_zh.md)
 - [example 模板](examples/_template/README_zh.md)
 
@@ -274,6 +276,8 @@ The same index is available from the CLI:
 multiwfn2vesta examples
 multiwfn2vesta examples --status needs-work
 multiwfn2vesta examples --id cdcl_trajectory_video
+multiwfn2vesta examples --coverage
+multiwfn2vesta examples --needs-render
 multiwfn2vesta examples --json
 multiwfn2vesta examples --verify
 multiwfn2vesta examples --id cdcl_trajectory_video --verify-smoke
@@ -287,6 +291,11 @@ Use `--id` to inspect one curated system, and use `--verify-smoke` only when
 the local workspace-level `smoke/` evidence is expected to be present.  Large
 videos remain smoke artifacts; the repository keeps runbooks, manifests, and
 poster frames instead.
+
+The feature-coverage view is the fastest way to answer "which real system
+should demonstrate this command?".  It reports whether a command is `ready`,
+covered through another ready workflow, still needs a better render, or still
+needs a real system.
 
 ## Find Multiwfn and VESTA
 
@@ -1834,6 +1843,8 @@ and `aim_atoms_only.vesta` without launching VESTA.
 - `docs/manual_zh.md`: Chinese user manual for the maintained workflows.
 - `docs/example_gallery_zh.md`: rendered example gallery with real systems.
 - `docs/example_status_matrix_zh.md`: per-feature example/rendering status.
+- `docs/feature_examples_zh.md`: command-to-example coverage table and
+  recommended real systems for closing missing figures.
 - `examples/README_zh.md`: Chinese plan for promoting smoke runs to formal
   examples.
 - `examples/_template/README_zh.md`: reusable Chinese runbook template for
