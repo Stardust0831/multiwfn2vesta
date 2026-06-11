@@ -135,6 +135,7 @@ then delete the temporary branch.
   weight, promolecular Delta-g, Hirshfeld-partition Delta-g, standalone IRI
   scalar, standalone vdW total/repulsion/dispersion potential, ABACUS direct potential, partial charge,
   wavefunction norm cubes, ELF/LOL, IRI/RDG/NCI, DORI, ESP/MEP,
+  positive/negative ESP components, electric-field magnitude,
   IGM/IGMH/aIGM weak-interaction maps, ALIE/LEA/LEAE, and vdW-potential
   mapped surfaces.
 - Overlay Multiwfn molecular-surface extrema from `surfanalysis.pdb` onto
@@ -196,7 +197,9 @@ then delete the temporary branch.
   promolecular Delta-g,
   Hirshfeld-partition Delta-g, vdW potential with
   run-local `ivdwprobe` probe selection, function-100 UFF vdW
-  repulsion/dispersion components with `iuserfunc=93/94`, and related scalar cubes, export
+  repulsion/dispersion components with `iuserfunc=93/94`, function-100
+  positive/negative ESP and electric-field magnitude routes with
+  `iuserfunc=101/102/103`, and related scalar cubes, export
   multiple orbitals through
   isolated batch runs, optionally write VESTA files through `cube-preset`,
   and map generated ESP/ALIE/vdW/sign(lambda2)rho cubes as textures on a
@@ -251,7 +254,9 @@ The supported day-to-day entry point is the global `multiwfn2vesta` command.
 Avoid running package modules from inside `src/multiwfn2vesta`; from the repo
 root, either add `project/bin` to `PATH` as above, run
 `bin/multiwfn2vesta ...`, or, for a one-off module invocation, use
-`PYTHONPATH=src python3 -m multiwfn2vesta.cli`.
+`PYTHONPATH=src python3 -m multiwfn2vesta.cli`.  The legacy
+`multiwfn-vesta` console script is not maintained; editable installs expose
+the `multiwfn2vesta-*` scripts listed in `pyproject.toml` and `setup.py`.
 
 ## Chinese Manual And Examples
 
@@ -261,6 +266,7 @@ For day-to-day use, start from the Chinese manual and the example gallery:
 - [效果图库和真实算例索引](docs/example_gallery_zh.md)
 - [功能 example 状态矩阵](docs/example_status_matrix_zh.md)
 - [examples 规划](examples/README_zh.md)
+- [example 模板](examples/_template/README_zh.md)
 
 The same index is available from the CLI:
 
@@ -333,6 +339,12 @@ multiwfn2vesta grid-run input.molden grid_products \
   --vdw-probe Ar
 multiwfn2vesta grid-run input.molden grid_products \
   --function vdw-dispersion-potential
+multiwfn2vesta grid-run input.molden grid_products \
+  --function positive-esp
+multiwfn2vesta grid-run input.molden grid_products \
+  --function negative-esp
+multiwfn2vesta grid-run input.molden grid_products \
+  --function electric-field-magnitude
 multiwfn2vesta grid-run input.molden grid_products \
   --function edr \
   --edr-length 0.85
@@ -583,6 +595,8 @@ IUSERFUNC`.  Source-backed named routes now imply common `iuserfunc` values:
 `orbital-weighted-dual-descriptor` sets `98`,
 `fractional-occupation-density` sets `90`,
 `vdw-repulsion-potential` / `vdw-dispersion-potential` set `93` / `94`,
+`positive-esp` / `negative-esp` / `electric-field-magnitude` set
+`101` / `102` / `103`,
 `information-gain-density` sets `49`, `shannon-entropy-density` sets `50`,
 and `fisher-information-density` / `second-fisher-information-density` set
 `51` / `52`.  The runner copies the selected Multiwfn `settings.ini` when
@@ -839,13 +853,14 @@ Common functions:
   `dori`, `local-electron-affinity`, `local-electron-attachment-energy`,
   `local-mulliken-electronegativity`, `local-hardness`,
   `vdw-repulsion-potential`, `vdw-dispersion-potential`,
+  `positive-esp`, `negative-esp`, `electric-field-magnitude`,
   `thomas-fermi-ked`, `weizsacker-ked`, `pauli-ked`,
   `orbital-weighted-fukui-plus`, `orbital-weighted-fukui-minus`,
   `orbital-weighted-fukui-zero`, `orbital-weighted-dual-descriptor`,
   `fractional-occupation-density`,
   `information-gain-density`, `shannon-entropy-density`,
   `fisher-information-density`, and `second-fisher-information-density`
-  automatically patch `iuserfunc=1/2/20/27/-27/28/29/93/94/90/1200/114/95/96/97/98/49/50/51/52`
+  automatically patch `iuserfunc=1/2/20/27/-27/28/29/93/94/101/102/103/90/1200/114/95/96/97/98/49/50/51/52`
   into a run-local `-set` settings file, leaving global Multiwfn settings
   untouched.  The KED variants also patch run-local `iKEDsel`.
 - `alpha-density` and `beta-density`: function `100`, raw `userfunc.cub`,
@@ -901,6 +916,15 @@ Common functions:
   defaulting to the `signed` preset; with `--surface-cube`,
   `esp`/`nuclear-esp` map through `cube-preset esp` and
   `signlambda2rho` maps through `cube-preset iri`.
+- `positive-esp`, `negative-esp`, and `electric-field-magnitude`: function
+  `100`, raw `userfunc.cub`, run-local `iuserfunc=101` / `102` / `103`.
+  The inspected Multiwfn source clips total ESP below or above zero for the
+  positive/negative component routes, and obtains electric-field magnitude
+  from the ESP gradient.  Standalone products use single-surface presets:
+  `+0.05` for positive ESP, `-0.05` for negative ESP, and `0.05` for field
+  magnitude.  With `--surface-cube`, these routes use the generic
+  `surface-map` preset; explicit `--tex-physical` is recommended when
+  comparing systems.
 - `vdw-potential` / `vdw`: function `25`, raw `vdWpot.cub`, preset
   `vdw-potential`, signed at `+/-1.0` kcal/mol by default.  With
   `--surface-cube`, it maps through `cube-preset vdw-map` instead so the
@@ -1812,6 +1836,8 @@ and `aim_atoms_only.vesta` without launching VESTA.
 - `docs/example_status_matrix_zh.md`: per-feature example/rendering status.
 - `examples/README_zh.md`: Chinese plan for promoting smoke runs to formal
   examples.
+- `examples/_template/README_zh.md`: reusable Chinese runbook template for
+  new formal examples.
 - `docs/usage.md`: fuller user guide.
 - `docs/skills/multiwfn2vesta_cli_skill.md`: CLI operating notes.
 - `docs/skills/cube_vesta_skill.md`: ABACUS/Multiwfn cube to VESTA workflow.

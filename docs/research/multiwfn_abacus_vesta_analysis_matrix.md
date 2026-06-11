@@ -87,7 +87,9 @@ Multiwfn evidence:
   Pauli KED (`114`), selected KED (`1200` plus `iKEDsel`),
   orbital-weighted Fukui+/Fukui-/Fukui0 (`95/96/97`),
   orbital-weighted dual descriptor (`98`), Shannon entropy density (`50`),
-  Fisher information density (`51/52`), and many other selectable functions;
+  positive ESP (`101`), negative ESP (`102`), electric-field magnitude from
+  ESP gradient (`103`), Fisher information density (`51/52`), and many other
+  selectable functions;
   `0123dim.f90` exports `userfunc.cub`.
   Multiwfn main menu `1000 -> 2` can set `iuserfunc` interactively, but the
   maintained runner copies the selected Multiwfn `settings.ini` when
@@ -96,7 +98,8 @@ Multiwfn evidence:
   `user-function` route still accepts any direct `iuserfunc`, while named
   routes now imply common source-backed indices for DORI, LEA/LEAE, local
   Mulliken electronegativity/local hardness, selected KED variants,
-  orbital-weighted Fukui/dual descriptor, FOD, spin-channel density, and
+  orbital-weighted Fukui/dual descriptor, FOD, spin-channel density, ESP
+  positive/negative components, electric-field magnitude, and
   information-theory densities.  Multiwfn source computes the
   orbital-weighted descriptors with HOMO/LUMO chemical potential, Gaussian
   orbital-energy weights, and `orbwei_delta=0.1` a.u. by default; the current
@@ -242,7 +245,7 @@ occupations, and density derivatives from the wavefunction representation.
 | Analysis | Multiwfn input | ABACUS feasibility | Multiwfn output | VESTA representation | Project action |
 | --- | --- | --- | --- | --- | --- |
 | IRI/NCI/RDG/Delta-g/DORI | Full wavefunction, or promolecular approximation from structure | Molden route feasible; promolecular route can avoid wavefunction | `IRI.cub`, `RDG.cub`, `RDGprodens.cub`, `Delta_g.cub`, function-23 `griddata.cub`, DORI `userfunc.cub`, `sl2r.cub`, `func1.cub`, `func2.cub` | Standalone scalar isosurfaces, or isosurface plus texture cube; section planes off | `multiwfn2vesta iri-run` implemented for the two-cube weak-interaction stream; `grid-run --surface-cube` can use sign(lambda2)rho cubes as texture on an existing RDG/IRI surface; `grid-run --function dori` now exports DORI by patching `iuserfunc=20` and uses `cube-preset dori-scalar`; explicit `cube-preset dori DORI.cub --texture-cube sl2r.cub` follows `DORIfill.vmd` for DORI+sign(lambda2)rho; `cube-preset rdg-scalar`, `promolecular-rdg`, `promolecular-delta-g`, `hirshfeld-delta-g`, and `iri-scalar` cover standalone `RDG.cub`/`RDGprodens.cub`/`Delta_g.cub`/function-23 `griddata.cub`/`IRI.cub` without stealing the existing `rdg -> iri` texture alias or the IGM/IGMH `dg_inter.cub` route |
-| ESP/MEP on density surface | Full wavefunction or ABACUS `out_pot` plus density cube | Strong direct cube route; Molden route for Multiwfn ESP | `density.cub`, `totesp.cub`, `pot_es.cube`, `pots*.cube` | Density isosurface colored by potential texture | `grid-run --function esp --surface-cube density.cub --grid-mode cube --grid-cube density.cub` now generates the ESP texture and writes the mapped-surface VESTA file directly |
+| ESP/MEP on density surface and ESP components | Full wavefunction or ABACUS `out_pot` plus density cube | Strong direct cube route for total potential; Molden route for Multiwfn ESP components and electric field | `density.cub`, `totesp.cub`, `userfunc.cub`, `pot_es.cube`, `pots*.cube` | Density isosurface colored by potential texture, standalone positive/negative ESP regions, or electric-field-strength isosurfaces | `grid-run --function esp --surface-cube density.cub --grid-mode cube --grid-cube density.cub` generates total ESP texture maps; `grid-run --function positive-esp` / `negative-esp` / `electric-field-magnitude` patch function-100 `iuserfunc=101/102/103`, export `userfunc.cub`, and use standalone `positive-esp` / `negative-esp` / `electric-field-magnitude` presets or `surface-map` with `--surface-cube` |
 | STM/LDOS | Full wavefunction with GTF information | Good candidate for Gamma LCAO Molden; metals and Fermi-level choices need care | `STM.cub` | Single positive LDOS/current isosurface or slices | `stm-run` now automates Multiwfn `300 -> 4`, switches to constant-current mode, exports `STM.cub`, and calls `cube-preset stm` |
 | Molecular surface mapped properties | Full wavefunction or cube pair | Feasible through Molden; ABACUS can provide density/potential cubes | `surf.cub`, `mapfunc.cub`, `density.cub`, `avglocion.cub`, `surfanalysis.pdb` | Surface cube plus texture; extrema as atoms-only overlay phase | `cube-preset surface-map` covers surface+texture display using `molsurfmap.vmd` defaults; `--surfanalysis-pdb` and `surface-extrema` overlay surface extrema |
 | ALIE / LEA / LEAE / local electronegativity / local hardness | Full wavefunction, occupied/virtual orbitals | Feasible only if ABACUS Molden orbitals/energies are adequate; virtual levels in metals risky | `avglocion.cub`, `userfunc.cub`, `surfanalysis.pdb` | Colored density surface plus extrema points | `grid-run --function alie --surface-cube density.cub` now generates ALIE texture maps directly; `grid-run --function local-electron-affinity` and `grid-run --function local-electron-attachment-energy` export LEA/LEAE `userfunc.cub` by automatically patching `iuserfunc=27/-27`; `grid-run --function local-mulliken-electronegativity` and `grid-run --function local-hardness` patch `iuserfunc=28/29` and use `surface-map` with `--surface-cube`; `grid-run --surface-cube` now forwards texture color-scale controls such as `--tex-physical` and `--tex-range-source surface-band`; `cube-preset alie/lea/leae/surface-map` remains the lower-level display layer |
@@ -486,13 +489,14 @@ Main gaps:
   `grid-run --function user-function --user-function-index IUSERFUNC` route,
   and dedicated named function-100 routes for alpha/beta density, DORI,
   LEA/LEAE, local Mulliken electronegativity/local hardness,
-  selected KED variants, orbital-weighted Fukui/dual descriptor, FOD, and
-  information-theory densities.
+  selected KED variants, UFF vdW repulsion/dispersion components, ESP
+  positive/negative components, electric-field magnitude, orbital-weighted
+  Fukui/dual descriptor, FOD, and information-theory densities.
   Local
   Multiwfn source shows function `100`
   exports `userfunc.cub` and evaluates `userfunc(x,y,z)` according to
   `iuserfunc`; named routes patch
-  `1/2/20/27/-27/28/29/90/114/1200/95/96/97/98/49/50/51/52` automatically
+  `1/2/20/27/-27/28/29/93/94/101/102/103/90/114/1200/95/96/97/98/49/50/51/52` automatically
   through the same run-local `-set` settings file while leaving global
   settings untouched.  The KED routes additionally patch run-local `iKEDsel`.
   External-grid interpolation `-1/-3`

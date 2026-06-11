@@ -1,5 +1,29 @@
 # Worklog
 
+## 2026-06-12: ESP component routes and feature-closure UX pass
+
+- Continued the long-running Multiwfn/ABACUS/VESTA route expansion while
+  also closing current features into documented examples.
+- Added source-backed `grid-run` routes for ESP positive component,
+  ESP negative component, and electric-field magnitude.  These use Multiwfn
+  function `100`, patch run-local `iuserfunc=101/102/103`, export
+  `userfunc.cub`, and map to dedicated VESTA presets
+  `positive-esp`, `negative-esp`, and `electric-field-magnitude`.
+- The positive/negative ESP routes follow the inspected Multiwfn source:
+  `101/102` clip total ESP to positive-only/negative-only regions, while
+  `103` derives electric-field magnitude from the ESP gradient.
+- Added focused tests for preset writing, alias resolution, command streams,
+  run-local settings patching, VESTA recipe/manifest content, and CLI
+  function listing.
+- Improved feature-closure documentation: Chinese manual now has a
+  "from zero to first figure" path, the example status matrix records formal
+  example requirements, and `examples/_template/README_zh.md` gives a
+  reusable Chinese runbook structure for future examples.
+- Tightened user experience: editable-install console scripts in `setup.py`
+  now align with `pyproject.toml` for `surface-extrema`, the broken legacy
+  `multiwfn-vesta` script was removed, and the interactive launcher default
+  now opens curated examples instead of the advanced AIM+IGMH workflow.
+
 ## 2026-06-12: Maintained XYZ/extXYZ trajectory-to-VESTA frame layer
 
 - Continued feature closure by filling the upstream gap before

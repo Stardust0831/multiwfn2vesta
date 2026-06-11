@@ -65,8 +65,8 @@ multiwfn2vesta trajectory-video --help
 - `cube-preset`: 在 `cube-vesta` 后端上套用常见分析默认值，例如 density、
   orbital/signed、spin density、Laplacian、K(r)/G(r)、ABACUS direct
   potential、partial charge、wavefunction norm、ELF/LOL、IRI/RDG/NCI、DORI、
-  EDR(r;d)、D(r)、IGM/IGMH/aIGM、ESP/MEP、ALIE/LEA/LEAE、
-  userfunc/iuserfunc、selected KED variants、standalone vdW total/repulsion/
+  EDR(r;d)、D(r)、IGM/IGMH/aIGM、ESP/MEP、positive/negative ESP、
+  electric-field magnitude、ALIE/LEA/LEAE、userfunc/iuserfunc、selected KED variants、standalone vdW total/repulsion/
   dispersion potential、vdW map
 - `surface-extrema`: 把 Multiwfn `surfanalysis.pdb` 的分子表面极值点作为
   atoms-only phase 叠加到已有 `.vesta` 文件中
@@ -92,7 +92,7 @@ multiwfn2vesta trajectory-video --help
 - `grid-run`: 从 Multiwfn 可读波函数文件调用主菜单 `5` 的 real-space
   function grid，导出 density、MO/orbital、Laplacian、K(r)/G(r)、ELF/LOL
   及其 `ELFLOL_type` 变体、
-  ESP/MEP、ALIE、EDR(r;d)、D(r)、RDG/IRI-like、
+  ESP/MEP、positive/negative ESP、电场强度、ALIE、EDR(r;d)、D(r)、RDG/IRI-like、
   promolecular RDG/sign(lambda2)rho、function-100 alpha/beta density 和
   FOD、Thomas-Fermi/Weizsacker/Pauli KED 等单 cube，并可自动接
   `cube-preset` 写 `.vesta`
@@ -350,13 +350,15 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
   `beta-density`、`dori`、
   `local-electron-affinity`、`local-electron-attachment-energy`、
   `local-mulliken-electronegativity`、`local-hardness`、
+  `vdw-repulsion-potential`、`vdw-dispersion-potential`、
+  `positive-esp`、`negative-esp`、`electric-field-magnitude`、
   `thomas-fermi-ked`、`weizsacker-ked`、`pauli-ked`、
   `orbital-weighted-fukui-plus`、`orbital-weighted-fukui-minus`、
   `orbital-weighted-fukui-zero`、`orbital-weighted-dual-descriptor`、
   `fractional-occupation-density`、
   `information-gain-density`、`shannon-entropy-density`、
   `fisher-information-density`、`second-fisher-information-density` 会分别
-  自动 patch `iuserfunc=1/2/20/27/-27/28/29/90/1200/114/95/96/97/98/49/50/51/52`。
+  自动 patch `iuserfunc=1/2/20/27/-27/28/29/93/94/101/102/103/90/1200/114/95/96/97/98/49/50/51/52`。
   KED 变体还会额外 patch run-local `iKEDsel`。
   runner 优先复制所选 Multiwfn 同目录的 `settings.ini`，只 patch
   当前路线需要的 run-local 键后通过 `-set` 传入；
@@ -708,13 +710,14 @@ multiwfn2vesta grid-run --list-functions
   `local-electron-affinity`、`local-electron-attachment-energy`、
   `local-mulliken-electronegativity`、`local-hardness`、
   `vdw-repulsion-potential`、`vdw-dispersion-potential`、
+  `positive-esp`、`negative-esp`、`electric-field-magnitude`、
   `thomas-fermi-ked`、`weizsacker-ked`、`pauli-ked`、
   `orbital-weighted-fukui-plus`、`orbital-weighted-fukui-minus`、
   `orbital-weighted-fukui-zero`、`orbital-weighted-dual-descriptor`、
   `fractional-occupation-density`、
   `information-gain-density`、`shannon-entropy-density`、
   `fisher-information-density`、`second-fisher-information-density`，这些会
-  自动设置 `iuserfunc=1/2/20/27/-27/28/29/93/94/90/1200/114/95/96/97/98/49/50/51/52`；
+  自动设置 `iuserfunc=1/2/20/27/-27/28/29/93/94/101/102/103/90/1200/114/95/96/97/98/49/50/51/52`；
   KED 变体还会额外设置 run-local `iKEDsel`；
   LEA/LEAE 若要画成 density surface 上的染色图，可在 `grid-run` 中加
   `--surface-cube density.cub` 自动选 `lea` / `leae` mapped preset，也可
@@ -739,6 +742,13 @@ multiwfn2vesta grid-run --list-functions
 - `esp`、`nuclear-esp`、`signlambda2rho`：默认按 signed scalar 处理；配合
   `--surface-cube` 时，ESP/nuclear ESP 默认走 `cube-preset esp`，
   sign(lambda2)rho 默认走 `cube-preset iri`
+- `positive-esp` / `positive-mep`、`negative-esp` / `negative-mep`、
+  `electric-field-magnitude` / `electric-field`：函数 `100`，原始输出
+  `userfunc.cub`，分别 patch run-local `iuserfunc=101/102/103`。Multiwfn
+  源码中 101/102 会把总 ESP 裁剪为正值部分/负值部分，103 由 ESP 梯度得到
+  电场强度。standalone VESTA 默认分别用单正 `+0.05`、单负 `-0.05`、单正
+  `0.05` 等值面；若加 `--surface-cube density.cub`，则作为 texture 走
+  `surface-map`，建议显式给 `--tex-physical` 便于跨体系比较。
 - `vdw-potential` / `vdw`：函数 `25`，原始输出 `vdWpot.cub`，默认接
   `cube-preset vdw-potential`，按正/负 `1.0` kcal/mol 等值面显示；配合
   `--surface-cube` 时默认走 `cube-preset vdw-map`，把生成的 vdW potential

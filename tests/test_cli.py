@@ -376,6 +376,15 @@ class TestUnifiedCli(unittest.TestCase):
 
         self.assertEqual(code, 0)
 
+    def test_interactive_default_lists_examples(self):
+        with patch("builtins.input", return_value=""):
+            with patch("sys.stdout", io.StringIO()):
+                with patch("multiwfn2vesta.cli.examples_index.main", return_value=0) as mocked:
+                    code = cli.main([])
+
+        self.assertEqual(code, 0)
+        mocked.assert_called_once_with([])
+
     def test_interactive_aim_igmh_builds_expected_args(self):
         answers = iter(
             [

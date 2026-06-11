@@ -7,6 +7,13 @@
 - 有入口: CLI/测试/文档已存在，但还缺真实体系 smoke。
 - 暂存/杂项: 用户要求暂不进主代码或只作为经验保留。
 
+正式 example 的最低要求：
+
+- 有一个明确 `examples/<example_id>/README_zh.md` 或等价 runbook。
+- 写清输入来源、完整命令、关键参数、主要输出文件和验证命令。
+- 至少有一个项目内轻量 gallery PNG；大 cube、mp4、临时 `.vesta` 可以留在 `smoke/`，通过 manifest 或 `examples --verify-smoke` 引用。
+- 若图仍只是调试证据，状态必须保持 `needs-work` 或 `有 VESTA/cube`，不能标为 `已闭环`。
+
 ## 顶层 CLI 功能
 
 | 功能 | 代表命令 | 推荐体系 | 当前证据 | 状态 | 下一步 |
@@ -55,7 +62,7 @@
 | spin | `spin-density`, `spin-polarization`, `alpha-density`, `beta-density` | 磁性 Fe/O 或 open-shell 小分子 | 有入口 | 缺真实自旋体系效果图 |
 | KED | `hamiltonian-ked`, `lagrangian-ked`, `thomas-fermi-ked`, `weizsacker-ked`, `pauli-ked` | benzene/H2O | 有入口 | 缺物理解释型示例 |
 | ELF/LOL | `elf`, `lol`, `--elflol-type` | COF/Ag/benzene | 有入口 | ABACUS direct ELF 也可走 `cube-preset elf` |
-| ESP/ALIE/LEA/LEAE | `esp`, `alie`, `local-electron-affinity`, `local-electron-attachment-energy` | 芳香分子、极性分子 | 有 VESTA/cube | ESP H2O smoke 已有，缺 PNG 和 surface extrema 图 |
+| ESP/ALIE/LEA/LEAE | `esp`, `positive-esp`, `negative-esp`, `electric-field-magnitude`, `alie`, `local-electron-affinity`, `local-electron-attachment-energy` | 芳香分子、极性分子、Ag(111)+benzene | 有 VESTA/cube | ESP H2O smoke 已有；ESP 正/负分量和电场强度路由已维护，缺正式 PNG 和 surface extrema 图 |
 | vdW | `vdw-potential`, `vdw-repulsion-potential`, `vdw-dispersion-potential` | Ag(111)+benzene 或分子复合物 | 有入口 | 适合做吸附相互作用外围图 |
 | 弱相互作用标量 | `rdg`, `iri`, `dori`, `delta-g`, `hirshfeld-delta-g` | H2O dimer、benzene dimer、Ag adsorbate | IGMH 已闭环；IRI 有调试图 | IRI/DORI/Delta-g standalone 缺手册级图 |
 | 反应性 | `fod`, `orbital-weighted-fukui-*`, `orbital-weighted-dual-descriptor` | 小分子反应位点 | 有入口 | 需要真实 closed-shell 测试体系 |

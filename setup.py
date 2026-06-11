@@ -9,13 +9,13 @@ setup(
     python_requires='>=3.7',  # 指定Python版本
     entry_points={
         'console_scripts': [
-            'multiwfn-vesta=multiwfn_vesta.main:main',
             'multiwfn2vesta=multiwfn2vesta.cli:main',
             'multiwfn2vesta-discover=multiwfn2vesta.executables:main',
             'multiwfn2vesta-abacus-molden=multiwfn2vesta.abacus_molden:main',
             'multiwfn2vesta-molden-check=multiwfn2vesta.molden_check:main',
             'multiwfn2vesta-cube-vesta=multiwfn2vesta.cube_vesta:main',
             'multiwfn2vesta-cube-preset=multiwfn2vesta.cube_preset:main',
+            'multiwfn2vesta-surface-extrema=multiwfn2vesta.surface_extrema_vesta:main',
             'multiwfn2vesta-cube-arith=multiwfn2vesta.cube_arith:main',
             'multiwfn2vesta-iri-run=multiwfn2vesta.multiwfn_iri:main',
             'multiwfn2vesta-igmh-run=multiwfn2vesta.multiwfn_igmh:main',

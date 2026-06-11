@@ -11,6 +11,10 @@ multiwfn2vesta examples --status ready
 multiwfn2vesta examples --verify
 ```
 
+新增正式 example 时先参考 `_template/README_zh.md`。每个 example 应尽量有独立
+`examples/<example_id>/README_zh.md`，不要长期只挂在本总规划文件下；大体积 cube、
+mp4、临时 `.vesta` 留在 `smoke/`，项目内只提交 runbook、manifest、小输入和精选 PNG。
+
 ## 可先整理成正式 example 的体系
 
 | 优先级 | 体系 | 目标功能 | 现有证据 | 下一步 |

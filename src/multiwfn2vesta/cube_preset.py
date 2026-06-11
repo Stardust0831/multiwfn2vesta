@@ -188,6 +188,49 @@ PRESETS: Tuple[CubePreset, ...] = (
         ),
     ),
     CubePreset(
+        name="positive-esp",
+        aliases=("positive-mep", "esp-positive", "mep-positive", "esp-pos", "mep-pos"),
+        description="Single positive isosurface for the positive part of electrostatic potential.",
+        surface_mode="single",
+        isosurface=0.05,
+        positive_rgb=(255, 95, 60),
+        surface_opacity=(130, 255),
+        notes=(
+            "Use for Multiwfn function-100 userfunc.cub with iuserfunc=101. "
+            "The source clips total ESP below zero, leaving only positive potential regions. "
+            "For potential mapped on a density surface, use preset `surface-map` or `esp` "
+            "with an explicit texture cube."
+        ),
+    ),
+    CubePreset(
+        name="negative-esp",
+        aliases=("negative-mep", "esp-negative", "mep-negative", "esp-neg", "mep-neg"),
+        description="Single negative isosurface for the negative part of electrostatic potential.",
+        surface_mode="single",
+        isosurface=-0.05,
+        positive_rgb=(65, 125, 255),
+        surface_opacity=(130, 255),
+        notes=(
+            "Use for Multiwfn function-100 userfunc.cub with iuserfunc=102. "
+            "The source clips total ESP above zero, leaving only negative potential regions. "
+            "Because this is a single-surface preset, color overrides use --positive-rgb."
+        ),
+    ),
+    CubePreset(
+        name="electric-field-magnitude",
+        aliases=("electric-field", "efield", "e-field", "esp-gradient-magnitude", "mep-gradient-magnitude"),
+        description="Single positive isosurface for the magnitude of the electrostatic field.",
+        surface_mode="single",
+        isosurface=0.05,
+        positive_rgb=(120, 210, 255),
+        surface_opacity=(135, 255),
+        notes=(
+            "Use for Multiwfn function-100 userfunc.cub with iuserfunc=103. "
+            "Multiwfn obtains the ESP gradient and writes the electric-field magnitude as a nonnegative scalar. "
+            "This is useful as a standalone field-strength isosurface or as a texture on a density surface."
+        ),
+    ),
+    CubePreset(
         name="vdw-potential",
         aliases=("vdw", "vdwpot", "vdw-potential-cube", "van-der-waals-potential", "vdw-total-potential"),
         description="Positive/negative isosurfaces for standalone van der Waals potential cubes.",

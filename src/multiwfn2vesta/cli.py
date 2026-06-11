@@ -1224,7 +1224,7 @@ def interactive_main() -> int:
     print("20) Rendered trajectory PNG frames -> MP4")
     print("21) XYZ/extXYZ trajectory -> VESTA frame files")
     print("q) Quit")
-    choice = _prompt("choice", default="3").lower()
+    choice = _prompt("choice", default="19").lower()
     if choice in {"0", "discover", "where", "env"}:
         print(discovery_report())
         return 0

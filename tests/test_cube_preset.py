@@ -706,6 +706,48 @@ basin type two
             self.assertIn("effective_surface_mode: `signed`", manifest)
             self.assertIn("direct ABACUS out_pot cubes", manifest)
 
+    def test_esp_component_presets_write_single_surfaces(self):
+        cases = (
+            (
+                "esp-pos",
+                SIGNED_CUBE,
+                r"ISURF\n  1   1\s+0\.05\s+255\s+95\s+60\s+130\s+255",
+                "positive-esp",
+                "iuserfunc=101",
+            ),
+            (
+                "esp-neg",
+                SIGNED_CUBE,
+                r"ISURF\n  1   1\s+-0\.05\s+65\s+125\s+255\s+130\s+255",
+                "negative-esp",
+                "iuserfunc=102",
+            ),
+            (
+                "electric-field",
+                SURFACE_CUBE,
+                r"ISURF\n  1   1\s+0\.05\s+120\s+210\s+255\s+135\s+255",
+                "electric-field-magnitude",
+                "iuserfunc=103",
+            ),
+        )
+        for requested, cube_text, expected_surface, expected_preset, expected_note in cases:
+            with self.subTest(requested=requested):
+                with tempfile.TemporaryDirectory() as tmp:
+                    root = Path(tmp)
+                    cube = self.write_tmp(root, "userfunc.cub", cube_text)
+
+                    result = run_preset(requested, cube, root / "products")
+
+                    text = result.vesta_path.read_text(encoding="utf-8")
+                    manifest = result.manifest_path.read_text(encoding="utf-8")
+
+                    self.assertRegex(text, expected_surface)
+                    self.assertNotIn("IMPORT_TEXTURE", text)
+                    self.assertIn(f"canonical_preset: `{expected_preset}`", manifest)
+                    self.assertIn(f"requested_preset: `{requested}`", manifest)
+                    self.assertIn("effective_surface_mode: `single`", manifest)
+                    self.assertIn(expected_note, manifest)
+
     def test_vdw_potential_preset_writes_signed_surfaces(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

@@ -1,6 +1,22 @@
 # Project Kanban
 
-Updated: 2026-06-12 04:20 CST
+Updated: 2026-06-12 02:54 CST
+
+## Current Request: 2026-06-12 Existing Feature Closure With Valuable Examples
+
+- [x] 需求入板: 把当前已有功能进一步闭环；每个维护态功能都要逐步配真实有价值体系、example/runbook、可验证效果图或产物路径，并优化统一 CLI/发现入口和中文手册。
+- [x] 审计当前已维护功能、上轮未提交的 ESP component/electric-field route、已有 examples/gallery/smoke 图片和本地大文件；继续保护未跟踪 `domain.cub` / `domain.pdb`，不把大型 smoke 产物误提交。只读子 agent 确认正式 ready 图集中在 Ag(111)+benzene IGMH+AIM、GC AIM 和 Cd/Cl 轨迹，`grid-run`/atom coloring/IRI+AIM/STM/domain/surface-extrema 仍缺手册级图。
+- [x] 收口上轮 ESP positive/negative/electric-field 增量的文档和测试，作为本轮“每个功能可发现、可示例化”的基础之一。代码已包含 `positive-esp`、`negative-esp`、`electric-field-magnitude` presets 和 `grid-run` route，文档已同步到 README、usage、manual、skill、research、status matrix、worklog。
+- [x] 为当前维护态功能建立中文闭环矩阵：代表体系、命令、输入来源、效果图路径、状态等级、还缺什么；优先补真实有价值体系而不是 toy placeholder。已强化 `docs/example_status_matrix_zh.md` 的正式 example 验收标准，并新增 `examples/_template/README_zh.md`。
+- [x] 选择一批最缺口大的功能补 example 和渲染效果图；无法本轮完整渲染的功能明确标为待维护，不假装闭环。Linux VESTA 当前缺 `libGLU.so.1`，本轮不强行启动 GUI 渲染；继续复用已验证 PNG，把 IRI+AIM、grid-run、atom coloring 等标为待补手册级图。
+- [x] 优化用户体验入口和中文手册，验证后同步 `/mnt/g/work/multiwfn2vesta/docs/`，用 `Stardust0831` 身份提交并推送。已完成交互默认 examples、`setup.py` console scripts 对齐、中文手册“从零到第一张图”；验证已通过 focused 199-test set、378-test full no-GUI regression、CLI smokes、markdown local-link check、`examples --verify-smoke`、`git diff --check`、setup/pyproject console-script parity；docs 镜像 dry-run 为空。提交和 push 待本轮最后执行。
+
+## Active Goal Continuation: 2026-06-12 Next ABACUS/Multiwfn VESTA Analysis Feature
+
+- [x] 需求入板: 继续长期目标，调研并扩展有价值的 Multiwfn 波函数分析到 VESTA 可视化，优先选择 ABACUS LCAO Molden 或 ABACUS direct cube 可支撑的路线；本轮先审计当前矩阵和源码证据，再做一个可验证增量。
+- [x] 审计当前工作区、已实现 `grid-run`/`cube-preset`/examples/manual 状态、未跟踪本地文件和现有分析矩阵；保护 `domain.cub` / `domain.pdb`。
+- [x] 读取本地 Multiwfn 源码，选择一个尚未维护且适合 VESTA 的高价值分析路线。选定 function-100 `iuserfunc=101/102/103`：positive ESP、negative ESP 和 electric-field magnitude，可由 ABACUS LCAO Molden 经 Multiwfn 生成 `userfunc.cub`，再由 VESTA 显示为 standalone 等值面或 density-surface texture。
+- [x] 实现代码、测试、中文/英文文档、skill/worklog/kanban，同步 docs，验证后用 `Stardust0831` 身份提交推送。实现、文档、验证和 docs 镜像已完成；提交和 push 待本轮最后执行。
 
 ## Current Request: 2026-06-12 Feature Closure With Examples, Renders, And Chinese Manual Phase 3
 

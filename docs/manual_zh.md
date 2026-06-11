@@ -28,6 +28,20 @@ multiwfn2vesta --help
 multiwfn2vesta <command> [options]
 ```
 
+从零到第一张图建议走这条顺序：
+
+1. 运行 `multiwfn2vesta discover`，确认当前 Multiwfn 和 VESTA 候选路径。
+2. 运行 `multiwfn2vesta examples --status ready`，只看已经有真实体系和效果图的算例。
+3. 运行 `multiwfn2vesta examples --id ag111_benzene_igmh_aim --verify`，检查项目内 runbook 和 gallery 图是否齐全。
+4. 打开对应 `examples/<example_id>/README_zh.md`，先复用已有命令和输出目录。
+5. 若只是查看效果，直接看 `docs/assets/gallery/` 下的 PNG；若要复跑，则按 runbook 重新生成 `.cub`、`.vesta`、recipe 和可选 PNG/MP4。
+
+目前最适合先看的三个 ready examples 是：
+
+- `ag111_benzene_igmh_aim`：ABACUS LCAO Molden -> Multiwfn IGMH/AIM -> VESTA 三视图。
+- `gc_aim`：GC 碱基对 AIM 键径和 BCP 叠图。
+- `cdcl_trajectory_video`：Cd/Cl 轨迹帧、Boundary/成键判据和高码率视频合成。
+
 ## 2. 先检查 Multiwfn 和 VESTA
 
 ```bash
@@ -162,7 +176,8 @@ multiwfn2vesta grid-run --list-functions
 - `spin-density`, `spin-polarization`, `alpha-density`, `beta-density`
 - `laplacian`, `hamiltonian-ked`, `lagrangian-ked`, `thomas-fermi-ked`, `weizsacker-ked`, `pauli-ked`
 - `elf`, `lol`
-- `esp`, `alie`, `local-electron-affinity`, `local-electron-attachment-energy`
+- `esp`, `positive-esp`, `negative-esp`, `electric-field-magnitude`
+- `alie`, `local-electron-affinity`, `local-electron-attachment-energy`
 - `vdw-potential`, `vdw-repulsion-potential`, `vdw-dispersion-potential`
 - `iri`, `rdg`, `dori`
 - `fod`, `orbital-weighted-fukui-plus/minus/zero`, `orbital-weighted-dual-descriptor`
@@ -179,6 +194,21 @@ multiwfn2vesta grid-run input.molden esp_map \
   --grid-cube density.cub \
   --tex-physical -0.05 0.05
 ```
+
+若只想看 ESP 的正/负区域或电场强度，不需要手工改 Multiwfn
+`settings.ini`，直接用命名路由：
+
+```bash
+multiwfn2vesta grid-run input.molden esp_components --function positive-esp
+multiwfn2vesta grid-run input.molden esp_components --function negative-esp
+multiwfn2vesta grid-run input.molden efield --function electric-field-magnitude
+```
+
+这三个命名路由都走 Multiwfn 函数 `100`，分别写 run-local
+`iuserfunc=101/102/103`，不会修改全局 Multiwfn 配置。正/负 ESP 分量适合
+在极性分子、吸附界面或电荷转移体系中快速分开看静电正负区域；电场强度适合
+看局域强场区域。若要映射到 density surface 上，再加
+`--surface-cube density.cub --tex-physical MIN MAX`。
 
 ## 8. AIM、IRI、IGMH 的组合图
 
