@@ -35,6 +35,7 @@ class TestUnifiedCli(unittest.TestCase):
         self.assertIn("aim-run", text)
         self.assertIn("aim-pdb", text)
         self.assertIn("aim-igmh", text)
+        self.assertIn("trajectory-video", text)
         self.assertIn("examples", text)
 
     def test_dispatches_discover_command(self):
@@ -291,6 +292,20 @@ class TestUnifiedCli(unittest.TestCase):
 
         self.assertEqual(code, 0)
         mocked.assert_called_once_with(["--status", "ready"])
+
+    def test_dispatches_trajectory_video_command(self):
+        with patch("multiwfn2vesta.cli.trajectory_video.main", return_value=0) as mocked:
+            code = cli.main(["trajectory-video", "png", "movie.mp4", "--bitrate", "20M"])
+
+        self.assertEqual(code, 0)
+        mocked.assert_called_once_with(["png", "movie.mp4", "--bitrate", "20M"])
+
+    def test_dispatches_trajectory_video_alias(self):
+        with patch("multiwfn2vesta.cli.trajectory_video.main", return_value=0) as mocked:
+            code = cli.main(["traj-video", "png", "movie.mp4"])
+
+        self.assertEqual(code, 0)
+        mocked.assert_called_once_with(["png", "movie.mp4"])
 
     def test_dispatches_examples_alias(self):
         with patch("multiwfn2vesta.cli.examples_index.main", return_value=0) as mocked:

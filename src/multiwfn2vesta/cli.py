@@ -26,6 +26,7 @@ from . import (
     multiwfn_iri,
     multiwfn_stm,
     surface_extrema_vesta,
+    trajectory_video,
 )
 from .executables import discovery_report
 
@@ -53,6 +54,7 @@ COMMANDS: Dict[str, Tuple[str, str]] = {
     "aim-run": ("Run Multiwfn AIM on a wavefunction file, then convert PDB to VESTA", "multiwfn_aim"),
     "aim-pdb": ("Convert Multiwfn paths.pdb/CPs.pdb to atoms-only VESTA", "aim_vesta"),
     "aim-igmh": ("Style/render a saved AIM+IGMH VESTA overlay", "aim_igmh_vesta"),
+    "trajectory-video": ("Prepare or run MP4 encoding from VESTA trajectory PNG frames", "trajectory_video"),
     "examples": ("List curated real examples, gallery assets, and runbooks", "examples"),
 }
 
@@ -105,6 +107,9 @@ ALIASES = {
     "multiwfn-aim": "aim-run",
     "aim-vesta": "aim-pdb",
     "igmh": "aim-igmh",
+    "traj-video": "trajectory-video",
+    "trajectory-mp4": "trajectory-video",
+    "vesta-trajectory-video": "trajectory-video",
     "example": "examples",
     "gallery": "examples",
     "example-gallery": "examples",
@@ -154,6 +159,8 @@ Commands:
   aim-run    Run Multiwfn AIM on a wavefunction file, then convert to VESTA.
   aim-pdb    Convert Multiwfn paths.pdb/CPs.pdb to atoms-only VESTA.
   aim-igmh   Style a saved AIM+IGMH VESTA overlay, optionally render views.
+  trajectory-video
+             Prepare or run MP4 encoding from rendered trajectory PNG frames.
   examples   List curated real examples, gallery assets, and runbooks.
 
 Aliases:
@@ -192,6 +199,8 @@ Aliases:
   atom-color  Backward-compatible alias for abacus-mulliken-color.
   aim-vesta  Alias for aim-pdb.
   igmh       Alias for aim-igmh.
+  traj-video, trajectory-mp4, vesta-trajectory-video
+             Aliases for trajectory-video.
   example, gallery, example-gallery
              Aliases for examples.
 
@@ -217,6 +226,7 @@ Examples:
   multiwfn2vesta aim-run input.molden aim_out
   multiwfn2vesta aim-pdb paths.pdb aim_atoms_only.vesta --cps-pdb CPs.pdb
   multiwfn2vesta aim-igmh overlay.vesta products --label-bcp-sites
+  multiwfn2vesta trajectory-video png_frames out.mp4 --bitrate 20M
   multiwfn2vesta examples --status ready
   multiwfn2vesta examples --id cdcl_trajectory_video --verify-smoke
   multiwfn2vesta examples --verify
@@ -1114,6 +1124,35 @@ def interactive_multiwfn_atom_color() -> int:
     return multiwfn_atom_table.main(argv)
 
 
+def interactive_trajectory_video() -> int:
+    print("\nRendered trajectory PNG frames -> MP4")
+    manifest = _prompt("artifact manifest JSON (empty to use frames directory)")
+    argv: List[str] = []
+    if manifest:
+        argv.extend(["--manifest", manifest])
+    else:
+        frames_dir = _prompt("PNG frames directory", required=True)
+        argv.append(frames_dir)
+    output = _prompt("output mp4 (empty for default)")
+    if output:
+        argv.append(output)
+    frame_glob = _prompt("frame glob", default=trajectory_video.DEFAULT_FRAME_GLOB)
+    argv.extend(["--frame-glob", frame_glob])
+    fps = _prompt("fps", default=str(int(trajectory_video.DEFAULT_FPS)))
+    argv.extend(["--fps", fps])
+    bitrate = _prompt("bitrate (empty to use CRF or ffmpeg default)", default=trajectory_video.DEFAULT_BITRATE)
+    if bitrate:
+        argv.extend(["--bitrate", bitrate])
+    crf = _prompt("CRF quality value (empty to use bitrate)")
+    if crf:
+        argv.extend(["--crf", crf])
+    if _yes_no("execute ffmpeg now", default=False):
+        argv.append("--run")
+        if _yes_no("overwrite output if it exists", default=False):
+            argv.append("--overwrite")
+    return trajectory_video.main(argv)
+
+
 def interactive_main() -> int:
     print("multiwfn2vesta interactive launcher\n")
     print("0) Discover Multiwfn/VESTA executables")
@@ -1136,6 +1175,7 @@ def interactive_main() -> int:
     print("17) Charged-state wavefunctions -> Fukui/dual descriptor VESTA")
     print("18) Trajectory -> Multiwfn aIGM/amIGM cubes -> VESTA")
     print("19) List curated examples / gallery / runbooks")
+    print("20) Rendered trajectory PNG frames -> MP4")
     print("q) Quit")
     choice = _prompt("choice", default="3").lower()
     if choice in {"0", "discover", "where", "env"}:
@@ -1183,6 +1223,8 @@ def interactive_main() -> int:
         return interactive_surface_extrema()
     if choice in {"19", "examples", "example", "gallery", "example-gallery"}:
         return examples_index.main([])
+    if choice in {"20", "trajectory-video", "traj-video", "trajectory-mp4", "vesta-trajectory-video"}:
+        return interactive_trajectory_video()
     if choice in {"q", "quit", "exit"}:
         return 0
     print(f"Unknown choice: {choice}")
@@ -1235,6 +1277,8 @@ def run_command(command: str, args: Sequence[str]) -> int:
         return aim_vesta.main(args)
     if command == "aim-igmh":
         return aim_igmh_vesta.main(args)
+    if command == "trajectory-video":
+        return trajectory_video.main(args)
     if command == "examples":
         return examples_index.main(args)
     raise ValueError(f"Unknown command: {command}")

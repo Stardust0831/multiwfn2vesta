@@ -81,6 +81,8 @@ multiwfn2vesta aim-igmh --help
   或 amIGM 轨迹平均菜单，导出 `avgdg_inter.cub`/`avgsl2r.cub`，可选
   `avgRDG.cub`、`thermflu.cub`、`output.txt`，再通过 `cube-preset aigm`
   或 `cube-preset aigm-tfi` 写 mapped-surface `.vesta`
+- `trajectory-video`: 从已经渲染好的 VESTA 轨迹 PNG 帧准备或执行高码率
+  mp4 合成；默认只写 ffmpeg frame list 和 markdown recipe，不启动 VESTA
 - `grid-run`: 从 Multiwfn 可读波函数文件调用主菜单 `5` 的 real-space
   function grid，导出 density、MO/orbital、Laplacian、K(r)/G(r)、ELF/LOL
   及其 `ELFLOL_type` 变体、
@@ -1321,6 +1323,45 @@ PBC 网格菜单的选项 `4` 读取的是 spacing，而不是 `NX,NY,NZ`。
 这个 runner 只负责调用 Multiwfn 并生成 VESTA 文件，不启动 VESTA 图形界面。
 Multiwfn 非零退出、超时、或返回 0 但缺 `avgdg_inter.cub`/`avgsl2r.cub` 时，
 CLI 会保留 stdout/stderr 日志并返回非零码。
+
+## 已渲染轨迹帧到 MP4
+
+`trajectory-video` 是 VESTA 轨迹视频工作流里已经维护的合成层。它读取已渲染的
+PNG 序列，按自然顺序排序，写 ffmpeg concat 清单和 recipe，默认不执行
+ffmpeg：
+
+```bash
+multiwfn2vesta trajectory-video png_frames trajectory.mp4 \
+  --fps 24 \
+  --bitrate 20M
+```
+
+如果已经使用 curated example manifest 记录了 smoke 证据，可以直接从 manifest
+定位 PNG 帧目录，并用 `--output` 指定新视频路径：
+
+```bash
+multiwfn2vesta trajectory-video \
+  --manifest examples/cdcl_trajectory_video/artifact_manifest.json \
+  --output /tmp/cdcl_trajectory.mp4 \
+  --fps 24 \
+  --bitrate 20M
+```
+
+输出：
+
+- `<output>_frames.txt`: ffmpeg concat 输入清单。
+- `<output>_trajectory_video_recipe.md`: 帧目录、帧数、首尾帧、编码参数和完整命令。
+- `<output>.mp4`: 只有加 `--run` 且 ffmpeg 成功时才生成。
+
+常用选项：
+
+- `--run`: 立即执行 ffmpeg。
+- `--overwrite`: 允许替换已有输出视频。
+- `--crf N`: 使用 CRF 质量模式，替代固定 `--bitrate`。
+- `--extra-ffmpeg-arg ARG`: 追加单个 ffmpeg 参数，可重复。
+
+这个命令不启动 VESTA，不处理 ASE/XYZ 到 VESTA/PNG 的上游渲染步骤。后续正式
+trajectory workflow 应继续把参考 `.vesta` 视角、Boundary、成键判据和逐帧关窗策略接到这里。
 
 ## ABACUS Mulliken 原子着色
 

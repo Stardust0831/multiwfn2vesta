@@ -42,16 +42,18 @@
   ],
   "validation_commands": [
     "multiwfn2vesta examples --id cdcl_trajectory_video --verify",
-    "multiwfn2vesta examples --id cdcl_trajectory_video --verify-smoke"
+    "multiwfn2vesta examples --id cdcl_trajectory_video --verify-smoke",
+    "multiwfn2vesta trajectory-video --manifest examples/cdcl_trajectory_video/artifact_manifest.json --output /tmp/cdcl_trajectory.mp4 --fps 24 --bitrate 20M"
   ],
   "style_notes": [
     "Reuse a saved reference .vesta style for camera, atom style, bond style, and boundary.",
     "The cdcl3p50 smoke keeps a deliberately looser Cd-Cl bonding criterion.",
     "Do not commit large MP4 files; keep them in smoke and commit only curated poster frames.",
-    "Close or reuse VESTA windows during batch rendering to avoid save failures."
+    "Close or reuse VESTA windows during batch rendering to avoid save failures.",
+    "trajectory-video is the maintained PNG-sequence to MP4 layer; upstream trajectory-to-VESTA-frame rendering remains separate future work."
   ],
   "next_work": [
-    "Promote frame generation, VESTA rendering, and ffmpeg encoding into a maintained trajectory-video CLI.",
+    "Promote frame generation and VESTA rendering into a maintained trajectory workflow.",
     "Keep the manifest stable so smoke evidence can be verified without committing large artifacts."
   ]
 }

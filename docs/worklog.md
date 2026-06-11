@@ -1,5 +1,29 @@
 # Worklog
 
+## 2026-06-12: Maintained trajectory-video encoding layer
+
+- Continued the long-running Multiwfn/ABACUS/VESTA objective by closing the
+  next trajectory-video gap identified in the curated examples audit.
+- Added `multiwfn2vesta trajectory-video`, with aliases `traj-video`,
+  `trajectory-mp4`, and `vesta-trajectory-video`, to prepare or run
+  high-bitrate MP4 encoding from already rendered VESTA PNG frames.
+- The command naturally sorts PNG frames, writes an ffmpeg concat list,
+  writes a markdown recipe, supports `--manifest` for curated example artifact
+  manifests, and defaults to dry-run mode so it does not start VESTA or
+  ffmpeg unless `--run` is explicit.
+- Wired the command into the unified CLI, interactive launcher, `pyproject`
+  scripts, and `setup.py` scripts.
+- Updated the Cd/Cl trajectory-video example to use the new command:
+  `multiwfn2vesta trajectory-video --manifest
+  examples/cdcl_trajectory_video/artifact_manifest.json --output
+  /tmp/cdcl_trajectory.mp4 --fps 24 --bitrate 20M`.
+- Added `docs/skills/vesta_trajectory_video_skill.md` and updated README,
+  Chinese manual, usage docs, example gallery, status matrix, CLI skill notes,
+  runbook, and artifact manifest.
+- Scope boundary: this increment maintains PNG-sequence to MP4 encoding.  The
+  upstream trajectory-to-VESTA-frame generation and VESTA PNG rendering remain
+  future work.
+
 ## 2026-06-12: Curated example artifact verification
 
 - Continued the feature-closure work by improving the curated example entry

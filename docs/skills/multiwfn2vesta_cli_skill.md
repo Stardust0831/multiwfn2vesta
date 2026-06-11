@@ -48,6 +48,7 @@ multiwfn2vesta multiwfn-atom-color --help
 multiwfn2vesta aim-run --help
 multiwfn2vesta aim-pdb --help
 multiwfn2vesta aim-igmh --help
+multiwfn2vesta trajectory-video --help
 ```
 
 Aliases:
@@ -104,6 +105,9 @@ Aliases:
   `multiwfn2vesta igm-run ...`, and `multiwfn2vesta migm-run ...`.
   Trajectory-average runs are `multiwfn2vesta aigm-run ...` and
   `multiwfn2vesta amigm-run ...`.
+- `multiwfn2vesta traj-video ...`, `multiwfn2vesta trajectory-mp4 ...`, and
+  `multiwfn2vesta vesta-trajectory-video ...` are aliases for
+  `trajectory-video`.
 
 ## Maintained workflows
 
@@ -155,6 +159,26 @@ and gallery assets, so it remains useful even when old workspace smoke
 directories are absent.  `--verify-smoke` checks workspace-local smoke
 evidence such as large videos or PNG sequences; those files are not expected
 to be committed.
+
+### Rendered trajectory frames to MP4
+
+```bash
+multiwfn2vesta trajectory-video png_frames trajectory.mp4 \
+  --fps 24 \
+  --bitrate 20M
+
+multiwfn2vesta trajectory-video \
+  --manifest examples/cdcl_trajectory_video/artifact_manifest.json \
+  --output /tmp/cdcl_trajectory.mp4 \
+  --fps 24 \
+  --bitrate 20M
+```
+
+The command consumes already rendered PNG frames, writes an ffmpeg concat list
+and a markdown recipe, and defaults to dry-run mode.  Add `--run` to execute
+ffmpeg and `--overwrite` only when replacing an existing video is intended.
+It does not start VESTA; upstream VESTA frame rendering remains a separate
+workflow.
 
 ### ABACUS calculation to Molden
 

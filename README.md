@@ -8,7 +8,8 @@ maps, selected kinetic-energy-density variants, STM/LDOS, cube-domain
 extraction, basin cube display, AIM, IRI/RDG,
 and IGM/IGMH command streams, aIGM/amIGM trajectory-average weak-interaction maps,
 atoms-only topology overlays, surface extrema overlays, and AIM+IGMH
-multi-phase VESTA figures.
+multi-phase VESTA figures, plus MP4 encoding from rendered VESTA trajectory
+PNG frames.
 
 The project is still experimental, but the CLI below is the maintained entry
 point.
@@ -171,6 +172,10 @@ then delete the temporary branch.
   `avgsl2r.cub`, optionally preserve `avgRDG.cub`, `thermflu.cub`, and
   scatter data, and write a mapped-surface `.vesta` through `cube-preset
   aigm`/`aigm-tfi`.
+- Prepare high-bitrate MP4 videos from already rendered VESTA trajectory PNG
+  frames with `trajectory-video`, including natural frame sorting, an ffmpeg
+  concat list, a markdown recipe, manifest-based frame discovery for curated
+  examples, and dry-run mode by default.
 - Run Multiwfn main function `5` real-space grid generation from a
   wavefunction file, export density, orbital/MO, spin density,
   spin-polarization parameter, Laplacian, K(r)/G(r) kinetic-energy-density
@@ -305,6 +310,11 @@ multiwfn2vesta aigm-run trajectory.xyz aigm_products \
   --fragment 1-48 --fragment 49-60 \
   --frame-range 1 200 \
   --grid-mode spacing --grid-spacing 0.25
+multiwfn2vesta trajectory-video \
+  --manifest examples/cdcl_trajectory_video/artifact_manifest.json \
+  --output /tmp/cdcl_trajectory.mp4 \
+  --fps 24 \
+  --bitrate 20M
 multiwfn2vesta grid-run input.molden grid_products --function density
 multiwfn2vesta grid-run input.molden grid_products --function spin-polarization
 multiwfn2vesta grid-run input.molden grid_products --function vdw-potential \
@@ -1384,6 +1394,31 @@ detects common `Lattice=`, `pbc=`, and `CRYST1` markers and rejects
 `--grid-mode points` for periodic input, because Multiwfn's PBC grid option
 `4` reads a spacing value rather than `NX,NY,NZ`.
 
+## Rendered Trajectory Frames to MP4
+
+For VESTA trajectory videos, `trajectory-video` handles the maintained
+encoding layer after PNG frames already exist.  It does not start VESTA and
+therefore does not steal focus.  By default it writes an ffmpeg concat list
+and a markdown recipe, then prints the command without running it:
+
+```bash
+multiwfn2vesta trajectory-video png_frames trajectory.mp4 \
+  --fps 24 \
+  --bitrate 20M
+
+multiwfn2vesta trajectory-video \
+  --manifest examples/cdcl_trajectory_video/artifact_manifest.json \
+  --output /tmp/cdcl_trajectory.mp4 \
+  --fps 24 \
+  --bitrate 20M
+```
+
+Add `--run` to execute ffmpeg, and `--overwrite` only when replacing an
+existing MP4 is intended.  The command writes `<output>_frames.txt` and
+`<output>_trajectory_video_recipe.md`.  The still-open part of the workflow is
+the upstream step that converts ASE/XYZ trajectory frames into styled VESTA
+files and PNG images.
+
 ## ABACUS Calculation to Molden
 
 For ABACUS LCAO calculations intended for Multiwfn wavefunction workflows,
@@ -1760,6 +1795,8 @@ and `aim_atoms_only.vesta` without launching VESTA.
   runner notes.
 - `docs/skills/multiwfn_aigm_run_skill.md`: Multiwfn aIGM/amIGM trajectory-average
   runner notes.
+- `docs/skills/vesta_trajectory_video_skill.md`: VESTA PNG frame sequence to
+  MP4 video workflow.
 - `docs/skills/multiwfn_fukui_run_skill.md`: shared-grid
   Fukui/dual-descriptor runner notes.
 - `docs/skills/aim_paths_to_vesta_skill.md`: AIM topology to VESTA workflow.

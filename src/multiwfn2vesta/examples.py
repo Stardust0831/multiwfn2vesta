@@ -76,8 +76,8 @@ EXAMPLES: List[Dict[str, object]] = [
             "../smoke/vesta_trajectory_video_1608/ase_nvt_refstyle_stride20_cdcl3p50/patched/",
             "../smoke/vesta_trajectory_video_1608/ase_npt_refstyle_stride20/ase_npt_refstyle_stride20_hq20m.mp4",
         ],
-        "note": "Good trajectory/video evidence; the actual video is intentionally not committed because it is large.",
-        "next": "Turn the frame patching and ffmpeg sequence into a maintained CLI.",
+        "note": "Good trajectory/video evidence; MP4 encoding now has a maintained trajectory-video dry-run/ffmpeg wrapper.",
+        "next": "Turn trajectory-to-VESTA frame generation and PNG rendering into a maintained CLI.",
     },
     {
         "id": "benzene_aim",

@@ -84,6 +84,7 @@ multiwfn2vesta examples --json
 | 已有多个 cube | `cube-arith` | 线性组合 cube + `.vesta` | density difference、spin density、dual descriptor |
 | 波函数 + fragment | `igmh-run` / `igm-run` / `migm-run` | `dg_inter.cub` + `sl2r.cub` + `.vesta` | 弱相互作用和片段相互作用 |
 | 轨迹 + fragment | `aigm-run` / `amigm-run` | averaged IGM cubes + `.vesta` | 动力学平均弱相互作用 |
+| 已渲染 PNG 轨迹帧 | `trajectory-video` | ffmpeg frame list + mp4 + recipe | VESTA 轨迹视频合成 |
 | 波函数 | `iri-run` | IRI/RDG cube pair + `.vesta` | NCI/IRI 弱相互作用 |
 | 波函数 | `aim-run` | `paths.pdb`/`CPs.pdb` + `.vesta` | AIM 键径和临界点 |
 | 已有 AIM PDB | `aim-pdb` | atoms-only AIM `.vesta` | 防止 VESTA 自动画大量 bond |
@@ -236,6 +237,31 @@ multiwfn2vesta aim-igmh input_overlay.vesta products \
 - Cd/Cl NVT 轨迹视频 poster frame 和高码率 mp4 记录
 - H2O-HF IRI+AIM 调试证据
 - benzene NICS arrow 杂项
+
+## 9.1 已渲染轨迹帧合成视频
+
+`trajectory-video` 只处理已经渲染好的 PNG 序列，不启动 VESTA，因此不会抢鼠标。默认只写 ffmpeg
+frame list 和 recipe，并打印命令；只有加 `--run` 才真的执行 ffmpeg。
+
+```bash
+multiwfn2vesta trajectory-video png_frames trajectory.mp4 \
+  --fps 24 \
+  --bitrate 20M
+
+multiwfn2vesta trajectory-video \
+  --manifest examples/cdcl_trajectory_video/artifact_manifest.json \
+  --output /tmp/cdcl_trajectory.mp4 \
+  --fps 24 \
+  --bitrate 20M
+```
+
+输出包括：
+
+- `<output>_frames.txt`: ffmpeg concat 输入清单。
+- `<output>_trajectory_video_recipe.md`: 帧数、首尾帧、编码参数和完整命令。
+- `<output>.mp4`: 只有使用 `--run` 且 ffmpeg 成功时生成。
+
+仍待维护的是上游步骤：从 ASE/XYZ 轨迹生成带统一视角、Boundary、成键参数和样式的 VESTA/PNG 帧。
 
 ## 10. 每个功能的 example 状态
 

@@ -9,7 +9,7 @@
 | --- | --- | --- | --- |
 | Ag(111)+benzene | 周期性表面吸附体系的 IGMH+AIM 叠图和三视图 | 代表 ABACUS LCAO Molden -> Multiwfn -> VESTA 的主线，保留周期性信息，能展示表面-分子相互作用 | 有 VESTA、cube 和高清三视图 |
 | GC 碱基对 / benzene | AIM 拓扑路径和 BCP 可视化 | GC 更适合作为氢键/分子间 AIM 主图，benzene 适合作基础演示 | 有 VESTA 和 PNG |
-| Cd/Cl 轨迹视频 | VESTA 轨迹视频帧 | 代表 ASE trajectory -> VESTA frame -> PNG/video 的批处理路线 | 有 poster frame 和高码率 mp4，稳定 CLI 待整理 |
+| Cd/Cl 轨迹视频 | VESTA 轨迹视频帧 | 代表 ASE trajectory -> VESTA frame -> PNG/video 的批处理路线 | 有 poster frame 和高码率 mp4；PNG->mp4 合成层已有 `trajectory-video` CLI，上游帧渲染待整理 |
 | H2O-HF | IRI+AIM 叠图、IRI 纹理范围调试 | 当前更适合作 IRI/AIM 调试证据，不应作为手册级成品图 | 有 VESTA、cube 和 PNG，但状态为待完善 |
 | benzene NICS vector | VESTA 箭头/矢量杂项 | 芳香性相关矢量展示的原型；按用户要求暂不进主代码 | 有 VESTA 和 PNG，仅作为杂项保留 |
 
@@ -69,8 +69,8 @@ Phenanthrene 的现有图保留为审计证据，后续需要重新调整视角�
 ## Cd/Cl 轨迹视频
 
 这个例子来自 `smoke/vesta_trajectory_video_1608`，用于 VESTA 批量帧渲染、参考样式复用、Boundary
-和成键判据控制。当前已经有高码率 mp4；后续应把轨迹转 VESTA、帧渲染、ffmpeg 合成视频整理为
-一个稳定 CLI。
+和成键判据控制。当前已经有高码率 mp4；`trajectory-video` 已维护 PNG 序列到 mp4 的合成层，后续应继续
+把轨迹转 VESTA 和帧渲染整理为稳定 CLI。
 
 源目录：
 
@@ -88,6 +88,11 @@ Phenanthrene 的现有图保留为审计证据，后续需要重新调整视角�
 ```bash
 multiwfn2vesta examples --id cdcl_trajectory_video --verify
 multiwfn2vesta examples --id cdcl_trajectory_video --verify-smoke
+multiwfn2vesta trajectory-video \
+  --manifest ../examples/cdcl_trajectory_video/artifact_manifest.json \
+  --output /tmp/cdcl_trajectory.mp4 \
+  --fps 24 \
+  --bitrate 20M
 ```
 
 ![Cd/Cl NVT trajectory frame](assets/gallery/cdcl_nvt_trajectory_frame.png)
