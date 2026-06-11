@@ -5,7 +5,8 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
-from typing import Dict, Iterable, List, Optional, Sequence
+import sys
+from typing import Dict, Iterable, List, Optional, Sequence, Set
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -64,6 +65,7 @@ EXAMPLES: List[Dict[str, object]] = [
         "system": "Cd/Cl ASE trajectory",
         "route": "ASE trajectory -> VESTA frames -> PNG sequence -> MP4",
         "runbook": "examples/cdcl_trajectory_video/README_zh.md",
+        "manifest": "examples/cdcl_trajectory_video/artifact_manifest.json",
         "gallery": [
             "docs/assets/gallery/cdcl_nvt_trajectory_frame.png",
             "docs/assets/gallery/cdcl_trajectory_frame.png",
@@ -71,6 +73,8 @@ EXAMPLES: List[Dict[str, object]] = [
         "smoke": [
             "../smoke/vesta_trajectory_video_1608/ase_nvt_refstyle_stride20_cdcl3p50/ase_nvt_refstyle_stride20_cdcl3p50_hq20m.mp4",
             "../smoke/vesta_trajectory_video_1608/ase_nvt_refstyle_stride20_cdcl3p50/png/frame_0001.png",
+            "../smoke/vesta_trajectory_video_1608/ase_nvt_refstyle_stride20_cdcl3p50/patched/",
+            "../smoke/vesta_trajectory_video_1608/ase_npt_refstyle_stride20/ase_npt_refstyle_stride20_hq20m.mp4",
         ],
         "note": "Good trajectory/video evidence; the actual video is intentionally not committed because it is large.",
         "next": "Turn the frame patching and ffmpeg sequence into a maintained CLI.",
@@ -161,36 +165,72 @@ def _display_path(path_text: str, absolute: bool = False) -> str:
     return path_text
 
 
-def _iter_examples(status: str = "all") -> Iterable[Dict[str, object]]:
+def _known_ids() -> Set[str]:
+    return {str(example["id"]) for example in EXAMPLES}
+
+
+def _normalize_ids(ids: Optional[Sequence[str]]) -> Optional[Set[str]]:
+    if not ids:
+        return None
+    selected: Set[str] = set()
+    for item in ids:
+        for part in item.split(","):
+            value = part.strip()
+            if value:
+                selected.add(value)
+    return selected or None
+
+
+def _validate_ids(ids: Optional[Set[str]]) -> List[str]:
+    if not ids:
+        return []
+    known = _known_ids()
+    return sorted(item for item in ids if item not in known)
+
+
+def _iter_examples(status: str = "all", ids: Optional[Set[str]] = None) -> Iterable[Dict[str, object]]:
     for example in sorted(EXAMPLES, key=lambda item: int(item["priority"])):
+        if ids is not None and str(example["id"]) not in ids:
+            continue
         if status == "all" or example["status"] == status:
             yield example
 
 
-def examples_for_json(status: str = "all", absolute: bool = False) -> List[Dict[str, object]]:
+def examples_for_json(
+    status: str = "all",
+    absolute: bool = False,
+    ids: Optional[Sequence[str]] = None,
+) -> List[Dict[str, object]]:
+    selected_ids = _normalize_ids(ids)
     records: List[Dict[str, object]] = []
-    for example in _iter_examples(status):
+    for example in _iter_examples(status, selected_ids):
         record = dict(example)
-        for key in ("runbook",):
-            record[key] = _display_path(str(record[key]), absolute=absolute)
+        for key in ("runbook", "manifest"):
+            if key in record:
+                record[key] = _display_path(str(record[key]), absolute=absolute)
         for key in ("gallery", "smoke"):
             record[key] = [_display_path(str(item), absolute=absolute) for item in record.get(key, [])]  # type: ignore[arg-type]
         records.append(record)
     return records
 
 
-def _print_text(status: str = "all", absolute: bool = False) -> None:
+def _print_text(status: str = "all", absolute: bool = False, ids: Optional[Set[str]] = None) -> None:
     print("multiwfn2vesta curated examples\n")
     print("Docs:")
     for label, path in DOCS.items():
         print(f"  {label}: {_display_path(path, absolute=absolute)}")
     print()
     print("Examples:")
-    for example in _iter_examples(status):
+    matched = False
+    for example in _iter_examples(status, ids):
+        matched = True
         print(f"- [{example['status']}] {example['id']}: {example['title']}")
         print(f"  system: {example['system']}")
         print(f"  route: {example['route']}")
         print(f"  runbook: {_display_path(str(example['runbook']), absolute=absolute)}")
+        manifest = example.get("manifest")
+        if manifest:
+            print(f"  manifest: {_display_path(str(manifest), absolute=absolute)}")
         gallery = example.get("gallery") or []
         if gallery:
             print("  gallery:")
@@ -203,20 +243,25 @@ def _print_text(status: str = "all", absolute: bool = False) -> None:
                 print(f"    - {_display_path(str(item), absolute=absolute)}")
         print(f"  note: {example['note']}")
         print(f"  next: {example['next']}")
+    if not matched:
+        print("  No examples match the selected filters.")
     print()
-    print("Use --status ready, --status needs-work, or --status misc to filter.")
+    print("Use --id EXAMPLE_ID and --status ready/needs-work/misc to filter.")
     print("Use --json for machine-readable output.")
 
 
-def _verify_project_files(status: str = "all") -> int:
+def _verify_project_files(status: str = "all", ids: Optional[Set[str]] = None) -> int:
     missing: List[str] = []
     for path in DOCS.values():
         if not _project_path(path).exists():
             missing.append(path)
-    for example in _iter_examples(status):
+    for example in _iter_examples(status, ids):
         runbook = str(example["runbook"])
         if not _project_path(runbook).exists():
             missing.append(runbook)
+        manifest = example.get("manifest")
+        if manifest and not _project_path(str(manifest)).exists():
+            missing.append(str(manifest))
         for image in example.get("gallery", []):  # type: ignore[assignment]
             if not _project_path(str(image)).exists():
                 missing.append(str(image))
@@ -226,6 +271,26 @@ def _verify_project_files(status: str = "all") -> int:
             print(f"- {item}")
         return 1
     print("Project example docs and gallery files are present.")
+    return 0
+
+
+def _verify_smoke_files(status: str = "all", ids: Optional[Set[str]] = None) -> int:
+    missing: List[str] = []
+    checked = 0
+    for example in _iter_examples(status, ids):
+        for item in example.get("smoke", []):  # type: ignore[assignment]
+            checked += 1
+            path_text = str(item)
+            if not _project_path(path_text).exists():
+                missing.append(path_text)
+    if missing:
+        print("Missing smoke evidence:")
+        for item in missing:
+            print(f"- {item}")
+        print()
+        print("Smoke evidence is workspace-local and is not committed; rerun or restore the example smoke directory.")
+        return 1
+    print(f"Smoke evidence paths are present. checked={checked}")
     return 0
 
 
@@ -239,6 +304,13 @@ def build_parser() -> argparse.ArgumentParser:
         default="all",
         help="Filter examples by current documentation status.",
     )
+    parser.add_argument(
+        "--id",
+        action="append",
+        dest="ids",
+        metavar="EXAMPLE_ID",
+        help="Show or verify one example id. Can be repeated or comma-separated.",
+    )
     parser.add_argument("--json", action="store_true", help="Print machine-readable JSON.")
     parser.add_argument("--absolute", action="store_true", help="Print absolute paths.")
     parser.add_argument(
@@ -246,18 +318,40 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Check that project-local runbooks and gallery assets exist.",
     )
+    parser.add_argument(
+        "--verify-smoke",
+        action="store_true",
+        help="Check workspace-local smoke evidence paths. These files are not committed.",
+    )
     return parser
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
-    if args.verify:
-        return _verify_project_files(args.status)
+    selected_ids = _normalize_ids(args.ids)
+    unknown_ids = _validate_ids(selected_ids)
+    if unknown_ids:
+        print("Unknown example id(s): " + ", ".join(unknown_ids), file=sys.stderr)
+        print("Known ids: " + ", ".join(sorted(_known_ids())), file=sys.stderr)
+        return 2
+    if args.verify or args.verify_smoke:
+        exit_code = 0
+        if args.verify:
+            exit_code = max(exit_code, _verify_project_files(args.status, selected_ids))
+        if args.verify_smoke:
+            exit_code = max(exit_code, _verify_smoke_files(args.status, selected_ids))
+        return exit_code
     if args.json:
-        print(json.dumps(examples_for_json(args.status, absolute=args.absolute), ensure_ascii=False, indent=2))
+        print(
+            json.dumps(
+                examples_for_json(args.status, absolute=args.absolute, ids=args.ids),
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
     else:
-        _print_text(args.status, absolute=args.absolute)
+        _print_text(args.status, absolute=args.absolute, ids=selected_ids)
     return 0
 
 

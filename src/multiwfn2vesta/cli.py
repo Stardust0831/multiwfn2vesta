@@ -218,6 +218,7 @@ Examples:
   multiwfn2vesta aim-pdb paths.pdb aim_atoms_only.vesta --cps-pdb CPs.pdb
   multiwfn2vesta aim-igmh overlay.vesta products --label-bcp-sites
   multiwfn2vesta examples --status ready
+  multiwfn2vesta examples --id cdcl_trajectory_video --verify-smoke
   multiwfn2vesta examples --verify
 
 Use `multiwfn2vesta <command> --help` for workflow-specific options.

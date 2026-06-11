@@ -1,5 +1,23 @@
 # Worklog
 
+## 2026-06-12: Curated example artifact verification
+
+- Continued the feature-closure work by improving the curated example entry
+  point instead of adding another isolated analysis route.
+- Extended `multiwfn2vesta examples` with `--id` so a user can inspect one
+  real system, for example `cdcl_trajectory_video`, without scanning the full
+  gallery.
+- Added `--verify-smoke` to check workspace-local evidence paths such as
+  high-bitrate MP4 files, PNG sequences, and patched VESTA frame directories.
+  This is intentionally separate from `--verify`, which checks only
+  repository-local runbooks, gallery images, and manifests.
+- Added `examples/cdcl_trajectory_video/artifact_manifest.json` to record the
+  Cd/Cl trajectory-video artifact contract: committed poster/runbook assets,
+  local smoke evidence, validation commands, style notes, and future CLI work.
+- Updated README, Chinese manual, usage docs, example gallery, status matrix,
+  Cd/Cl runbook, and CLI skill notes so the new verification workflow is
+  discoverable.
+
 ## 2026-06-12: Chinese manual, example gallery, and feature closure matrix
 
 - Redirected the current work from adding another Multiwfn source-backed route

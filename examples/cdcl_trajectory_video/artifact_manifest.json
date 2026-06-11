@@ -1,0 +1,57 @@
+{
+  "id": "cdcl_trajectory_video",
+  "status": "ready",
+  "system": "Cd/Cl ASE trajectory",
+  "route": [
+    "ASE trajectory",
+    "VESTA frame sequence using a saved reference style",
+    "PNG sequence",
+    "high-bitrate MP4"
+  ],
+  "project_assets": [
+    {
+      "role": "poster_frame_nvt",
+      "path": "docs/assets/gallery/cdcl_nvt_trajectory_frame.png"
+    },
+    {
+      "role": "poster_frame_npt",
+      "path": "docs/assets/gallery/cdcl_trajectory_frame.png"
+    },
+    {
+      "role": "runbook",
+      "path": "examples/cdcl_trajectory_video/README_zh.md"
+    }
+  ],
+  "workspace_smoke_evidence": [
+    {
+      "role": "nvt_high_bitrate_video",
+      "path": "../smoke/vesta_trajectory_video_1608/ase_nvt_refstyle_stride20_cdcl3p50/ase_nvt_refstyle_stride20_cdcl3p50_hq20m.mp4"
+    },
+    {
+      "role": "nvt_first_png_frame",
+      "path": "../smoke/vesta_trajectory_video_1608/ase_nvt_refstyle_stride20_cdcl3p50/png/frame_0001.png"
+    },
+    {
+      "role": "patched_vesta_frames",
+      "path": "../smoke/vesta_trajectory_video_1608/ase_nvt_refstyle_stride20_cdcl3p50/patched/"
+    },
+    {
+      "role": "npt_high_bitrate_video",
+      "path": "../smoke/vesta_trajectory_video_1608/ase_npt_refstyle_stride20/ase_npt_refstyle_stride20_hq20m.mp4"
+    }
+  ],
+  "validation_commands": [
+    "multiwfn2vesta examples --id cdcl_trajectory_video --verify",
+    "multiwfn2vesta examples --id cdcl_trajectory_video --verify-smoke"
+  ],
+  "style_notes": [
+    "Reuse a saved reference .vesta style for camera, atom style, bond style, and boundary.",
+    "The cdcl3p50 smoke keeps a deliberately looser Cd-Cl bonding criterion.",
+    "Do not commit large MP4 files; keep them in smoke and commit only curated poster frames.",
+    "Close or reuse VESTA windows during batch rendering to avoid save failures."
+  ],
+  "next_work": [
+    "Promote frame generation, VESTA rendering, and ffmpeg encoding into a maintained trajectory-video CLI.",
+    "Keep the manifest stable so smoke evidence can be verified without committing large artifacts."
+  ]
+}

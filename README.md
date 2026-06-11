@@ -257,14 +257,20 @@ The same index is available from the CLI:
 ```bash
 multiwfn2vesta examples
 multiwfn2vesta examples --status needs-work
+multiwfn2vesta examples --id cdcl_trajectory_video
 multiwfn2vesta examples --json
 multiwfn2vesta examples --verify
+multiwfn2vesta examples --id cdcl_trajectory_video --verify-smoke
 ```
 
 The gallery only includes images that have already been rendered in the local
 workspace and copied into `docs/assets/gallery/`.  Features that have a CLI
 entry but do not yet have a real rendered example are explicitly marked in the
 status matrix instead of being treated as finished examples.
+Use `--id` to inspect one curated system, and use `--verify-smoke` only when
+the local workspace-level `smoke/` evidence is expected to be present.  Large
+videos remain smoke artifacts; the repository keeps runbooks, manifests, and
+poster frames instead.
 
 ## Find Multiwfn and VESTA
 

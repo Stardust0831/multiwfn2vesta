@@ -141,15 +141,20 @@ VESTA environment variables accepted:
 multiwfn2vesta examples
 multiwfn2vesta examples --status ready
 multiwfn2vesta examples --status needs-work
+multiwfn2vesta examples --id cdcl_trajectory_video
 multiwfn2vesta examples --json
 multiwfn2vesta examples --verify
+multiwfn2vesta examples --id cdcl_trajectory_video --verify-smoke
 ```
 
 Use this before choosing a demonstration or regression target.  The command
 prints the Chinese manual, gallery, status matrix, formal runbook paths, and
-smoke evidence paths for curated real systems.  `--verify` checks only
-project-local runbooks and gallery assets, so it remains useful even when old
-workspace smoke directories are absent.
+smoke evidence paths for curated real systems.  `--id` narrows the output to
+one curated system.  `--verify` checks only project-local runbooks, manifests,
+and gallery assets, so it remains useful even when old workspace smoke
+directories are absent.  `--verify-smoke` checks workspace-local smoke
+evidence such as large videos or PNG sequences; those files are not expected
+to be committed.
 
 ### ABACUS calculation to Molden
 

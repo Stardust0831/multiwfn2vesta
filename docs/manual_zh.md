@@ -60,11 +60,14 @@ VESTA 查找顺序同理，常见环境变量包括：
 multiwfn2vesta examples
 multiwfn2vesta examples --status ready
 multiwfn2vesta examples --status needs-work
+multiwfn2vesta examples --id cdcl_trajectory_video
 multiwfn2vesta examples --verify
+multiwfn2vesta examples --id cdcl_trajectory_video --verify-smoke
 ```
 
 `--verify` 只检查项目内已提交的 runbook 和 gallery 图片是否存在，不要求本机必须有完整 `smoke/`
-历史目录。需要程序读取时可以用：
+历史目录。`--id` 可以只看一个算例；`--verify-smoke` 会检查工作区本地 `smoke/` 证据，例如高码率
+mp4、PNG 序列或中间 VESTA frame，这些大文件默认不提交。需要程序读取时可以用：
 
 ```bash
 multiwfn2vesta examples --json

@@ -50,7 +50,9 @@ multiwfn2vesta aim-igmh --help
 
 - `discover`: 报告 Multiwfn 和 VESTA 可执行文件候选，以及当前会选择的路径
 - `examples`: 列出当前已整理的真实算例、gallery 图、runbook、状态矩阵；支持
-  `--status ready/needs-work/misc`、`--json` 和 `--verify`
+  `--status ready/needs-work/misc`、`--id`、`--json`、`--verify` 和
+  `--verify-smoke`；`--verify` 检查仓库内 runbook/gallery/manifest，
+  `--verify-smoke` 检查工作区本地大文件或历史渲染证据
 - `abacus-molden`: 从 ABACUS LCAO 计算目录调用最新
   `interfaces/Multiwfn_interface/molden.py`，生成并验证给 Multiwfn 用的
   Molden 文件

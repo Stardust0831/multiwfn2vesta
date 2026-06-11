@@ -80,6 +80,15 @@ Phenanthrene 的现有图保留为审计证据，后续需要重新调整视角�
   `smoke/vesta_trajectory_video_1608/ase_nvt_refstyle_stride20_cdcl3p50/png/frame_0001.png`
 - NPT 参考样式也有视频:
   `smoke/vesta_trajectory_video_1608/ase_npt_refstyle_stride20/ase_npt_refstyle_stride20_hq20m.mp4`
+- 项目内 artifact manifest:
+  `../examples/cdcl_trajectory_video/artifact_manifest.json`
+
+验证命令：
+
+```bash
+multiwfn2vesta examples --id cdcl_trajectory_video --verify
+multiwfn2vesta examples --id cdcl_trajectory_video --verify-smoke
+```
 
 ![Cd/Cl NVT trajectory frame](assets/gallery/cdcl_nvt_trajectory_frame.png)
 

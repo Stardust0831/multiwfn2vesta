@@ -39,7 +39,7 @@
 | AIM overlay 主图 | GC 碱基对 | `smoke/20260605_sob445_more_aim_examples/gc/products/gc_mol_plus_aim_overlay.png` | `docs/assets/gallery/gc_aim_overlay.png` |
 | AIM overlay | benzene | `smoke/20260605_sob445_more_aim_examples/benzene/products/benzene_mol_plus_aim_overlay.png` | `docs/assets/gallery/benzene_aim_overlay.png` |
 | AIM overlay 待重调视角 | phenanthrene | `smoke/20260605_sob445_more_aim_examples/phenanthrene/products/phenanthrene_mol_plus_aim_overlay.png` | `docs/assets/gallery/phenanthrene_aim_overlay.png` |
-| 轨迹视频 poster | Cd/Cl NVT | `smoke/vesta_trajectory_video_1608/ase_nvt_refstyle_stride20_cdcl3p50/png/frame_0001.png` | `docs/assets/gallery/cdcl_nvt_trajectory_frame.png` |
+| 轨迹视频 poster | Cd/Cl NVT | `smoke/vesta_trajectory_video_1608/ase_nvt_refstyle_stride20_cdcl3p50/png/frame_0001.png`；可用 `multiwfn2vesta examples --id cdcl_trajectory_video --verify-smoke` 检查本地证据 | `docs/assets/gallery/cdcl_nvt_trajectory_frame.png` |
 | 轨迹帧补充 | Cd/Cl NPT | `smoke/vesta_trajectory_video_1608/ase_npt_refstyle/png/frame_0008.png` | `docs/assets/gallery/cdcl_trajectory_frame.png` |
 | IRI+AIM 调试证据 | H2O-HF | `smoke/20260605_iri_aim_h2o_hf/products/1h2o_hf_iri2_plus_aim_cube_frame_irifill_small_nosect_texrange.png` | `docs/assets/gallery/h2o_iri_aim_overlay.png` |
 | NICS/vector misc | benzene | `smoke/20260605_nics_vesta_vectors/benzene_nics_vector_smoke.png` | `docs/assets/gallery/benzene_nics_vector.png` |
@@ -77,7 +77,7 @@
 
 1. 把 Ag(111)+benzene IGMH+AIM 整理成 `examples/ag111_benzene_igmh_aim/`，包含命令、输入清单、输出清单和图；后续重渲染更紧凑的 camera/zoom。
 2. 把 GC AIM 和 benzene AIM 整理成轻量 examples；GC 作氢键/分子间 AIM 主图，benzene 作基础例。
-3. 把 Cd/Cl NVT 高码率 mp4 轨迹例子整理出 summary、poster frame 和复用视角说明。
+3. 把 Cd/Cl NVT 高码率 mp4 轨迹例子整理出 summary、poster frame、artifact manifest、smoke 验证入口和复用视角说明；后续再升级为正式轨迹视频 CLI。
 4. 继续完善 IRI+AIM，当前 H2O-HF 只作为调试证据，不能作为最终展示图。
 5. 给 `cube-vesta`/`cube-preset` 基础功能补一张 direct cube PNG。
 6. 给 `grid-run` 选 3 个代表图：ESP-on-density、ELF、vdW potential 或 KED。
