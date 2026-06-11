@@ -13,6 +13,7 @@ cd /mnt/g/work/multiwfn2vesta/project
 export PATH=/mnt/g/work/multiwfn2vesta/project/bin:$PATH
 multiwfn2vesta --help
 multiwfn2vesta examples --summary
+multiwfn2vesta examples --closure-report
 multiwfn2vesta examples
 ```
 
@@ -33,11 +34,12 @@ multiwfn2vesta <command> [options]
 
 1. 运行 `multiwfn2vesta discover`，确认当前 Multiwfn 和 VESTA 候选路径。
 2. 运行 `multiwfn2vesta examples --summary`，先看 ready/needs-render/needs-example 的数量、当前可用效果图和下一批优先体系。
-3. 运行 `multiwfn2vesta examples --status ready`，只看已经有真实体系和效果图的算例。
-4. 运行 `multiwfn2vesta examples --coverage`，按功能查推荐体系、runbook、效果图和缺口。
-5. 运行 `multiwfn2vesta examples --id ag111_benzene_igmh_aim --verify`，检查项目内 runbook 和 gallery 图是否齐全。
-6. 打开对应 `examples/<example_id>/README_zh.md`，先复用已有命令和输出目录。
-7. 若只是查看效果，直接看 `docs/assets/gallery/` 下的 PNG；若要复跑，则按 runbook 重新生成 `.cub`、`.vesta`、recipe 和可选 PNG/MP4。
+3. 运行 `multiwfn2vesta examples --closure-report`，看每个功能当前是 `ready`、`linked`、`needs-render` 还是 `needs-example`。
+4. 运行 `multiwfn2vesta examples --status ready`，只看已经有真实体系和效果图的算例。
+5. 运行 `multiwfn2vesta examples --coverage`，按功能查推荐体系、runbook、效果图和缺口。
+6. 运行 `multiwfn2vesta examples --id ag111_benzene_igmh_aim --verify`，检查项目内 runbook 和 gallery 图是否齐全。
+7. 打开对应 `examples/<example_id>/README_zh.md`，先复用已有命令和输出目录。
+8. 若只是查看效果，直接看 `docs/assets/gallery/` 下的 PNG；若要复跑，则按 runbook 重新生成 `.cub`、`.vesta`、recipe 和可选 PNG/MP4。
 
 目前最适合先看的三个 ready examples 是：
 
@@ -76,6 +78,7 @@ VESTA 查找顺序同理，常见环境变量包括：
 ```bash
 multiwfn2vesta examples
 multiwfn2vesta examples --summary
+multiwfn2vesta examples --closure-report
 multiwfn2vesta examples --status ready
 multiwfn2vesta examples --status needs-work
 multiwfn2vesta examples --id cdcl_trajectory_video
@@ -96,6 +99,7 @@ mp4、PNG 序列或中间 VESTA frame，这些大文件默认不提交。需要�
 multiwfn2vesta examples --json
 multiwfn2vesta examples --coverage --json
 multiwfn2vesta examples --summary --json
+multiwfn2vesta examples --closure-report --json
 multiwfn2vesta examples --command aim-igmh --json
 multiwfn2vesta examples --gallery-assets --json
 ```
@@ -155,9 +159,24 @@ multiwfn2vesta examples --systems
 multiwfn2vesta examples --gallery-assets
 ```
 
-这一步不会启动 VESTA，也不会检查大体积 `smoke/` 文件；它只列出项目内轻量 PNG。
+如果想一次性看“功能 -> 推荐体系 -> 效果图状态 -> 下一步”的闭环报告：
+
+```bash
+multiwfn2vesta examples --closure-report
+```
+
+对应的中文文档是 [功能闭环报告](feature_closure_report_zh.md)。它比 example 级
+`ready/needs-work/misc` 更适合判断功能完成度，因为一个 example 可能是 `needs-work`，
+但其中某条子功能已经被别的 ready workflow 间接覆盖；也可能有调试图但仍不能算 ready。
+
+上述查询命令不会启动 VESTA；除非显式使用 `--verify-smoke`，也不会检查大体积 `smoke/` 文件。
+`--gallery-assets` 只列出项目内轻量 PNG。
 
 当前用于手册快速预览的闭环总览图是：
+
+![ready feature closure map](assets/gallery/feature_closure_ready_map.png)
+
+当前用于手册快速预览的 6-panel 展示图是：
 
 ![feature closure showcase](assets/gallery/feature_closure_showcase.png)
 

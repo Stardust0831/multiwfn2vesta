@@ -8,6 +8,7 @@
 ```bash
 multiwfn2vesta examples
 multiwfn2vesta examples --summary
+multiwfn2vesta examples --closure-report
 multiwfn2vesta examples --status ready
 multiwfn2vesta examples --coverage
 multiwfn2vesta examples --needs-render
@@ -49,7 +50,8 @@ mp4、临时 `.vesta` 留在 `smoke/`，项目内只提交 runbook、manifest、
 
 ## 功能到 example 的当前映射
 
-`multiwfn2vesta examples --coverage` 是权威索引。当前未闭环功能先映射到这些
+`multiwfn2vesta examples --closure-report` 是功能验收的主入口，`--coverage`
+是按命令反查的详细索引。当前未闭环功能先映射到这些
 planned examples，等真实 PNG 生成后再把状态提升为 `ready`：
 
 | example id | 覆盖功能 |
@@ -69,3 +71,4 @@ planned examples，等真实 PNG 生成后再把状态提升为 `ready`：
 - 效果图库: `../docs/example_gallery_zh.md`
 - 功能 example 状态矩阵: `../docs/example_status_matrix_zh.md`
 - 功能到算例闭环索引: `../docs/feature_examples_zh.md`
+- 功能闭环报告: `../docs/feature_closure_report_zh.md`

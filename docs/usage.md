@@ -24,6 +24,7 @@ multiwfn2vesta
 multiwfn2vesta discover
 multiwfn2vesta examples --help
 multiwfn2vesta examples --summary
+multiwfn2vesta examples --closure-report
 multiwfn2vesta examples --coverage
 multiwfn2vesta abacus-molden --help
 multiwfn2vesta molden-check --help
@@ -56,6 +57,7 @@ multiwfn2vesta trajectory-video --help
 - `examples`: 列出当前已整理的真实算例、gallery 图、runbook、状态矩阵；支持
   `--status ready/needs-work/misc`、`--id`、`--json`、`--verify` 和
   `--verify-smoke`；`--summary` 汇总 ready/needs-render/needs-example 数量、gallery 状态和下一批优先体系；
+  `--closure-report` 以功能为主线汇总推荐体系、runbook、效果图状态、缺图队列和 JSON 报告；
   `--coverage` 按功能列出推荐真实体系、runbook、效果图状态和下一步；
   `--needs-render` 只列出缺手册级渲染或缺真实体系的功能；`--command` 按命令或功能关键词筛选；
   `--gallery-assets` 只列出已经提交到项目内的 PNG 效果图；`--systems` 列出当前推荐用于闭环示例的真体系；
@@ -146,6 +148,7 @@ multiwfn2vesta --help
 ```bash
 multiwfn2vesta discover
 multiwfn2vesta examples --summary
+multiwfn2vesta examples --closure-report
 multiwfn2vesta examples --status ready
 multiwfn2vesta examples --coverage
 multiwfn2vesta examples --command grid-run
@@ -153,10 +156,12 @@ multiwfn2vesta examples --gallery-assets
 multiwfn2vesta examples --systems
 ```
 
-当前项目内已提交的效果图包含 `docs/assets/gallery/current_feature_overview.png`
-和 `docs/assets/gallery/feature_closure_showcase.png`。后者由已渲染的真实 VESTA
+当前项目内已提交的效果图包含 `docs/assets/gallery/current_feature_overview.png`、
+`docs/assets/gallery/feature_closure_showcase.png` 和
+`docs/assets/gallery/feature_closure_ready_map.png`。后两者由已渲染的真实 VESTA
 PNG 拼接而成，用于中文手册快速预览；仍缺图的功能继续以 `needs-render` 或
-`needs-example` 出现在 `multiwfn2vesta examples --needs-render` 中。
+`needs-example` 出现在 `multiwfn2vesta examples --closure-report` 和
+`multiwfn2vesta examples --needs-render` 中。
 
 Multiwfn 查找顺序：
 

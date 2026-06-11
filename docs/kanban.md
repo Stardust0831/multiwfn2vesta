@@ -1,6 +1,15 @@
 # Project Kanban
 
-Updated: 2026-06-12 09:42 CST
+Updated: 2026-06-12 07:09 CST
+
+## Current Request: 2026-06-12 Feature Closure Phase 9, Functional Examples, UX, Renders, And Chinese Manual
+
+- [x] 需求入板: 把当前已有功能进一步闭环；每个维护态功能都要能从统一 CLI 找到 example、真实有价值体系、runbook、效果图或明确 `needs-render` / `needs-example` 原因；继续优化中文手册和使用体验。继续保护未跟踪 `domain.cub` / `domain.pdb`，不把大型 smoke/cube/mp4 误提交。
+- [x] 盘点当前状态: `examples --summary --json` 显示 16 个 curated examples，其中 4 个 ready、11 个 needs-work、1 个 misc；29 条功能覆盖中 7 个 ready、5 个 linked、14 个 needs-render、3 个 needs-example；项目内 gallery PNG 12/12 present。已有真实手册级图仍主要是 Ag(111)+benzene IGMH+AIM、GC/benzene AIM 和 Cd/Cl 轨迹，H2O-HF IRI+AIM 仅作调试证据。
+- [x] 补一个更直接的功能闭环报告入口: 已新增 `multiwfn2vesta examples --closure-report` 和 JSON 输出，从 CLI 导出 ready/linked/needs-render/needs-example 的功能清单、推荐体系、runbook、gallery 图和下一步；README、中文手册、usage、feature/status matrix、examples 规划、skill 和 worklog 已同步。
+- [x] 准备本轮效果图产物: 已生成 `docs/assets/gallery/feature_closure_ready_map.png`，只复用已提交的 Ag(111)+benzene、GC/benzene AIM 和 Cd/Cl 真实 VESTA 渲染图；不使用 toy/placeholder 图冒充缺失功能，缺图功能继续保持 `needs-render`。
+- [x] 吸收子 agent 只读审计: 源码候选增量优先级为偶极矩密度、应力张量派生标量、能量密度梯度/拉普拉斯、方向 KED、局域 virial ratio；这些作为后续扩展候选记录在 `docs/feature_closure_report_zh.md`，不阻塞本轮已有功能闭环。
+- [x] 运行 focused/full no-GUI tests、CLI smokes、docs mirror、markdown/link checks、`git diff --check`；通过后用 `Stardust0831` 身份提交并推送。已通过 focused `tests.test_examples tests.test_cli` 89 tests、full 409 no-GUI tests、`examples --closure-report` / `--summary` / `--verify` smokes、ready-map PNG 尺寸检查、56-file markdown local-link check、`git diff --check` 和 docs mirror checksum dry-run；提交/push 结果由最终回复报告。
 
 ## Current Request: 2026-06-12 Feature Closure Phase 8, Real Examples, Renders, UX, And Chinese Manual
 

@@ -270,6 +270,7 @@ class TestExamplesIndex(unittest.TestCase):
             [
                 "docs/assets/gallery/current_feature_overview.png",
                 "docs/assets/gallery/feature_closure_showcase.png",
+                "docs/assets/gallery/feature_closure_ready_map.png",
             ],
         )
 
@@ -345,6 +346,7 @@ class TestExamplesIndex(unittest.TestCase):
         self.assertIn("ready: ag111_benzene_igmh_aim", text)
         self.assertIn("next closures", text)
         self.assertIn("grid-run", text)
+        self.assertIn("feature_closure_ready_map.png", text)
         self.assertIn("feature_closure_showcase.png", text)
         self.assertIn("ag111_benzene", text)
 
@@ -360,7 +362,46 @@ class TestExamplesIndex(unittest.TestCase):
         self.assertIn("gallery", summary)
         self.assertIn("ag111_benzene_igmh_aim", summary["examples"]["ready_ids"])
         self.assertGreater(summary["coverage"]["by_status"]["needs-render"], 0)
+        self.assertEqual(summary["gallery"]["ready_map"], "docs/assets/gallery/feature_closure_ready_map.png")
         self.assertEqual(summary["gallery"]["showcase"], "docs/assets/gallery/feature_closure_showcase.png")
+
+    def test_closure_report_output_lists_feature_buckets(self):
+        output = io.StringIO()
+        with patch("sys.stdout", output):
+            code = examples.main(["--closure-report"])
+
+        self.assertEqual(code, 0)
+        text = output.getvalue()
+        self.assertIn("feature closure report", text)
+        self.assertIn("feature_closure_report_zh.md", text)
+        self.assertIn("feature_closure_ready_map.png", text)
+        self.assertIn("Ready or linked features", text)
+        self.assertIn("Needs render", text)
+        self.assertIn("Needs real example", text)
+        self.assertIn("aim-igmh", text)
+        self.assertIn("grid-run --function bonding/energy diagnostics", text)
+        self.assertIn("fukui-run", text)
+
+    def test_closure_report_json_has_every_feature_and_assets(self):
+        output = io.StringIO()
+        with patch("sys.stdout", output):
+            code = examples.main(["--closure-report", "--json"])
+
+        self.assertEqual(code, 0)
+        report = json.loads(output.getvalue())
+        self.assertEqual(report["features"]["total"], len(examples.FEATURE_COVERAGE))
+        self.assertIn("ready_or_linked", report["features"])
+        self.assertIn("needs_render", report["features"])
+        self.assertIn("needs_example", report["features"])
+        self.assertEqual(
+            report["rendered_effects"]["ready_map"],
+            "docs/assets/gallery/feature_closure_ready_map.png",
+        )
+        self.assertIn("closure_report_zh", report["docs"])
+        ready_commands = {item["command"] for item in report["features"]["ready_or_linked"]}
+        self.assertIn("aim-igmh", ready_commands)
+        needs_render_commands = {item["command"] for item in report["features"]["needs_render"]}
+        self.assertIn("grid-run --function bonding/energy diagnostics", needs_render_commands)
 
     def test_unknown_id_is_an_error(self):
         error = io.StringIO()

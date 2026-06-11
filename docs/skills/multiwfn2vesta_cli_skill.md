@@ -148,6 +148,7 @@ VESTA environment variables accepted:
 ```bash
 multiwfn2vesta examples
 multiwfn2vesta examples --summary
+multiwfn2vesta examples --closure-report
 multiwfn2vesta examples --status ready
 multiwfn2vesta examples --status needs-work
 multiwfn2vesta examples --id cdcl_trajectory_video
@@ -164,9 +165,9 @@ multiwfn2vesta examples --id cdcl_trajectory_video --verify-smoke
 ```
 
 Use this before choosing a demonstration or regression target.  Start with
-`--summary` when you need a compact closure report: it counts curated example
-statuses, feature coverage statuses, committed gallery assets, and the next
-priority real systems.  The default command
+`--summary` when you need compact status counts, or `--closure-report` when
+you need a feature-by-feature closeout with ready/linked/needs-render/needs-example
+status, recommended systems, gallery figures, and next actions.  The default command
 prints the Chinese manual, gallery, status matrix, formal runbook paths, and
 smoke evidence paths for curated real systems.  `--id` narrows the output to
 one curated system.  `--verify` checks only project-local runbooks, manifests,

@@ -1,5 +1,36 @@
 # Worklog
 
+## 2026-06-12: Feature closure report, ready-map render, and manual UX pass
+
+- Continued the current feature-closure request by adding a status-oriented
+  `multiwfn2vesta examples --closure-report` CLI mode.  The report groups all
+  maintained features into `ready`/`linked`, `needs-render`, and
+  `needs-example`, and records the recommended real system, runbook, gallery
+  image, and next action for each route.  JSON output is available for future
+  dashboards or automated audits.
+- Added `docs/feature_closure_report_zh.md` as the Chinese feature closeout
+  report.  It explicitly distinguishes feature-level readiness from example
+  `ready/needs-work/misc` status, so debug images and toy smokes do not get
+  promoted to finished examples.
+- Generated `docs/assets/gallery/feature_closure_ready_map.png` from already
+  committed real VESTA renders.  The new ready map covers the current
+  Ag(111)+benzene IGMH/AIM, GC/benzene AIM, and Cd/Cl trajectory-video
+  ready paths; grid-run scalar suites, atom coloring, Fukui/cube-arith,
+  domain, STM, aIGM, and clean IRI renders remain listed as missing figures.
+- Updated README, Chinese manual, usage guide, example gallery, feature
+  index, status matrix, examples planning page, CLI skill notes, and kanban
+  so the recommended discovery flow is now `examples --summary`,
+  `examples --closure-report`, then `examples --coverage` / `--command`.
+- Read-only subagent audits agreed with the strict readiness boundary:
+  ready figures are concentrated in Ag(111)+benzene, GC/benzene AIM, and
+  Cd/Cl trajectory workflows.  The next formal render priorities are Ag
+  extended scalar fields, GC weak-interaction extension, benzene/phenol dimer
+  scalar suite, COF direct cubes, reactive-aromatic Fukui/atom coloring, and
+  real spin/atom coloring.  A separate source-route audit suggested future
+  Multiwfn function-100 candidates such as dipole density, stress tensor
+  scalars, energy-density gradient/Laplacian, directional KED, and local
+  virial ratio; these are recorded as future work, not current ready routes.
+
 ## 2026-06-12: Bonding and local-energy diagnostic routes
 
 - Continued the feature-closure request by adding source-backed

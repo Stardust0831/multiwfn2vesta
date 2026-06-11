@@ -18,6 +18,7 @@ DOCS = {
     "gallery_zh": "docs/example_gallery_zh.md",
     "status_matrix_zh": "docs/example_status_matrix_zh.md",
     "feature_examples_zh": "docs/feature_examples_zh.md",
+    "closure_report_zh": "docs/feature_closure_report_zh.md",
     "examples_plan_zh": "examples/README_zh.md",
 }
 
@@ -578,6 +579,7 @@ FEATURE_COVERAGE: List[Dict[str, object]] = [
         "gallery": [
             "docs/assets/gallery/current_feature_overview.png",
             "docs/assets/gallery/feature_closure_showcase.png",
+            "docs/assets/gallery/feature_closure_ready_map.png",
         ],
         "next": "Keep the coverage table synchronized whenever a workflow gains or loses ready example status.",
     },
@@ -988,6 +990,11 @@ def gallery_for_json(
                 "Feature closure showcase",
                 "Compact manual panel assembled from committed real VESTA renders; missing features remain listed as needs-render.",
             ),
+            (
+                "docs/assets/gallery/feature_closure_ready_map.png",
+                "Ready feature closure map",
+                "Status-oriented panel assembled from committed real VESTA renders for the currently ready examples.",
+            ),
         ):
             records.append(
                 {
@@ -1049,6 +1056,7 @@ def summary_for_json(absolute: bool = False) -> Dict[str, object]:
             "total_assets": len(gallery_records),
             "present_assets": sum(1 for item in gallery_records if item["exists"]),
             "missing_assets": [item["image"] for item in gallery_records if not item["exists"]],
+            "ready_map": _display_path("docs/assets/gallery/feature_closure_ready_map.png", absolute=absolute),
             "showcase": _display_path("docs/assets/gallery/feature_closure_showcase.png", absolute=absolute),
         },
         "recommended_systems": [
@@ -1063,9 +1071,58 @@ def summary_for_json(absolute: bool = False) -> Dict[str, object]:
         ],
         "workflow": [
             "Run examples --status ready for finished tutorials.",
+            "Run examples --closure-report for the per-feature closure map and remaining render queue.",
             "Run examples --coverage or --command NAME to find the recommended example for a feature.",
             "Run examples --needs-render to find features that still need a real PNG or real input chain.",
             "Run examples --gallery-assets to list committed render artifacts.",
+        ],
+    }
+
+
+def closure_report_for_json(absolute: bool = False) -> Dict[str, object]:
+    """Return one status-oriented view of every maintained feature route."""
+
+    coverage_records = feature_coverage_for_json(absolute=absolute)
+    examples_records = examples_for_json(absolute=absolute)
+    gallery_records = gallery_for_json(absolute=absolute)
+
+    def _select(statuses: Set[str]) -> List[Dict[str, object]]:
+        return [record for record in coverage_records if str(record["status"]) in statuses]
+
+    return {
+        "docs": {key: _display_path(path, absolute=absolute) for key, path in DOCS.items()},
+        "rendered_effects": {
+            "ready_map": _display_path("docs/assets/gallery/feature_closure_ready_map.png", absolute=absolute),
+            "showcase": _display_path("docs/assets/gallery/feature_closure_showcase.png", absolute=absolute),
+            "gallery_index": _display_path("docs/example_gallery_zh.md", absolute=absolute),
+        },
+        "examples": {
+            "total": len(examples_records),
+            "by_status": _status_counts(examples_records),
+            "ready_ids": [str(item["id"]) for item in examples_records if item["status"] == "ready"],
+            "needs_work_ids": [str(item["id"]) for item in examples_records if item["status"] == "needs-work"],
+        },
+        "features": {
+            "total": len(coverage_records),
+            "by_status": _status_counts(coverage_records),
+            "all": coverage_records,
+            "ready_or_linked": _select({"ready", "linked"}),
+            "needs_render": _select({"needs-render"}),
+            "needs_example": _select({"needs-example"}),
+            "misc": _select({"misc"}),
+        },
+        "gallery": {
+            "total_assets": len(gallery_records),
+            "present_assets": sum(1 for item in gallery_records if item["exists"]),
+            "missing_assets": [item["image"] for item in gallery_records if not item["exists"]],
+        },
+        "recommended_systems": systems_for_json(),
+        "policy": [
+            "Use ready only when a real-system runbook and project-local PNG exist.",
+            "Use linked when a command is covered inside another ready workflow but does not yet have its own tutorial figure.",
+            "Keep needs-render for implemented routes that still need a real VESTA PNG.",
+            "Keep needs-example for routes that still lack a complete real input chain.",
+            "Do not promote toy or debug renders to ready status.",
         ],
     }
 
@@ -1078,6 +1135,7 @@ def _print_summary(absolute: bool = False) -> None:
     print("multiwfn2vesta example closure summary\n")
     print(f"Manual: {_display_path('docs/manual_zh.md', absolute=absolute)}")
     print(f"Feature index: {_display_path('docs/feature_examples_zh.md', absolute=absolute)}")
+    print(f"Ready map PNG: {gallery_info['ready_map']}")  # type: ignore[index]
     print(f"Showcase PNG: {gallery_info['showcase']}")  # type: ignore[index]
     print()
     print("Curated examples:")
@@ -1106,7 +1164,57 @@ def _print_summary(absolute: bool = False) -> None:
     for item in summary["recommended_systems"][:5]:  # type: ignore[index]
         print(f"  - {item['priority']}. {item['id']}: {item['title']} ({item['status']})")
     print()
-    print("Next commands: examples --coverage, examples --needs-render, examples --gallery-assets, examples --systems")
+    print("Next commands: examples --closure-report, examples --coverage, examples --needs-render, examples --gallery-assets, examples --systems")
+
+
+def _print_closure_report(absolute: bool = False) -> None:
+    report = closure_report_for_json(absolute=absolute)
+    features = report["features"]  # type: ignore[assignment]
+    examples_info = report["examples"]  # type: ignore[assignment]
+    gallery_info = report["gallery"]  # type: ignore[assignment]
+    effects = report["rendered_effects"]  # type: ignore[assignment]
+
+    print("multiwfn2vesta feature closure report\n")
+    print(f"Chinese report: {report['docs']['closure_report_zh']}")  # type: ignore[index]
+    print(f"Manual: {report['docs']['manual_zh']}")  # type: ignore[index]
+    print(f"Feature index: {report['docs']['feature_examples_zh']}")  # type: ignore[index]
+    print(f"Ready map PNG: {effects['ready_map']}")  # type: ignore[index]
+    print(f"Showcase PNG: {effects['showcase']}")  # type: ignore[index]
+    print()
+    print(f"Examples: total={examples_info['total']} by_status={examples_info['by_status']}")  # type: ignore[index]
+    print(f"Features: total={features['total']} by_status={features['by_status']}")  # type: ignore[index]
+    print(f"Gallery: {gallery_info['present_assets']}/{gallery_info['total_assets']} project assets present")  # type: ignore[index]
+    missing = gallery_info["missing_assets"]  # type: ignore[index]
+    if missing:
+        print("Missing gallery assets:")
+        for item in missing:
+            print(f"  - {item}")
+    print()
+
+    print("Ready or linked features:")
+    for record in features["ready_or_linked"]:  # type: ignore[index]
+        print(f"  - [{record['status']}] {record['command']} -> {record['example']} ({record['system']})")
+    print()
+
+    print("Needs render:")
+    for record in features["needs_render"]:  # type: ignore[index]
+        print(f"  - {record['command']} -> {record['example']}")
+        print(f"    system: {record['system']}")
+        print(f"    next: {record['next']}")
+    print()
+
+    print("Needs real example:")
+    for record in features["needs_example"]:  # type: ignore[index]
+        print(f"  - {record['command']} -> {record['example']}")
+        print(f"    system: {record['system']}")
+        print(f"    next: {record['next']}")
+    print()
+
+    print("Recommended systems:")
+    for item in report["recommended_systems"][:7]:  # type: ignore[index]
+        print(f"  - {item['priority']}. {item['id']}: {item['title']} ({item['status']})")
+    print()
+    print("Policy: do not mark debug/toy/no-PNG workflows as ready; keep them as needs-render or needs-example.")
 
 
 def _print_text(status: str = "all", absolute: bool = False, ids: Optional[Set[str]] = None) -> None:
@@ -1311,6 +1419,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print a compact closure summary with status counts, ready examples, gallery state, and next priorities.",
     )
     parser.add_argument(
+        "--closure-report",
+        action="store_true",
+        help="Print the per-feature closure report: example, system, rendered figure status, and next action.",
+    )
+    parser.add_argument(
         "--verify",
         action="store_true",
         help="Check that project-local runbooks and gallery assets exist.",
@@ -1344,6 +1457,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             print(json.dumps(summary_for_json(absolute=args.absolute), ensure_ascii=False, indent=2))
         else:
             _print_summary(absolute=args.absolute)
+        return 0
+    if args.closure_report:
+        if args.json:
+            print(json.dumps(closure_report_for_json(absolute=args.absolute), ensure_ascii=False, indent=2))
+        else:
+            _print_closure_report(absolute=args.absolute)
         return 0
     if args.gallery_assets:
         if args.json:

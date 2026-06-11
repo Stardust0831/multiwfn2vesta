@@ -11,11 +11,16 @@
 
 ![feature closure showcase](assets/gallery/feature_closure_showcase.png)
 
+当前 ready 功能图谱只放已经能作为 ready/linked 功能证据的真实渲染图：
+
+![ready feature closure map](assets/gallery/feature_closure_ready_map.png)
+
 按功能反查 example 覆盖状态见 `feature_examples_zh.md`，命令入口是
 `multiwfn2vesta examples --coverage`。想先看当前闭环概况、缺图数量和下一批优先体系时用：
 
 ```bash
 multiwfn2vesta examples --summary
+multiwfn2vesta examples --closure-report
 ```
 
 只想列出已经提交到项目内的 PNG 时用：
@@ -31,6 +36,7 @@ multiwfn2vesta examples --systems
 ```
 
 体系选择依据见 [真实算例体系选择依据](research/valuable_systems_for_examples_zh.md)。
+逐功能闭环状态见 [功能闭环报告](feature_closure_report_zh.md)。
 
 ## 高价值代表体系
 
@@ -176,13 +182,12 @@ multiwfn2vesta cube-preset iri h2o_hf_IRI2_surface.cub iri_products \
 
 后续补图建议按下面顺序推进：
 
-1. Ag(111)+benzene IGMH+AIM: 重渲染一套更紧凑的 camera/zoom，减少留白。
-2. GC AIM: 补一个更适合手册的无重复坐标轴版本。
-3. IRI+AIM: 继续解析 VESTA `SURFS`/`SECTS`/`TEX3P`，直到 IRI 等值面和 AIM 叠图清楚。
-4. ABACUS 直接 cube: charge density、potential-on-density、ELF、partial charge、wavefunction norm。
-5. Multiwfn `grid-run`: density/orbital/spin/KED/ELF/LOL/ESP/ALIE/LEA/vdW/component vdW/FOD/OW-Fukui/信息论密度。
-6. RoSE/SEDD: 用 benzene dimer 或 GC 碱基对渲染一组 paired figure，先试 `0.5` 等值面再按 cube 范围调参；公开 fallback 可用 phenol dimer 类弱相互作用体系。
-7. `cube-arith` 和 `fukui-run`: density difference、spin density、Fukui+/-/0、dual descriptor；coronene 或带杂原子的芳香体系比 toy 小分子更适合手册图。
-8. surface extrema: 用 phenol、含氟/硝基芳香体系或 GC 的 ALIE/LEA/LEAE 表面极值补一张点标记图。
-9. `stm-run`、`domain-run`、basin cube: 当前有 VESTA/cube 烟测，但缺真正渲染图。
-10. atom coloring: ABACUS Mulliken 和 Multiwfn 原子表染色已有 VESTA 烟测，缺真实电荷/磁矩或 condensed Fukui 对比 PNG。
+1. Ag(111)+benzene extended fields: 复用已验证 Molden/cell/相机，补 vdW、ESP、电场、steric/SBL、STM 和 bonding diagnostics。
+2. GC weak interaction extension: 在 ready AIM 图基础上补 IRI/RDG、ESP-on-density、surface extrema、on-top pair density。
+3. benzene/phenol dimer scalar suite: 补 IRI/RDG/DORI、RoSE/SEDD、vdW、information-density、USI/BNI、on-top pair density。
+4. COF_12000N2 单层: 补 ABACUS direct density/potential/ELF/partial-charge/wfc norm 图。
+5. Fukui/atom coloring 体系: 准备同网格三态 density cube 和真实 atom scalar table。
+6. Spin/atom coloring 体系: 用真实 open-shell 或磁性体系替换 toy Fe smoke。
+7. H2O domain baseline: 补小体系 domain 和基础 KED/ESP 对照图。
+8. IRI+AIM debug clean render: 继续解析 VESTA `SURFS`/`SECTS`/`TEX3P`，直到 IRI 等值面和 AIM 叠图清楚。
+9. STM/domain/basin: 当前有 VESTA/cube 烟测，但缺真正渲染图。

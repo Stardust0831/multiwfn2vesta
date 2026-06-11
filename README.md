@@ -26,15 +26,17 @@ point.
   an editable install.  Direct module execution from inside
   `src/multiwfn2vesta` is intentionally not the supported path.
 - Curated real-system examples are discoverable with
-  `multiwfn2vesta examples --summary` and `multiwfn2vesta examples`.  The ready gallery currently uses
+  `multiwfn2vesta examples --summary`, `multiwfn2vesta examples --closure-report`,
+  and `multiwfn2vesta examples`.  The ready gallery currently uses
   Ag(111)+benzene, GC AIM, and Cd/Cl trajectory figures; planned closure
   runbooks for Ag extended fields, benzene dimer scalar fields, GC weak
   interactions, COF direct cubes, Fukui/dual reactivity, spin/atom coloring,
   H2O domains, and short aIGM trajectories remain marked `needs-work` until
-  real PNG renders are added.  The current manual showcase image is
-  `docs/assets/gallery/feature_closure_showcase.png`, assembled from already
-  rendered project PNGs so missing functions are still visible as
-  `needs-render` in the coverage table.
+  real PNG renders are added.  The current ready-feature map is
+  `docs/assets/gallery/feature_closure_ready_map.png`, and the manual
+  showcase is `docs/assets/gallery/feature_closure_showcase.png`; both are
+  assembled from already rendered project PNGs so missing functions are still
+  visible as `needs-render` in the coverage table.
 - Untracked local probe files such as `domain.cub` and `domain.pdb` are
   workspace artifacts and should stay out of normal commits.
 
@@ -274,6 +276,7 @@ cd /mnt/g/work/multiwfn2vesta/project
 export PATH=/mnt/g/work/multiwfn2vesta/project/bin:$PATH
 multiwfn2vesta --help
 multiwfn2vesta examples --summary
+multiwfn2vesta examples --closure-report
 multiwfn2vesta examples --status ready
 multiwfn2vesta examples --coverage
 multiwfn2vesta examples --command grid-run
@@ -308,6 +311,7 @@ For day-to-day use, start from the Chinese manual and the example gallery:
 - [效果图库和真实算例索引](docs/example_gallery_zh.md)
 - [功能 example 状态矩阵](docs/example_status_matrix_zh.md)
 - [功能到算例闭环索引](docs/feature_examples_zh.md)
+- [功能闭环报告](docs/feature_closure_report_zh.md)
 - [真实算例体系选择依据](docs/research/valuable_systems_for_examples_zh.md)
 - [examples 规划](examples/README_zh.md)
 - [example 模板](examples/_template/README_zh.md)
@@ -317,6 +321,7 @@ The same index is available from the CLI:
 ```bash
 multiwfn2vesta examples
 multiwfn2vesta examples --summary
+multiwfn2vesta examples --closure-report
 multiwfn2vesta examples --status needs-work
 multiwfn2vesta examples --id cdcl_trajectory_video
 multiwfn2vesta examples --coverage
@@ -342,6 +347,9 @@ The feature-coverage view is the fastest way to answer "which real system
 should demonstrate this command?".  It reports whether a command is `ready`,
 covered through another ready workflow, still needs a better render, or still
 needs a real system.
+Use `--closure-report` when you want the same information as a status-oriented
+closeout report with the ready-feature map, render queue, real-system queue,
+and policy notes in one place.
 Use `--command <name-or-term>` to filter that view to one workflow, use
 `--gallery-assets` to list only committed PNG figures, and use `--systems`
 when choosing a real system for the next example instead of falling back to a

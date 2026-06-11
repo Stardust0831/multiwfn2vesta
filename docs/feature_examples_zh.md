@@ -15,6 +15,7 @@
 
 ```bash
 multiwfn2vesta examples --summary
+multiwfn2vesta examples --closure-report
 multiwfn2vesta examples --coverage
 multiwfn2vesta examples --needs-render
 multiwfn2vesta examples --command grid-run
@@ -56,7 +57,7 @@ multiwfn2vesta examples --coverage --json
 | `aim-igmh` | Ag(111)+benzene | ready | Ag 三视图 | 继续改善不抢焦点渲染和 camera preset |
 | `trajectory-frames` | Cd/Cl extXYZ 轨迹 | ready | `assets/gallery/cdcl_nvt_trajectory_frame.png` | 后续补 ASE `.traj` 直接读取 |
 | `trajectory-video` | Cd/Cl VESTA PNG frame 序列 | ready | Cd/Cl poster frame | 后续补不抢焦点 PNG 渲染层 |
-| `examples` | 文档/算例发现入口 | ready | `assets/gallery/current_feature_overview.png`、`assets/gallery/feature_closure_showcase.png` | 继续把 smoke 逐步提升为正式 example |
+| `examples` | 文档/算例发现入口 | ready | `assets/gallery/current_feature_overview.png`、`assets/gallery/feature_closure_showcase.png`、`assets/gallery/feature_closure_ready_map.png` | 继续把 smoke 逐步提升为正式 example |
 
 ## 推荐真实体系组合
 
@@ -122,15 +123,21 @@ example id 落地。每个 example 都应先满足 `examples/_template/README_zh
 
 ![current feature overview](assets/gallery/current_feature_overview.png)
 
+当前 ready 功能图谱：
+
+![ready feature closure map](assets/gallery/feature_closure_ready_map.png)
+
 当前手册用的 6-panel 闭环展示图：
 
 ![feature closure showcase](assets/gallery/feature_closure_showcase.png)
 
 单图入口见 `docs/example_gallery_zh.md`。
+逐功能闭环报告见 `docs/feature_closure_report_zh.md`。
 
 CLI 入口补充：
 
 - `multiwfn2vesta examples --summary`：快速汇总当前闭环度、ready examples、gallery 完整性和下一批优先体系。
+- `multiwfn2vesta examples --closure-report`：按功能验收当前 `ready`、`linked`、`needs-render`、`needs-example`、推荐体系、图像状态和下一步。
 - `multiwfn2vesta examples --command <命令或关键词>`：从某个功能反查推荐体系、状态和下一步。
 - `multiwfn2vesta examples --gallery-assets`：只列出已提交的项目内 PNG，不检查本地大文件。
 - `multiwfn2vesta examples --systems`：列出当前推荐真体系，帮助新 example 避免 toy placeholder。

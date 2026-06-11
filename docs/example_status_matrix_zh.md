@@ -18,6 +18,7 @@
 
 ```bash
 multiwfn2vesta examples --summary
+multiwfn2vesta examples --closure-report
 multiwfn2vesta examples --coverage
 multiwfn2vesta examples --needs-render
 multiwfn2vesta examples --command aim-igmh
@@ -34,6 +35,8 @@ multiwfn2vesta examples --systems
 - 新功能闭环时先运行 `multiwfn2vesta examples --systems` 选体系，再用 `--command` 检查同类功能已有状态。
 - 需要快速汇报当前闭环度时先运行 `multiwfn2vesta examples --summary`；它会统计 ready/linked/needs-render/needs-example，
   并列出当前 gallery 是否齐全和下一批优先体系。
+- 需要逐功能验收时运行 `multiwfn2vesta examples --closure-report`；它把功能级 `ready/linked/needs-render/needs-example`
+  与推荐体系、runbook、gallery 图和下一步放在同一处，比 example 级 `ready/needs-work/misc` 更适合做功能完成度判断。
 
 ## 顶层 CLI 功能
 
@@ -73,6 +76,7 @@ multiwfn2vesta examples --systems
 | 轨迹帧补充 | Cd/Cl NPT | `smoke/vesta_trajectory_video_1608/ase_npt_refstyle/png/frame_0008.png` | `docs/assets/gallery/cdcl_trajectory_frame.png` |
 | IRI+AIM 调试证据 | H2O-HF | `smoke/20260605_iri_aim_h2o_hf/products/1h2o_hf_iri2_plus_aim_cube_frame_irifill_small_nosect_texrange.png` | `docs/assets/gallery/h2o_iri_aim_overlay.png` |
 | NICS/vector misc | benzene | `smoke/20260605_nics_vesta_vectors/benzene_nics_vector_smoke.png` | `docs/assets/gallery/benzene_nics_vector.png` |
+| Ready 功能图谱 | Ag/GC/CdCl ready 主线 | 已提交 gallery PNG 拼接，不代表新增计算 | `docs/assets/gallery/feature_closure_ready_map.png` |
 
 ## grid-run 函数组覆盖
 
