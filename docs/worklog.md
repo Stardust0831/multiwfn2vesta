@@ -1,5 +1,55 @@
 # Worklog
 
+## 2026-06-12: Feature closure showcase pass
+
+- Continued the current feature-closure request by treating gallery figures as
+  first-class example artifacts: every maintained feature should point to a
+  real-system example and either a project-local rendered PNG or an explicit
+  `needs-render` / `needs-example` status.
+- The scientific figure rule remains strict.  Existing Ag(111)+benzene,
+  GC/benzene AIM, Cd/Cl trajectory, H2O-HF IRI debug, phenanthrene AIM, and
+  NICS/vector images are reused only as what they are; missing grid-run,
+  domain, STM, Fukui, atom-coloring, and surface-extrema figures are not
+  represented by placeholders.
+- Added a small reusable gallery-showcase generation step so the manual can
+  display one current effect panel assembled from already rendered VESTA PNGs
+  while the deeper `needs-render` queue stays visible in the feature matrix.
+- Integrated the read-only audit recommendations into the example system
+  queue: Ag(111)+benzene extended scalar fields, benzene/phenol dimer scalar
+  figures, GC weak-interaction extensions, COF direct cubes, coronene or
+  heteroaromatic Fukui/atom coloring, and open-shell/spin-coloring examples.
+- Validation for this pass: focused example tests, focused 221-test
+  grid/cube/CLI/example regression, full 400-test no-GUI regression,
+  example/gallery/system CLI smokes, markdown local-link check, showcase PNG
+  dimension check, py_compile, and `git diff --check`.
+
+## 2026-06-12: Extended KED diagnostics and feature-closure cleanup
+
+- Continued the feature-closure pass: every maintained function should have a
+  discoverable example/runbook, a real-system recommendation, and either a
+  committed gallery image or an explicit `needs-render` status.
+- Implemented extended KED diagnostics for `grid-run` and `cube-preset`.
+  Source-backed function-100 routes now cover `iuserfunc=1201/1202/1203/1204`
+  and source-supported `1210` KED-potential routes with `iKEDsel=3/5/7`.
+- Added cautious local-temperature support for `--ked-density-cutoff`, which
+  overrides run-local Multiwfn `uservar`.  Maintained function-100 KED routes
+  now write run-local `uservar=0` by default so stale global Multiwfn settings
+  cannot affect KED evaluation.  The docs record that nonzero `uservar` is not
+  a pure post-processing mask because the inspected source also uses it inside
+  KED evaluation.
+- Added KED diagnostics to examples coverage as a `needs-render` feature
+  instead of pretending it has a manual-grade figure.  Recommended systems are
+  H2O/benzene for fast KED comparisons and Ag(111)+benzene for interface
+  diagnostics.
+- Fixed stale planned-example commands found during read-only review:
+  `domain-run` now starts from a generated density cube rather than a Molden
+  file, `fukui-run` uses `--neutral/--anion/--cation`, `cube-arith` uses the
+  supported `dual-descriptor` operation, and aIGM/amIGM examples use repeated
+  `--fragment` options on a single trajectory file.
+- Added the missing editable-install console script entry point
+  `multiwfn2vesta-abacus-mulliken-color` in both `pyproject.toml` and
+  `setup.py`, with a packaging parity test.
+
 ## 2026-06-12: Feature closure planned examples and concrete runbooks
 
 - Continued the feature-closure request by turning the next real-system queue

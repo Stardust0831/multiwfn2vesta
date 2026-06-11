@@ -78,7 +78,7 @@ multiwfn2vesta examples --systems
 | 基础密度/梯度/Laplacian | `density`, `gradient`, `laplacian` | H2O、benzene、Ag slab | 有入口 | density 可作为大多数 mapped surface 的 surface cube |
 | 轨道/轨道密度 | `orbital`, `orbital-density` | benzene HOMO/LUMO，ABACUS band | 有入口 | 需要轨道编号和 HOMO/LUMO 发现辅助 |
 | spin | `spin-density`, `spin-polarization`, `alpha-density`, `beta-density` | 磁性 Fe/O 或 open-shell 小分子 | 有入口 | 缺真实自旋体系效果图 |
-| KED | `hamiltonian-ked`, `lagrangian-ked`, `thomas-fermi-ked`, `weizsacker-ked`, `pauli-ked` | benzene/H2O | 有入口 | 缺物理解释型示例 |
+| KED 和扩展 KED diagnostics | `hamiltonian-ked`, `lagrangian-ked`, `thomas-fermi-ked`, `weizsacker-ked`, `pauli-ked`, `tf-minus-lagrangian-ked`, `lagrangian-local-temperature`, `thomas-fermi-ked-potential` 等 | benzene/H2O/Ag(111)+benzene | 有入口 | 已有 `iuserfunc=1201/1202/1203/1204/1210` 路由和 preset，缺物理解释型示例图 |
 | ELF/LOL | `elf`, `lol`, `--elflol-type` | COF/Ag/benzene | 有入口 | ABACUS direct ELF 也可走 `cube-preset elf` |
 | ESP/ALIE/LEA/LEAE | `esp`, `electron-esp`, `positive-esp`, `negative-esp`, `electric-field-magnitude`, `alie`, `local-electron-affinity`, `local-electron-attachment-energy` | 芳香分子、极性分子、Ag(111)+benzene | 有 VESTA/cube | ESP H2O smoke 已有；电子贡献 ESP、正/负分量和电场强度路由已维护，缺正式 PNG 和 surface extrema 图 |
 | vdW | `vdw-potential`, `vdw-repulsion-potential`, `vdw-dispersion-potential` | Ag(111)+benzene 或分子复合物 | 有入口 | 适合做吸附相互作用外围图 |
@@ -96,7 +96,7 @@ multiwfn2vesta examples --systems
 | 预设组 | 代表 preset | 状态 | 补图建议 |
 | --- | --- | --- | --- |
 | density/signed/orbital | `density`, `signed`, `orbital-density` | 有 VESTA/cube | benzene HOMO/LUMO |
-| spin/potential/KED | `spin-density`, `potential`, `kinetic-energy-density` | 有入口 | open-shell 和 ABACUS out_pot |
+| spin/potential/KED | `spin-density`, `potential`, `kinetic-energy-density`, `ked-difference`, `ked-local-temperature`, `ked-potential` | 有入口 | open-shell、ABACUS out_pot 和 H2O/benzene KED diagnostics |
 | ABACUS direct cube | `partial-charge`, `wavefunction-norm`, `elf` | 有入口 | 准备 ABACUS 小体系 direct cube |
 | IRI/DORI/IGMH/aIGM | `iri`, `dori`, `igmh`, `aigm` | IGMH 已闭环；IRI 有调试图 | IRI/DORI/aIGM 补手册级图 |
 | RoSE/SEDD | `rose`, `sedd` | 有入口 | 用 benzene dimer 或 GC 配对渲染慢电子/SEDD 等值面 |
@@ -106,12 +106,12 @@ multiwfn2vesta examples --systems
 
 ## 近期闭环优先级
 
-1. 把 Ag(111)+benzene IGMH+AIM 整理成 `examples/ag111_benzene_igmh_aim/`，包含命令、输入清单、输出清单和图；后续重渲染更紧凑的 camera/zoom。
-2. 把 GC AIM 和 benzene AIM 整理成轻量 examples；GC 作氢键/分子间 AIM 主图，benzene 作基础例。
-3. 把 Cd/Cl NVT 高码率 mp4 轨迹例子整理出 summary、poster frame、artifact manifest、smoke 验证入口和复用视角说明；当前已升级 XYZ/extXYZ->VESTA frame 的 `trajectory-frames` CLI 和 PNG->mp4 的 `trajectory-video` CLI，后续补 ASE `.traj` 读取和 VESTA PNG 渲染。
-4. 继续完善 IRI+AIM，当前 H2O-HF 只作为调试证据，不能作为最终展示图。
-5. 给 `cube-vesta`/`cube-preset` 基础功能补一张 direct cube PNG。
-6. 给 `grid-run` 选 3 个代表图：ESP-on-density、ELF、vdW potential 或 KED。
-7. 给 `domain-run`/`stm-run` 补真实渲染 PNG。
-8. 给 atom coloring 补一张按电荷/磁矩染色的对比图。
+1. `ag111_benzene_extended_fields`: 复用已 ready 的 Ag(111)+benzene Molden、cell 和三视图相机，补 ESP/vdW/electric-field/steric/SBL/STM 至少一张 scalar-field PNG。
+2. `benzene_dimer_scalar_suite`: 用 benzene dimer 或 phenol dimer 一次性覆盖 IRI/RDG/DORI/Delta-g、RoSE/SEDD、vdW 和 on-top pair density 的弱相互作用图。
+3. `gc_weak_interaction_suite`: 在已 ready 的 GC AIM 上补 IRI/ESP/surface-extrema/on-top pair density，形成完整氢键教程。
+4. `cof_direct_cube_suite`: 给 COF_12000N2 单层补 ABACUS direct density/potential/ELF/partial-charge/wavefunction-norm 的真实材料 cube 图。
+5. `fukui_dual_reactivity`: 准备 coronene、nitro/hetero aromatic 或类似三态反应性体系的同网格 neutral/anion/cation density cube，闭合 `fukui-run`、`cube-arith` 和 atom coloring 主线。
+6. `spin_atom_coloring_suite`: 用 C4H8 diradical、triplet 小分子、磁性氧化物或 spin-polarized adsorbate 替换 toy Fe smoke，补 spin-density 和原子电荷/磁矩染色图。
+7. `h2o_domain_baseline`: 作为低风险 quick win，渲染 H2O density domain 和一张基础 density/ESP/KED 图；继续保护根目录未跟踪 `domain.cub` / `domain.pdb`，不把它们误提交。
+8. Cd/Cl 轨迹: 继续补 ASE `.traj` 直接读取和不抢焦点 VESTA PNG 渲染层；现有 `trajectory-frames` 和 `trajectory-video` 已可作为 ready 基线。
 9. 再考虑新增 Multiwfn 源码功能路线；在中文手册闭环前，不优先扩展新功能。

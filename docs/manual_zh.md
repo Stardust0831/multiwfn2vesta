@@ -149,6 +149,13 @@ multiwfn2vesta examples --gallery-assets
 
 这一步不会启动 VESTA，也不会检查大体积 `smoke/` 文件；它只列出项目内轻量 PNG。
 
+当前用于手册快速预览的闭环总览图是：
+
+![feature closure showcase](assets/gallery/feature_closure_showcase.png)
+
+这张图由已经提交的真实 VESTA PNG 拼接而成，不代表额外的新计算；仍缺手册级图的功能会继续在
+`multiwfn2vesta examples --needs-render` 和 `docs/feature_examples_zh.md` 中标为待渲染。
+
 ## 4. 推荐工作流总览
 
 | 起点 | 推荐命令 | 产物 | 典型用途 |
@@ -237,6 +244,9 @@ multiwfn2vesta grid-run --list-functions
 - `density`, `orbital`, `orbital-density`
 - `spin-density`, `spin-polarization`, `alpha-density`, `beta-density`
 - `laplacian`, `hamiltonian-ked`, `lagrangian-ked`, `thomas-fermi-ked`, `weizsacker-ked`, `pauli-ked`
+- `lagrangian-minus-weizsacker-ked`, `tf-minus-weizsacker-ked`, `tf-minus-lagrangian-ked`, `weizsacker-minus-lagrangian-ked`
+- `tf-lagrangian-ked-absdiff`, `weizsacker-lagrangian-ked-absdiff`, `lagrangian-local-temperature`, `tf-local-temperature`
+- `thomas-fermi-ked-potential`, `gea2-ked-potential`, `tfvw-ked-potential`
 - `elf`, `lol`
 - `esp`, `electron-esp`, `positive-esp`, `negative-esp`, `electric-field-magnitude`
 - `alie`, `local-electron-affinity`, `local-electron-attachment-energy`
@@ -312,6 +322,27 @@ Steric/SBL 路线适合看吸附界面、分子间排斥/束缚区域和能量�
 correlation only，`3` 为两者都包含。默认 VESTA preset 是单正值
 `on-top-pair-density`，等值面 `0.01` 只是起点；正式图建议用 benzene dimer
 或 GC 碱基对，先检查 cube 范围。
+
+扩展 KED diagnostics 也走 function `100` 和 run-local `-set`，不会改全局
+`settings.ini`：
+
+```bash
+multiwfn2vesta grid-run input.molden ked_diff --function tf-minus-lagrangian-ked
+multiwfn2vesta grid-run input.molden ked_abs --function tf-lagrangian-ked-absdiff
+multiwfn2vesta grid-run input.molden ked_temp --function lagrangian-local-temperature --ked-density-cutoff 1e-6
+multiwfn2vesta grid-run input.molden ked_pot --function thomas-fermi-ked-potential
+multiwfn2vesta examples --command local-temperature-ked
+```
+
+源码证据对应为：`iuserfunc=1201` 是 selected KED minus Weizsacker KED，
+`1202` 是 selected KED minus Lagrangian KED，`1203` 是 selected KED 与
+Lagrangian KED 的绝对差，`1204` 是 KED-derived local temperature，`1210`
+是 KED potential。当前只维护 `1210` 中源码显式处理的 `iKEDsel=3/5/7`
+路线，即 Thomas-Fermi、second-order GEA 和 Thomas-Fermi+Weizsacker。
+维护态 function-100 KED 路线默认都会在 run-local settings 里写 `uservar=0`，
+避免继承 Multiwfn 安装目录 `settings.ini` 里的旧值。`--ked-density-cutoff`
+只对 local-temperature 路线开放，会把这个 run-local `uservar` 覆盖为用户值；
+源码里非零 `uservar` 也参与 KED 评价，所以它只能作为谨慎的稳定性参数，正式出图必须记录数值和 cube 范围。
 
 ## 8. AIM、IRI、IGMH 的组合图
 

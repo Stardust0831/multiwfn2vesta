@@ -209,6 +209,18 @@ user function comment two
 """
 
 
+LOCAL_TEMPERATURE_CUBE = """local temperature comment one
+local temperature comment two
+    2    -1.000000    -2.000000     0.500000
+    2     0.500000     0.000000     0.000000
+    2     0.000000     0.500000     0.000000
+    2     0.000000     0.000000     0.500000
+    8     8.000000    -1.000000    -2.000000     0.500000
+    1     1.000000    -0.500000    -2.000000     0.500000
+ 0.0 250.0 500.0 1000.0 1250.0 1500.0 1750.0 2000.0
+"""
+
+
 ROSE_SEDD_CUBE = """rose sedd comment one
 rose sedd comment two
     2    -1.000000    -2.000000     0.500000
@@ -325,11 +337,23 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertIn("thomas-fermi-ked", text)
         self.assertIn("weizsacker-ked", text)
         self.assertIn("pauli-ked", text)
+        self.assertIn("lagrangian-minus-weizsacker-ked", text)
+        self.assertIn("tf-minus-lagrangian-ked", text)
+        self.assertIn("tf-lagrangian-ked-absdiff", text)
+        self.assertIn("lagrangian-local-temperature", text)
+        self.assertIn("thomas-fermi-ked-potential", text)
         self.assertIn("default iuserfunc=1200", text)
         self.assertIn("default iuserfunc=114", text)
+        self.assertIn("default iuserfunc=1201", text)
+        self.assertIn("default iuserfunc=1202", text)
+        self.assertIn("default iuserfunc=1203", text)
+        self.assertIn("default iuserfunc=1204", text)
+        self.assertIn("default iuserfunc=1210", text)
         self.assertIn("settings: iKEDsel=3", text)
         self.assertIn("settings: iKEDsel=4", text)
         self.assertIn("settings: iKEDsel=2", text)
+        self.assertIn("settings: iKEDsel=5", text)
+        self.assertIn("settings: iKEDsel=7", text)
         self.assertIn("orbital-weighted-fukui-plus", text)
         self.assertIn("orbital-weighted-dual-descriptor", text)
         self.assertIn("default iuserfunc=95", text)
@@ -476,6 +500,16 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertEqual(resolve_grid_function("pauli-ked").default_user_function_index, 114)
         self.assertEqual(resolve_grid_function("pauli-kinetic-energy-density").settings_updates, (("iKEDsel", 2),))
         self.assertEqual(resolve_grid_function("pauli-ked").mapped_preset, "surface-map")
+        self.assertEqual(resolve_grid_function("ked-minus-weizsacker").default_user_function_index, 1201)
+        self.assertEqual(resolve_grid_function("tf-minus-vw-ked").settings_updates, (("iKEDsel", 3),))
+        self.assertEqual(resolve_grid_function("tf-minus-g-ked").default_user_function_index, 1202)
+        self.assertEqual(resolve_grid_function("vw-minus-g-ked").settings_updates, (("iKEDsel", 4),))
+        self.assertEqual(resolve_grid_function("abs-tf-minus-lagrangian-ked").preset, "ked-absolute-difference")
+        self.assertEqual(resolve_grid_function("local-temperature-ked").default_user_function_index, 1204)
+        self.assertEqual(resolve_grid_function("tf-local-temperature").settings_updates, (("iKEDsel", 3),))
+        self.assertEqual(resolve_grid_function("tf-ked-pot").preset, "ked-potential")
+        self.assertEqual(resolve_grid_function("gea2-ked-pot").settings_updates, (("iKEDsel", 5),))
+        self.assertEqual(resolve_grid_function("tfvw-ked-pot").settings_updates, (("iKEDsel", 7),))
         self.assertEqual(resolve_grid_function("ow-fukui-plus").preset, "density")
         self.assertEqual(resolve_grid_function("orbital-weighted-fplus").default_user_function_index, 95)
         self.assertEqual(resolve_grid_function("ow-fukui-minus").default_user_function_index, 96)
@@ -1357,7 +1391,12 @@ class TestMultiwfnGridRunner(unittest.TestCase):
 
                     def fake_run(command, **kwargs):
                         cwd = Path(kwargs["cwd"])
-                        (cwd / "userfunc.cub").write_text(USER_FUNCTION_CUBE, encoding="utf-8")
+                        cube_text = (
+                            LOCAL_TEMPERATURE_CUBE
+                            if "local-temperature" in function_name
+                            else USER_FUNCTION_CUBE
+                        )
+                        (cwd / "userfunc.cub").write_text(cube_text, encoding="utf-8")
                         return subprocess.CompletedProcess(command, 0, stdout="ok", stderr="")
 
                     with patch("multiwfn2vesta.multiwfn_grid.find_multiwfn", return_value=candidate):
@@ -1540,7 +1579,12 @@ class TestMultiwfnGridRunner(unittest.TestCase):
 
                     def fake_run(command, **kwargs):
                         cwd = Path(kwargs["cwd"])
-                        (cwd / "userfunc.cub").write_text(USER_FUNCTION_CUBE, encoding="utf-8")
+                        cube_text = (
+                            LOCAL_TEMPERATURE_CUBE
+                            if "local-temperature" in function_name
+                            else USER_FUNCTION_CUBE
+                        )
+                        (cwd / "userfunc.cub").write_text(cube_text, encoding="utf-8")
                         return subprocess.CompletedProcess(command, 0, stdout="ok", stderr="")
 
                     with patch("multiwfn2vesta.multiwfn_grid.find_multiwfn", return_value=candidate):
@@ -1582,7 +1626,7 @@ class TestMultiwfnGridRunner(unittest.TestCase):
 
             def fake_run(command, **kwargs):
                 cwd = Path(kwargs["cwd"])
-                (cwd / "userfunc.cub").write_text(USER_FUNCTION_CUBE, encoding="utf-8")
+                (cwd / "userfunc.cub").write_text(LOCAL_TEMPERATURE_CUBE, encoding="utf-8")
                 return subprocess.CompletedProcess(command, 0, stdout="ok", stderr="")
 
             with patch("multiwfn2vesta.multiwfn_grid.find_multiwfn", return_value=candidate):
@@ -1623,7 +1667,7 @@ class TestMultiwfnGridRunner(unittest.TestCase):
 
             def fake_run(command, **kwargs):
                 cwd = Path(kwargs["cwd"])
-                (cwd / "userfunc.cub").write_text(USER_FUNCTION_CUBE, encoding="utf-8")
+                (cwd / "userfunc.cub").write_text(LOCAL_TEMPERATURE_CUBE, encoding="utf-8")
                 return subprocess.CompletedProcess(command, 0, stdout="ok", stderr="")
 
             with patch("multiwfn2vesta.multiwfn_grid.find_multiwfn", return_value=candidate):
@@ -1740,11 +1784,46 @@ class TestMultiwfnGridRunner(unittest.TestCase):
 
     def test_run_ked_named_user_functions_patch_iuserfunc_and_ikedsel(self):
         cases = (
-            ("thomas-fermi-ked", 1200, 3, "case_thomas-fermi-ked.cub"),
-            ("weizsacker-ked", 1200, 4, "case_weizsacker-ked.cub"),
-            ("pauli-ked", 114, 2, "case_pauli-ked.cub"),
+            ("thomas-fermi-ked", 1200, 3, "case_thomas-fermi-ked.cub", "kinetic-energy-density", "single"),
+            ("weizsacker-ked", 1200, 4, "case_weizsacker-ked.cub", "kinetic-energy-density", "single"),
+            ("pauli-ked", 114, 2, "case_pauli-ked.cub", "kinetic-energy-density", "single"),
+            (
+                "lagrangian-minus-weizsacker-ked",
+                1201,
+                2,
+                "case_lagrangian-minus-weizsacker-ked.cub",
+                "ked-difference",
+                "signed",
+            ),
+            ("tf-minus-lagrangian-ked", 1202, 3, "case_tf-minus-lagrangian-ked.cub", "ked-difference", "signed"),
+            (
+                "tf-lagrangian-ked-absdiff",
+                1203,
+                3,
+                "case_tf-lagrangian-ked-absdiff.cub",
+                "ked-absolute-difference",
+                "single",
+            ),
+            (
+                "lagrangian-local-temperature",
+                1204,
+                2,
+                "case_lagrangian-local-temperature.cub",
+                "ked-local-temperature",
+                "single",
+            ),
+            (
+                "thomas-fermi-ked-potential",
+                1210,
+                3,
+                "case_thomas-fermi-ked-potential.cub",
+                "ked-potential",
+                "signed",
+            ),
+            ("gea2-ked-potential", 1210, 5, "case_gea2-ked-potential.cub", "ked-potential", "signed"),
+            ("tfvw-ked-potential", 1210, 7, "case_tfvw-ked-potential.cub", "ked-potential", "signed"),
         )
-        for function_name, expected_iuserfunc, expected_ikedsel, expected_cube in cases:
+        for function_name, expected_iuserfunc, expected_ikedsel, expected_cube, expected_preset, expected_mode in cases:
             with self.subTest(function_name=function_name):
                 with tempfile.TemporaryDirectory() as tmp:
                     root = Path(tmp)
@@ -1752,13 +1831,18 @@ class TestMultiwfnGridRunner(unittest.TestCase):
                     wavefunction.write_text("wavefunction", encoding="utf-8")
                     candidate = self.make_candidate(root)
                     (candidate.path.parent / "settings.ini").write_text(
-                        "iuserfunc= 0 // stale userfunc\niKEDsel= 0 // stale KED\n",
+                        "iuserfunc= 0 // stale userfunc\niKEDsel= 0 // stale KED\nuservar= 7 // stale uservar\n",
                         encoding="utf-8",
                     )
 
                     def fake_run(command, **kwargs):
                         cwd = Path(kwargs["cwd"])
-                        (cwd / "userfunc.cub").write_text(USER_FUNCTION_CUBE, encoding="utf-8")
+                        cube_text = (
+                            LOCAL_TEMPERATURE_CUBE
+                            if "local-temperature" in function_name
+                            else USER_FUNCTION_CUBE
+                        )
+                        (cwd / "userfunc.cub").write_text(cube_text, encoding="utf-8")
                         return subprocess.CompletedProcess(command, 0, stdout="ok", stderr="")
 
                     with patch("multiwfn2vesta.multiwfn_grid.find_multiwfn", return_value=candidate):
@@ -1779,19 +1863,70 @@ class TestMultiwfnGridRunner(unittest.TestCase):
                     settings_text = result.settings_override.read_text(encoding="utf-8")
                     self.assertIn(f"iuserfunc= {expected_iuserfunc} // stale userfunc", settings_text)
                     self.assertIn(f"iKEDsel= {expected_ikedsel} // stale KED", settings_text)
+                    self.assertIn("uservar= 0 // stale uservar", settings_text)
                     self.assertIsNotNone(result.vesta_result)
                     self.assertEqual(
                         result.vesta_result.vesta_path.name,
-                        expected_cube.replace(".cub", "_kinetic-energy-density_cube.vesta"),
+                        expected_cube.replace(".cub", f"_{expected_preset}_cube.vesta"),
                     )
                     recipe = result.recipe_path.read_text(encoding="utf-8")
                     self.assertIn(f"function_name: `{function_name}`", recipe)
                     self.assertIn(f"user_function_index_iuserfunc: `{expected_iuserfunc}`", recipe)
                     self.assertIn(f"('iKEDsel', {expected_ikedsel})", recipe)
-                    self.assertIn("auto_vesta_preset: `kinetic-energy-density`", recipe)
+                    self.assertIn(f"auto_vesta_preset: `{expected_preset}`", recipe)
                     manifest = result.vesta_result.manifest_path.read_text(encoding="utf-8")
-                    self.assertIn("canonical_preset: `kinetic-energy-density`", manifest)
-                    self.assertIn("effective_surface_mode: `single`", manifest)
+                    self.assertIn(f"canonical_preset: `{expected_preset}`", manifest)
+                    self.assertIn(f"effective_surface_mode: `{expected_mode}`", manifest)
+
+    def test_run_ked_local_temperature_accepts_density_cutoff_uservar(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            wavefunction = root / "h2o.fch"
+            wavefunction.write_text("wavefunction", encoding="utf-8")
+            candidate = self.make_candidate(root)
+            (candidate.path.parent / "settings.ini").write_text(
+                "iuserfunc= 0 // stale userfunc\niKEDsel= 0 // stale KED\nuservar= 7 // stale uservar\n",
+                encoding="utf-8",
+            )
+
+            def fake_run(command, **kwargs):
+                cwd = Path(kwargs["cwd"])
+                (cwd / "userfunc.cub").write_text(LOCAL_TEMPERATURE_CUBE, encoding="utf-8")
+                return subprocess.CompletedProcess(command, 0, stdout="ok", stderr="")
+
+            with patch("multiwfn2vesta.multiwfn_grid.find_multiwfn", return_value=candidate):
+                with patch("multiwfn2vesta.multiwfn_grid.subprocess.run", side_effect=fake_run):
+                    result = run_multiwfn_grid(
+                        wavefunction,
+                        root / "products",
+                        function_name="lagrangian-local-temperature",
+                        stem="case",
+                        grid_mode="low",
+                        ked_density_cutoff=1e-6,
+                    )
+
+            self.assertTrue(result.success)
+            self.assertEqual(result.ked_density_cutoff, 1e-6)
+            settings_text = result.settings_override.read_text(encoding="utf-8")
+            self.assertIn("iuserfunc= 1204 // stale userfunc", settings_text)
+            self.assertIn("iKEDsel= 2 // stale KED", settings_text)
+            self.assertIn("uservar= 1e-06 // stale uservar", settings_text)
+            recipe = result.recipe_path.read_text(encoding="utf-8")
+            self.assertIn("ked_density_cutoff_uservar: `1e-06`", recipe)
+
+    def test_run_ked_density_cutoff_rejects_non_temperature_routes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            wavefunction = root / "h2o.fch"
+            wavefunction.write_text("wavefunction", encoding="utf-8")
+
+            with self.assertRaisesRegex(ValueError, "ked-density-cutoff"):
+                run_multiwfn_grid(
+                    wavefunction,
+                    root / "products",
+                    function_name="thomas-fermi-ked",
+                    ked_density_cutoff=1e-6,
+                )
 
     def test_run_orbital_weighted_dual_descriptor_surface_map_passes_texture_scale(self):
         with tempfile.TemporaryDirectory() as tmp:

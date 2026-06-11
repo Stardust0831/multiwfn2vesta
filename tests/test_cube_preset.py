@@ -48,6 +48,18 @@ surface two
 """
 
 
+LOCAL_TEMPERATURE_CUBE = """local temperature one
+local temperature two
+    2    -1.000000    -2.000000     0.500000
+    2     0.500000     0.000000     0.000000
+    2     0.000000     0.500000     0.000000
+    2     0.000000     0.000000     0.500000
+    8     8.000000    -1.000000    -2.000000     0.500000
+    1     1.000000    -0.500000    -2.000000     0.500000
+  0.0 250.0 500.0 1000.0 1250.0 1500.0 1750.0 2000.0
+"""
+
+
 TEXTURE_CUBE = """texture one
 texture two
     2    -1.000000    -2.000000     0.500000
@@ -141,6 +153,10 @@ class TestCubePreset(unittest.TestCase):
         self.assertIn("hamiltonian-ked", text)
         self.assertIn("lagrangian-ked", text)
         self.assertIn("kinetic-energy-density", text)
+        self.assertIn("ked-difference", text)
+        self.assertIn("ked-absolute-difference", text)
+        self.assertIn("ked-local-temperature", text)
+        self.assertIn("ked-potential", text)
         self.assertIn("steric-energy-density", text)
         self.assertIn("sbl-energy-density", text)
         self.assertIn("sbl-potential", text)
@@ -228,6 +244,28 @@ ked two
             self.assertIn("effective_isosurface: `0.01`", manifest)
             self.assertIn("selected kinetic-energy-density variants", manifest)
             self.assertIn("inspect the range", manifest)
+
+    def test_extended_ked_presets_write_expected_surface_modes(self):
+        cases = (
+            ("tf-minus-lagrangian-ked", SIGNED_CUBE, "ked-difference", "signed", "0.01", "iuserfunc=1202"),
+            ("tf-lagrangian-ked-absdiff", SURFACE_CUBE, "ked-absolute-difference", "single", "0.01", "iuserfunc=1203"),
+            ("local-temperature-ked", LOCAL_TEMPERATURE_CUBE, "ked-local-temperature", "single", "1000.0", "iuserfunc=1204"),
+            ("tf-ked-potential", SIGNED_CUBE, "ked-potential", "signed", "0.05", "iuserfunc=1210"),
+        )
+        for requested, cube_text, canonical, mode, isosurface, note in cases:
+            with self.subTest(requested=requested):
+                with tempfile.TemporaryDirectory() as tmp:
+                    root = Path(tmp)
+                    cube = self.write_tmp(root, "userfunc.cub", cube_text)
+
+                    result = run_preset(requested, cube, root / "products")
+
+                    manifest = result.manifest_path.read_text(encoding="utf-8")
+                    self.assertIn(f"canonical_preset: `{canonical}`", manifest)
+                    self.assertIn(f"requested_preset: `{requested}`", manifest)
+                    self.assertIn(f"effective_surface_mode: `{mode}`", manifest)
+                    self.assertIn(f"effective_isosurface: `{isosurface}`", manifest)
+                    self.assertIn(note, manifest)
 
     def test_steric_and_sbl_presets_write_expected_surface_modes(self):
         cases = (

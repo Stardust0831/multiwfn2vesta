@@ -2,16 +2,16 @@
 
 ## 体系价值
 
-- 体系：open-shell 小分子、磁性氧化物或自旋极化吸附体系。
+- 体系：C4H8 diradical、triplet 小分子、磁性氧化物或自旋极化吸附体系。
 - 对应功能：spin density、alpha/beta density、spin polarization、`abacus-mulliken-color`、`multiwfn-atom-color`。
-- 为什么值得作为示例：它能把体相自旋密度和原子局域磁矩/电荷颜色联系起来，替代当前 Fe toy smoke。
+- 为什么值得作为示例：它能把体相自旋密度和原子局域磁矩/电荷颜色联系起来，替代当前 Fe toy smoke。小的 diradical/triplet 体系适合快速重跑，磁性氧化物或吸附体系适合展示 ABACUS Mulliken 磁矩。
 - 不适合说明的问题：不适合 closed-shell 体系；没有自旋或电荷差异时图像信息量很低。
 
 ## 输入文件
 
 | 文件 | 来源 | 是否提交 | 备注 |
 | --- | --- | --- | --- |
-| `spin_system.molden` | 自旋极化波函数 | 否 | 可由 ABACUS LCAO Molden 或其他程序给出 |
+| `spin_system.molden` | 自旋极化波函数 | 否 | 可由 ABACUS LCAO Molden 或其他程序给出；第一版优先小体系 |
 | `mulliken.txt` | ABACUS Mulliken 电荷/磁矩 | 可提交小型脱敏片段 | 用于 `abacus-mulliken-color` |
 | `atom_values.csv` | Multiwfn 原子表或整理后的数值 | 可提交小表 | 用于 generic atom coloring |
 
@@ -54,4 +54,3 @@ multiwfn2vesta examples --command mulliken-color --json
 ```
 
 升为 `ready` 前需要替换当前 toy smoke，选用真实自旋体系并记录 atom-value mapping 规则。
-

@@ -31,7 +31,10 @@ point.
   runbooks for Ag extended fields, benzene dimer scalar fields, GC weak
   interactions, COF direct cubes, Fukui/dual reactivity, spin/atom coloring,
   H2O domains, and short aIGM trajectories remain marked `needs-work` until
-  real PNG renders are added.
+  real PNG renders are added.  The current manual showcase image is
+  `docs/assets/gallery/feature_closure_showcase.png`, assembled from already
+  rendered project PNGs so missing functions are still visible as
+  `needs-render` in the coverage table.
 - Untracked local probe files such as `domain.cub` and `domain.pdb` are
   workspace artifacts and should stay out of normal commits.
 
@@ -137,8 +140,8 @@ then delete the temporary branch.
   such as density, orbitals/wavefunctions, orbital density, spin density,
   spin-polarization parameter, Laplacian, K(r)/G(r) kinetic-density cubes,
   selected Thomas-Fermi/Weizsacker/Pauli kinetic-energy-density cubes,
-  standalone RDG/promolecular
-  RDG, local information entropy, EDR(r;d),
+  KED difference/absolute-difference/local-temperature/KED-potential
+  diagnostics, standalone RDG/promolecular RDG, local information entropy, EDR(r;d),
   orbital-overlap distance D(r), Becke atomic/overlap weight, Hirshfeld
   weight, promolecular Delta-g, Hirshfeld-partition Delta-g, standalone IRI
   scalar, standalone vdW total/repulsion/dispersion potential, ABACUS direct potential, partial charge,
@@ -165,6 +168,15 @@ then delete the temporary branch.
   `100`: Thomas-Fermi and Weizsacker KED use `iuserfunc=1200` with
   run-local `iKEDsel=3/4`, while Pauli KED uses `iuserfunc=114` with
   run-local `iKEDsel=2`.
+- Run extended kinetic-energy-density diagnostics through Multiwfn function
+  `100`: selected KED minus Weizsacker/Lagrangian KED uses
+  `iuserfunc=1201/1202`, selected-minus-Lagrangian absolute difference uses
+  `iuserfunc=1203`, KED-derived local temperature uses `iuserfunc=1204`
+  with optional cautious `--ked-density-cutoff` run-local `uservar`, and
+  maintained KED-potential routes use source-supported `iuserfunc=1210`
+  with `iKEDsel=3/5/7`.  Maintained function-100 KED routes reset run-local
+  `uservar=0` by default so stale global Multiwfn settings do not leak into
+  KED evaluation.
 - Run high-level Fukui/dual-descriptor maps from neutral, anion, and cation
   wavefunction files by generating Multiwfn density cubes on a shared neutral
   grid and then delegating the map arithmetic to `cube-arith`.
@@ -213,6 +225,8 @@ then delete the temporary branch.
   SEDD scalar fields with `iuserfunc=18/19`, steric/SBL/Pauli/quantum
   diagnostic fields with `iuserfunc=40-43`, `60-69`, `-69`, and `110-113`,
   on-top pair density with `iuserfunc=36` and run-local `paircorrtype`,
+  extended KED difference/local-temperature/KED-potential diagnostics with
+  `iuserfunc=1201/1202/1203/1204/1210`,
   and related scalar cubes, export
   multiple orbitals through
   isolated batch runs, optionally write VESTA files through `cube-preset`,

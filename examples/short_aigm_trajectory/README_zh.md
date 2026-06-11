@@ -11,8 +11,8 @@
 
 | 文件 | 来源 | 是否提交 | 备注 |
 | --- | --- | --- | --- |
-| `frames/*.molden` 或 Multiwfn 可读轨迹输入 | 短轨迹波函数序列 | 否 | 每帧需要相同 fragment 定义 |
-| `fragments.txt` | 片段定义 | 可提交小文本 | 例如两个苯环或 benzene/Ag slab |
+| `benzene_dimer_traj.xyz` 或其它 Multiwfn 可读轨迹文件 | 短轨迹 | 否 | 每帧需要相同 fragment 定义 |
+| `fragments.txt` | 片段定义记录 | 可提交小文本 | 例如两行：`1-12` 和 `13-24`，命令里仍用重复 `--fragment` 传入 |
 | `reference.vesta` | 可选相机/style 参考 | 可提交小文件 | 便于和单帧 IGMH 保持一致 |
 
 ## 推荐命令
@@ -21,14 +21,16 @@
 cd /mnt/g/work/multiwfn2vesta/project
 export PATH=/mnt/g/work/multiwfn2vesta/project/bin:$PATH
 
-multiwfn2vesta aigm-run frames/ products/aigm \
-  --fragments fragments.txt
+multiwfn2vesta aigm-run benzene_dimer_traj.xyz products/aigm \
+  --fragment 1-12 \
+  --fragment 13-24
 
-multiwfn2vesta amigm-run frames/ products/amigm \
-  --fragments fragments.txt
+multiwfn2vesta amigm-run benzene_dimer_traj.xyz products/amigm \
+  --fragment 1-12 \
+  --fragment 13-24
 
-multiwfn2vesta cube-preset aigm products/aigm/dg_inter_avg.cub products/aigm_vesta \
-  --texture-cube products/aigm/sl2r_avg.cub
+multiwfn2vesta cube-preset aigm products/aigm/benzene_dimer_traj_avgdg_inter.cub products/aigm_vesta \
+  --texture-cube products/aigm/benzene_dimer_traj_avgsl2r.cub
 ```
 
 ## 输出文件
@@ -52,4 +54,3 @@ multiwfn2vesta examples --command aigm-run --json
 ```
 
 升为 `ready` 前需要记录帧数、fragment 定义、平均 cube 范围和至少一张 mapped-surface PNG。
-

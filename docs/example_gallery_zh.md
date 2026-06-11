@@ -7,6 +7,10 @@
 
 ![current feature overview](assets/gallery/current_feature_overview.png)
 
+当前闭环展示图用同一批真实 VESTA PNG 重新排版成手册友好的 6-panel 预览：
+
+![feature closure showcase](assets/gallery/feature_closure_showcase.png)
+
 按功能反查 example 覆盖状态见 `feature_examples_zh.md`，命令入口是
 `multiwfn2vesta examples --coverage`。只想列出已经提交到项目内的 PNG 时用：
 
@@ -28,6 +32,9 @@ multiwfn2vesta examples --systems
 | GC 碱基对 / benzene | AIM 拓扑路径和 BCP 可视化 | GC 更适合作为氢键/分子间 AIM 主图，benzene 适合作基础演示 | 有 VESTA 和 PNG |
 | Cd/Cl 轨迹视频 | VESTA 轨迹视频帧 | 代表 trajectory -> VESTA frame -> PNG/video 的批处理路线 | 有 poster frame 和高码率 mp4；XYZ/extXYZ->VESTA frame 已有 `trajectory-frames` CLI，PNG->mp4 合成层已有 `trajectory-video` CLI |
 | H2O-HF | IRI+AIM 叠图、IRI 纹理范围调试 | 当前更适合作 IRI/AIM 调试证据，不应作为手册级成品图 | 有 VESTA、cube 和 PNG，但状态为待完善 |
+| benzene dimer / phenol dimer | IRI/RDG/DORI/RoSE/SEDD/on-top pair density | 小而直观的弱相互作用体系，适合 paired scalar 对比；phenol dimer 可作为公开教程 fallback | 待准备 Molden/cube 和手册图 |
+| COF_12000N2 单层 | ABACUS direct cube、ELF/ESP、孔道/原子染色 | 周期多孔 2D 材料能展示 cell、真空层、孔道和 direct cube workflow | 待单层化、单点 cube 和 PNG |
+| 反应性芳香分子 / coronene | Fukui、dual descriptor、condensed atom coloring | 可同时覆盖 charged-state cube arithmetic 和原子数值染色 | 待准备同网格三态 cube |
 | benzene NICS vector | VESTA 箭头/矢量杂项 | 芳香性相关矢量展示的原型；按用户要求暂不进主代码 | 有 VESTA 和 PNG，仅作为杂项保留 |
 
 ## Ag(111)+benzene: IGMH+AIM 三视图
@@ -166,7 +173,8 @@ multiwfn2vesta cube-preset iri h2o_hf_IRI2_surface.cub iri_products \
 3. IRI+AIM: 继续解析 VESTA `SURFS`/`SECTS`/`TEX3P`，直到 IRI 等值面和 AIM 叠图清楚。
 4. ABACUS 直接 cube: charge density、potential-on-density、ELF、partial charge、wavefunction norm。
 5. Multiwfn `grid-run`: density/orbital/spin/KED/ELF/LOL/ESP/ALIE/LEA/vdW/component vdW/FOD/OW-Fukui/信息论密度。
-6. RoSE/SEDD: 用 benzene dimer 或 GC 碱基对渲染一组 paired figure，先试 `0.5` 等值面再按 cube 范围调参。
-7. `cube-arith` 和 `fukui-run`: density difference、spin density、Fukui+/-/0、dual descriptor。
-8. `stm-run`、`domain-run`、basin cube: 当前有 VESTA/cube 烟测，但缺真正渲染图。
-9. atom coloring: ABACUS Mulliken 和 Multiwfn 原子表染色已有 VESTA 烟测，缺对比 PNG。
+6. RoSE/SEDD: 用 benzene dimer 或 GC 碱基对渲染一组 paired figure，先试 `0.5` 等值面再按 cube 范围调参；公开 fallback 可用 phenol dimer 类弱相互作用体系。
+7. `cube-arith` 和 `fukui-run`: density difference、spin density、Fukui+/-/0、dual descriptor；coronene 或带杂原子的芳香体系比 toy 小分子更适合手册图。
+8. surface extrema: 用 phenol、含氟/硝基芳香体系或 GC 的 ALIE/LEA/LEAE 表面极值补一张点标记图。
+9. `stm-run`、`domain-run`、basin cube: 当前有 VESTA/cube 烟测，但缺真正渲染图。
+10. atom coloring: ABACUS Mulliken 和 Multiwfn 原子表染色已有 VESTA 烟测，缺真实电荷/磁矩或 condensed Fukui 对比 PNG。

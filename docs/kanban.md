@@ -1,6 +1,25 @@
 # Project Kanban
 
-Updated: 2026-06-12 05:06 CST
+Updated: 2026-06-12 07:32 CST
+
+## Current Request: 2026-06-12 Feature Closure Phase 6, Examples, Renders, And Chinese Manual
+
+- [x] 需求入板: 继续把已有功能闭环，要求每个维护态功能都有真实有价值体系的 example、可复现命令、效果图或明确待渲染原因，并优化统一 CLI/中文手册体验。
+- [x] 收口当前未完成的 extended KED diagnostics 增量: 修复 local-temperature 测试失败，确认 `uservar`/`iKEDsel` 只用于源码支撑的路线；提交前 review 发现的 stale global `uservar` 继承风险已修复为维护态 KED 默认 run-local `uservar=0`，并补齐 README、usage、中文手册、skills、research matrix 和 worklog。
+- [x] 重新盘点 examples/gallery/status matrix: 只读子 agent 确认 ready 图集中在 Ag(111)+benzene IGMH+AIM、GC/benzene AIM 和 Cd/Cl 轨迹；grid-run/cube/domain/STM/atom-coloring 仍保持 `needs-render` 或 `needs-example`。
+- [x] 对已有真实体系优先补效果图索引和可验证 artifact；不能无 GUI 稳定重渲染的项目保留 `needs-render`，不使用 toy/placeholder 图冒充正式效果图。本轮新增 KED diagnostics coverage，但明确无手册级 PNG。
+- [x] 修正子 agent 审计发现的 stale runbook 和入口缺口: `domain-run` 改为 cube 输入，`fukui-run` 改为 `--neutral/--anion/--cation`，aIGM/amIGM 改为重复 `--fragment`，并补 `multiwfn2vesta-abacus-mulliken-color` console script。
+- [x] 继续收口用户最新要求: 新增可复用 gallery showcase 生成脚本 `scripts/build_gallery_showcase.py`，生成由真实 VESTA PNG 组成的 `docs/assets/gallery/feature_closure_showcase.png`，并接入 `examples --gallery-assets`、中文手册、gallery 和 feature coverage 文档。
+- [x] 吸收两个只读子 agent 结果: ready 主线仍是 Ag(111)+benzene、GC/benzene AIM 和 Cd/Cl 轨迹；近期补图优先级固定为 Ag extended fields、benzene/phenol dimer scalar suite、GC weak-interaction suite、COF direct cube suite、Fukui/atom-coloring suite 和 spin coloring suite。
+- [x] 运行 no-GUI regression、CLI smokes、docs mirror、提交前检查；用 `Stardust0831` 身份提交并推送，同时保护未跟踪 `domain.cub` / `domain.pdb`。已通过 focused 221 tests、full 400 no-GUI tests、`examples --verify`、`examples --gallery-assets`、`examples --systems --json`、`examples --needs-render`、markdown local-link check、showcase PNG 尺寸检查、py_compile、`git diff --check` 和 docs mirror dry-run；提交/push 结果由最终回复报告。
+
+## Active Goal Continuation: 2026-06-12 Extended KED Diagnostics Increment
+
+- [x] 需求入板: 继续长期目标，调研并实现更多适合 VESTA 的 Multiwfn 波函数分析，优先 ABACUS LCAO Molden 可支撑的路线；本轮选择本地源码已列出的扩展 KED diagnostics。
+- [x] 审计当前仓库状态: `main` 与 `origin/main` 对齐在 `02cb480`；仅有未跟踪 `domain.cub` / `domain.pdb`，继续保护，不提交。
+- [x] 审计本地 Multiwfn 2026.6.2 源码证据: function-100 `iuserfunc=1201/1202/1203/1204/1210` 分别为 selected KED 与 Weizsacker/Lagrangian KED 的差值、绝对差值、基于 `iKEDsel` 的 local temperature 和 KED potential。`KEDpot` 源码只显式处理 `iKEDsel=3/5/7`，本轮先维护 Thomas-Fermi KED potential。
+- [x] 实现 named `grid-run` routes、VESTA presets、focused tests，并同步 README、中文手册、usage、research matrix、skills、worklog、看板。
+- [ ] 运行 no-GUI regression、CLI smokes、docs 镜像、提交前检查；通过后用 `Stardust0831` 身份提交并推送。
 
 ## Current Request: 2026-06-12 Feature Closure Phase 5 With Valuable Systems
 

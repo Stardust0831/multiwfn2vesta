@@ -34,6 +34,12 @@ multiwfn2vesta grid-run gc.molden products/esp \
 multiwfn2vesta grid-run gc.molden products/ontop_pair \
   --function on-top-pair-density \
   --pair-correlation-type 3
+
+# surface extrema 分支需要先由 Multiwfn 生成 surfanalysis.pdb。
+multiwfn2vesta surface-extrema gc_surface.vesta surfanalysis.pdb products/extrema_overlay.vesta \
+  --surface-cube products/iri/IRI2_surface.cub \
+  --selection all \
+  --label-extrema
 ```
 
 ## 输出文件
@@ -63,4 +69,3 @@ multiwfn2vesta examples --command surface-extrema --json
 ```
 
 升为 `ready` 前需要至少一张 IRI/ESP/extrema/on-top pair density 的项目内 PNG，并在 runbook 中记录与 GC AIM 图的对齐方式。
-

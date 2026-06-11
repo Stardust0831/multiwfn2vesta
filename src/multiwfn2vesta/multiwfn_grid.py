@@ -10,7 +10,7 @@ import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, NamedTuple, Optional, Sequence, Tuple
+from typing import Dict, List, NamedTuple, Optional, Sequence, Tuple, Union
 
 from .cube_preset import run_preset
 from .cube_vesta import CubeVestaResult, PERIODIC_SYMBOLS
@@ -39,6 +39,8 @@ VDW_PROBE_SYMBOLS = tuple(PERIODIC_SYMBOLS) + (
     "No",
     "Lr",
 )
+SettingValue = Union[int, float]
+KED_USER_FUNCTION_INDICES = frozenset({114, 1200, 1201, 1202, 1203, 1204, 1210})
 
 
 @dataclass(frozen=True)
@@ -51,7 +53,7 @@ class GridFunction:
     requires_orbital: bool = False
     mapped_preset: Optional[str] = None
     default_user_function_index: Optional[int] = None
-    settings_updates: Tuple[Tuple[str, int], ...] = ()
+    settings_updates: Tuple[Tuple[str, SettingValue], ...] = ()
 
 
 GRID_FUNCTIONS: Tuple[GridFunction, ...] = (
@@ -608,6 +610,160 @@ GRID_FUNCTIONS: Tuple[GridFunction, ...] = (
         settings_updates=(("iKEDsel", 2),),
     ),
     GridFunction(
+        "lagrangian-minus-weizsacker-ked",
+        100,
+        "userfunc.cub",
+        "ked-difference",
+        (
+            "ked-minus-weizsacker",
+            "ked-minus-vw",
+            "lagrangian-minus-vw-ked",
+            "pauli-ked-diff",
+        ),
+        mapped_preset="surface-map",
+        default_user_function_index=1201,
+        settings_updates=(("iKEDsel", 2),),
+    ),
+    GridFunction(
+        "tf-minus-weizsacker-ked",
+        100,
+        "userfunc.cub",
+        "ked-difference",
+        (
+            "tf-minus-vw-ked",
+            "thomas-fermi-minus-weizsacker-ked",
+            "thomas-fermi-minus-vw-ked",
+        ),
+        mapped_preset="surface-map",
+        default_user_function_index=1201,
+        settings_updates=(("iKEDsel", 3),),
+    ),
+    GridFunction(
+        "tf-minus-lagrangian-ked",
+        100,
+        "userfunc.cub",
+        "ked-difference",
+        (
+            "tf-minus-g-ked",
+            "thomas-fermi-minus-lagrangian-ked",
+            "thomas-fermi-minus-g-ked",
+        ),
+        mapped_preset="surface-map",
+        default_user_function_index=1202,
+        settings_updates=(("iKEDsel", 3),),
+    ),
+    GridFunction(
+        "weizsacker-minus-lagrangian-ked",
+        100,
+        "userfunc.cub",
+        "ked-difference",
+        (
+            "vw-minus-g-ked",
+            "vw-minus-lagrangian-ked",
+            "weizsaecker-minus-lagrangian-ked",
+        ),
+        mapped_preset="surface-map",
+        default_user_function_index=1202,
+        settings_updates=(("iKEDsel", 4),),
+    ),
+    GridFunction(
+        "tf-lagrangian-ked-absdiff",
+        100,
+        "userfunc.cub",
+        "ked-absolute-difference",
+        (
+            "abs-tf-minus-lagrangian-ked",
+            "tf-minus-lagrangian-ked-abs",
+            "thomas-fermi-lagrangian-ked-absdiff",
+        ),
+        mapped_preset="surface-map",
+        default_user_function_index=1203,
+        settings_updates=(("iKEDsel", 3),),
+    ),
+    GridFunction(
+        "weizsacker-lagrangian-ked-absdiff",
+        100,
+        "userfunc.cub",
+        "ked-absolute-difference",
+        (
+            "abs-vw-minus-lagrangian-ked",
+            "vw-lagrangian-ked-absdiff",
+            "weizsaecker-lagrangian-ked-absdiff",
+        ),
+        mapped_preset="surface-map",
+        default_user_function_index=1203,
+        settings_updates=(("iKEDsel", 4),),
+    ),
+    GridFunction(
+        "lagrangian-local-temperature",
+        100,
+        "userfunc.cub",
+        "ked-local-temperature",
+        (
+            "ked-local-temperature",
+            "local-temperature-ked",
+            "local-temperature-lagrangian-ked",
+        ),
+        mapped_preset="surface-map",
+        default_user_function_index=1204,
+        settings_updates=(("iKEDsel", 2),),
+    ),
+    GridFunction(
+        "tf-local-temperature",
+        100,
+        "userfunc.cub",
+        "ked-local-temperature",
+        (
+            "thomas-fermi-local-temperature",
+            "tf-ked-local-temperature",
+        ),
+        mapped_preset="surface-map",
+        default_user_function_index=1204,
+        settings_updates=(("iKEDsel", 3),),
+    ),
+    GridFunction(
+        "thomas-fermi-ked-potential",
+        100,
+        "userfunc.cub",
+        "ked-potential",
+        (
+            "tf-ked-potential",
+            "tf-ked-pot",
+            "thomas-fermi-ked-pot",
+        ),
+        mapped_preset="surface-map",
+        default_user_function_index=1210,
+        settings_updates=(("iKEDsel", 3),),
+    ),
+    GridFunction(
+        "gea2-ked-potential",
+        100,
+        "userfunc.cub",
+        "ked-potential",
+        (
+            "gea2-ked-pot",
+            "second-order-gea-ked-potential",
+            "gea2-potential",
+        ),
+        mapped_preset="surface-map",
+        default_user_function_index=1210,
+        settings_updates=(("iKEDsel", 5),),
+    ),
+    GridFunction(
+        "tfvw-ked-potential",
+        100,
+        "userfunc.cub",
+        "ked-potential",
+        (
+            "tf-vw-ked-potential",
+            "tf-plus-weizsacker-ked-potential",
+            "tfvw-ked-pot",
+        ),
+        mapped_preset="surface-map",
+        default_user_function_index=1210,
+        settings_updates=(("iKEDsel", 7),),
+    ),
+    GridFunction(
         "orbital-weighted-fukui-plus",
         100,
         "userfunc.cub",
@@ -756,6 +912,7 @@ class MultiwfnGridResult(NamedTuple):
     user_function_index: Optional[int]
     elflol_type: Optional[int]
     vdw_probe: Optional[int]
+    ked_density_cutoff: Optional[float]
     tex_percent: Optional[Tuple[float, float]]
     tex_physical: Optional[Tuple[float, float]]
     tex_range_source: Optional[str]
@@ -1035,6 +1192,23 @@ def _function_accepts_pair_correlation_type(function: GridFunction) -> bool:
     return function.index == 17 or any(key == "paircorrtype" for key, _value in function.settings_updates)
 
 
+def _function_accepts_ked_density_cutoff(function: GridFunction) -> bool:
+    return function.default_user_function_index == 1204
+
+
+def _function_uses_ked_uservar(function: GridFunction) -> bool:
+    return function.default_user_function_index in KED_USER_FUNCTION_INDICES
+
+
+def _normalize_ked_density_cutoff(value: Optional[float]) -> Optional[float]:
+    if value is None:
+        return None
+    cutoff = float(value)
+    if cutoff < 0:
+        raise ValueError("--ked-density-cutoff must be non-negative")
+    return cutoff
+
+
 def _normalize_float_pair(value: Optional[Sequence[float]], label: str) -> Optional[Tuple[float, float]]:
     if value is None:
         return None
@@ -1072,11 +1246,18 @@ def _normalize_surface_band(value: Optional[float]) -> Optional[float]:
 
 def _write_run_local_settings(
     path: Path,
-    updates: Dict[str, int],
+    updates: Dict[str, SettingValue],
     *,
     base_settings: Optional[Path] = None,
 ) -> None:
-    normalized_updates = {str(key): int(value) for key, value in updates.items()}
+    def format_setting_value(value: SettingValue) -> str:
+        if isinstance(value, bool):
+            return str(int(value))
+        if isinstance(value, int):
+            return str(value)
+        return f"{float(value):.12g}"
+
+    normalized_updates = {str(key): format_setting_value(value) for key, value in updates.items()}
     match_updates = {key.lower(): (key, value) for key, value in normalized_updates.items()}
     path.parent.mkdir(parents=True, exist_ok=True)
     if base_settings is not None and base_settings.exists():
@@ -1236,6 +1417,7 @@ def build_grid_commands(
     pair_correlation_type: Optional[int] = None,
     source_function_mode: Optional[int] = None,
     user_function_index: Optional[int] = None,
+    ked_density_cutoff: Optional[float] = None,
     grid_mode: str = "points",
     grid_points: Sequence[int] = (40, 40, 40),
     grid_spacing: Optional[float] = None,
@@ -1276,6 +1458,10 @@ def build_grid_commands(
         _effective_user_function_index(function, user_function_index)
     elif user_function_index is not None:
         raise ValueError("--user-function-index is only valid for user-function")
+    if _function_accepts_ked_density_cutoff(function):
+        _normalize_ked_density_cutoff(ked_density_cutoff)
+    elif ked_density_cutoff is not None:
+        raise ValueError("--ked-density-cutoff is only valid for KED local-temperature routes")
 
     commands.extend(["5", str(function.index)])
     if function.requires_orbital:
@@ -1383,6 +1569,7 @@ def _write_recipe(
     user_function_index: Optional[int] = None,
     elflol_type: Optional[int] = None,
     vdw_probe: Optional[int] = None,
+    ked_density_cutoff: Optional[float] = None,
     tex_percent: Optional[Tuple[float, float]] = None,
     tex_physical: Optional[Tuple[float, float]] = None,
     tex_range_source: Optional[str] = None,
@@ -1417,6 +1604,7 @@ def _write_recipe(
         user_function_index = result.user_function_index
         elflol_type = result.elflol_type
         vdw_probe = result.vdw_probe
+        ked_density_cutoff = result.ked_density_cutoff
         tex_percent = result.tex_percent
         tex_physical = result.tex_physical
         tex_range_source = result.tex_range_source
@@ -1462,6 +1650,7 @@ def _write_recipe(
             f"- user_function_index_iuserfunc: `{user_function_index}`",
             f"- elflol_type: `{elflol_type}`",
             f"- vdw_probe_atomic_number_ivdwprobe: `{vdw_probe}`",
+            f"- ked_density_cutoff_uservar: `{ked_density_cutoff}`",
             f"- mapped_tex_percent: `{tex_percent}`",
             f"- mapped_tex_physical: `{tex_physical}`",
             f"- mapped_tex_range_source: `{tex_range_source}`",
@@ -1486,6 +1675,9 @@ def _write_recipe(
             "- Function `20` EDR(r;d) asks for length scale `d` in Bohr before grid setup and exports `EDR.cub`.",
             "- Function `21` D(r) can use Multiwfn's default EDR exponent set `20, 2.50, 1.50` or a manual count/start/increment set and exports `EDRDmax.cub`.",
             "- Function `100` KED named routes patch `iKEDsel` in the same run-local settings file: `3` selects Thomas-Fermi KED, `4` selects Weizsacker KED, and Pauli KED uses `iuserfunc=114` with selected KED minus Weizsacker KED.",
+            "- Function `100` extended KED routes use source-backed `iuserfunc=1201/1202/1203/1204/1210` for selected KED differences, absolute differences, local temperature, and source-supported KED potentials.  The maintained KED potential routes only use `iKEDsel=3/5/7`, which the inspected source handles explicitly.",
+            "- Maintained function-100 KED routes write run-local `uservar=0` by default so stale global Multiwfn settings do not affect KED evaluation.",
+            "- `--ked-density-cutoff` overrides run-local Multiwfn `uservar` for KED local-temperature routes.  Use it cautiously because the inspected source also uses nonzero `uservar` inside KED evaluation, not only as a density cutoff.",
             "- Function `100` evaluates `userfunc(x,y,z)` using `iuserfunc` from settings; the maintained stream copies the selected Multiwfn `settings.ini` when available, patches `iuserfunc`, passes the run-local settings file through `-set`, and exports `userfunc.cub`.  Special external-grid modes `-1`, `-3`, and Shubin `57/58/59` are intentionally excluded from this generic route.",
             "- Function `111` Becke weight asks for atom indices `I,J` before grid setup and exports `Becke.cub`; `J=0` means atomic weight and two positive indices mean overlap weight.",
             "- Function `112` Hirshfeld weight asks for an atom selection string and an atomic-density source before grid setup; the maintained command stream uses built-in atomic densities and exports `Hirshfeld.cub`.",
@@ -1589,6 +1781,7 @@ def run_multiwfn_grid(
     user_function_index: Optional[int] = None,
     elflol_type: Optional[object] = None,
     vdw_probe: Optional[object] = None,
+    ked_density_cutoff: Optional[float] = None,
     timeout: Optional[int] = None,
     nthreads: Optional[int] = None,
     stem: Optional[str] = None,
@@ -1633,6 +1826,7 @@ def run_multiwfn_grid(
     normalized_user_function_index: Optional[int] = None
     normalized_elflol_type: Optional[int] = None
     normalized_vdw_probe: Optional[int] = None
+    normalized_ked_density_cutoff: Optional[float] = None
     normalized_tex_percent = _normalize_float_pair(tex_percent, "--tex-percent")
     normalized_tex_physical = _normalize_float_pair(tex_physical, "--tex-physical")
     normalized_tex_range_source = _normalize_tex_range_source(tex_range_source)
@@ -1695,6 +1889,10 @@ def run_multiwfn_grid(
         normalized_vdw_probe = _normalize_vdw_probe(vdw_probe)
     elif vdw_probe is not None:
         raise ValueError("--vdw-probe is only valid for vdW potential routes")
+    if _function_accepts_ked_density_cutoff(function):
+        normalized_ked_density_cutoff = _normalize_ked_density_cutoff(ked_density_cutoff)
+    elif ked_density_cutoff is not None:
+        raise ValueError("--ked-density-cutoff is only valid for KED local-temperature routes")
     candidate = find_multiwfn(multiwfn_path)
     if candidate is None:
         raise FileNotFoundError(
@@ -1721,7 +1919,7 @@ def run_multiwfn_grid(
             raw_dir = output_dir / raw_dir
     raw_dir.mkdir(parents=True, exist_ok=True)
 
-    settings_updates: Dict[str, int] = {key: value for key, value in function.settings_updates}
+    settings_updates: Dict[str, SettingValue] = {key: value for key, value in function.settings_updates}
     if function.index == 17:
         settings_updates.update(
             {
@@ -1753,6 +1951,12 @@ def run_multiwfn_grid(
         if normalized_vdw_probe is not None
         else settings_updates.get("ivdwprobe")
     )
+    if _function_uses_ked_uservar(function):
+        settings_updates["uservar"] = (
+            normalized_ked_density_cutoff
+            if _function_accepts_ked_density_cutoff(function) and normalized_ked_density_cutoff is not None
+            else 0
+        )
 
     settings_override: Optional[Path] = None
     if settings_updates:
@@ -1783,6 +1987,7 @@ def run_multiwfn_grid(
             pair_correlation_type=normalized_pair_correlation_type,
             source_function_mode=normalized_source_function_mode,
             user_function_index=normalized_user_function_index,
+            ked_density_cutoff=normalized_ked_density_cutoff,
             grid_mode=grid_mode,
             grid_points=grid_points,
             grid_spacing=grid_spacing,
@@ -1853,6 +2058,7 @@ def run_multiwfn_grid(
             user_function_index=normalized_user_function_index,
             elflol_type=effective_elflol_type,
             vdw_probe=effective_vdw_probe,
+            ked_density_cutoff=normalized_ked_density_cutoff,
             tex_percent=normalized_tex_percent,
             tex_physical=normalized_tex_physical,
             tex_range_source=normalized_tex_range_source,
@@ -1893,6 +2099,7 @@ def run_multiwfn_grid(
             user_function_index=normalized_user_function_index,
             elflol_type=effective_elflol_type,
             vdw_probe=effective_vdw_probe,
+            ked_density_cutoff=normalized_ked_density_cutoff,
             tex_percent=normalized_tex_percent,
             tex_physical=normalized_tex_physical,
             tex_range_source=normalized_tex_range_source,
@@ -1928,6 +2135,7 @@ def run_multiwfn_grid(
             user_function_index=normalized_user_function_index,
             elflol_type=effective_elflol_type,
             vdw_probe=effective_vdw_probe,
+            ked_density_cutoff=normalized_ked_density_cutoff,
             tex_percent=normalized_tex_percent,
             tex_physical=normalized_tex_physical,
             tex_range_source=normalized_tex_range_source,
@@ -1968,6 +2176,7 @@ def run_multiwfn_grid(
             user_function_index=normalized_user_function_index,
             elflol_type=effective_elflol_type,
             vdw_probe=effective_vdw_probe,
+            ked_density_cutoff=normalized_ked_density_cutoff,
             tex_percent=normalized_tex_percent,
             tex_physical=normalized_tex_physical,
             tex_range_source=normalized_tex_range_source,
@@ -2072,6 +2281,7 @@ def run_multiwfn_grid(
         user_function_index=normalized_user_function_index,
         elflol_type=effective_elflol_type,
         vdw_probe=effective_vdw_probe,
+        ked_density_cutoff=normalized_ked_density_cutoff,
         tex_percent=normalized_tex_percent,
         tex_physical=normalized_tex_physical,
         tex_range_source=normalized_tex_range_source,
@@ -2363,6 +2573,17 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         ),
     )
     parser.add_argument(
+        "--ked-density-cutoff",
+        type=float,
+        default=None,
+        help=(
+            "Optional Multiwfn uservar density cutoff for function-100 KED "
+            "local-temperature routes.  Use cautiously: in the inspected "
+            "Multiwfn source, nonzero uservar is also used inside KED evaluation. "
+            "Maintained KED routes write run-local uservar=0 unless this option is set."
+        ),
+    )
+    parser.add_argument(
         "--elflol-type",
         default=None,
         help=(
@@ -2499,6 +2720,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 or args.pair_correlation_type is not None
                 or args.source_function_mode is not None
                 or args.user_function_index is not None
+                or args.ked_density_cutoff is not None
                 or args.elflol_type is not None
                 or args.vdw_probe is not None
                 or args.tex_percent is not None
@@ -2513,7 +2735,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     "--reference-point, --reference-unit, "
                     "--pair-function-type, --pair-correlation-type, and "
                     "--source-function-mode, --user-function-index, and "
-                    "--elflol-type, --vdw-probe, and mapped texture controls "
+                    "--ked-density-cutoff, --elflol-type, --vdw-probe, "
+                    "and mapped texture controls "
                     "are not supported with --orbitals"
                 )
             result = run_multiwfn_grid_batch(
@@ -2577,6 +2800,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             pair_correlation_type=args.pair_correlation_type,
             source_function_mode=args.source_function_mode,
             user_function_index=args.user_function_index,
+            ked_density_cutoff=args.ked_density_cutoff,
             elflol_type=args.elflol_type,
             vdw_probe=args.vdw_probe,
             timeout=args.timeout,

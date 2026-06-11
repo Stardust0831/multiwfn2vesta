@@ -1,4 +1,5 @@
 import io
+from pathlib import Path
 import unittest
 from unittest.mock import patch
 
@@ -6,6 +7,19 @@ from multiwfn2vesta import cli
 
 
 class TestUnifiedCli(unittest.TestCase):
+    def test_packaging_entry_points_cover_atom_coloring_commands(self):
+        root = Path(__file__).resolve().parents[1]
+        pyproject = (root / "pyproject.toml").read_text(encoding="utf-8")
+        setup_py = (root / "setup.py").read_text(encoding="utf-8")
+        expected = (
+            "multiwfn2vesta-abacus-mulliken-color=multiwfn2vesta.abacus_mulliken:main",
+            "multiwfn2vesta-multiwfn-atom-color=multiwfn2vesta.multiwfn_atom_table:main",
+        )
+        for entry in expected:
+            pyproject_entry = entry.replace("=", ' = "')
+            self.assertIn(pyproject_entry, pyproject)
+            self.assertIn(entry, setup_py)
+
     def test_help_lists_maintained_workflows(self):
         output = io.StringIO()
         with patch("sys.stdout", output):

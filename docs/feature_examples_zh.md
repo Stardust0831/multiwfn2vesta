@@ -38,6 +38,7 @@ multiwfn2vesta examples --coverage --json
 | `igmh-run` / `igm-run` / `migm-run` | Ag(111)+benzene | ready | Ag 三视图 | 保留 Ag 为周期体系主例，另补小分子快速例 |
 | `aigm-run` / `amigm-run` | benzene dimer 轨迹或 Ag(111)+benzene AIMD 片段 | needs-example | 无 | 生成短轨迹平均 IGM cube 并渲染 |
 | `grid-run` | H2O、benzene、Ag(111)+benzene、未来 COF | needs-render | 无手册级图 | 按函数组补 density/orbital/KED/ELF/ESP/vdW/FOD 等图 |
+| `grid-run --function ked diagnostics` | H2O、benzene、Ag(111)+benzene | needs-render | 无 | 已有 `iuserfunc=1201/1202/1203/1204/1210` CLI 和 preset；下一步渲染 selected KED、KED 差值、local temperature 或 KED potential 对照图 |
 | `grid-run --function rose/sedd` | benzene dimer、GC 碱基对或类似弱相互作用/芳香体系 | needs-render | 无 | 已有 RoSE/SEDD CLI 和 preset；下一步在同一真实体系中渲染 paired figure |
 | `grid-run --function steric/sbl` | Ag(111)+benzene、benzene dimer、GC 碱基对 | needs-render | 无 | 已有 steric/SBL/Pauli/quantum/electrostatic CLI 和 preset；下一步在界面或弱相互作用体系中渲染成组图 |
 | `grid-run --function on-top-pair-density` | benzene dimer、GC 碱基对 | needs-render | 无 | 已有 `iuserfunc=36` CLI 和 preset；下一步比较 `paircorrtype` 后渲染电子对密度图 |
@@ -51,7 +52,7 @@ multiwfn2vesta examples --coverage --json
 | `aim-igmh` | Ag(111)+benzene | ready | Ag 三视图 | 继续改善不抢焦点渲染和 camera preset |
 | `trajectory-frames` | Cd/Cl extXYZ 轨迹 | ready | `assets/gallery/cdcl_nvt_trajectory_frame.png` | 后续补 ASE `.traj` 直接读取 |
 | `trajectory-video` | Cd/Cl VESTA PNG frame 序列 | ready | Cd/Cl poster frame | 后续补不抢焦点 PNG 渲染层 |
-| `examples` | 文档/算例发现入口 | ready | `assets/gallery/current_feature_overview.png` | 继续把 smoke 逐步提升为正式 example |
+| `examples` | 文档/算例发现入口 | ready | `assets/gallery/current_feature_overview.png`、`assets/gallery/feature_closure_showcase.png` | 继续把 smoke 逐步提升为正式 example |
 
 ## 推荐真实体系组合
 
@@ -59,10 +60,11 @@ multiwfn2vesta examples --coverage --json
 
 1. Ag(111)+benzene 周期性吸附体系：覆盖 ABACUS Molden、Molden 检查、IGMH、AIM、AIM+IGMH 三视图、vdW/ESP 类 grid-run 后续扩展。
 2. GC 碱基对：覆盖 AIM 氢键拓扑，适合继续补 IRI/RDG、ESP-on-density、surface extrema。
-3. H2O-HF 或 benzene dimer：覆盖 IRI/RDG、DORI、Delta-g 和小分子弱相互作用快速调试。
+3. H2O-HF、benzene dimer 或 phenol dimer：覆盖 IRI/RDG、DORI、Delta-g、RoSE/SEDD 和小分子弱相互作用快速调试；H2O-HF 保留为 fast debug，benzene/phenol dimer 更适合手册主图。
 4. COF_12000N2 单层加真空层：适合 ABACUS direct cube、电子密度、静电势、ELF/LOL、原子电荷染色。
-5. 真实 open-shell 或磁性体系：适合 spin density、ABACUS Mulliken magnetism coloring、Multiwfn atom table coloring。
-6. Cd/Cl NVT/NPT 轨迹：覆盖 trajectory frame、reference VESTA style、Boundary、成键判据和高码率视频。
+5. coronene、nitro/hetero aromatic 或其它反应性芳香体系：适合 Fukui、dual descriptor、condensed Fukui/电荷原子染色。
+6. 真实 open-shell 或磁性体系：适合 spin density、ABACUS Mulliken magnetism coloring、Multiwfn atom table coloring；C4H8 diradical/triplet 小分子或磁性氧化物都比当前 toy Fe smoke 更有展示价值。
+7. Cd/Cl NVT/NPT 轨迹：覆盖 trajectory frame、reference VESTA style、Boundary、成键判据和高码率视频。
 
 ## 下一批正式 example 队列
 
@@ -76,11 +78,11 @@ example id 落地。每个 example 都应先满足 `examples/_template/README_zh
 | 计划 example id | 体系 | 主要覆盖功能 | 当前可复用资产 | 验收缺口 |
 | --- | --- | --- | --- | --- |
 | `ag111_benzene_extended_fields` | Ag(111)+benzene 周期 slab | `abacus-molden`, `molden-check`, `igmh-run`, `aim-igmh`, vdW/ESP/steric/SBL/STM | 已有 Ag 三视图、ABACUS Molden、IGMH/AIM smoke | 为 vdW/ESP/steric/SBL/STM 生成同一视角下的真实 PNG，并记录 cube 范围和等值面 |
-| `benzene_dimer_scalar_suite` | benzene dimer | `iri-run`, RDG/DORI/Delta-g, RoSE/SEDD, vdW components | 目前无正式图 | 准备轻量 Molden/cube，渲染 paired weak-interaction/scalar figures |
+| `benzene_dimer_scalar_suite` | benzene dimer；公开 fallback 可用 phenol dimer | `iri-run`, RDG/DORI/Delta-g, RoSE/SEDD, vdW components, on-top pair density | 目前无正式图 | 准备轻量 Molden/cube，渲染 paired weak-interaction/scalar figures |
 | `gc_weak_interaction_suite` | GC 碱基对 | `aim-run`, `aim-pdb`, IRI/RDG, ESP-on-density, on-top pair density, `surface-extrema` | `gc_aim_overlay.png` 和 GC AIM runbook | 在同一 GC 体系补 IRI/ESP/ALIE、LEA extrema 或 on-top pair density 图 |
 | `cof_direct_cube_suite` | COF_12000N2 单层或小 COF | `cube-vesta`, `cube-preset`, ABACUS density/potential/ELF/partial charge/wfc norm | 仅有 COF CIF 经验记录 | 跑 ABACUS 单点或复用 direct cube，渲染 density/potential/ELF 等图 |
-| `fukui_dual_reactivity` | 杂原子芳香小分子 | `cube-arith`, `fukui-run`, orbital-weighted Fukui/dual, atom scalar coloring | 无正式图 | 准备同网格 neutral/anion/cation density cube 和 condensed atom values |
-| `spin_atom_coloring_suite` | open-shell 或磁性 ABACUS 体系 | spin density, `abacus-mulliken-color`, `multiwfn-atom-color` | 只有 toy/coloring smoke | 换真实 `mulliken.txt` 或 Multiwfn atom table，补 PNG 和色标说明 |
+| `fukui_dual_reactivity` | coronene、nitro/hetero aromatic 或其它三态反应性分子 | `cube-arith`, `fukui-run`, orbital-weighted Fukui/dual, atom scalar coloring | 无正式图 | 准备同网格 neutral/anion/cation density cube 和 condensed atom values |
+| `spin_atom_coloring_suite` | C4H8 diradical、triplet 小分子、磁性氧化物或 spin-polarized adsorbate | spin density, `abacus-mulliken-color`, `multiwfn-atom-color` | 只有 toy/coloring smoke | 换真实 `mulliken.txt` 或 Multiwfn atom table，补 PNG 和色标说明 |
 | `h2o_domain_baseline` | H2O 或小极性分子 | `domain-run`, KED/ESP 快速回归 | H2O domain/grid smoke | 渲染二值 domain 和基础 scalar 图，只作为快速 baseline |
 | `short_aigm_trajectory` | benzene dimer 或 Ag(111)+benzene AIMD 片段 | `aigm-run`, `amigm-run`, trajectory-average weak interaction | 轨迹经验和 Cd/Cl video workflow | 准备短轨迹平均 IGM cube，并给一张 mapped-surface PNG |
 
@@ -93,7 +95,7 @@ example id 落地。每个 example 都应先满足 `examples/_template/README_zh
 | density、gradient、Laplacian | H2O 或 benzene | standalone isosurface；density 也作为 surface cube |
 | orbital、orbital-density | benzene HOMO/LUMO | signed 或 orbital-density preset |
 | spin-density、spin-polarization、alpha/beta density | open-shell/磁性体系 | signed spin-density surface，另配 atom coloring |
-| KED、Thomas-Fermi、Weizsacker、Pauli KED | H2O/benzene | positive KED isosurface 或映射到 density surface |
+| KED、Thomas-Fermi、Weizsacker、Pauli KED、KED diagnostics | H2O/benzene | positive KED isosurface、signed KED difference、local temperature 或 KED potential；可映射到 density surface |
 | ELF/LOL | COF 或芳香分子 | ELF/LOL 等值面，必要时配 density frame |
 | ESP、electron-only ESP、positive/negative ESP、electric field magnitude | 极性分子、Ag(111)+benzene | potential surface 或 density surface texture；`electron-esp` 可拆出电子贡献 |
 | ALIE/LEA/LEAE | 芳香分子反应位点 | surface texture + `surface-extrema` |
@@ -112,6 +114,10 @@ example id 落地。每个 example 都应先满足 `examples/_template/README_zh
 
 ![current feature overview](assets/gallery/current_feature_overview.png)
 
+当前手册用的 6-panel 闭环展示图：
+
+![feature closure showcase](assets/gallery/feature_closure_showcase.png)
+
 单图入口见 `docs/example_gallery_zh.md`。
 
 CLI 入口补充：
@@ -124,7 +130,7 @@ CLI 入口补充：
 
 只读源码审计建议的下一批 Multiwfn function-100 路线：
 
-- 扩展 KED: `iuserfunc=1201/1202/1203/1204/1210`，适合 KED 差值、局域温度和 KED potential。
+- 扩展 KED 已维护: `iuserfunc=1201/1202/1203/1204/1210`，适合 KED 差值、局域温度和 KED potential；仍缺真实手册级 render。
 - steric/SBL 场已维护核心无额外交互路线：`iuserfunc=40-43/60-69/-69/110-113`，适合吸附排斥和界面相互作用解释；damped steric `44-47` 暂未维护。
 - on-top pair density 已维护：`iuserfunc=36`，适合电子对密度相关展示；需要真实 `benzene dimer` 或 GC 渲染后再标 ready。
 

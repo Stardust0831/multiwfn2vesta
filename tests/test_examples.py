@@ -106,6 +106,7 @@ class TestExamplesIndex(unittest.TestCase):
         text = output.getvalue()
         self.assertIn("feature example coverage", text)
         self.assertIn("grid-run", text)
+        self.assertIn("ked diagnostics", text)
         self.assertIn("rose/sedd", text)
         self.assertIn("steric/sbl", text)
         self.assertIn("on-top-pair-density", text)
@@ -157,6 +158,15 @@ class TestExamplesIndex(unittest.TestCase):
 
         output = io.StringIO()
         with patch("sys.stdout", output):
+            code = examples.main(["--command", "local-temperature-ked", "--json"])
+
+        self.assertEqual(code, 0)
+        records = json.loads(output.getvalue())
+        commands = {item["command"] for item in records}
+        self.assertEqual(commands, {"grid-run --function ked diagnostics"})
+
+        output = io.StringIO()
+        with patch("sys.stdout", output):
             code = examples.main(["--command", "surface-extrema", "--json"])
 
         self.assertEqual(code, 0)
@@ -180,7 +190,13 @@ class TestExamplesIndex(unittest.TestCase):
         self.assertEqual(code, 0)
         records = json.loads(output.getvalue())
         self.assertEqual([item["command"] for item in records], ["examples"])
-        self.assertEqual(records[0]["gallery"], ["docs/assets/gallery/current_feature_overview.png"])
+        self.assertEqual(
+            records[0]["gallery"],
+            [
+                "docs/assets/gallery/current_feature_overview.png",
+                "docs/assets/gallery/feature_closure_showcase.png",
+            ],
+        )
 
     def test_gallery_assets_output_lists_project_images(self):
         output = io.StringIO()
@@ -193,6 +209,7 @@ class TestExamplesIndex(unittest.TestCase):
         self.assertIn("ag111_benzene_igmh_aim_front.png", text)
         self.assertIn("gc_aim_overlay.png", text)
         self.assertIn("current_feature_overview.png", text)
+        self.assertIn("feature_closure_showcase.png", text)
         self.assertNotIn("h2o_iri_aim_overlay.png", text)
 
     def test_gallery_assets_json_includes_existence_flag(self):
@@ -217,6 +234,8 @@ class TestExamplesIndex(unittest.TestCase):
         self.assertIn("ag111_benzene", text)
         self.assertIn("gc_base_pair", text)
         self.assertIn("cof_12000n2_monolayer", text)
+        self.assertIn("fukui_aromatic_reactivity", text)
+        self.assertIn("surface_extrema_aromatic", text)
 
     def test_systems_json_is_priority_ordered(self):
         output = io.StringIO()

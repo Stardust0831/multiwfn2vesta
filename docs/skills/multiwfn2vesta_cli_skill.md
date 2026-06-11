@@ -176,6 +176,11 @@ commands that still need a better figure or a real example.  Use
 `--command <command-or-term>` when the user asks "this function/example is
 where?", `--gallery-assets` when they ask for the current rendered figures,
 and `--systems` before proposing a new real-system example.
+The current manual preview is
+`docs/assets/gallery/feature_closure_showcase.png`, assembled from already
+committed real VESTA renders; do not use it to mark a missing feature as
+complete unless that feature also has its own real-system render or a clearly
+linked ready workflow.
 
 ### Rendered trajectory frames to MP4
 
@@ -626,6 +631,17 @@ IUSERFUNC`; named routes automatically patch common source-backed values:
 `thomas-fermi-ked` / `tf-ked` = `1200` plus `iKEDsel=3`,
 `weizsacker-ked` / `vw-ked` = `1200` plus `iKEDsel=4`,
 `pauli-ked` = `114` plus `iKEDsel=2`,
+`lagrangian-minus-weizsacker-ked` = `1201` plus `iKEDsel=2`,
+`tf-minus-weizsacker-ked` = `1201` plus `iKEDsel=3`,
+`tf-minus-lagrangian-ked` = `1202` plus `iKEDsel=3`,
+`weizsacker-minus-lagrangian-ked` = `1202` plus `iKEDsel=4`,
+`tf-lagrangian-ked-absdiff` = `1203` plus `iKEDsel=3`,
+`weizsacker-lagrangian-ked-absdiff` = `1203` plus `iKEDsel=4`,
+`lagrangian-local-temperature` = `1204` plus `iKEDsel=2`,
+`tf-local-temperature` = `1204` plus `iKEDsel=3`,
+`thomas-fermi-ked-potential` = `1210` plus `iKEDsel=3`,
+`gea2-ked-potential` = `1210` plus `iKEDsel=5`,
+`tfvw-ked-potential` = `1210` plus `iKEDsel=7`,
 `orbital-weighted-fukui-plus` / `ow-fplus` = `95`,
 `orbital-weighted-fukui-minus` / `ow-fminus` = `96`,
 `orbital-weighted-fukui-zero` / `ow-f0` = `97`,
@@ -639,11 +655,13 @@ into a run-local settings file copied from the selected Multiwfn
 `settings.ini` when available and passed with `-set`; KED routes also patch
 `iKEDsel`.  LEA/LEAE named routes also auto-select mapped presets
 `lea`/`leae` when `--surface-cube` is supplied; local electronegativity and
-local hardness plus alpha/beta density, FOD, KED variants, RoSE/SEDD,
+local hardness plus alpha/beta density, FOD, KED variants/diagnostics, RoSE/SEDD,
 on-top pair density, steric/SBL routes, and the
 orbital-weighted Fukui/dual routes use `surface-map`.  Alpha/beta density,
 FOD, and Fukui+/Fukui-/Fukui0 standalone products use `density`, KED variants
-use `kinetic-energy-density`, RoSE/SEDD use `rose`/`sedd`, on-top pair density
+use `kinetic-energy-density`, extended KED diagnostics use `ked-difference`,
+`ked-absolute-difference`, `ked-local-temperature`, or `ked-potential`,
+RoSE/SEDD use `rose`/`sedd`, on-top pair density
 uses `on-top-pair-density`, steric/SBL routes use the five
 `steric-energy-density`/`sbl-*` presets, and
 orbital-weighted dual descriptor uses `signed`.  These 95..98 routes are single-wavefunction
@@ -673,6 +691,14 @@ minus Weizsacker KED.  These are Molden-orbital derivative analyses rather
 than native ABACUS KED cubes, so ABACUS use should stay on validated LCAO
 Molden files and the `kinetic-energy-density` isosurface should be tuned per
 system after checking the value range.
+Extended KED diagnostics use `iuserfunc=1201/1202/1203/1204/1210` for KED
+differences, absolute KED difference, local temperature, and KED potential.
+The maintained KED-potential routes are limited to source-explicit
+`iKEDsel=3/5/7`.  Maintained function-100 KED routes reset run-local
+`uservar=0` by default.  `--ked-density-cutoff` is accepted only by
+local-temperature routes and overrides run-local `uservar`; record it in
+examples because nonzero `uservar` also affects KED evaluation in the
+inspected Multiwfn source.
 `grid-run --function becke` requires
 `--becke-atoms I J`; `I J` requests Becke overlap weight and `I 0` requests
 Becke atomic weight.  `grid-run --function hirshfeld` requires

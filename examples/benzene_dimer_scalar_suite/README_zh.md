@@ -2,16 +2,16 @@
 
 ## 体系价值
 
-- 体系：benzene dimer 或取代芳香二聚体。
+- 体系：benzene dimer、phenol dimer 或取代芳香二聚体。
 - 对应功能：`iri-run`、RDG/DORI/Delta-g、RoSE/SEDD、vdW component、on-top pair density。
-- 为什么值得作为示例：pi-stacking/色散相互作用直观，体系比 Ag slab 小，适合做弱相互作用标量场的快速教程。
+- 为什么值得作为示例：pi-stacking/氢键/色散相互作用直观，体系比 Ag slab 小，适合做弱相互作用标量场的快速教程。若本地没有 benzene dimer 波函数，phenol dimer 可作为公开教程型 fallback。
 - 不适合说明的问题：不覆盖周期性边界和金属表面吸附。
 
 ## 输入文件
 
 | 文件 | 来源 | 是否提交 | 备注 |
 | --- | --- | --- | --- |
-| `benzene_dimer.molden` | Gaussian/ORCA/ABACUS LCAO 等可被 Multiwfn 读入的波函数 | 否 | 需要几何和电子态稳定 |
+| `benzene_dimer.molden` 或 `phenol_dimer.molden` | Gaussian/ORCA/ABACUS LCAO 等可被 Multiwfn 读入的波函数 | 否 | 需要几何和电子态稳定，优先用一个体系复用所有 scalar field |
 | `density.cub` | Multiwfn density 或 ABACUS direct cube | 否 | 可用于 mapped-surface |
 
 ## 推荐命令
@@ -62,4 +62,3 @@ multiwfn2vesta examples --command rose --json
 ```
 
 升为 `ready` 前需要记录 cube 最小/最大值、选定等值面、VESTA sections 是否关闭，以及至少一张项目内 PNG。
-

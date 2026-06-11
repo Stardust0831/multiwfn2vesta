@@ -255,6 +255,22 @@ passes it back through `cube-preset`.
   `userfunc.cub`, default isosurface `0.01`.  Use this for
   `grid-run --function thomas-fermi-ked`, `weizsacker-ked`, or `pauli-ked`;
   inspect the value range and tune the isosurface per system.
+- `ked-difference` aliases include `tf-minus-lagrangian-ked` and
+  `lagrangian-minus-weizsacker-ked`; signed surfaces for function-100
+  `iuserfunc=1201/1202` KED difference diagnostics, default magnitude `0.01`.
+- `ked-absolute-difference` aliases include `tf-lagrangian-ked-absdiff`;
+  single positive surface for function-100 `iuserfunc=1203`, default
+  isosurface `0.01`.
+- `ked-local-temperature` aliases include `lagrangian-local-temperature` and
+  `tf-local-temperature`; single positive surface for function-100
+  `iuserfunc=1204`, default isosurface `1000.0` K.  Treat low-density
+  regions and any `uservar` cutoff choice as part of the scientific record;
+  maintained function-100 KED routes reset run-local `uservar=0` unless a
+  local-temperature cutoff is explicitly requested.
+- `ked-potential` aliases include `thomas-fermi-ked-potential`,
+  `gea2-ked-potential`, and `tfvw-ked-potential`; signed surfaces for
+  source-supported function-100 `iuserfunc=1210` routes with `iKEDsel=3/5/7`,
+  default magnitude `0.05`.
 - `steric-energy-density` aliases: `steric-density`, `steric-energy`,
   `steric-ked`; single positive surface for function-100 `iuserfunc=40`
   steric/Weizsacker-like energy density, default isosurface `0.01`.
@@ -331,8 +347,10 @@ passes it back through `cube-preset`.
   `51` / `52`, `fractional-occupation-density` / `fod` = `90`,
   `vdw-repulsion-potential` / `vdw-dispersion-potential` = `93` / `94`,
   ESP components = `101` / `102` / `103`, orbital-weighted Fukui/dual =
-  `95` / `96` / `97` / `98`, and selected KED routes = `1200` or `114`
-  plus run-local `iKEDsel`.  For LEA/LEAE density-surface maps, use
+  `95` / `96` / `97` / `98`, selected KED routes = `1200` or `114`
+  plus run-local `iKEDsel`, and extended KED diagnostics =
+  `1201/1202/1203/1204/1210` plus the maintained run-local `iKEDsel` choices.
+  For LEA/LEAE density-surface maps, use
   `grid-run --function local-electron-affinity --surface-cube density.cub`
   or the lower-level `lea`/`leae` texture presets with `density.cub` plus
   `userfunc.cub`.  For local electronegativity/local hardness maps, use

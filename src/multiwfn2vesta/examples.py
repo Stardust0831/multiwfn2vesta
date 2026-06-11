@@ -311,7 +311,7 @@ FEATURE_COVERAGE: List[Dict[str, object]] = [
         "feature": "Multiwfn surfanalysis extrema overlay",
         "status": "needs-render",
         "example": "gc_weak_interaction_suite",
-        "system": "polar aromatic molecule or adsorption interface",
+        "system": "phenol, fluorinated/nitro aromatic molecule, GC base pair, or adsorption interface",
         "runbook": "docs/skills/surface_extrema_vesta_skill.md",
         "gallery": [],
         "next": "Generate ALIE/LEA/LEAE surface extrema from a real molecule and render minima/maxima markers.",
@@ -321,7 +321,7 @@ FEATURE_COVERAGE: List[Dict[str, object]] = [
         "feature": "Density difference, spin density, Fukui, and dual cube arithmetic",
         "status": "needs-example",
         "example": "fukui_dual_reactivity",
-        "system": "reactive aromatic or heteroatom-rich molecule with neutral/anion/cation states",
+        "system": "coronene, nitro/hetero aromatic, or another charged-state reactive molecule",
         "runbook": "docs/usage.md",
         "gallery": [],
         "next": "Prepare charged-state cubes and render Fukui+/Fukui-/dual maps.",
@@ -365,10 +365,23 @@ FEATURE_COVERAGE: List[Dict[str, object]] = [
         "feature": "Multiwfn real-space scalar functions",
         "status": "needs-render",
         "example": "ag111_benzene_extended_fields; benzene_dimer_scalar_suite; h2o_domain_baseline",
-        "system": "H2O for density/KED/ESP, benzene for orbital/Fukui, Ag(111)+benzene for vdW/ESP",
+        "system": "H2O for density/basic KED/ESP, benzene for orbital/Fukui, Ag(111)+benzene for vdW/ESP",
         "runbook": "docs/feature_examples_zh.md",
         "gallery": [],
-        "next": "Render one compact suite covering density/orbital/spin/KED/ELF/ESP/vdW/FOD/information-density groups.",
+        "next": "Render one compact suite covering density/orbital/spin/basic KED/ELF/ESP/vdW/FOD/information-density groups.",
+    },
+    {
+        "command": "grid-run --function ked diagnostics",
+        "feature": "Extended kinetic-energy-density difference, local-temperature, and KED-potential diagnostics",
+        "status": "needs-render",
+        "example": "h2o_domain_baseline; benzene_dimer_scalar_suite; ag111_benzene_extended_fields",
+        "system": "H2O or benzene for fast KED comparison, Ag(111)+benzene for interface diagnostics",
+        "runbook": "examples/h2o_domain_baseline/README_zh.md",
+        "gallery": [],
+        "next": (
+            "Use validated Molden input to render selected KED, KED differences, local temperature, "
+            "and source-supported KED potentials; inspect cube ranges before accepting default isosurfaces."
+        ),
     },
     {
         "command": "grid-run --function rose/sedd",
@@ -411,7 +424,7 @@ FEATURE_COVERAGE: List[Dict[str, object]] = [
         "feature": "Charged-state Fukui and dual descriptor maps",
         "status": "needs-example",
         "example": "fukui_dual_reactivity",
-        "system": "heteroatom-rich aromatic molecule with neutral, anion, and cation wavefunctions",
+        "system": "coronene, nitro/hetero aromatic, or another neutral/anion/cation charged-state set",
         "runbook": "docs/usage.md",
         "gallery": [],
         "next": "Compute aligned charged-state density cubes and render Fukui+/Fukui-/dual descriptor surfaces.",
@@ -441,7 +454,7 @@ FEATURE_COVERAGE: List[Dict[str, object]] = [
         "feature": "ABACUS Mulliken charge/magnetism atom coloring",
         "status": "needs-render",
         "example": "spin_atom_coloring_suite; cof_direct_cube_suite",
-        "system": "magnetic oxide/metal cluster or charged adsorbate system",
+        "system": "C4H8 diradical, triplet molecule, magnetic oxide/cluster, or charged adsorbate system",
         "runbook": "docs/vesta_atom_value_coloring.md",
         "gallery": [],
         "next": "Replace the toy Fe smoke with a real charge or spin-density coloring figure and legend.",
@@ -451,7 +464,7 @@ FEATURE_COVERAGE: List[Dict[str, object]] = [
         "feature": "Generic atom scalar table coloring",
         "status": "needs-render",
         "example": "fukui_dual_reactivity; spin_atom_coloring_suite",
-        "system": "reactive molecule with atom charges or condensed Fukui values",
+        "system": "coronene/reactive aromatic condensed Fukui table or open-shell atom spin/charge table",
         "runbook": "docs/vesta_atom_value_coloring.md",
         "gallery": [],
         "next": "Connect a real Multiwfn population table and render a colored molecular structure.",
@@ -520,7 +533,10 @@ FEATURE_COVERAGE: List[Dict[str, object]] = [
         "example": "project example index",
         "system": "maintained real-system gallery",
         "runbook": "docs/feature_examples_zh.md",
-        "gallery": ["docs/assets/gallery/current_feature_overview.png"],
+        "gallery": [
+            "docs/assets/gallery/current_feature_overview.png",
+            "docs/assets/gallery/feature_closure_showcase.png",
+        ],
         "next": "Keep the coverage table synchronized whenever a workflow gains or loses ready example status.",
     },
 ]
@@ -557,12 +573,12 @@ SYSTEM_RECOMMENDATIONS: List[Dict[str, object]] = [
     {
         "id": "benzene_dimer",
         "priority": 3,
-        "title": "Benzene dimer or substituted aromatic dimer",
-        "value": "Small, interpretable dispersion/pi-stacking system for RDG/IRI/DORI/Delta-g, RoSE/SEDD, vdW potential, and orbital/Fukui demonstrations.",
+        "title": "Benzene dimer, phenol dimer, or substituted aromatic dimer",
+        "value": "Small, interpretable weak-interaction system for RDG/IRI/DORI/Delta-g, RoSE/SEDD, on-top pair density, vdW potential, and paired scalar comparisons.",
         "covers": ["iri-run", "grid-run", "cube-preset", "cube-arith", "fukui-run"],
         "example": "planned_benzene_dimer_scalar_suite",
         "status": "recommended; not yet rendered",
-        "next": "Prepare one validated Molden and reuse it for a compact scalar-field gallery instead of creating one toy per scalar.",
+        "next": "Prepare one validated Molden and reuse it for a compact scalar-field gallery; use phenol dimer as a public fallback if a tutorial fixture is easier to reproduce.",
     },
     {
         "id": "h2o_hf_complex",
@@ -587,7 +603,7 @@ SYSTEM_RECOMMENDATIONS: List[Dict[str, object]] = [
     {
         "id": "open_shell_or_magnetic_system",
         "priority": 6,
-        "title": "Open-shell molecule, magnetic oxide, or spin-polarized adsorbate",
+        "title": "C4H8 diradical, triplet molecule, magnetic oxide, or spin-polarized adsorbate",
         "value": "Needed for spin-density, alpha/beta density, spin-polarization, Mulliken magnetism coloring, and atom-table coloring figures.",
         "covers": ["grid-run spin", "cube-arith spin-density", "abacus-mulliken-color", "multiwfn-atom-color"],
         "example": "planned_spin_coloring_suite",
@@ -595,8 +611,28 @@ SYSTEM_RECOMMENDATIONS: List[Dict[str, object]] = [
         "next": "Replace the current toy Fe coloring smoke with a chemically meaningful spin or charge example plus a legend.",
     },
     {
-        "id": "cdcl_trajectory",
+        "id": "fukui_aromatic_reactivity",
         "priority": 7,
+        "title": "Coronene, nitro aromatic, or heteroatom-rich aromatic charged-state set",
+        "value": "Best planned route for closing Fukui+/Fukui-/dual descriptor cube arithmetic together with condensed atom-value coloring.",
+        "covers": ["fukui-run", "cube-arith", "multiwfn-atom-color", "cube-preset signed"],
+        "example": "planned_fukui_dual_reactivity",
+        "status": "missing charged-state cubes",
+        "next": "Prepare neutral, anion, and cation density cubes on the same grid, then render signed Fukui/dual surfaces and atom coloring.",
+    },
+    {
+        "id": "surface_extrema_aromatic",
+        "priority": 8,
+        "title": "Phenol, fluorinated/nitro aromatic molecule, or GC surface extrema target",
+        "value": "Compact systems for ALIE/LEA/LEAE molecular-surface extrema, sigma-hole or reactive-site marker overlays.",
+        "covers": ["surface-extrema", "grid-run alie/lea/leae", "cube-preset potential"],
+        "example": "planned_gc_weak_interaction_suite",
+        "status": "missing surfanalysis render",
+        "next": "Generate a real surfanalysis.pdb and render extrema markers on a colored molecular surface.",
+    },
+    {
+        "id": "cdcl_trajectory",
+        "priority": 9,
         "title": "Cd/Cl NVT/NPT trajectory",
         "value": "Best current video workflow system because it exercises extXYZ frames, reference VESTA style reuse, custom Cd-Cl bonding, Boundary, PNG sequence, and high-bitrate MP4.",
         "covers": ["trajectory-frames", "trajectory-video"],
@@ -639,6 +675,14 @@ COVERAGE_COMMAND_ALIASES: Dict[str, str] = {
     "multiwfn-grid": "grid-run",
     "scalar-cube-run": "grid-run",
     "function-cube": "grid-run",
+    "ked": "grid-run --function ked diagnostics",
+    "ked-diagnostics": "grid-run --function ked diagnostics",
+    "ked-difference": "grid-run --function ked diagnostics",
+    "ked-absdiff": "grid-run --function ked diagnostics",
+    "ked-local-temperature": "grid-run --function ked diagnostics",
+    "local-temperature-ked": "grid-run --function ked diagnostics",
+    "ked-potential": "grid-run --function ked diagnostics",
+    "tf-ked-potential": "grid-run --function ked diagnostics",
     "on-top-pair": "grid-run --function on-top-pair-density",
     "on-top-pair-density": "grid-run --function on-top-pair-density",
     "ontop-pair": "grid-run --function on-top-pair-density",
@@ -838,19 +882,30 @@ def gallery_for_json(
                 }
             )
     if selected_ids is None and status in {"all", "ready"}:
-        image_text = "docs/assets/gallery/current_feature_overview.png"
-        records.append(
-            {
-                "example_id": "examples",
-                "status": "ready",
-                "title": "Feature overview gallery",
-                "system": "maintained real-system gallery",
-                "image": _display_path(image_text, absolute=absolute),
-                "exists": _project_path(image_text).exists(),
-                "runbook": _display_path("docs/feature_examples_zh.md", absolute=absolute),
-                "note": "Rendered overview assembled from committed gallery PNGs; not a separate scientific calculation.",
-            }
-        )
+        for image_text, title, note in (
+            (
+                "docs/assets/gallery/current_feature_overview.png",
+                "Feature overview gallery",
+                "Rendered overview assembled from committed gallery PNGs; not a separate scientific calculation.",
+            ),
+            (
+                "docs/assets/gallery/feature_closure_showcase.png",
+                "Feature closure showcase",
+                "Compact manual panel assembled from committed real VESTA renders; missing features remain listed as needs-render.",
+            ),
+        ):
+            records.append(
+                {
+                    "example_id": "examples",
+                    "status": "ready",
+                    "title": title,
+                    "system": "maintained real-system gallery",
+                    "image": _display_path(image_text, absolute=absolute),
+                    "exists": _project_path(image_text).exists(),
+                    "runbook": _display_path("docs/feature_examples_zh.md", absolute=absolute),
+                    "note": note,
+                }
+            )
     return records
 
 

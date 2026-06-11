@@ -98,7 +98,7 @@ multiwfn2vesta trajectory-video --help
   及其 `ELFLOL_type` 变体、
   ESP/MEP、electron-only ESP、positive/negative ESP、电场强度、ALIE、EDR(r;d)、D(r)、RDG/IRI-like、
   promolecular RDG/sign(lambda2)rho、function-100 alpha/beta density 和
-  FOD、on-top pair density、Thomas-Fermi/Weizsacker/Pauli KED、steric/SBL/Pauli/quantum/electrostatic
+  FOD、on-top pair density、Thomas-Fermi/Weizsacker/Pauli KED、KED 差值/局域温度/KED potential diagnostics、steric/SBL/Pauli/quantum/electrostatic
   potential/force/charge/energy-density 等单 cube，并可自动接
   `cube-preset` 写 `.vesta`
 - `fukui-run`: 从中性、阴离子、阳离子波函数分别生成共享格点的 density
@@ -144,6 +144,11 @@ multiwfn2vesta examples --command grid-run
 multiwfn2vesta examples --gallery-assets
 multiwfn2vesta examples --systems
 ```
+
+当前项目内已提交的效果图包含 `docs/assets/gallery/current_feature_overview.png`
+和 `docs/assets/gallery/feature_closure_showcase.png`。后者由已渲染的真实 VESTA
+PNG 拼接而成，用于中文手册快速预览；仍缺图的功能继续以 `needs-render` 或
+`needs-example` 出现在 `multiwfn2vesta examples --needs-render` 中。
 
 Multiwfn 查找顺序：
 
@@ -250,6 +255,10 @@ multiwfn2vesta cube-preset laplacian laplacian.cub cube_products
 multiwfn2vesta cube-preset hamiltonian-ked 'K(r).cub' cube_products
 multiwfn2vesta cube-preset lagrangian-ked 'G(r).cub' cube_products
 multiwfn2vesta cube-preset kinetic-energy-density userfunc.cub cube_products
+multiwfn2vesta cube-preset ked-difference userfunc.cub cube_products
+multiwfn2vesta cube-preset ked-absolute-difference userfunc.cub cube_products
+multiwfn2vesta cube-preset ked-local-temperature userfunc.cub cube_products
+multiwfn2vesta cube-preset ked-potential userfunc.cub cube_products
 multiwfn2vesta cube-preset local-information-entropy infoentro.cub cube_products
 multiwfn2vesta cube-preset electron-delocalization-range EDR.cub cube_products
 multiwfn2vesta cube-preset orbital-overlap-distance EDRDmax.cub cube_products
@@ -320,6 +329,18 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
   `thomas-fermi-ked`、`weizsacker-ked`、`vw-ked`、`pauli-ked`，用于
   function-100 导出的 KED 派生 `userfunc.cub`；默认等值面 `0.01`。
   这些量通常按正标量场显示，但需要检查数据范围并按体系微调
+- `ked-difference`：正/负等值面，用于 function-100 `iuserfunc=1201/1202`
+  的 selected KED minus Weizsacker/Lagrangian KED 差值诊断；默认幅值
+  `0.01`
+- `ked-absolute-difference`：单正值等值面，用于 function-100
+  `iuserfunc=1203` 的 selected KED 与 Lagrangian KED 绝对差；默认等值面
+  `0.01`
+- `ked-local-temperature`：单正值等值面，用于 function-100
+  `iuserfunc=1204` 的 KED-derived local temperature，单位 K；默认等值面
+  `1000.0`，低密度区非常敏感；维护态 KED 路线默认写 run-local
+  `uservar=0`，只有 local-temperature 路线的 `--ked-density-cutoff` 会覆盖它
+- `ked-potential`：正/负等值面，用于 function-100 `iuserfunc=1210`
+  且源码显式支持的 `iKEDsel=3/5/7` KED potential；默认幅值 `0.05`
 - `steric-energy-density`：单正值等值面，用于 function-100
   `iuserfunc=40` 的 steric/Weizsacker-like energy density；默认等值面
   `0.01`
@@ -382,12 +403,17 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
   `electron-esp`、`positive-esp`、`negative-esp`、`electric-field-magnitude`、
   `rose`、`sedd`、
   `thomas-fermi-ked`、`weizsacker-ked`、`pauli-ked`、
+  `lagrangian-minus-weizsacker-ked`、`tf-minus-weizsacker-ked`、
+  `tf-minus-lagrangian-ked`、`weizsacker-minus-lagrangian-ked`、
+  `tf-lagrangian-ked-absdiff`、`weizsacker-lagrangian-ked-absdiff`、
+  `lagrangian-local-temperature`、`tf-local-temperature`、
+  `thomas-fermi-ked-potential`、`gea2-ked-potential`、`tfvw-ked-potential`、
   `orbital-weighted-fukui-plus`、`orbital-weighted-fukui-minus`、
   `orbital-weighted-fukui-zero`、`orbital-weighted-dual-descriptor`、
   `fractional-occupation-density`、
   `information-gain-density`、`shannon-entropy-density`、
   `fisher-information-density`、`second-fisher-information-density` 会分别
-  自动 patch `iuserfunc=1/2/14/20/27/-27/28/29/93/94/101/102/103/90/1200/114/95/96/97/98/49/50/51/52`。
+  自动 patch `iuserfunc=1/2/14/20/27/-27/28/29/93/94/101/102/103/90/1200/114/1201/1202/1203/1204/1210/95/96/97/98/49/50/51/52`。
   KED 变体还会额外 patch run-local `iKEDsel`。
   runner 优先复制所选 Multiwfn 同目录的 `settings.ini`，只 patch
   当前路线需要的 run-local 键后通过 `-set` 传入；

@@ -174,6 +174,88 @@ PRESETS: Tuple[CubePreset, ...] = (
         ),
     ),
     CubePreset(
+        name="ked-difference",
+        aliases=(
+            "ked-diff",
+            "lagrangian-minus-weizsacker-ked",
+            "ked-minus-weizsacker",
+            "tf-minus-weizsacker-ked",
+            "tf-minus-lagrangian-ked",
+            "weizsacker-minus-lagrangian-ked",
+        ),
+        description="Signed isosurfaces for selected kinetic-energy-density difference diagnostics.",
+        surface_mode="signed",
+        isosurface=0.01,
+        positive_rgb=(255, 180, 70),
+        negative_rgb=(75, 115, 255),
+        surface_opacity=(140, 255),
+        notes=(
+            "Use for Multiwfn function-100 KED difference routes, including iuserfunc=1201 "
+            "selected KED minus Weizsacker KED and iuserfunc=1202 selected KED minus "
+            "Lagrangian KED.  These diagnostics can be signed; inspect the cube range "
+            "before using the default +/-0.01 isosurface."
+        ),
+    ),
+    CubePreset(
+        name="ked-absolute-difference",
+        aliases=(
+            "ked-absdiff",
+            "ked-absolute-diff",
+            "tf-lagrangian-ked-absdiff",
+            "weizsacker-lagrangian-ked-absdiff",
+        ),
+        description="Single positive isosurface for absolute KED difference diagnostics.",
+        surface_mode="single",
+        isosurface=0.01,
+        positive_rgb=(170, 210, 80),
+        surface_opacity=(145, 255),
+        notes=(
+            "Use for Multiwfn function-100 iuserfunc=1203, the absolute difference "
+            "between the selected KED and Lagrangian KED.  The default 0.01 is a "
+            "starting value and should be tuned after range inspection."
+        ),
+    ),
+    CubePreset(
+        name="ked-local-temperature",
+        aliases=(
+            "local-temperature-ked",
+            "lagrangian-local-temperature",
+            "tf-local-temperature",
+        ),
+        description="Single positive isosurface for KED-derived local temperature fields.",
+        surface_mode="single",
+        isosurface=1000.0,
+        positive_rgb=(255, 90, 45),
+        surface_opacity=(145, 255),
+        notes=(
+            "Use for Multiwfn function-100 iuserfunc=1204.  The scalar is in Kelvin "
+            "and is sensitive to low-density regions; inspect the range and consider "
+            "the grid-run --ked-density-cutoff option with care because Multiwfn also "
+            "uses uservar inside KED evaluation."
+        ),
+    ),
+    CubePreset(
+        name="ked-potential",
+        aliases=(
+            "thomas-fermi-ked-potential",
+            "tf-ked-potential",
+            "gea2-ked-potential",
+            "tfvw-ked-potential",
+        ),
+        description="Signed isosurfaces for KED functional potentials.",
+        surface_mode="signed",
+        isosurface=0.05,
+        positive_rgb=(255, 170, 65),
+        negative_rgb=(85, 120, 255),
+        surface_opacity=(140, 255),
+        notes=(
+            "Use for Multiwfn function-100 iuserfunc=1210 with source-supported "
+            "iKEDsel values: 3 Thomas-Fermi, 5 second-order GEA, and 7 "
+            "Thomas-Fermi plus Weizsacker.  Do not treat other iKEDsel values as "
+            "maintained unless the Multiwfn source adds explicit support."
+        ),
+    ),
+    CubePreset(
         name="steric-energy-density",
         aliases=("steric-density", "steric-energy", "steric-ked"),
         description="Single positive isosurface for Multiwfn steric energy density cubes.",

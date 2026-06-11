@@ -27,6 +27,7 @@ setup(
             'multiwfn2vesta-fukui-run=multiwfn2vesta.multiwfn_fukui:main',
             'multiwfn2vesta-stm-run=multiwfn2vesta.multiwfn_stm:main',
             'multiwfn2vesta-domain-run=multiwfn2vesta.multiwfn_domain:main',
+            'multiwfn2vesta-abacus-mulliken-color=multiwfn2vesta.abacus_mulliken:main',
             'multiwfn2vesta-multiwfn-atom-color=multiwfn2vesta.multiwfn_atom_table:main',
             'multiwfn2vesta-aim-run=multiwfn2vesta.multiwfn_aim:main',
             'multiwfn2vesta-aim-pdb=multiwfn2vesta.aim_vesta:main',

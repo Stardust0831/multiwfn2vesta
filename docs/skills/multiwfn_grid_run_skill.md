@@ -172,6 +172,17 @@ multiwfn2vesta grid-run --list-functions
   `thomas-fermi-ked` / `tf-ked` = `1200` plus `iKEDsel=3`,
   `weizsacker-ked` / `vw-ked` = `1200` plus `iKEDsel=4`,
   `pauli-ked` = `114` plus `iKEDsel=2`,
+  `lagrangian-minus-weizsacker-ked` = `1201` plus `iKEDsel=2`,
+  `tf-minus-weizsacker-ked` = `1201` plus `iKEDsel=3`,
+  `tf-minus-lagrangian-ked` = `1202` plus `iKEDsel=3`,
+  `weizsacker-minus-lagrangian-ked` = `1202` plus `iKEDsel=4`,
+  `tf-lagrangian-ked-absdiff` = `1203` plus `iKEDsel=3`,
+  `weizsacker-lagrangian-ked-absdiff` = `1203` plus `iKEDsel=4`,
+  `lagrangian-local-temperature` = `1204` plus `iKEDsel=2`,
+  `tf-local-temperature` = `1204` plus `iKEDsel=3`,
+  `thomas-fermi-ked-potential` = `1210` plus `iKEDsel=3`,
+  `gea2-ked-potential` = `1210` plus `iKEDsel=5`,
+  `tfvw-ked-potential` = `1210` plus `iKEDsel=7`,
   `orbital-weighted-fukui-plus` / `ow-fplus` = `95`,
   `orbital-weighted-fukui-minus` / `ow-fminus` = `96`,
   `orbital-weighted-fukui-zero` / `ow-f0` = `97`,
@@ -184,10 +195,11 @@ multiwfn2vesta grid-run --list-functions
   also auto-select mapped presets `lea`/`leae` when `--surface-cube` is
   supplied; alpha/beta density, FOD, local Mulliken electronegativity, local
   hardness, electron ESP/ESP component/electric-field routes, on-top pair density, steric/SBL
-  routes, KED variants, and the orbital-weighted Fukui/dual routes, RoSE, and SEDD fall back to the generic `surface-map`
+  routes, KED variants/diagnostics, and the orbital-weighted Fukui/dual routes, RoSE, and SEDD fall back to the generic `surface-map`
   mapped preset.  Alpha/beta density, FOD, and
-  Fukui+/Fukui-/Fukui0 standalone products use `density`, KED variants use
-  `kinetic-energy-density`, electron ESP uses `electron-esp`, on-top pair density uses
+  Fukui+/Fukui-/Fukui0 standalone products use `density`, selected positive KED variants use
+  `kinetic-energy-density`, KED diagnostics use `ked-difference`, `ked-absolute-difference`,
+  `ked-local-temperature`, or `ked-potential`, electron ESP uses `electron-esp`, on-top pair density uses
   `on-top-pair-density`, steric/SBL
   standalone routes use `steric-energy-density`, `sbl-energy-density`,
   `sbl-potential`, `sbl-force-magnitude`, or `sbl-charge`, while orbital-weighted dual descriptor uses
@@ -290,6 +302,16 @@ multiwfn2vesta grid-run --list-functions
   uses `iuserfunc=114` and `iKEDsel=2`.  These routes are Molden-orbital
   derivative analyses rather than ABACUS native KED cubes; for ABACUS use,
   keep to validated LCAO Molden files and tune `--isosurface` per system.
+- Extended KED diagnostics: function `100`, raw `userfunc.cub`, standalone
+  presets `ked-difference`, `ked-absolute-difference`, `ked-local-temperature`,
+  or `ked-potential`.  `iuserfunc=1201/1202/1203` cover selected KED
+  differences against Weizsacker/Lagrangian KED, `1204` gives KED-derived
+  local temperature, and `1210` is only maintained for source-explicit
+  `iKEDsel=3/5/7`.  Maintained function-100 KED routes reset run-local
+  `uservar=0` by default.  `--ked-density-cutoff` overrides run-local
+  Multiwfn `uservar` for local-temperature routes only; record it carefully
+  because nonzero `uservar` also affects KED evaluation in the inspected
+  source.
 - `orbital-weighted-fukui-plus`, `orbital-weighted-fukui-minus`, and
   `orbital-weighted-fukui-zero`: function `100`, raw `userfunc.cub`, default
   `iuserfunc=95` / `96` / `97`, standalone preset `density`.  Use these when
@@ -477,6 +499,9 @@ multiwfn2vesta grid-run input.fch products --function positive-esp
 multiwfn2vesta grid-run input.fch products --function negative-esp
 multiwfn2vesta grid-run input.fch products --function electric-field-magnitude
 multiwfn2vesta grid-run input.fch products --function hamiltonian-ked --no-vesta
+multiwfn2vesta grid-run input.fch products --function tf-minus-lagrangian-ked
+multiwfn2vesta grid-run input.fch products --function lagrangian-local-temperature --ked-density-cutoff 1e-6
+multiwfn2vesta grid-run input.fch products --function thomas-fermi-ked-potential
 multiwfn2vesta grid-run input.fch products --function alie --no-vesta
 multiwfn2vesta grid-run input.fch products --function pair-function --reference-point 0 0 0 --pair-function-type 1 --pair-correlation-type 3
 multiwfn2vesta grid-run input.fch products --function on-top-pair-density --pair-correlation-type 3
