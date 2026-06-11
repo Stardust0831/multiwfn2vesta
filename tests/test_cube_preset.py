@@ -377,6 +377,28 @@ basin type two
             self.assertIn("-set", manifest)
             self.assertIn("sur_value=0.05", manifest)
 
+    def test_pair_function_preset_writes_signed_surfaces(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            cube = self.write_tmp(root, "fermihole.cub", SIGNED_CUBE)
+
+            result = run_preset("fermihole", cube, root / "products")
+
+            text = result.vesta_path.read_text(encoding="utf-8")
+            manifest = result.manifest_path.read_text(encoding="utf-8")
+
+            self.assertRegex(
+                text,
+                r"ISURF\n  1   1\s+0\.05\s+255\s+185\s+90\s+135\s+255\n  1   1\s+-0\.05\s+85\s+145\s+255\s+135\s+255",
+            )
+            self.assertIn("canonical_preset: `pair-function`", manifest)
+            self.assertIn("requested_preset: `fermihole`", manifest)
+            self.assertIn("fermihole.cub", manifest)
+            self.assertIn("reference point", manifest)
+            self.assertIn("pairfunctype", manifest)
+            self.assertIn("paircorrtype", manifest)
+            self.assertIn("-set", manifest)
+
     def test_electron_delocalization_range_preset_writes_single_positive_surface(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

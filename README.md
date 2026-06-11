@@ -21,16 +21,16 @@ point.
 - Working checkout: `/mnt/g/work/multiwfn2vesta/project`.  The workspace-level
   `/mnt/g/work/multiwfn2vesta/.git` is an empty metadata stub and is not used
   for project commits.
-- Branch audit on 2026-06-10 23:43 CST, after `git fetch --prune origin`,
+- Branch audit on 2026-06-11 00:31 CST, after `git fetch --prune origin`,
   found local `main`, `origin/main`, and `origin/HEAD` aligned at
-  `49a350619601fdff76c0e993b55b2c9c26024ccc`
-  (`Refresh README branch status at Delta-g tip`).
+  `c879f30c62e8361b6636f88504abed30bdce75b1`
+  (`Add source-function grid preset`).
 - `git ls-remote --heads origin` currently returns only `refs/heads/main`; no
   merge-back was needed in this pass because there is no extra local or remote
   feature branch to consolidate.
-- This README/status refresh is being kept on the same maintained `main`
-  branch; there is still no side branch or remote feature head to merge back
-  in this pass.
+- This README/status refresh and the current pair-function closeout are being
+  kept on the same maintained `main` branch; there is still no side branch or
+  remote feature head to merge back in this pass.
 - Local untracked probe files such as `domain.cub` and `domain.pdb` are not
   part of the maintained branch state and should stay uncommitted unless they
   are explicitly promoted into documented fixtures.
@@ -40,8 +40,9 @@ point.
 - Recent maintained feature work includes dedicated VESTA presets for
   Multiwfn gradient norm, spin-density, orbital-density, Laplacian, K(r),
   G(r), local information entropy, electron delocalization range EDR(r;d),
-  orbital-overlap distance D(r), source function, Becke atomic/overlap
-  weight, Hirshfeld weight, standalone RDG, promolecular RDG, promolecular Delta-g,
+  orbital-overlap distance D(r), pair/correlation function, source function,
+  Becke atomic/overlap weight, Hirshfeld weight, standalone RDG,
+  promolecular RDG, promolecular Delta-g,
   Hirshfeld-partition Delta-g, standalone IRI scalar, and standalone vdW
   potential cubes, ABACUS direct cube presets for potential,
   partial-charge, and wavefunction-norm cubes,
@@ -134,7 +135,8 @@ then delete the temporary branch.
   wavefunction file, export density, orbital/MO, Laplacian, K(r)/G(r)
   kinetic-energy-density cubes, ELF, LOL, ESP/MEP, ALIE, RDG/IRI-like,
   promolecular RDG/sign(lambda2)rho, local information entropy, EDR(r;d),
-  orbital-overlap distance D(r), source function with run-local
+  orbital-overlap distance D(r), pair/correlation functions with run-local
+  `pairfunctype`/`paircorrtype`, source function with run-local
   `srcfuncmode`, Becke atomic/overlap weight, Hirshfeld weight,
   promolecular Delta-g, Hirshfeld-partition Delta-g, and related
   scalar cubes, export multiple orbitals through
@@ -228,6 +230,11 @@ multiwfn2vesta grid-run input.molden grid_products \
 multiwfn2vesta grid-run input.molden grid_products \
   --function edrdmax \
   --edr-exponents 12 3.0 1.2
+multiwfn2vesta grid-run input.molden grid_products \
+  --function pair-function \
+  --reference-point 0 0 0 \
+  --pair-function-type 1 \
+  --pair-correlation-type 3
 multiwfn2vesta grid-run input.molden grid_products \
   --function source-function \
   --reference-point 0 0 0 \
@@ -327,6 +334,7 @@ multiwfn2vesta cube-preset lagrangian-ked 'G(r).cub' cube_products
 multiwfn2vesta cube-preset local-information-entropy infoentro.cub cube_products
 multiwfn2vesta cube-preset electron-delocalization-range EDR.cub cube_products
 multiwfn2vesta cube-preset orbital-overlap-distance EDRDmax.cub cube_products
+multiwfn2vesta cube-preset pair-function fermihole.cub cube_products
 multiwfn2vesta cube-preset source-function srcfunc.cub cube_products
 multiwfn2vesta cube-preset becke-weight Becke.cub cube_products
 multiwfn2vesta cube-preset hirshfeld-weight Hirshfeld.cub cube_products
@@ -363,7 +371,7 @@ Available presets can be listed with `multiwfn2vesta cube-preset
 orbital/wavefunction/density-difference cubes, Multiwfn gradient norm,
 orbital-density, spin-density, Laplacian, K(r), G(r), local information
 entropy, electron delocalization range, orbital-overlap distance, standalone
-source function, Becke atomic/overlap weight, Hirshfeld weight, RDG,
+pair/correlation function, source function, Becke atomic/overlap weight, Hirshfeld weight, RDG,
 promolecular RDG, and promolecular Delta-g, Hirshfeld-partition Delta-g, standalone IRI scalar
 cubes, standalone vdW potential cubes, direct ABACUS potential cubes, ABACUS
 partial-charge/state-density cubes, nonnegative ABACUS wavefunction norm
@@ -392,6 +400,17 @@ for the EDR length scale before grid setup.  Use
 `orbital-overlap-distance`/`edrdmax` for function `21` `EDRDmax.cub`; omit
 `--edr-exponents` to use Multiwfn's default exponent set `20, 2.50, 1.50`,
 or pass `--edr-exponents COUNT START INCREMENT` for manual control.
+
+Use `pair-function`/`fermihole`/`correlation-hole` for Multiwfn function
+`17` `fermihole.cub`.  `grid-run` requires `--reference-point X Y Z`;
+coordinates are Bohr by default and can be Angstrom with
+`--reference-unit angstrom`.  `--pair-function-type` controls Multiwfn
+`pairfunctype` (`1/2` correlation hole alpha/beta, `4/5` correlation
+factor, `7/8` exchange-correlation density, `10/11/12` pair density), and
+`--pair-correlation-type` controls `paircorrtype` (`1` exchange only, `2`
+Coulomb correlation only, `3` both).  The runner copies the selected
+Multiwfn `settings.ini` when available, patches only `pairfunctype` and
+`paircorrtype`, and passes the run-local settings file with `-set`.
 
 Use `source-function`/`source`/`srcfunc` for Multiwfn function `19`
 `srcfunc.cub`.  `grid-run` requires `--reference-point X Y Z`; coordinates
@@ -601,6 +620,13 @@ Common functions:
   Multiwfn evaluates function `11` as local information entropy
   `-rho/N*ln(rho/N)` and keeps the global main-function-5 default
   `sur_value=0.05`.
+- `pair-function` / `fermihole` / `correlation-hole`: function `17`, raw
+  `fermihole.cub`, preset `pair-function`, signed by default.  Pass
+  `--reference-point X Y Z`; add `--reference-unit angstrom` when those
+  coordinates are Angstrom.  `--pair-function-type` controls `pairfunctype`
+  and `--pair-correlation-type` controls `paircorrtype` through a run-local
+  `-set` settings file copied from the selected Multiwfn `settings.ini` when
+  available.
 - `source-function` / `source` / `srcfunc`: function `19`, raw
   `srcfunc.cub`, preset `source-function`, signed by default.  Pass
   `--reference-point X Y Z`; add `--reference-unit angstrom` when those
@@ -674,6 +700,14 @@ multiwfn2vesta grid-run input.fch grid_products \
 multiwfn2vesta grid-run input.fch grid_products \
   --function edrdmax \
   --edr-exponents 12 3.0 1.2 \
+  --grid-mode points \
+  --grid-points 120 120 120
+
+multiwfn2vesta grid-run input.fch grid_products \
+  --function pair-function \
+  --reference-point 0 0 0 \
+  --pair-function-type 1 \
+  --pair-correlation-type 3 \
   --grid-mode points \
   --grid-points 120 120 120
 

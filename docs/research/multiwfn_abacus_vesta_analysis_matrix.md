@@ -38,6 +38,13 @@ Multiwfn evidence:
 - Multiwfn `function.f90` lists function `11` as local information entropy,
   evaluates it as `-rho/N*ln(rho/N)`, and `0123dim.f90` exports the cube as
   `infoentro.cub` while leaving the global `sur_value=0.05`.
+- Multiwfn `function.f90` lists function `17` as the reference-point pair
+  function and evaluates `pairfunc(refx,refy,refz,x,y,z)`.  The selected
+  physical quantity is controlled by `settings.ini` keys `pairfunctype`
+  (`1/2` correlation hole alpha/beta, `4/5` correlation factor, `7/8`
+  exchange-correlation density, `10/11/12` pair density alpha/beta/all) and
+  `paircorrtype` (`1` exchange only, `2` Coulomb correlation only, `3`
+  both).  `0123dim.f90` exports the cube as `fermihole.cub`.
 - Multiwfn `function.f90` lists function `19` as source function and calls
   `srcfunc(x,y,z,srcfuncmode)`, which depends on global reference point
   variables `refx,refy,refz`.  The inspected `0123dim.f90` export-name block
@@ -178,6 +185,7 @@ occupations, and density derivatives from the wavefunction representation.
 | Molecular surface mapped properties | Full wavefunction or cube pair | Feasible through Molden; ABACUS can provide density/potential cubes | `surf.cub`, `mapfunc.cub`, `density.cub`, `avglocion.cub`, `surfanalysis.pdb` | Surface cube plus texture; extrema as atoms-only overlay phase | `cube-preset surface-map` covers surface+texture display using `molsurfmap.vmd` defaults; `--surfanalysis-pdb` and `surface-extrema` overlay surface extrema |
 | ALIE / LEA / LEAE | Full wavefunction, occupied/virtual orbitals | Feasible only if ABACUS Molden orbitals/energies are adequate; virtual levels in metals risky | `avglocion.cub`, `userfunc.cub`, `surfanalysis.pdb` | Colored density surface plus extrema points | `grid-run --function alie --surface-cube density.cub` now generates ALIE texture maps directly; `cube-preset alie/lea/leae` remains the lower-level display layer and auto-selects extrema from `surfanalysis.pdb` |
 | Information-theory density functions | Full wavefunction Molden/FCH/WFN; local information entropy is a normal main-function-5 grid function | Feasible for Gamma LCAO Molden; interpretation depends on the NAO2GTO density quality | `infoentro.cub`, possible future user-function Shannon/Fisher cubes | Signed scalar isosurfaces or slices | `grid-run --function local-information-entropy` now exports Multiwfn function `11` `infoentro.cub`; `cube-preset local-information-entropy` provides a signed display default |
+| Pair/correlation function | Full wavefunction Molden/FCH/WFN plus a reference point | Feasible for Gamma LCAO Molden; pair density/correlation interpretation depends on orbitals and occupations | `fermihole.cub` | Signed scalar isosurfaces by default; pair-density modes can use a single positive preset | `grid-run --function pair-function --reference-point X Y Z` now exports Multiwfn function `17`; `--pair-function-type` patches `pairfunctype`, `--pair-correlation-type` patches `paircorrtype`, the runner copies the selected Multiwfn `settings.ini` when available, and `cube-preset pair-function` provides signed `+/-0.05` display defaults |
 | Source function | Full wavefunction Molden/FCH/WFN plus a reference point | Feasible for Gamma LCAO Molden; reference-point choice controls the chemical meaning | `srcfunc.cub` | Signed scalar isosurfaces or slices | `grid-run --function source-function --reference-point X Y Z` now exports Multiwfn function `19` `srcfunc.cub`; `--reference-unit angstrom` supports Angstrom reference coordinates, `--source-function-mode` is patched into a run-local settings file copied from the selected Multiwfn `settings.ini` when available, and `cube-preset source-function` provides signed `+/-0.05` display defaults |
 | Electron delocalization / orbital overlap distance | Full wavefunction Molden/FCH/WFN | Feasible for Gamma LCAO Molden; parameter choice needs chemical interpretation | `EDR.cub`, `EDRDmax.cub` | Single positive scalar isosurfaces or slices | `grid-run --function edr --edr-length D_BOHR` now exports function `20` `EDR.cub`; `grid-run --function edrdmax` exports function `21` `EDRDmax.cub`, using Multiwfn's default exponent set unless `--edr-exponents COUNT START INCREMENT` is supplied; `cube-preset electron-delocalization-range` and `cube-preset orbital-overlap-distance` provide display defaults |
 | Becke atomic/overlap weight | Full wavefunction Molden/FCH/WFN plus atom indices | Feasible for Gamma LCAO Molden; useful for fuzzy atomic domains and pair-overlap-weight context | `Becke.cub` | Single positive `0..1` weight isosurfaces or slices | `grid-run --function becke --becke-atoms I J` now exports Multiwfn function `111` `Becke.cub`; `I J` requests Becke overlap weight, `I 0` requests Becke atomic weight, and `cube-preset becke-weight` provides a `0.5` single-positive display default |
@@ -393,9 +401,16 @@ Main gaps:
   `refx,refy,refz`, and reads `srcfuncmode` from settings.  The maintained
   stream sets the reference point through main menu `1000 -> 1`, copies the
   selected Multiwfn `settings.ini` when available, patches `srcfuncmode` into
-  a run-local settings file, and passes it with `-set`.  Fermi hole and
-  pair/correlation hole functions remain deferred until their prompt/settings
-  streams are bounded.
+  a run-local settings file, and passes it with `-set`.
+- Pair/correlation function now has `cube-preset pair-function` and
+  `grid-run --function pair-function --reference-point X Y Z`; local Multiwfn
+  source shows function `17` exports `fermihole.cub`, uses
+  `pairfunc(refx,refy,refz,x,y,z)`, and reads `pairfunctype`/`paircorrtype`
+  from settings.  The maintained stream sets the reference point through main
+  menu `1000 -> 1`, copies the selected Multiwfn `settings.ini` when
+  available, patches those two settings, and passes the run-local settings
+  file with `-set`.  More specialized pair-density display defaults remain
+  a later tuning layer.
 - Promolecular Delta-g now has a distinct `cube-preset
   promolecular-delta-g` route and `grid-run --function delta-g` maps to
   Multiwfn function `22` `Delta_g.cub`.  This is a single-cube promolecular

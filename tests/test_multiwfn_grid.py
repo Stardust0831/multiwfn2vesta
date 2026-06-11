@@ -149,6 +149,18 @@ source function comment two
 """
 
 
+PAIR_FUNCTION_CUBE = """pair function comment one
+pair function comment two
+    2    -1.000000    -2.000000     0.500000
+    2     0.500000     0.000000     0.000000
+    2     0.000000     0.500000     0.000000
+    2     0.000000     0.000000     0.500000
+    8     8.000000    -1.000000    -2.000000     0.500000
+    1     1.000000    -0.500000    -2.000000     0.500000
+ -0.20 -0.10 -0.05 0.00 0.05 0.10 0.15 0.20
+"""
+
+
 class TestMultiwfnGridRunner(unittest.TestCase):
     def make_candidate(self, root):
         fake_exe = Path(root) / "Multiwfn_noGUI"
@@ -176,6 +188,7 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertIn("preset=vdw-potential", text)
         self.assertIn("preset=electron-delocalization-range", text)
         self.assertIn("preset=orbital-overlap-distance", text)
+        self.assertIn("preset=pair-function", text)
         self.assertIn("preset=source-function", text)
         self.assertIn("preset=becke-weight", text)
         self.assertIn("preset=hirshfeld-weight", text)
@@ -219,6 +232,11 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertEqual(resolve_grid_function("edrdmax").index, 21)
         self.assertEqual(resolve_grid_function("edrdmax").output_filename, "EDRDmax.cub")
         self.assertEqual(resolve_grid_function("d(r)").preset, "orbital-overlap-distance")
+        self.assertEqual(resolve_grid_function("pair-function").index, 17)
+        self.assertEqual(resolve_grid_function("fermihole").output_filename, "fermihole.cub")
+        self.assertEqual(resolve_grid_function("correlation-hole").preset, "pair-function")
+        self.assertEqual(resolve_grid_function("xc-density").name, "pair-function")
+        self.assertEqual(resolve_grid_function("pair-density").index, 17)
         self.assertEqual(resolve_grid_function("source-function").index, 19)
         self.assertEqual(resolve_grid_function("srcfunc").output_filename, "srcfunc.cub")
         self.assertEqual(resolve_grid_function("source").preset, "source-function")
@@ -302,6 +320,40 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         )
         with self.assertRaisesRegex(ValueError, "--reference-unit is only valid"):
             build_grid_commands(resolve_grid_function("density"), reference_unit="angstrom")
+
+    def test_build_pair_function_command_stream_sets_reference_point(self):
+        function = resolve_grid_function("pair-function")
+
+        with self.assertRaisesRegex(ValueError, "requires --reference-point"):
+            build_grid_commands(function)
+        with self.assertRaisesRegex(ValueError, "--pair-function-type must be one of"):
+            build_grid_commands(function, reference_point=(1.0, 2.0, 3.0), pair_function_type=3)
+        with self.assertRaisesRegex(ValueError, "--pair-correlation-type must be 1, 2, or 3"):
+            build_grid_commands(function, reference_point=(1.0, 2.0, 3.0), pair_correlation_type=4)
+
+        self.assertEqual(
+            build_grid_commands(
+                function,
+                reference_point=(1.0, 2.0, 3.0),
+                pair_function_type=7,
+                pair_correlation_type=1,
+                grid_points=(10, 11, 12),
+            ),
+            ["1000", "1", "1.0,2.0,3.0", "5", "17", "4", "10,11,12", "2", "0", "q"],
+        )
+        self.assertEqual(
+            build_grid_commands(
+                function,
+                reference_point=(1.0, 2.0, 3.0),
+                reference_unit="angstrom",
+                grid_mode="low",
+            ),
+            ["1000", "1", "1.0,2.0,3.0 A", "5", "17", "1", "2", "0", "q"],
+        )
+        with self.assertRaisesRegex(ValueError, "--pair-function-type is only valid"):
+            build_grid_commands(resolve_grid_function("density"), pair_function_type=1)
+        with self.assertRaisesRegex(ValueError, "--pair-correlation-type is only valid"):
+            build_grid_commands(resolve_grid_function("density"), pair_correlation_type=3)
 
     def test_build_edr_command_stream_requires_length_scale(self):
         function = resolve_grid_function("edr")
@@ -581,6 +633,85 @@ class TestMultiwfnGridRunner(unittest.TestCase):
             self.assertIn("effective_surface_mode: `signed`", manifest)
             self.assertIn("srcfunc.cub", manifest)
             self.assertIn("srcfuncmode", manifest)
+            self.assertIn("-set", manifest)
+
+    def test_run_multiwfn_grid_pair_function_uses_reference_point_and_local_settings(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            wavefunction = root / "h2o.fch"
+            wavefunction.write_text("wavefunction", encoding="utf-8")
+            candidate = self.make_candidate(root)
+            (candidate.path.parent / "settings.ini").write_text(
+                "laplfac= 6\npairfunctype= 1\npaircorrtype= 3\nother_setting= keep\n",
+                encoding="utf-8",
+            )
+
+            def fake_run(command, **kwargs):
+                cwd = Path(kwargs["cwd"])
+                (cwd / "fermihole.cub").write_text(PAIR_FUNCTION_CUBE, encoding="utf-8")
+                return subprocess.CompletedProcess(command, 0, stdout="ok", stderr="")
+
+            with patch("multiwfn2vesta.multiwfn_grid.find_multiwfn", return_value=candidate):
+                with patch("multiwfn2vesta.multiwfn_grid.subprocess.run", side_effect=fake_run) as mocked_run:
+                    result = run_multiwfn_grid(
+                        wavefunction,
+                        root / "products",
+                        function_name="pair-function",
+                        reference_point=(1.0, 2.0, 3.0),
+                        reference_unit="angstrom",
+                        pair_function_type=7,
+                        pair_correlation_type=1,
+                        stem="case",
+                        grid_points=(10, 11, 12),
+                    )
+
+            self.assertTrue(result.success)
+            self.assertEqual(result.reference_point, (1.0, 2.0, 3.0))
+            self.assertEqual(result.reference_unit, "angstrom")
+            self.assertEqual(result.pair_function_type, 7)
+            self.assertEqual(result.pair_correlation_type, 1)
+            self.assertEqual(
+                result.command_file.read_text(encoding="utf-8"),
+                "1000\n1\n1.0,2.0,3.0 A\n5\n17\n4\n10,11,12\n2\n0\nq\n",
+            )
+            self.assertEqual(
+                mocked_run.call_args.args[0],
+                [
+                    str(candidate.path),
+                    str(wavefunction.resolve()),
+                    "-set",
+                    str((root / "products" / "multiwfn_grid_raw" / "multiwfn_grid_settings.ini").resolve()),
+                ],
+            )
+            self.assertIsNotNone(result.settings_override)
+            self.assertEqual(result.settings_override.name, "multiwfn_grid_settings.ini")
+            settings_text = result.settings_override.read_text(encoding="utf-8")
+            self.assertIn("laplfac= 6", settings_text)
+            self.assertIn("pairfunctype= 7", settings_text)
+            self.assertIn("paircorrtype= 1", settings_text)
+            self.assertNotIn("pairfunctype= 1\n", settings_text)
+            self.assertNotIn("paircorrtype= 3\n", settings_text)
+            self.assertIn("other_setting= keep", settings_text)
+            self.assertEqual(result.raw_cube.name, "fermihole.cub")
+            self.assertEqual(result.cube.name, "case_pair-function.cub")
+            self.assertIsNotNone(result.vesta_result)
+            self.assertEqual(
+                result.vesta_result.vesta_path.name,
+                "case_pair-function_pair-function_cube.vesta",
+            )
+            recipe = result.recipe_path.read_text(encoding="utf-8")
+            self.assertIn("function_index: `17`", recipe)
+            self.assertIn("reference_point: `(1.0, 2.0, 3.0)`", recipe)
+            self.assertIn("reference_unit: `angstrom`", recipe)
+            self.assertIn("pair_function_type: `7`", recipe)
+            self.assertIn("pair_correlation_type: `1`", recipe)
+            self.assertIn("local_settings_file:", recipe)
+            manifest = result.vesta_result.manifest_path.read_text(encoding="utf-8")
+            self.assertIn("canonical_preset: `pair-function`", manifest)
+            self.assertIn("effective_surface_mode: `signed`", manifest)
+            self.assertIn("fermihole.cub", manifest)
+            self.assertIn("pairfunctype", manifest)
+            self.assertIn("paircorrtype", manifest)
             self.assertIn("-set", manifest)
 
     def test_run_multiwfn_grid_iri_uses_standalone_iri_scalar_preset(self):
@@ -1223,6 +1354,50 @@ class TestMultiwfnGridRunner(unittest.TestCase):
             )
             settings = root / "products" / "multiwfn_grid_raw" / "multiwfn_grid_settings.ini"
             self.assertIn("srcfuncmode= 2", settings.read_text(encoding="utf-8"))
+
+    def test_main_pair_function_accepts_reference_and_pair_options(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            wavefunction = root / "h2o.fch"
+            wavefunction.write_text("wavefunction", encoding="utf-8")
+            candidate = self.make_candidate(root)
+
+            def fake_run(command, **kwargs):
+                Path(kwargs["cwd"], "fermihole.cub").write_text(PAIR_FUNCTION_CUBE, encoding="utf-8")
+                return subprocess.CompletedProcess(command, 0, stdout="ok", stderr="")
+
+            with patch("multiwfn2vesta.multiwfn_grid.find_multiwfn", return_value=candidate):
+                with patch("multiwfn2vesta.multiwfn_grid.subprocess.run", side_effect=fake_run):
+                    with patch("sys.stdout", io.StringIO()):
+                        code = __import__("multiwfn2vesta.multiwfn_grid", fromlist=["main"]).main(
+                            [
+                                str(wavefunction),
+                                str(root / "products"),
+                                "--function",
+                                "fermihole",
+                                "--reference-point",
+                                "1",
+                                "2",
+                                "3",
+                                "--pair-function-type",
+                                "12",
+                                "--pair-correlation-type",
+                                "1",
+                                "--grid-mode",
+                                "low",
+                                "--no-vesta",
+                            ]
+                        )
+
+            self.assertEqual(code, 0)
+            self.assertEqual(
+                (root / "products" / "multiwfn_grid_input.txt").read_text(encoding="utf-8"),
+                "1000\n1\n1.0,2.0,3.0\n5\n17\n1\n2\n0\nq\n",
+            )
+            settings = root / "products" / "multiwfn_grid_raw" / "multiwfn_grid_settings.ini"
+            settings_text = settings.read_text(encoding="utf-8")
+            self.assertIn("pairfunctype= 12", settings_text)
+            self.assertIn("paircorrtype= 1", settings_text)
 
     def test_main_rejects_batch_single_orbital_conflict(self):
         stderr = io.StringIO()

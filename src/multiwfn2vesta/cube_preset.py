@@ -273,6 +273,34 @@ PRESETS: Tuple[CubePreset, ...] = (
         ),
     ),
     CubePreset(
+        name="pair-function",
+        aliases=(
+            "fermihole",
+            "fermi-hole",
+            "correlation-hole",
+            "corr-hole",
+            "correlation-factor",
+            "corr-factor",
+            "exchange-correlation-density",
+            "xc-density",
+            "pair-density",
+        ),
+        description="Positive/negative isosurfaces for Multiwfn pair/correlation function cubes.",
+        surface_mode="signed",
+        isosurface=0.05,
+        positive_rgb=(255, 185, 90),
+        negative_rgb=(85, 145, 255),
+        surface_opacity=(135, 255),
+        notes=(
+            "Use for Multiwfn fermihole.cub from real-space function 17. "
+            "The function depends on a reference point plus pairfunctype and paircorrtype; "
+            "grid-run sets the reference point through main menu 1000 -> 1, copies the selected "
+            "Multiwfn settings.ini when available, patches pairfunctype/paircorrtype, and passes "
+            "the run-local settings file with -set. Pair-density modes can be displayed with "
+            "--preset density when a single positive surface is preferred."
+        ),
+    ),
+    CubePreset(
         name="becke-weight",
         aliases=("becke", "becke-overlap-weight", "becke-atomic-weight", "beckewei"),
         description="Single positive isosurface for Multiwfn Becke atomic/overlap weight cubes.",

@@ -65,6 +65,17 @@ multiwfn2vesta grid-run --list-functions
 - `promolecular-signlambda2rho`: function `16`, raw
   `signlambda2rhoprodens.cub`, preset `signed`; mapped preset `iri` with
   `--surface-cube`.
+- `pair-function`, aliases `fermihole`, `fermi-hole`, `correlation-hole`,
+  `corr-hole`, `correlation-factor`, `corr-factor`,
+  `exchange-correlation-density`, `xc-density`, `pair-density`: function
+  `17`, raw `fermihole.cub`, preset `pair-function` with signed
+  positive/negative isosurfaces.  Pass `--reference-point X Y Z`;
+  coordinates are Bohr by default, or Angstrom with `--reference-unit
+  angstrom`.  `--pair-function-type` controls Multiwfn `pairfunctype` and
+  `--pair-correlation-type` controls `paircorrtype` through a run-local
+  `multiwfn_grid_settings.ini`, copied from the selected Multiwfn
+  `settings.ini` when available and passed with `-set`, so global Multiwfn
+  settings are not modified.
 - `alie`, aliases `average-local-ionization-energy`, `avglocion`: function
   `18`, raw `avglocion.cub`, preset `density`; mapped preset `alie` with
   `--surface-cube`.
@@ -148,9 +159,9 @@ paths.
 
 Default behavior stops after the first failed orbital.  Add `--keep-going` to
 continue later orbitals.  Batch mode rejects `--orbital`, `--commands-file`,
-`--expected-cube`, `--raw-dir`, reference-point/source-function options, and
-other function-specific non-orbital options because those options would make
-the child run ownership ambiguous.
+`--expected-cube`, `--raw-dir`, reference-point/source-function/pair-function
+options, and other function-specific non-orbital options because those
+options would make the child run ownership ambiguous.
 
 ## Grid Modes
 
@@ -244,6 +255,7 @@ multiwfn2vesta grid-run input.fch products --function esp --no-vesta
 multiwfn2vesta grid-run input.fch products --function esp --surface-cube density.cub --grid-mode cube --grid-cube density.cub
 multiwfn2vesta grid-run input.fch products --function hamiltonian-ked --no-vesta
 multiwfn2vesta grid-run input.fch products --function alie --no-vesta
+multiwfn2vesta grid-run input.fch products --function pair-function --reference-point 0 0 0 --pair-function-type 1 --pair-correlation-type 3
 multiwfn2vesta grid-run input.fch products --function source-function --reference-point 0 0 0 --source-function-mode 1
 multiwfn2vesta grid-run input.fch products --function edr --edr-length 0.85
 multiwfn2vesta grid-run input.fch products --function edrdmax --edr-exponents 12 3.0 1.2

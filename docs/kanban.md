@@ -1,6 +1,75 @@
 # Project Kanban
 
-Updated: 2026-06-11 00:13 CST
+Updated: 2026-06-11 00:31 CST
+
+## Current Request: 2026-06-11 README Refresh And Main Branch Consolidation
+
+- [x] Record user request: update README, inspect unusual branch state,
+  consolidate back to one maintained branch if needed, and keep Git identity
+  as `Stardust0831`.
+- [x] Confirm repository-local identity is
+  `Stardust0831 <13862180016@163.com>`.
+- [x] Recheck branch state after `git fetch --prune origin`: local `main`,
+  `origin/main`, and `origin/HEAD` are aligned at
+  `c879f30c62e8361b6636f88504abed30bdce75b1`; `git ls-remote --heads
+  origin` exposes only `refs/heads/main`.
+- [x] Decide merge action: no merge-back is needed because there is no extra
+  local or remote feature branch to consolidate.
+- [x] Refresh README branch-status text to the current single-branch state
+  and keep the pair-function closeout on `main`.
+- [x] Finish README/usage/skills/research docs sync for the current
+  pair-function increment.
+- [x] Sync root docs mirror and validate.  Passed checks: focused
+  `py_compile`, 90 focused cube/grid tests, full 306-test no-GUI regression,
+  `cube-preset --list-presets`, `grid-run --list-functions`,
+  `grid-run --help`, `bin/multiwfn2vesta --help`, docs mirror dry-run,
+  stale pair-function wording scan, and `git diff --check`.
+- [x] Complete pre-commit review.  The delegated read-only subagent response
+  was unrelated and not used as evidence; local review found no blocking
+  issue in branch-status text, function-17 command stream, run-local
+  settings handling, CLI validation, docs sync, or untracked probe handling.
+- [ ] Commit, push, and verify branch alignment; keep `domain.cub` and
+  `domain.pdb` untracked.
+
+## Active Goal Continuation: 2026-06-11 Next ABACUS-Compatible Wavefunction Visualization Increment
+
+- [x] Record automatic continuation of the long-running objective: keep
+  researching and implementing valuable Multiwfn wavefunction analyses that
+  can become VESTA products, prioritizing workflows fed by ABACUS LCAO
+  Molden files or direct ABACUS cube outputs.
+- [x] Recheck current repository state before new edits: local `main` and
+  `origin/main` are aligned at
+  `c879f30c62e8361b6636f88504abed30bdce75b1`; local untracked probes
+  `domain.cub` and `domain.pdb` remain outside version control.
+- [x] Inspect current `grid-run`/`cube-preset` coverage and local Multiwfn
+  2026.6.2 source for the next bounded, source-backed increment.
+- [x] Selected increment: Multiwfn function `17` pair/correlation function.
+  Source evidence: `function.f90` calls
+  `pairfunc(refx,refy,refz,x,y,z)`, `settings.ini` controls the physical
+  quantity through `pairfunctype`/`paircorrtype`, and `0123dim.f90` exports
+  `fermihole.cub`.
+- [x] Implement `grid-run --function pair-function` plus
+  `cube-preset pair-function`, using `--reference-point`,
+  `--reference-unit`, `--pair-function-type`, and
+  `--pair-correlation-type`; preserve global Multiwfn settings by copying
+  the selected `settings.ini` when available and patching a run-local
+  `multiwfn_grid_settings.ini`.
+- [x] Focused validation passed during implementation: `py_compile` for
+  edited modules/tests and 90 tests across `tests.test_cube_preset` and
+  `tests.test_multiwfn_grid`.
+- [x] Finish README/usage/skills/research docs sync for the selected
+  increment.
+- [x] Sync root docs mirror and validate.  Passed checks: focused
+  `py_compile`, 90 focused cube/grid tests, full 306-test no-GUI regression,
+  `cube-preset --list-presets`, `grid-run --list-functions`,
+  `grid-run --help`, `bin/multiwfn2vesta --help`, docs mirror dry-run,
+  stale pair-function wording scan, and `git diff --check`.
+- [x] Complete pre-commit review.  The delegated read-only subagent response
+  was unrelated and not used as evidence; local review found no blocking
+  issue in branch-status text, function-17 command stream, run-local
+  settings handling, CLI validation, docs sync, or untracked probe handling.
+- [ ] Commit, push, and verify branch alignment; keep `domain.cub` and
+  `domain.pdb` untracked.
 
 ## Current Request: 2026-06-10 README Refresh, Branch Check, Source Function Closeout
 
@@ -447,11 +516,12 @@ Updated: 2026-06-11 00:13 CST
   `domain.cub` and `domain.pdb` remain uncommitted.
 - [x] Inspect current source-backed grid-function gaps: Multiwfn 2026.6.2
   `function.f90` lists function `11` as local information entropy and
-  `0123dim.f90` exports it as `infoentro.cub`; Fermi hole/source function/EDR
-  were deferred at that time because they needed reference points or extra
-  EDR parameters.  EDR/D(r) was later implemented in the 2026-06-10 EDR and
-  orbital-overlap distance increment above; reference-point functions remain
-  deferred.
+  `0123dim.f90` exports it as `infoentro.cub`; reference-point and EDR
+  routes were deferred at that time because they needed reference points or
+  extra EDR parameters.  EDR/D(r) was later implemented in the 2026-06-10 EDR
+  and orbital-overlap distance increment above; source function was later
+  implemented in the 2026-06-10 source-function increment; pair/correlation
+  functions were later implemented in the 2026-06-11 pair-function increment.
 - [x] Add a maintained `cube-preset` and `grid-run` mapping for
   `infoentro.cub`, with focused tests and docs: implemented
   `cube-preset local-information-entropy`, mapped `grid-run --function
@@ -1714,10 +1784,3 @@ Updated: 2026-06-11 00:13 CST
 - If the user asks for fresh PNGs, either run an explicitly accepted
   focus-stealing VESTA CLI export or continue the Linux/local-library
   non-focus route first.
-## Incoming Request: 2026-06-10 README and Branch Hygiene
-
-- [x] Record user request: update README, inspect unusual branch state, merge/consolidate back to one branch where appropriate, and use identity `Stardust0831`.
-- [ ] Inspect current branch/remote/status without disturbing existing work.
-- [ ] Finish or reconcile in-progress documentation/code edits before README update.
-- [ ] Update README and mirrored docs consistently.
-- [ ] Validate, review, commit, and push with `Stardust0831` identity.

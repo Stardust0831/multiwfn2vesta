@@ -1,5 +1,50 @@
 # Worklog
 
+## 2026-06-11: README branch refresh at pair-function tip
+
+- User requested a README update, a check of the unusual-looking branch state,
+  convergence back to one maintained branch if needed, and git identity
+  `Stardust0831`.
+- Rechecked repository state after `git fetch --prune origin`: local `main`,
+  `origin/main`, and `origin/HEAD` are aligned at
+  `c879f30c62e8361b6636f88504abed30bdce75b1`
+  (`Add source-function grid preset`), and `git ls-remote --heads origin`
+  exposes only `refs/heads/main`.  No merge-back is needed because no extra
+  local or remote feature branch exists.
+- Repository-local identity is `Stardust0831 <13862180016@163.com>`.
+- Refreshed README branch-status text and completed the pair-function
+  README/usage/skills/research documentation sync on the maintained `main`
+  branch.  Local untracked probes `domain.cub` and `domain.pdb` remain
+  outside version control.
+
+## 2026-06-11: Pair/correlation function grid preset
+
+- Continued the long-running Multiwfn/ABACUS/VESTA analysis objective with a
+  bounded reference-point grid-function increment that ABACUS LCAO Molden
+  wavefunctions can feed.
+- Rechecked repository state before edits: local `main` and `origin/main`
+  were aligned at `c879f30c62e8361b6636f88504abed30bdce75b1`
+  (`Add source-function grid preset`); local untracked probes `domain.cub`
+  and `domain.pdb` remain outside version control.
+- Rechecked local Multiwfn 2026.6.2 source evidence: main-function-5
+  function `17` calls `pairfunc(refx,refy,refz,x,y,z)`,
+  `settings.ini` controls it through `pairfunctype` and `paircorrtype`, and
+  `0123dim.f90` exports the cube as `fermihole.cub`.
+- Added `grid-run --function pair-function` with aliases including
+  `fermihole`, `correlation-hole`, `correlation-factor`,
+  `exchange-correlation-density`, `xc-density`, and `pair-density`.
+  The runner requires `--reference-point X Y Z`, accepts
+  `--reference-unit bohr|angstrom`, patches `pairfunctype` through
+  `--pair-function-type`, patches `paircorrtype` through
+  `--pair-correlation-type`, and uses a run-local settings file copied from
+  the selected Multiwfn `settings.ini` when available.
+- Added `cube-preset pair-function` for `fermihole.cub` with signed
+  positive/negative `0.05` isosurfaces.  Pair-density modes can still use
+  `--preset density` when a single positive surface is preferred.
+- Focused validation passed during implementation: `py_compile` for edited
+  modules/tests and 90 tests across `tests.test_cube_preset` and
+  `tests.test_multiwfn_grid`.
+
 ## 2026-06-10: Source function grid preset and README branch refresh
 
 - User requested README refresh, branch-state cleanup toward one maintained
@@ -321,12 +366,13 @@
   `-rho/N*ln(rho/N)`; `0123dim.f90` exports `infoentro.cub` and does not
   reset `sur_value`, so the maintained default follows the global
   main-function-5 `sur_value=0.05`.
-- At that time, Fermi hole/source function and EDR/D(r) cube routes were
+- At that time, several reference-point and EDR/D(r) cube routes were
   deferred because they needed reference points or extra prompt parameters;
   EDR/D(r) was later implemented as the dedicated 2026-06-10 EDR and
   orbital-overlap distance increment above, and source function was later
   implemented as the dedicated 2026-06-10 source function increment above.
-  Fermi hole and pair/correlation-hole functions remain deferred.
+  Fermi hole and pair/correlation-hole functions were later implemented as
+  the 2026-06-11 pair-function increment.
 - Added focused tests for preset listing, signed `ISURF` defaults, manifest
   notes, function alias resolution, and a fake Multiwfn
   `grid-run --function information-entropy` run that verifies the recipe and

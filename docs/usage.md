@@ -225,6 +225,7 @@ multiwfn2vesta cube-preset lagrangian-ked 'G(r).cub' cube_products
 multiwfn2vesta cube-preset local-information-entropy infoentro.cub cube_products
 multiwfn2vesta cube-preset electron-delocalization-range EDR.cub cube_products
 multiwfn2vesta cube-preset orbital-overlap-distance EDRDmax.cub cube_products
+multiwfn2vesta cube-preset pair-function fermihole.cub cube_products
 multiwfn2vesta cube-preset source-function srcfunc.cub cube_products
 multiwfn2vesta cube-preset becke-weight Becke.cub cube_products
 multiwfn2vesta cube-preset hirshfeld-weight Hirshfeld.cub cube_products
@@ -291,6 +292,14 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
   Multiwfn 函数 `21` 的 `EDRDmax.cub`；不传 `--edr-exponents` 时使用
   Multiwfn 默认指数集合 `20, 2.50, 1.50`，也可传
   `--edr-exponents COUNT START INCREMENT` 手动控制
+- `pair-function`：正/负等值面，别名包括 `fermihole`、`fermi-hole`、
+  `correlation-hole`、`correlation-factor`、`exchange-correlation-density`、
+  `pair-density`，用于 Multiwfn 函数 `17` 的 `fermihole.cub`；`grid-run`
+  需要 `--reference-point X Y Z`，默认 Bohr，若坐标为 Angstrom 则加
+  `--reference-unit angstrom`；`--pair-function-type` patch Multiwfn
+  `pairfunctype`，`--pair-correlation-type` patch `paircorrtype`；runner
+  优先复制所选 Multiwfn 同目录的 `settings.ini`，只 patch 这两个键后写入
+  run-local `multiwfn_grid_settings.ini` 并通过 `-set` 传给 Multiwfn
 - `source-function`：正/负等值面，别名包括 `source`、`srcfunc`、
   `source-func`，用于 Multiwfn 函数 `19` 的 `srcfunc.cub`；`grid-run`
   需要 `--reference-point X Y Z`，默认 Bohr，若坐标为 Angstrom 则加
@@ -566,6 +575,12 @@ multiwfn2vesta grid-run --list-functions
 - `local-information-entropy` / `information-entropy`：函数 `11`，原始
   输出 `infoentro.cub`，默认接 `cube-preset local-information-entropy`，
   按正/负等值面显示，默认幅值 `0.05`
+- `pair-function` / `fermihole` / `correlation-hole`：函数 `17`，原始
+  输出 `fermihole.cub`，默认接 `cube-preset pair-function`，按正/负等值面
+  显示；必须传 `--reference-point X Y Z`，默认 Bohr，Angstrom 坐标用
+  `--reference-unit angstrom`；`--pair-function-type` 控制 `pairfunctype`，
+  `--pair-correlation-type` 控制 `paircorrtype`，两者都通过本次运行目录里的
+  run-local settings 文件和 Multiwfn `-set` 传入
 - `source-function` / `source` / `srcfunc`：函数 `19`，原始输出
   `srcfunc.cub`，默认接 `cube-preset source-function`，按正/负等值面显示；
   必须传 `--reference-point X Y Z`，默认 Bohr，Angstrom 坐标用
@@ -635,6 +650,14 @@ multiwfn2vesta grid-run input.fch grid_products \
 multiwfn2vesta grid-run input.fch grid_products \
   --function edrdmax \
   --edr-exponents 12 3.0 1.2 \
+  --grid-mode points \
+  --grid-points 120 120 120
+
+multiwfn2vesta grid-run input.fch grid_products \
+  --function pair-function \
+  --reference-point 0 0 0 \
+  --pair-function-type 1 \
+  --pair-correlation-type 3 \
   --grid-mode points \
   --grid-points 120 120 120
 

@@ -52,6 +52,7 @@ multiwfn2vesta cube-preset lagrangian-ked 'G(r).cub' cube_products
 multiwfn2vesta cube-preset local-information-entropy infoentro.cub cube_products
 multiwfn2vesta cube-preset electron-delocalization-range EDR.cub cube_products
 multiwfn2vesta cube-preset orbital-overlap-distance EDRDmax.cub cube_products
+multiwfn2vesta cube-preset pair-function fermihole.cub cube_products
 multiwfn2vesta cube-preset source-function srcfunc.cub cube_products
 multiwfn2vesta cube-preset becke-weight Becke.cub cube_products
 multiwfn2vesta cube-preset hirshfeld-weight Hirshfeld.cub cube_products
@@ -235,6 +236,16 @@ passes it back through `cube-preset`.
   `21` `EDRDmax.cub`, default isosurface `0.05`.  `grid-run` uses
   Multiwfn's default exponent set unless `--edr-exponents COUNT START
   INCREMENT` is supplied.
+- `pair-function` aliases: `fermihole`, `fermi-hole`, `correlation-hole`,
+  `corr-hole`, `correlation-factor`, `corr-factor`,
+  `exchange-correlation-density`, `xc-density`, `pair-density`;
+  positive/negative surfaces for Multiwfn function `17` `fermihole.cub`,
+  default magnitude `0.05`.  When generating the cube with `grid-run`, pass
+  `--reference-point X Y Z`; `--reference-unit angstrom` is available for
+  Angstrom input coordinates.  `--pair-function-type` patches Multiwfn
+  `pairfunctype`, `--pair-correlation-type` patches `paircorrtype`, and both
+  settings are written to a run-local settings file copied from the selected
+  Multiwfn `settings.ini` when available and passed with `-set`.
 - `source-function` aliases: `source`, `srcfunc`, `source-func`;
   positive/negative surfaces for Multiwfn function `19` `srcfunc.cub`,
   default magnitude `0.05`.  When generating the cube with `grid-run`, pass
