@@ -46,6 +46,7 @@ multiwfn2vesta cube-preset orbital orbital.cub cube_products
 multiwfn2vesta cube-preset orbital-density orbdens.cub cube_products
 multiwfn2vesta cube-preset gradient-norm gradient.cub cube_products
 multiwfn2vesta cube-preset spin-density spindensity.cub cube_products
+multiwfn2vesta cube-preset spin-polarization spindensity.cub cube_products
 multiwfn2vesta cube-preset laplacian laplacian.cub cube_products
 multiwfn2vesta cube-preset hamiltonian-ked 'K(r).cub' cube_products
 multiwfn2vesta cube-preset lagrangian-ked 'G(r).cub' cube_products
@@ -217,6 +218,9 @@ passes it back through `cube-preset`.
 - `spin-density` aliases: `spin`, `spindensity`, `magnetization-density`;
   positive/negative surfaces for Multiwfn `spindensity.cub`, default
   magnitude `0.02`.
+- `spin-polarization` aliases: `spin-polarization-parameter`, `spin-pol`,
+  `spin-polarisation`; positive/negative surfaces for Multiwfn function `5`
+  `spindensity.cub` generated with `ipolarpara=1`, default magnitude `0.5`.
 - `laplacian` aliases: `lap`, `laplacian-rho`; positive/negative surfaces
   for Multiwfn `laplacian.cub`, default magnitude `0.05`; tune per system.
 - `hamiltonian-ked` aliases: `k-r`, `k(r)`, `kinetic-k`; positive/negative

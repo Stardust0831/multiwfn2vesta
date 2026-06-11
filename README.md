@@ -25,9 +25,10 @@ point.
   local `main`, `origin/main`, and `origin/HEAD`; `git ls-remote --heads
   origin` returned only `refs/heads/main`.  No merge-back was needed because
   there was no extra local or remote feature branch to consolidate.
-- Feature closeouts, including the user-function grid route, are kept on the
-  maintained `main` branch.  Use `git log --oneline --decorate -5` after
-  pulling if an exact current commit hash is needed.
+- Feature closeouts, including the user-function and spin-polarization grid
+  routes, are kept on the maintained `main` branch.  Use
+  `git log --oneline --decorate -5` after pulling if an exact current commit
+  hash is needed.
 - Local untracked probe files such as `domain.cub` and `domain.pdb` are not
   part of the maintained branch state and should stay uncommitted unless they
   are explicitly promoted into documented fixtures.
@@ -35,7 +36,8 @@ point.
   containing feature commits and documentation closure commits, not active
   competing branches.
 - Recent maintained feature work includes dedicated VESTA presets for
-  Multiwfn gradient norm, spin-density, orbital-density, Laplacian, K(r),
+  Multiwfn gradient norm, spin-density, spin-polarization parameter,
+  orbital-density, Laplacian, K(r),
   G(r), local information entropy, electron delocalization range EDR(r;d),
   orbital-overlap distance D(r), pair/correlation function, source function,
   Becke atomic/overlap weight, Hirshfeld weight, standalone RDG,
@@ -99,7 +101,8 @@ then delete the temporary branch.
   scaling, and signed positive/negative isosurface presets.
 - Apply analysis-oriented cube presets for common ABACUS/Multiwfn products
   such as density, orbitals/wavefunctions, orbital density, spin density,
-  Laplacian, K(r)/G(r) kinetic-density cubes, standalone RDG/promolecular
+  spin-polarization parameter, Laplacian, K(r)/G(r) kinetic-density cubes,
+  standalone RDG/promolecular
   RDG, local information entropy, EDR(r;d),
   orbital-overlap distance D(r), Becke atomic/overlap weight, Hirshfeld
   weight, promolecular Delta-g, Hirshfeld-partition Delta-g, standalone IRI
@@ -129,8 +132,9 @@ then delete the temporary branch.
   scatter data, and write a mapped-surface `.vesta` through `cube-preset
   aigm`/`aigm-tfi`.
 - Run Multiwfn main function `5` real-space grid generation from a
-  wavefunction file, export density, orbital/MO, Laplacian, K(r)/G(r)
-  kinetic-energy-density cubes, ELF, LOL, ESP/MEP, ALIE, RDG/IRI-like,
+  wavefunction file, export density, orbital/MO, spin density,
+  spin-polarization parameter, Laplacian, K(r)/G(r) kinetic-energy-density
+  cubes, ELF, LOL, ESP/MEP, ALIE, RDG/IRI-like,
   promolecular RDG/sign(lambda2)rho, local information entropy, EDR(r;d),
   orbital-overlap distance D(r), pair/correlation functions with run-local
   `pairfunctype`/`paircorrtype`, source function with run-local
@@ -221,6 +225,7 @@ multiwfn2vesta aigm-run trajectory.xyz aigm_products \
   --frame-range 1 200 \
   --grid-mode spacing --grid-spacing 0.25
 multiwfn2vesta grid-run input.molden grid_products --function density
+multiwfn2vesta grid-run input.molden grid_products --function spin-polarization
 multiwfn2vesta grid-run input.molden grid_products --function vdw-potential
 multiwfn2vesta grid-run input.molden grid_products \
   --function edr \
@@ -328,6 +333,7 @@ multiwfn2vesta cube-preset orbital orbital.cub cube_products
 multiwfn2vesta cube-preset gradient-norm gradient.cub cube_products
 multiwfn2vesta cube-preset orbital-density orbdens.cub cube_products
 multiwfn2vesta cube-preset spin-density spindensity.cub cube_products
+multiwfn2vesta cube-preset spin-polarization spindensity.cub cube_products
 multiwfn2vesta cube-preset laplacian laplacian.cub cube_products
 multiwfn2vesta cube-preset hamiltonian-ked 'K(r).cub' cube_products
 multiwfn2vesta cube-preset lagrangian-ked 'G(r).cub' cube_products
@@ -370,13 +376,14 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
 Available presets can be listed with `multiwfn2vesta cube-preset
 --list-presets`.  Current presets cover density-like scalar cubes, signed
 orbital/wavefunction/density-difference cubes, Multiwfn gradient norm,
-orbital-density, spin-density, Laplacian, K(r), G(r), local information
-entropy, electron delocalization range, orbital-overlap distance, standalone
-pair/correlation function, source function, Becke atomic/overlap weight, Hirshfeld weight, RDG,
-promolecular RDG, and promolecular Delta-g, Hirshfeld-partition Delta-g, standalone IRI scalar
-cubes, standalone vdW potential cubes, direct ABACUS potential cubes, ABACUS
-partial-charge/state-density cubes, nonnegative ABACUS wavefunction norm
-cubes, ELF/LOL cubes, IRI/RDG/NCI mapped surfaces, STM/LDOS
+orbital-density, spin-density, spin-polarization parameter, Laplacian, K(r),
+G(r), local information entropy, electron delocalization range,
+orbital-overlap distance, standalone pair/correlation function, source
+function, Becke atomic/overlap weight, Hirshfeld weight, RDG, promolecular
+RDG, and promolecular Delta-g, Hirshfeld-partition Delta-g, standalone IRI
+scalar cubes, standalone vdW potential cubes, direct ABACUS potential cubes,
+ABACUS partial-charge/state-density cubes, nonnegative ABACUS wavefunction
+norm cubes, ELF/LOL cubes, IRI/RDG/NCI mapped surfaces, STM/LDOS
 tunneling-current surfaces, binary domain isosurfaces, binary basin
 isosurfaces, signed basin-type maps, IGM/IGMH/aIGM weak-interaction mapped
 surfaces, ESP/MEP mapped density surfaces, generic molecular surface maps,
@@ -624,7 +631,15 @@ Common functions:
 - `laplacian` / `lap`: function `3`, raw `laplacian.cub`, preset
   `laplacian`, signed by default.
 - `spin-density` / `spin`: function `5`, raw `spindensity.cub`, preset
-  `spin-density`, signed by default.
+  `spin-density`, signed by default.  The runner writes a run-local
+  `multiwfn_grid_settings.ini` with `ipolarpara=0` and passes it with
+  `-set`, so stale global Multiwfn settings cannot accidentally switch this
+  route to the spin-polarization parameter.
+- `spin-polarization` / `spin-pol`: function `5`, raw `spindensity.cub`,
+  preset `spin-polarization`, signed by default at `+/-0.5`.  This uses the
+  same Multiwfn cube filename as spin density, but writes run-local
+  `ipolarpara=1`; Multiwfn then evaluates
+  `(rho_alpha-rho_beta)/(rho_alpha+rho_beta)`.
 - `hamiltonian-ked` / `k(r)`: function `6`, raw `K(r).cub`, preset
   `hamiltonian-ked`, signed by default.
 - `lagrangian-ked` / `g(r)`: function `7`, raw `G(r).cub`, preset

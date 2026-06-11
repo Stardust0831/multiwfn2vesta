@@ -38,7 +38,16 @@ multiwfn2vesta grid-run --list-functions
   `MOvalue.cub`, preset `signed`, requires `--orbital` for one orbital or
   `--orbitals` for batch export.
 - `spin-density`: function `5`, raw `spindensity.cub`, preset
-  `spin-density` with signed positive/negative isosurfaces.
+  `spin-density` with signed positive/negative isosurfaces.  The runner
+  writes a run-local `multiwfn_grid_settings.ini` with `ipolarpara=0`, copied
+  from the selected Multiwfn `settings.ini` when available and passed with
+  `-set`, so global Multiwfn settings are not modified or accidentally reused.
+- `spin-polarization`, aliases `spin-polarization-parameter`, `spin-pol`,
+  `spin-polarisation`: function `5`, raw `spindensity.cub`, preset
+  `spin-polarization` with signed positive/negative isosurfaces.  This uses
+  the same Multiwfn output filename as spin density, but writes run-local
+  `ipolarpara=1`; Multiwfn evaluates
+  `(rho_alpha-rho_beta)/(rho_alpha+rho_beta)`.
 - `hamiltonian-ked`, aliases `k-r`, `k(r)`, `kinetic-k`,
   `hamiltonian-kinetic-density`: function `6`, raw `K(r).cub`, preset
   `hamiltonian-ked` with signed positive/negative isosurfaces.
@@ -264,6 +273,7 @@ Examples:
 
 ```bash
 multiwfn2vesta grid-run input.fch products --function density
+multiwfn2vesta grid-run input.fch products --function spin-polarization
 multiwfn2vesta grid-run input.fch products --function orbital --orbital h
 multiwfn2vesta grid-run input.fch products --orbitals h l l+1 --no-vesta
 multiwfn2vesta grid-run input.fch products --function elf

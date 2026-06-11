@@ -32,6 +32,7 @@ class GridFunction:
     requires_orbital: bool = False
     mapped_preset: Optional[str] = None
     default_user_function_index: Optional[int] = None
+    settings_updates: Tuple[Tuple[str, int], ...] = ()
 
 
 GRID_FUNCTIONS: Tuple[GridFunction, ...] = (
@@ -39,7 +40,22 @@ GRID_FUNCTIONS: Tuple[GridFunction, ...] = (
     GridFunction("gradient", 2, "gradient.cub", "gradient-norm", ("rho-gradient", "grad-rho")),
     GridFunction("laplacian", 3, "laplacian.cub", "laplacian", ("lap", "laplacian-rho")),
     GridFunction("orbital", 4, "MOvalue.cub", "signed", ("mo", "wavefunction", "mo-value"), True),
-    GridFunction("spin-density", 5, "spindensity.cub", "spin-density", ("spin", "spindensity")),
+    GridFunction(
+        "spin-density",
+        5,
+        "spindensity.cub",
+        "spin-density",
+        ("spin", "spindensity"),
+        settings_updates=(("ipolarpara", 0),),
+    ),
+    GridFunction(
+        "spin-polarization",
+        5,
+        "spindensity.cub",
+        "spin-polarization",
+        ("spin-polarization-parameter", "spin-pol", "spin-polarisation"),
+        settings_updates=(("ipolarpara", 1),),
+    ),
     GridFunction(
         "hamiltonian-ked",
         6,
@@ -284,9 +300,15 @@ def available_functions_text() -> str:
             if function.default_user_function_index is not None
             else ""
         )
+        settings = (
+            "; settings: " + ", ".join(f"{key}={value}" for key, value in function.settings_updates)
+            if function.settings_updates
+            else ""
+        )
         lines.append(
             f"- {function.name}{aliases}: index={function.index}, "
-            f"Multiwfn output={function.output_filename}, preset={function.preset}{orbital}{mapped}{user_default}"
+            f"Multiwfn output={function.output_filename}, preset={function.preset}"
+            f"{orbital}{mapped}{user_default}{settings}"
         )
     return "\n".join(lines) + "\n"
 
@@ -513,49 +535,6 @@ def _write_run_local_settings(
             ]
         ),
         encoding="utf-8",
-    )
-
-
-def _write_source_function_settings(
-    path: Path,
-    mode: int,
-    *,
-    base_settings: Optional[Path] = None,
-) -> None:
-    _write_run_local_settings(
-        path,
-        {"srcfuncmode": _normalize_source_function_mode(mode)},
-        base_settings=base_settings,
-    )
-
-
-def _write_pair_function_settings(
-    path: Path,
-    pair_function_type: int,
-    pair_correlation_type: int,
-    *,
-    base_settings: Optional[Path] = None,
-) -> None:
-    _write_run_local_settings(
-        path,
-        {
-            "pairfunctype": _normalize_pair_function_type(pair_function_type),
-            "paircorrtype": _normalize_pair_correlation_type(pair_correlation_type),
-        },
-        base_settings=base_settings,
-    )
-
-
-def _write_user_function_settings(
-    path: Path,
-    user_function_index: int,
-    *,
-    base_settings: Optional[Path] = None,
-) -> None:
-    _write_run_local_settings(
-        path,
-        {"iuserfunc": _normalize_user_function_index(user_function_index)},
-        base_settings=base_settings,
     )
 
 
@@ -1091,28 +1070,31 @@ def run_multiwfn_grid(
             raw_dir = output_dir / raw_dir
     raw_dir.mkdir(parents=True, exist_ok=True)
 
+    settings_updates: Dict[str, int] = {key: value for key, value in function.settings_updates}
+    if function.index == 17:
+        settings_updates.update(
+            {
+                "pairfunctype": normalized_pair_function_type if normalized_pair_function_type is not None else 1,
+                "paircorrtype": normalized_pair_correlation_type if normalized_pair_correlation_type is not None else 3,
+            }
+        )
+    elif function.index == 19:
+        settings_updates["srcfuncmode"] = (
+            normalized_source_function_mode if normalized_source_function_mode is not None else 1
+        )
+    elif function.index == 100:
+        settings_updates["iuserfunc"] = (
+            normalized_user_function_index if normalized_user_function_index is not None else 0
+        )
+
     settings_override: Optional[Path] = None
-    if function.index in {17, 19, 100}:
+    if settings_updates:
         settings_override = raw_dir / "multiwfn_grid_settings.ini"
-        if function.index == 17:
-            _write_pair_function_settings(
-                settings_override,
-                normalized_pair_function_type if normalized_pair_function_type is not None else 1,
-                normalized_pair_correlation_type if normalized_pair_correlation_type is not None else 3,
-                base_settings=candidate.path.parent / "settings.ini",
-            )
-        elif function.index == 19:
-            _write_source_function_settings(
-                settings_override,
-                normalized_source_function_mode if normalized_source_function_mode is not None else 1,
-                base_settings=candidate.path.parent / "settings.ini",
-            )
-        elif function.index == 100:
-            _write_user_function_settings(
-                settings_override,
-                normalized_user_function_index if normalized_user_function_index is not None else 0,
-                base_settings=candidate.path.parent / "settings.ini",
-            )
+        _write_run_local_settings(
+            settings_override,
+            settings_updates,
+            base_settings=candidate.path.parent / "settings.ini",
+        )
 
     output_stem = stem or wavefunction.stem
     if commands_file is not None:

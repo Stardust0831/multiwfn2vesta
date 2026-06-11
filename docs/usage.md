@@ -219,6 +219,7 @@ multiwfn2vesta cube-preset orbital orbital.cub cube_products
 multiwfn2vesta cube-preset gradient-norm gradient.cub cube_products
 multiwfn2vesta cube-preset orbital-density orbdens.cub cube_products
 multiwfn2vesta cube-preset spin-density spindensity.cub cube_products
+multiwfn2vesta cube-preset spin-polarization spindensity.cub cube_products
 multiwfn2vesta cube-preset laplacian laplacian.cub cube_products
 multiwfn2vesta cube-preset hamiltonian-ked 'K(r).cub' cube_products
 multiwfn2vesta cube-preset lagrangian-ked 'G(r).cub' cube_products
@@ -272,6 +273,10 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
 - `spin-density`：正/负等值面，别名包括 `spin`、`spindensity`，用于
   Multiwfn `spindensity.cub` 或兼容的 signed spin-density cube，默认幅值
   `0.02`
+- `spin-polarization`：正/负等值面，别名包括
+  `spin-polarization-parameter`、`spin-pol`，用于 Multiwfn 函数 `5` 在
+  `ipolarpara=1` 时导出的 `spindensity.cub`；物理量是
+  `(rho_alpha-rho_beta)/(rho_alpha+rho_beta)`，默认幅值 `0.5`
 - `laplacian`：正/负等值面，别名包括 `lap`、`laplacian-rho`，用于
   Multiwfn `laplacian.cub`，默认幅值 `0.05`，通常需要按体系微调
 - `hamiltonian-ked`：正/负等值面，别名包括 `k(r)`、`kinetic-k`，用于
@@ -581,7 +586,13 @@ multiwfn2vesta grid-run --list-functions
 - `laplacian` / `lap`：函数 `3`，原始输出 `laplacian.cub`，默认接
   `cube-preset laplacian`
 - `spin-density` / `spin`：函数 `5`，原始输出 `spindensity.cub`，默认接
-  `cube-preset spin-density`
+  `cube-preset spin-density`；运行时会写本地
+  `multiwfn_grid_settings.ini` 并通过 `-set` 固定 `ipolarpara=0`，避免被
+  全局 Multiwfn 设置误切到 spin-polarization parameter
+- `spin-polarization` / `spin-pol`：函数 `5`，原始输出同样是
+  `spindensity.cub`，默认接 `cube-preset spin-polarization`；运行时通过
+  本地 `-set` 文件固定 `ipolarpara=1`，Multiwfn 计算
+  `(rho_alpha-rho_beta)/(rho_alpha+rho_beta)`
 - `hamiltonian-ked` / `k(r)`：函数 `6`，原始输出 `K(r).cub`，默认接
   `cube-preset hamiltonian-ked`
 - `lagrangian-ked` / `g(r)`：函数 `7`，原始输出 `G(r).cub`，默认接

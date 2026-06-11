@@ -79,6 +79,21 @@ PRESETS: Tuple[CubePreset, ...] = (
         ),
     ),
     CubePreset(
+        name="spin-polarization",
+        aliases=("spin-polarization-parameter", "spin-pol", "spin-polarisation"),
+        description="Positive/negative isosurfaces for dimensionless spin polarization parameter cubes.",
+        surface_mode="signed",
+        isosurface=0.5,
+        positive_rgb=(255, 95, 80),
+        negative_rgb=(80, 145, 255),
+        surface_opacity=(145, 255),
+        notes=(
+            "Use for Multiwfn function 5 spindensity.cub generated with ipolarpara=1. "
+            "The field is (rho_alpha-rho_beta)/(rho_alpha+rho_beta), so it is normally "
+            "dimensionless and bounded near +/-1 where the total density is meaningful."
+        ),
+    ),
+    CubePreset(
         name="orbital-density",
         aliases=("orbdens", "mo-density", "orbital-density-cube"),
         description="Single positive isosurface for orbital density cubes.",

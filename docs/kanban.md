@@ -1,6 +1,59 @@
 # Project Kanban
 
-Updated: 2026-06-11 18:51 CST
+Updated: 2026-06-11 19:35 CST
+
+## Current Request: 2026-06-11 README Update And Branch Consolidation With Spin Route
+
+- [x] Record user request immediately: update README, inspect the unusual
+  branch state, converge back to one maintained branch if needed, and keep
+  git identity as `Stardust0831`.
+- [x] Confirm current repository-local identity is already
+  `Stardust0831 <13862180016@163.com>`.
+- [x] Recheck local/remote branches after fetch and decide whether a merge is
+  actually needed.  After `git fetch --prune origin`, local `main`,
+  `origin/main`, and `origin/HEAD` point at
+  `cc56b650b26a9138a93cd6a8386ec6d3c5e52870`; `git ls-remote --heads
+  origin` exposes only `refs/heads/main`, so there is no extra branch to
+  merge back.
+- [x] Finish or explicitly defer the current uncommitted spin-polarization
+  route before updating README, so documentation reflects the real CLI state.
+  Decision: finish it now.  Added `grid-run --function spin-polarization`,
+  `cube-preset spin-polarization`, run-local `ipolarpara=0/1` handling for
+  the two function-5 routes, focused tests, and README/usage/skill/research
+  notes.
+- [x] Sync root docs mirror, validate, review, commit, push, and verify final
+  branch alignment while preserving local untracked `domain.cub` and
+  `domain.pdb`.  Pre-commit status: root docs checksum dry-run is empty;
+  focused 101-test cube/grid regression passed; full no-GUI regression passed
+  with 317 tests; focused `py_compile`, `grid-run --list-functions`,
+  `cube-preset --list-presets`, `grid-run --help`, `multiwfn2vesta --help`,
+  and `git diff --check` passed.  Read-only subagent review found no
+  blocker and approved commit, with the caveat to keep `domain.cub` and
+  `domain.pdb` untracked.  Final commit hash and post-push branch alignment
+  are reported in the assistant response to avoid a self-referential hash in
+  this document.
+
+## Active Goal Continuation: 2026-06-11 Spin Polarization Survey
+
+- [x] Record automatic continuation of the long-running objective: keep
+  surveying and implementing valuable Multiwfn wavefunction analyses for
+  VESTA, prioritizing ABACUS LCAO Molden-compatible wavefunction routes.
+- [x] Recheck repository state, current spin/grid coverage, and Multiwfn
+  source evidence before editing.
+- [x] Select whether the next bounded increment should expose Multiwfn's
+  spin-polarization parameter route or defer it in favor of another
+  ABACUS-compatible analysis.  Selected route: expose Multiwfn function `5`
+  spin-polarization parameter as a named route because local `settings.ini`
+  shows `ipolarpara=0/1`, `function.f90` changes function `5` display text
+  and `fspindens` behavior according to `ipolarpara`, and `0123dim.f90`
+  still exports `spindensity.cub`; the implementation should use run-local
+  settings so global Multiwfn settings do not change.
+- [x] Implement the selected increment with tests, docs, root docs sync,
+  validation, review, commit, push, and branch verification.  Implementation,
+  focused tests, README/usage/skill/research/worklog documentation, root docs
+  sync, full validation, read-only review, commit, push, and final branch
+  verification are complete; final commit hash is reported in the assistant
+  response.
 
 ## Active Goal Continuation: 2026-06-11 Next ABACUS-Compatible Analysis Survey
 
@@ -36,8 +89,11 @@ Updated: 2026-06-11 18:51 CST
   validation.  Final validation after those patches passed: focused
   `py_compile`, full 314-test no-GUI regression, `grid-run --list-functions`,
   `grid-run --help`, root docs checksum mirror dry-run, and
-  `git diff --check`.  Final commit hash and post-push alignment are reported
-  in the assistant response to avoid a self-referential docs loop.
+  `git diff --check`.  The actual pushed commit was
+  `cc56b650b26a9138a93cd6a8386ec6d3c5e52870`
+  (`Add named iuserfunc grid routes`), with local `main`, `origin/main`, and
+  `origin/HEAD` aligned and only `domain.cub`/`domain.pdb` remaining
+  untracked.
 
 ## Current Request: 2026-06-11 README Refresh And Branch Consolidation Recheck
 

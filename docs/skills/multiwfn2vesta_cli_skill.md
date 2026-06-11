@@ -155,6 +155,7 @@ multiwfn2vesta cube-preset orbital orbital.cub cube_products
 multiwfn2vesta cube-preset orbital-density orbdens.cub cube_products
 multiwfn2vesta cube-preset gradient-norm gradient.cub cube_products
 multiwfn2vesta cube-preset spin-density spindensity.cub cube_products
+multiwfn2vesta cube-preset spin-polarization spindensity.cub cube_products
 multiwfn2vesta cube-preset laplacian laplacian.cub cube_products
 multiwfn2vesta cube-preset hamiltonian-ked 'K(r).cub' cube_products
 multiwfn2vesta cube-preset lagrangian-ked 'G(r).cub' cube_products
@@ -192,9 +193,9 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
 Use this when the file is a common ABACUS/Multiwfn cube product and the
 default style is enough to start.  Presets cover density-like scalar cubes,
 signed orbital/wavefunction/density-difference cubes, Multiwfn
-orbital-density, spin-density, Laplacian, K(r), G(r), pair/correlation
-function, Becke and Hirshfeld weight cubes, standalone RDG, and promolecular
-RDG cubes, standalone IRI and vdW potential cubes, direct
+orbital-density, spin-density, spin-polarization parameter, Laplacian, K(r),
+G(r), pair/correlation function, Becke and Hirshfeld weight cubes,
+standalone RDG, and promolecular RDG cubes, standalone IRI and vdW potential cubes, direct
 ABACUS potential cubes, ABACUS partial-charge/state-density cubes,
 nonnegative ABACUS wavefunction-norm cubes, ELF/LOL, IRI/RDG/NCI mapped
 surfaces, binary domain isosurfaces, binary basin isosurfaces, signed
@@ -420,8 +421,9 @@ multiwfn2vesta grid-run --list-functions
 ```
 
 Common functions include `density`, `gradient`, `orbital --orbital h`,
-`orbital-density`, `spin-density`, `laplacian`, `hamiltonian-ked`,
-`lagrangian-ked`, `local-information-entropy`, `elf`, `lol`, `esp`, `alie`,
+`orbital-density`, `spin-density`, `spin-polarization`, `laplacian`,
+`hamiltonian-ked`, `lagrangian-ked`, `local-information-entropy`, `elf`,
+`lol`, `esp`, `alie`,
 `pair-function`, `source-function`, `user-function`,
 `local-electron-affinity`, `local-electron-attachment-energy`,
 `information-gain-density`, `shannon-entropy-density`,
@@ -431,7 +433,9 @@ Common functions include `density`, `gradient`, `orbital --orbital h`,
 `promolecular-signlambda2rho`, and `vdw-potential`.
 The scalar display defaults are
 function-specific where possible: `gradient.cub` uses `gradient-norm`,
-`spindensity.cub` uses `cube-preset spin-density`, `orbdens.cub` uses
+`spindensity.cub` uses `cube-preset spin-density` for
+`--function spin-density` and `cube-preset spin-polarization` for
+`--function spin-polarization`, `orbdens.cub` uses
 `orbital-density`, `laplacian.cub` uses `laplacian`, `K(r).cub` uses
 `hamiltonian-ked`, `G(r).cub` uses `lagrangian-ked`, `infoentro.cub` uses
 `local-information-entropy`, `EDR.cub` uses `electron-delocalization-range`,
@@ -452,6 +456,11 @@ through a run-local settings file copied from the selected Multiwfn
 `--source-function-mode` is patched into a run-local settings file copied
 from the selected Multiwfn `settings.ini` when available and passed with
 `-set`.
+`grid-run --function spin-density` and `grid-run --function spin-polarization`
+both use Multiwfn function `5` and raw `spindensity.cub`; the runner
+disambiguates them by copying the selected Multiwfn `settings.ini` when
+available, patching run-local `ipolarpara=0` or `ipolarpara=1`, and passing
+that file with `-set`.
 Generic `grid-run --function user-function` requires `--user-function-index
 IUSERFUNC`; named routes automatically patch common source-backed values:
 `local-electron-affinity` / `lea` = `27`,

@@ -187,6 +187,9 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertIn("hamiltonian-ked", text)
         self.assertIn("preset=gradient-norm", text)
         self.assertIn("preset=spin-density", text)
+        self.assertIn("preset=spin-polarization", text)
+        self.assertIn("settings: ipolarpara=0", text)
+        self.assertIn("settings: ipolarpara=1", text)
         self.assertIn("preset=laplacian", text)
         self.assertIn("preset=hamiltonian-ked", text)
         self.assertIn("preset=lagrangian-ked", text)
@@ -226,6 +229,10 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertEqual(resolve_grid_function("local-info-entropy").output_filename, "infoentro.cub")
         self.assertEqual(resolve_grid_function("local-shannon-entropy").preset, "local-information-entropy")
         self.assertEqual(resolve_grid_function("spin").preset, "spin-density")
+        self.assertEqual(resolve_grid_function("spin-density").settings_updates, (("ipolarpara", 0),))
+        self.assertEqual(resolve_grid_function("spin-polarization").preset, "spin-polarization")
+        self.assertEqual(resolve_grid_function("spin-pol").settings_updates, (("ipolarpara", 1),))
+        self.assertEqual(resolve_grid_function(None, 5).name, "spin-density")
         self.assertEqual(resolve_grid_function("lap").preset, "laplacian")
         self.assertEqual(resolve_grid_function("orbdens").preset, "orbital-density")
         self.assertEqual(resolve_grid_function("rdg").preset, "rdg-scalar")
@@ -307,6 +314,13 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertEqual(commands[:3], ["5", "9", "8"])
         self.assertTrue(commands[3].endswith("ref.cub"))
         self.assertEqual(commands[-3:], ["2", "0", "q"])
+
+    def test_build_spin_polarization_command_stream_uses_function_5(self):
+        function = resolve_grid_function("spin-polarization")
+        self.assertEqual(
+            build_grid_commands(function, grid_points=(10, 11, 12)),
+            ["5", "5", "4", "10,11,12", "2", "0", "q"],
+        )
 
     def test_build_alie_command_stream_uses_function_18(self):
         function = resolve_grid_function("alie")
@@ -598,6 +612,68 @@ class TestMultiwfnGridRunner(unittest.TestCase):
             manifest = result.vesta_result.manifest_path.read_text(encoding="utf-8")
             self.assertIn("canonical_preset: `gradient-norm`", manifest)
             self.assertIn("effective_isosurface: `0.05`", manifest)
+
+    def test_run_multiwfn_grid_spin_routes_patch_ipolarpara(self):
+        cases = (
+            ("spin-density", "1", "0", "spin-density"),
+            ("spin-polarization", "0", "1", "spin-polarization"),
+        )
+        for function_name, base_value, expected_value, expected_preset in cases:
+            with self.subTest(function_name=function_name):
+                with tempfile.TemporaryDirectory() as tmp:
+                    root = Path(tmp)
+                    wavefunction = root / "h2o.fch"
+                    wavefunction.write_text("wavefunction", encoding="utf-8")
+                    candidate = self.make_candidate(root)
+                    (candidate.path.parent / "settings.ini").write_text(
+                        f"laplfac= 6\nipolarpara= {base_value}\nother_setting= keep\n",
+                        encoding="utf-8",
+                    )
+
+                    def fake_run(command, **kwargs):
+                        cwd = Path(kwargs["cwd"])
+                        (cwd / "spindensity.cub").write_text(VDW_POTENTIAL_CUBE, encoding="utf-8")
+                        return subprocess.CompletedProcess(command, 0, stdout="ok", stderr="")
+
+                    with patch("multiwfn2vesta.multiwfn_grid.find_multiwfn", return_value=candidate):
+                        with patch("multiwfn2vesta.multiwfn_grid.subprocess.run", side_effect=fake_run) as mocked_run:
+                            result = run_multiwfn_grid(
+                                wavefunction,
+                                root / "products",
+                                function_name=function_name,
+                                stem="case",
+                                grid_points=(10, 11, 12),
+                            )
+
+                    self.assertTrue(result.success)
+                    self.assertEqual(result.command_file.read_text(encoding="utf-8"), "5\n5\n4\n10,11,12\n2\n0\nq\n")
+                    self.assertEqual(
+                        mocked_run.call_args.args[0],
+                        [
+                            str(candidate.path),
+                            str(wavefunction.resolve()),
+                            "-set",
+                            str((root / "products" / "multiwfn_grid_raw" / "multiwfn_grid_settings.ini").resolve()),
+                        ],
+                    )
+                    self.assertIsNotNone(result.settings_override)
+                    settings_text = result.settings_override.read_text(encoding="utf-8")
+                    self.assertIn("laplfac= 6", settings_text)
+                    self.assertIn(f"ipolarpara= {expected_value}", settings_text)
+                    self.assertNotIn(f"ipolarpara= {base_value}\n", settings_text)
+                    self.assertIn("other_setting= keep", settings_text)
+                    self.assertEqual(result.raw_cube.name, "spindensity.cub")
+                    self.assertEqual(result.cube.name, f"case_{function_name}.cub")
+                    self.assertIsNotNone(result.vesta_result)
+                    self.assertEqual(
+                        result.vesta_result.vesta_path.name,
+                        f"case_{function_name}_{expected_preset}_cube.vesta",
+                    )
+                    recipe = result.recipe_path.read_text(encoding="utf-8")
+                    self.assertIn("function_index: `5`", recipe)
+                    self.assertIn("local_settings_file:", recipe)
+                    manifest = result.vesta_result.manifest_path.read_text(encoding="utf-8")
+                    self.assertIn(f"canonical_preset: `{expected_preset}`", manifest)
 
     def test_run_multiwfn_grid_information_entropy_uses_dedicated_preset(self):
         with tempfile.TemporaryDirectory() as tmp:

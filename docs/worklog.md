@@ -1,5 +1,33 @@
 # Worklog
 
+## 2026-06-11: Spin-polarization grid route and README branch refresh
+
+- User requested a README refresh, branch consolidation check, and continued
+  use of the `Stardust0831` Git identity.
+- Confirmed repository-local Git identity is
+  `Stardust0831 <13862180016@163.com>`.
+- Checked branch state after `git fetch --prune origin`: local `main`,
+  `origin/main`, and `origin/HEAD -> origin/main` are aligned before this
+  feature commit, and `git ls-remote --heads origin` exposes only
+  `refs/heads/main`; no merge-back branch is currently present.
+- Added a maintained `grid-run --function spin-polarization` route for
+  Multiwfn main-function-5 function `5`.  Local Multiwfn source shows
+  `settings.ini` key `ipolarpara=1` changes function `5` from spin density to
+  `(rho_alpha-rho_beta)/(rho_alpha+rho_beta)`, while the exported filename
+  remains `spindensity.cub`.
+- `grid-run --function spin-density` now also writes run-local
+  `ipolarpara=0`, so stale global Multiwfn settings cannot change the route's
+  meaning.  Both function-5 routes copy the selected Multiwfn `settings.ini`
+  when available, patch `multiwfn_grid_settings.ini`, and pass it with
+  `-set`.
+- Added `cube-preset spin-polarization` with signed `+/-0.5` default
+  surfaces and manifest notes distinguishing it from ordinary spin density.
+- Updated README, usage notes, reusable skill notes, research matrix, and
+  kanban before final validation and commit closeout.
+- Focused validation during development passed:
+  `PYTHONPATH=src python3 -m unittest tests.test_cube_preset tests.test_multiwfn_grid -v`
+  with 101 tests.
+
 ## 2026-06-11: Named iuserfunc grid routes
 
 - Continued the long-running ABACUS/Multiwfn/VESTA analysis objective by

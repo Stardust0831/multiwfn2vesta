@@ -25,6 +25,14 @@ Multiwfn evidence:
   global `define.f90` default `0.05`, `spindensity.cub` uses `0.02`,
   `RDG.cub` uses `0.5`, `RDGprodens.cub` uses `0.4`, `IRI.cub` uses `1.0`,
   and `orbdens.cub` uses `0.005`.
+- Multiwfn `settings.ini` key `ipolarpara` changes main-function-5 function
+  `5` from electron spin density to the spin-polarization parameter.  Local
+  `function.f90` shows `ipolarpara=0` evaluates `rho_alpha-rho_beta`, while
+  `ipolarpara=1` evaluates
+  `(rho_alpha-rho_beta)/(rho_alpha+rho_beta)`; `0123dim.f90` still exports
+  both cases as `spindensity.cub`.  The maintained runner therefore patches
+  `ipolarpara` through a run-local `multiwfn_grid_settings.ini` and `-set`
+  for both `spin-density` and `spin-polarization`.
 - Multiwfn `function.f90` lists function `22` as Delta-g with promolecular
   approximation, and `0123dim.f90` exports it as `Delta_g.cub` while leaving
   the global `sur_value=0.05`; this standalone cube is separate from
@@ -181,7 +189,7 @@ occupations, and density derivatives from the wavefunction representation.
 | --- | --- | --- | --- | --- | --- |
 | Generic cube visualizer | Any `.cub` from Multiwfn or ABACUS | Strong: `out_chg`, `out_pot`, `out_pchg`, `out_wfc_*`, `out_elf` | Cube | Density/texture import, isosurface, section off by default | Implemented as `multiwfn2vesta cube-vesta`; `cube-preset` adds common analysis defaults, including direct ABACUS potential/partial-charge/wavefunction-norm presets |
 | Molecular orbitals and band wavefunctions | Full wavefunction Molden/FCH/WFN, or ABACUS real-space `get_wf` cubes | Strong for Gamma LCAO Molden; direct cube route for selected bands | `orb*.cub`, `MOvalue.cub`, `orbdens.cub`, or ABACUS `wfi*.cube` | Positive/negative orbital isosurfaces; orbital-density magnitude as a single surface | `cube-preset orbital` and `cube-preset orbital-density` implemented; `grid-run --function orbital --orbital ...`, `grid-run --function orbital-density --orbital ...`, and `grid-run --orbitals ...` cover isolated orbital exports |
-| Electron density, gradient norm, spin density, Laplacian, kinetic density | Full wavefunction, or ABACUS density cubes for density only | Strong for density cube; Molden route for derivatives | `density.cub`, `gradient.cub`, `spindensity.cub`, `laplacian.cub`, `K(r).cub`, `G(r).cub` | Single/positive-negative isosurfaces or slices | `grid-run` now covers density, gradient norm, spin density, Laplacian, and K(r)/G(r) single cubes; `cube-preset gradient-norm`, `spin-density`, `laplacian`, `hamiltonian-ked`, and `lagrangian-ked` provide maintained display defaults; `cube-arith --operation spin-density` builds alpha-minus-beta spin-density cubes from compatible spin-channel density cubes and routes them to `cube-preset spin-density` |
+| Electron density, gradient norm, spin density/spin polarization, Laplacian, kinetic density | Full wavefunction, or ABACUS density cubes for density only | Strong for density cube; Molden route for derivatives | `density.cub`, `gradient.cub`, `spindensity.cub`, `laplacian.cub`, `K(r).cub`, `G(r).cub` | Single/positive-negative isosurfaces or slices | `grid-run` now covers density, gradient norm, spin density, spin-polarization parameter, Laplacian, and K(r)/G(r) single cubes; `cube-preset gradient-norm`, `spin-density`, `spin-polarization`, `laplacian`, `hamiltonian-ked`, and `lagrangian-ked` provide maintained display defaults; `grid-run` writes run-local `ipolarpara=0/1` for the two function-5 routes, and `cube-arith --operation spin-density` builds alpha-minus-beta spin-density cubes from compatible spin-channel density cubes and routes them to `cube-preset spin-density` |
 | ELF/LOL | Full wavefunction; ABACUS direct `out_elf` for ELF | Strong for ELF direct; Molden route for Multiwfn ELF/LOL | `ELF.cub`, `LOL.cub`, ABACUS `elf*.cube` | Isosurfaces around localized regions | `grid-run` now covers Multiwfn ELF/LOL; `cube-preset elf/lol` remains the VESTA writer |
 | AIM/QTAIM topology | Full wavefunction Molden/FCH/WFN/WFX | Feasible for Gamma LCAO Molden with `[Nval]`; validated on Ag(111)+benzene | `CPs.pdb`, `paths.pdb`, `CPprop.txt`, `mol.pdb` | Atoms-only pseudo-sites, no AIM bonds, optional labels | Already partly implemented; add ABACUS-aware recipes |
 | IGM/IGMH + AIM overlay | Full wavefunction and fragment definitions | Feasible for Gamma LCAO Molden; validated on Ag(111)+benzene | `dg_inter.cub`, `sl2r.cub`, AIM PDBs | Multi-phase VESTA density/texture plus AIM pseudo-sites | `igmh-run`/`igm-run`/`migm-run` now automate standard Multiwfn fragment streams and call `cube-preset igmh`/`igm`; saved AIM+IGMH overlay styling is implemented |
@@ -377,8 +385,12 @@ Main gaps:
 - Spin-density visualization now has both a direct `cube-preset spin-density`
   path for existing `spindensity.cub` and a named `cube-arith
   --operation spin-density` route for compatible alpha/beta or
-  spin-up/spin-down density cubes.  Fukui/dual-descriptor visualization has
-  both the cube-arithmetic bottom layer and the `fukui-run` shared-grid
+  spin-up/spin-down density cubes.  The Multiwfn function-5 runner also
+  distinguishes `grid-run --function spin-density` and
+  `grid-run --function spin-polarization` by writing run-local
+  `ipolarpara=0/1` settings; use `cube-preset spin-polarization` only for the
+  latter dimensionless parameter cube.  Fukui/dual-descriptor visualization
+  has both the cube-arithmetic bottom layer and the `fukui-run` shared-grid
   charged-state orchestration layer; it still needs real chemistry smoke cases
   and guidance for charged periodic systems.
 - Density-gradient visualization now has a distinct `cube-preset

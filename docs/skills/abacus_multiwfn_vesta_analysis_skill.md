@@ -52,6 +52,7 @@ multiwfn2vesta cube-preset orbital wfc_real.cub cube_products
 multiwfn2vesta cube-preset orbital-density orbdens.cub cube_products
 multiwfn2vesta cube-preset gradient-norm gradient.cub cube_products
 multiwfn2vesta cube-preset spin-density spindensity.cub cube_products
+multiwfn2vesta cube-preset spin-polarization spindensity.cub cube_products
 multiwfn2vesta cube-preset laplacian laplacian.cub cube_products
 multiwfn2vesta cube-preset hamiltonian-ked 'K(r).cub' cube_products
 multiwfn2vesta cube-preset lagrangian-ked 'G(r).cub' cube_products
@@ -112,6 +113,9 @@ multiwfn2vesta cube-arith spin_products \
 
 `cube-arith --preset auto` sends this product through
 `cube-preset spin-density`; it does not generate the spin-channel cubes.
+Use `cube-preset spin-polarization` only when `spindensity.cub` was generated
+with Multiwfn `ipolarpara=1`; the maintained `grid-run --function
+spin-polarization` route writes a run-local `-set` file to force that state.
 
 For a surface cube plus a compatible texture cube:
 
@@ -224,8 +228,9 @@ multiwfn2vesta grid-run ABACUS_Multiwfn.molden grid_products \
 
 Useful `grid-run` functions for ABACUS-compatible Molden files include
 `density`, `gradient`, `orbital --orbital h`, `orbital-density --orbital h`,
-`spin-density`, `laplacian`, `hamiltonian-ked`, `lagrangian-ked`, `elf`,
-`lol`, `local-information-entropy`, `esp`, `rdg`, `promolecular-rdg`,
+`spin-density`, `spin-polarization`, `laplacian`, `hamiltonian-ked`,
+`lagrangian-ked`, `elf`, `lol`, `local-information-entropy`, `esp`, `rdg`,
+`promolecular-rdg`,
 `pair-function`, `source-function`, `edr`, `edrdmax`, `becke`, `hirshfeld`,
 `delta-g`, `hirshfeld-delta-g`, `iri`, `vdw-potential`, and
 `signlambda2rho`.
@@ -239,6 +244,10 @@ defaults where the source defines them.  For `gradient.cub`, `infoentro.cub`,
 `fermihole.cub`, `EDR.cub`, `EDRDmax.cub`, `srcfunc.cub`, `Delta_g.cub`,
 and function `23` `griddata.cub`, Multiwfn leaves the function at the global
 `sur_value=0.05`, so tune the VESTA isosurface per system.
+For Multiwfn function `5`, `grid-run --function spin-density` forces
+`ipolarpara=0`, while `grid-run --function spin-polarization` forces
+`ipolarpara=1`; both settings are written to a run-local file copied from the
+selected Multiwfn `settings.ini` when available and passed with `-set`.
 `grid-run --function edr` requires `--edr-length D_BOHR`; `grid-run
 --function edrdmax` uses Multiwfn's default exponent set unless
 `--edr-exponents COUNT START INCREMENT` is supplied; `grid-run --function

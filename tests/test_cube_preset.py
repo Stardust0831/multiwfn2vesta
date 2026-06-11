@@ -24,6 +24,18 @@ signed comment two
 """
 
 
+WIDE_SIGNED_CUBE = """wide signed comment one
+wide signed comment two
+    2    -1.000000    -2.000000     0.500000
+    2     0.500000     0.000000     0.000000
+    2     0.000000     0.500000     0.000000
+    2     0.000000     0.000000     0.500000
+    8     8.000000    -1.000000    -2.000000     0.500000
+    1     1.000000    -0.500000    -2.000000     0.500000
+ -1.0 -0.8 -0.5 -0.1 0.1 0.5 0.8 1.0
+"""
+
+
 SURFACE_CUBE = """surface one
 surface two
     2    -1.000000    -2.000000     0.500000
@@ -99,6 +111,7 @@ class TestCubePreset(unittest.TestCase):
         self.assertIn("gradient-norm", text)
         self.assertIn("signed", text)
         self.assertIn("spin-density", text)
+        self.assertIn("spin-polarization", text)
         self.assertIn("orbital-density", text)
         self.assertIn("laplacian", text)
         self.assertIn("hamiltonian-ked", text)
@@ -268,6 +281,24 @@ basin type two
             self.assertIn("requested_preset: `spindensity`", manifest)
             self.assertIn("alpha-minus-beta spin density", manifest)
             self.assertIn("main-function-5 sur_value", manifest)
+
+    def test_spin_polarization_preset_writes_signed_surfaces(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            cube = self.write_tmp(root, "spindensity.cub", WIDE_SIGNED_CUBE)
+
+            result = run_preset("spin-polarization", cube, root / "products")
+
+            text = result.vesta_path.read_text(encoding="utf-8")
+            manifest = result.manifest_path.read_text(encoding="utf-8")
+
+            self.assertRegex(
+                text,
+                r"ISURF\n  1   1\s+0\.5\s+255\s+95\s+80\s+145\s+255\n  1   1\s+-0\.5\s+80\s+145\s+255\s+145\s+255",
+            )
+            self.assertIn("canonical_preset: `spin-polarization`", manifest)
+            self.assertIn("dimensionless spin polarization parameter", manifest)
+            self.assertIn("ipolarpara=1", manifest)
 
     def test_orbital_density_preset_writes_single_positive_surface(self):
         with tempfile.TemporaryDirectory() as tmp:
