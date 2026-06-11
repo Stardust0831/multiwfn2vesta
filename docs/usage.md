@@ -59,7 +59,8 @@ multiwfn2vesta aim-igmh --help
   orbital/signed、spin density、Laplacian、K(r)/G(r)、ABACUS direct
   potential、partial charge、wavefunction norm、ELF/LOL、IRI/RDG/NCI、DORI、
   EDR(r;d)、D(r)、IGM/IGMH/aIGM、ESP/MEP、ALIE/LEA/LEAE、
-  userfunc/iuserfunc、selected KED variants、standalone vdW potential、vdW map
+  userfunc/iuserfunc、selected KED variants、standalone vdW total/repulsion/
+  dispersion potential、vdW map
 - `surface-extrema`: 把 Multiwfn `surfanalysis.pdb` 的分子表面极值点作为
   atoms-only phase 叠加到已有 `.vesta` 文件中
 - `cube-arith`: 对兼容 cube 做线性组合，用于 density difference、
@@ -241,6 +242,8 @@ multiwfn2vesta cube-preset hirshfeld-delta-g griddata.cub cube_products
 multiwfn2vesta cube-preset iri-scalar IRI.cub cube_products
 multiwfn2vesta cube-preset dori-scalar userfunc.cub cube_products
 multiwfn2vesta cube-preset vdw-potential vdWpot.cub cube_products
+multiwfn2vesta cube-preset vdw-repulsion-potential userfunc.cub cube_products
+multiwfn2vesta cube-preset vdw-dispersion-potential userfunc.cub cube_products
 multiwfn2vesta cube-preset potential pot_es.cube cube_products
 multiwfn2vesta cube-preset partial-charge pchg.cube cube_products
 multiwfn2vesta cube-preset wavefunction-norm wfc_norm.cube cube_products
@@ -384,6 +387,16 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
   `1.0`；通过 `grid-run` 生成时默认写 run-local `ivdwprobe=6`，即 C
   探针，也可用 `--vdw-probe O`、`--vdw-probe Cl` 或原子序数改探针元素；
   如果是把 vdW potential 染色到 density/surface cube 上，用 `vdw-map`
+- `vdw-repulsion-potential`：单正值等值面，别名包括 `vdw-repulsion`、
+  `repulsion-potential`、`repul`，用于 Multiwfn function-100
+  `userfunc.cub` 或 vdW 模块导出的 `repul.cub`；`grid-run` 会写
+  run-local `iuserfunc=93` 和 `ivdwprobe`，默认 `+1.0` kcal/mol 等值面
+- `vdw-dispersion-potential`：单负值等值面，别名包括
+  `vdw-dispersion`、`dispersion-potential`、`disp`，用于 Multiwfn
+  function-100 `userfunc.cub` 或 vdW 模块导出的 `disp.cub`；`grid-run`
+  会写 run-local `iuserfunc=94` 和 `ivdwprobe`，默认 `-1.0` kcal/mol
+  等值面。色散项通常为负，所以这里不是 signed 双等值面；若要改这个
+  单负值等值面的颜色，仍使用 single surface 的 `--positive-rgb`
 - `potential`：正/负等值面，别名包括 `abacus-potential`、`out-pot`、
   `pot-es`，用于 ABACUS `out_pot` 直接势场 cube；如果是密度表面按电势染色，
   用 `esp`
@@ -680,13 +693,14 @@ multiwfn2vesta grid-run --list-functions
   `alpha-density`、`beta-density`、`dori`、
   `local-electron-affinity`、`local-electron-attachment-energy`、
   `local-mulliken-electronegativity`、`local-hardness`、
+  `vdw-repulsion-potential`、`vdw-dispersion-potential`、
   `thomas-fermi-ked`、`weizsacker-ked`、`pauli-ked`、
   `orbital-weighted-fukui-plus`、`orbital-weighted-fukui-minus`、
   `orbital-weighted-fukui-zero`、`orbital-weighted-dual-descriptor`、
   `fractional-occupation-density`、
   `information-gain-density`、`shannon-entropy-density`、
   `fisher-information-density`、`second-fisher-information-density`，这些会
-  自动设置 `iuserfunc=1/2/20/27/-27/28/29/90/1200/114/95/96/97/98/49/50/51/52`；
+  自动设置 `iuserfunc=1/2/20/27/-27/28/29/93/94/90/1200/114/95/96/97/98/49/50/51/52`；
   KED 变体还会额外设置 run-local `iKEDsel`；
   LEA/LEAE 若要画成 density surface 上的染色图，可在 `grid-run` 中加
   `--surface-cube density.cub` 自动选 `lea` / `leae` mapped preset，也可
@@ -716,6 +730,14 @@ multiwfn2vesta grid-run --list-functions
   `--surface-cube` 时默认走 `cube-preset vdw-map`，把生成的 vdW potential
   cube 作为已有 density/surface cube 的 texture；`--vdw-probe` 可选择
   UFF 探针元素，默认 C/6
+- `vdw-repulsion-potential` / `repul`、`vdw-dispersion-potential` /
+  `disp`：函数 `100`，原始输出 `userfunc.cub`，分别自动写 run-local
+  `iuserfunc=93` / `94` 和 `ivdwprobe`；默认接
+  `cube-preset vdw-repulsion-potential` / `vdw-dispersion-potential`。排斥项
+  按单正值 `+1.0` kcal/mol 显示，色散项通常为负，按单负值 `-1.0`
+  kcal/mol 显示；配合 `--surface-cube` 时也可走 `vdw-map`，但建议显式调
+  `--tex-physical` 或 `--tex-percent`。色散 standalone preset 是 single
+  mode，改色时用 `--positive-rgb`
 - `alie` / `avglocion`：函数 `18`，原始输出 `avglocion.cub`；常规 ALIE
   表面图可以用 `--surface-cube density.cub` 自动把生成的 ALIE cube 作为
   `cube-preset alie` 的 texture

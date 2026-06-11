@@ -45,8 +45,9 @@ point.
   Becke atomic/overlap weight, Hirshfeld weight, standalone RDG,
   promolecular RDG, promolecular Delta-g,
   Hirshfeld-partition Delta-g, standalone IRI scalar, standalone DORI scalar
-  and DORI+sign(lambda2)rho mapped surfaces, and standalone vdW potential
-  cubes with run-local probe-atom control, local Mulliken electronegativity
+  and DORI+sign(lambda2)rho mapped surfaces, and standalone vdW total,
+  repulsion, and dispersion potential cubes with run-local probe-atom control,
+  local Mulliken electronegativity
   and local hardness function-100 routes, spin-channel alpha/beta density
   function-100 routes, fractional occupation density function-100 route,
   selected kinetic-energy-density function-100 routes,
@@ -116,7 +117,7 @@ then delete the temporary branch.
   RDG, local information entropy, EDR(r;d),
   orbital-overlap distance D(r), Becke atomic/overlap weight, Hirshfeld
   weight, promolecular Delta-g, Hirshfeld-partition Delta-g, standalone IRI
-  scalar, standalone vdW potential, ABACUS direct potential, partial charge,
+  scalar, standalone vdW total/repulsion/dispersion potential, ABACUS direct potential, partial charge,
   wavefunction norm cubes, ELF/LOL, IRI/RDG/NCI, DORI, ESP/MEP,
   IGM/IGMH/aIGM weak-interaction maps, ALIE/LEA/LEAE, and vdW-potential
   mapped surfaces.
@@ -169,7 +170,8 @@ then delete the temporary branch.
   selected Thomas-Fermi/Weizsacker/Pauli kinetic-energy-density variants,
   promolecular Delta-g,
   Hirshfeld-partition Delta-g, vdW potential with
-  run-local `ivdwprobe` probe selection, and related scalar cubes, export
+  run-local `ivdwprobe` probe selection, function-100 UFF vdW
+  repulsion/dispersion components with `iuserfunc=93/94`, and related scalar cubes, export
   multiple orbitals through
   isolated batch runs, optionally write VESTA files through `cube-preset`,
   and map generated ESP/ALIE/vdW/sign(lambda2)rho cubes as textures on a
@@ -260,6 +262,11 @@ multiwfn2vesta grid-run input.molden grid_products --function density
 multiwfn2vesta grid-run input.molden grid_products --function spin-polarization
 multiwfn2vesta grid-run input.molden grid_products --function vdw-potential \
   --vdw-probe C
+multiwfn2vesta grid-run input.molden grid_products \
+  --function vdw-repulsion-potential \
+  --vdw-probe Ar
+multiwfn2vesta grid-run input.molden grid_products \
+  --function vdw-dispersion-potential
 multiwfn2vesta grid-run input.molden grid_products \
   --function edr \
   --edr-length 0.85
@@ -403,6 +410,8 @@ multiwfn2vesta cube-preset hirshfeld-delta-g griddata.cub cube_products
 multiwfn2vesta cube-preset iri-scalar IRI.cub cube_products
 multiwfn2vesta cube-preset dori-scalar userfunc.cub cube_products
 multiwfn2vesta cube-preset vdw-potential vdWpot.cub cube_products
+multiwfn2vesta cube-preset vdw-repulsion-potential userfunc.cub cube_products
+multiwfn2vesta cube-preset vdw-dispersion-potential userfunc.cub cube_products
 multiwfn2vesta cube-preset potential pot_es.cube cube_products
 multiwfn2vesta cube-preset partial-charge pchg.cube cube_products
 multiwfn2vesta cube-preset wavefunction-norm wfc_norm.cube cube_products
@@ -435,7 +444,8 @@ G(r), selected kinetic-energy-density variants, local information entropy, elect
 orbital-overlap distance, standalone pair/correlation function, source
 function, Becke atomic/overlap weight, Hirshfeld weight, RDG, promolecular
 RDG, and promolecular Delta-g, Hirshfeld-partition Delta-g, standalone IRI
-scalar cubes, standalone vdW potential cubes, direct ABACUS potential cubes,
+scalar cubes, standalone vdW total/repulsion/dispersion potential cubes,
+direct ABACUS potential cubes,
 ABACUS partial-charge/state-density cubes, nonnegative ABACUS wavefunction
 norm cubes, ELF/LOL cubes, IRI/RDG/NCI mapped surfaces, STM/LDOS
 tunneling-current surfaces, binary domain isosurfaces, binary basin
@@ -453,10 +463,17 @@ isosurfaces; it uses signed surfaces at `+/-1.0` kcal/mol, matching
 Multiwfn's main-function-5 display default.  `grid-run` fixes the Multiwfn
 `ivdwprobe` probe atom to carbon/6 by default and accepts `--vdw-probe O`,
 `--vdw-probe Cl`, or an atomic number for other UFF probe atoms.  Use
-`vdw-map`/`vdw-surface` when a vdW potential cube should color a
-density/surface cube.  Use `potential` for direct `out_pot`/potential cube
-isosurfaces.  Use `esp` when a density or molecular surface cube should be
-colored by a potential texture cube.
+`vdw-repulsion-potential` / `repul` for the positive UFF repulsion component
+and `vdw-dispersion-potential` / `disp` for the attractive dispersion
+component.  These two component routes use Multiwfn function `100`, patch
+`iuserfunc=93/94`, still write run-local `ivdwprobe`, and export
+`userfunc.cub`; the standalone VESTA presets show `+1.0` and `-1.0`
+kcal/mol single isosurfaces respectively.  Since the dispersion preset is a
+single negative surface, color overrides still use the single-surface
+`--positive-rgb` option.  Use `vdw-map`/`vdw-surface` when a vdW potential
+cube should color a density/surface cube.  Use `potential` for direct
+`out_pot`/potential cube isosurfaces.  Use `esp` when a density or molecular
+surface cube should be colored by a potential texture cube.
 
 Use `electron-delocalization-range`/`edr` for Multiwfn function `20`
 `EDR.cub`; `grid-run` requires `--edr-length D_BOHR` because Multiwfn asks
@@ -499,6 +516,7 @@ IUSERFUNC`.  Source-backed named routes now imply common `iuserfunc` values:
 `orbital-weighted-fukui-plus` / `minus` / `zero` set `95` / `96` / `97`,
 `orbital-weighted-dual-descriptor` sets `98`,
 `fractional-occupation-density` sets `90`,
+`vdw-repulsion-potential` / `vdw-dispersion-potential` set `93` / `94`,
 `information-gain-density` sets `49`, `shannon-entropy-density` sets `50`,
 and `fisher-information-density` / `second-fisher-information-density` set
 `51` / `52`.  The runner copies the selected Multiwfn `settings.ini` when
@@ -754,13 +772,14 @@ Common functions:
   `alpha-density`, `beta-density`,
   `dori`, `local-electron-affinity`, `local-electron-attachment-energy`,
   `local-mulliken-electronegativity`, `local-hardness`,
+  `vdw-repulsion-potential`, `vdw-dispersion-potential`,
   `thomas-fermi-ked`, `weizsacker-ked`, `pauli-ked`,
   `orbital-weighted-fukui-plus`, `orbital-weighted-fukui-minus`,
   `orbital-weighted-fukui-zero`, `orbital-weighted-dual-descriptor`,
   `fractional-occupation-density`,
   `information-gain-density`, `shannon-entropy-density`,
   `fisher-information-density`, and `second-fisher-information-density`
-  automatically patch `iuserfunc=1/2/20/27/-27/28/29/90/1200/114/95/96/97/98/49/50/51/52`
+  automatically patch `iuserfunc=1/2/20/27/-27/28/29/93/94/90/1200/114/95/96/97/98/49/50/51/52`
   into a run-local `-set` settings file, leaving global Multiwfn settings
   untouched.  The KED variants also patch run-local `iKEDsel`.
 - `alpha-density` and `beta-density`: function `100`, raw `userfunc.cub`,
@@ -822,6 +841,14 @@ Common functions:
   generated vdW potential cube colors an existing density/surface cube.
   `grid-run` writes run-local `ivdwprobe=6` by default and accepts
   `--vdw-probe ELEMENT_OR_Z` for other probe atoms.
+- `vdw-repulsion-potential` / `repul` and `vdw-dispersion-potential` /
+  `disp`: function `100`, raw `userfunc.cub`, run-local `iuserfunc=93` /
+  `94`, and run-local `ivdwprobe`.  The standalone presets use a single
+  `+1.0` kcal/mol repulsion surface and a single `-1.0` kcal/mol dispersion
+  surface.  With `--surface-cube`, these component cubes can also be used as
+  `vdw-map` textures; pass explicit `--tex-physical` or `--tex-percent` when
+  comparing systems.  The dispersion route is negative-valued but still uses
+  `single` mode, so override its standalone color with `--positive-rgb`.
 - `elf` and `lol`: localization cubes, defaulting to `cube-preset elf/lol`.
   The runner copies the selected Multiwfn `settings.ini` when available and
   writes run-local `ELFLOL_type=0` for ordinary Becke ELF/LOL definitions.

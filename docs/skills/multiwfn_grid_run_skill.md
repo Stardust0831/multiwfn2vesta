@@ -244,6 +244,22 @@ multiwfn2vesta grid-run --list-functions
   The maintained stream writes run-local `ivdwprobe=6` by default and accepts
   `--vdw-probe ELEMENT_OR_Z` for other probe atoms.  Mapped preset `vdw-map`
   is used with `--surface-cube`.
+- `vdw-repulsion-potential`, aliases `vdw-repulsion`,
+  `repulsion-potential`, `repul`, `repul-potential`: function `100`, raw
+  `userfunc.cub`, default `iuserfunc=93`, standalone preset
+  `vdw-repulsion-potential`.  The route also writes run-local `ivdwprobe=6`
+  by default and accepts `--vdw-probe`.  Use it for the positive UFF
+  repulsion component in kcal/mol; mapped preset `vdw-map` is used with
+  `--surface-cube`.
+- `vdw-dispersion-potential`, aliases `vdw-dispersion`,
+  `dispersion-potential`, `disp`, `disp-potential`: function `100`, raw
+  `userfunc.cub`, default `iuserfunc=94`, standalone preset
+  `vdw-dispersion-potential`.  The route also writes run-local `ivdwprobe=6`
+  by default and accepts `--vdw-probe`.  Use it for the attractive UFF
+  dispersion component, normally negative in kcal/mol; mapped preset
+  `vdw-map` is used with `--surface-cube`.  The standalone preset is single
+  mode despite the negative isosurface, so color overrides use
+  `--positive-rgb`.
 - `orbital-density`: function `44`, raw `orbdens.cub`, preset
   `orbital-density`, requires `--orbital` for one orbital or `--orbitals` for
   batch export.
@@ -398,6 +414,8 @@ multiwfn2vesta grid-run input.fch products --function hirshfeld --hirshfeld-atom
 multiwfn2vesta grid-run input.fch products --function delta-g
 multiwfn2vesta grid-run input.fch products --function hirshfeld-delta-g
 multiwfn2vesta grid-run input.fch products --function vdw-potential
+multiwfn2vesta grid-run input.fch products --function repul --vdw-probe Ar
+multiwfn2vesta grid-run input.fch products --function disp
 ```
 
 For two-cube mapped surfaces, use `--surface-cube` when the new grid cube

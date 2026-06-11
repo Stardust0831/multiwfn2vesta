@@ -175,6 +175,8 @@ multiwfn2vesta cube-preset hirshfeld-delta-g griddata.cub cube_products
 multiwfn2vesta cube-preset iri-scalar IRI.cub cube_products
 multiwfn2vesta cube-preset dori-scalar userfunc.cub cube_products
 multiwfn2vesta cube-preset vdw-potential vdWpot.cub cube_products
+multiwfn2vesta cube-preset vdw-repulsion-potential userfunc.cub cube_products
+multiwfn2vesta cube-preset vdw-dispersion-potential userfunc.cub cube_products
 multiwfn2vesta cube-preset potential pot_es.cube cube_products
 multiwfn2vesta cube-preset partial-charge pchg.cube cube_products
 multiwfn2vesta cube-preset wavefunction-norm wfc_norm.cube cube_products
@@ -440,7 +442,7 @@ Common functions include `density`, `gradient`, `orbital --orbital h`,
 `fisher-information-density`, `second-fisher-information-density`, `edr`, `edrdmax`,
 `becke`, `hirshfeld`, `rdg`, `promolecular-rdg`, `delta-g`,
 `hirshfeld-delta-g`, `iri`, `signlambda2rho`,
-`promolecular-signlambda2rho`, and `vdw-potential`.
+`promolecular-signlambda2rho`, `vdw-potential`, `repul`, and `disp`.
 The scalar display defaults are
 function-specific where possible: `gradient.cub` uses `gradient-norm`,
 `spindensity.cub` uses `cube-preset spin-density` for
@@ -471,6 +473,12 @@ uses `dori-scalar`, and `vdWpot.cub` uses
 `vdw-potential` with `+/-1.0`
 kcal/mol signed surfaces.  `grid-run --function vdw-potential` writes
 run-local `ivdwprobe=6` by default and accepts `--vdw-probe ELEMENT_OR_Z`.
+`grid-run --function repul` and `grid-run --function disp` write
+function-100 `userfunc.cub` with `iuserfunc=93/94`, use the same run-local
+`ivdwprobe` handling, and call standalone `vdw-repulsion-potential` /
+`vdw-dispersion-potential` presets unless `--surface-cube` requests
+`vdw-map`.  The dispersion standalone preset is a single negative surface, so
+override its color with the single-surface `--positive-rgb` option.
 `grid-run --function pair-function` requires
 `--reference-point X Y Z`; `--pair-function-type` and
 `--pair-correlation-type` patch Multiwfn `pairfunctype`/`paircorrtype`

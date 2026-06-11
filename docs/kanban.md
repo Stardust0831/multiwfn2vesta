@@ -1,6 +1,14 @@
 # Project Kanban
 
-Updated: 2026-06-11 23:18 CST
+Updated: 2026-06-11 23:35 CST
+
+## Active Goal Continuation: 2026-06-11 Next ABACUS/Multiwfn VESTA Analysis Survey Increment
+- 2026-06-11 继续项：收到 README 更新、分支归并检查、Git 身份统一为 Stardust0831 的需求；本轮先补 README/文档，再验证并合并回 main。
+- 2026-06-11 子 agent 审查结果：无阻塞问题；建议提交前可选补强 `resolve_grid_function("100")` 回归断言，并在文档说明负值 single preset 改色仍使用 single-surface 的正色参数。
+
+- [x] Record automatic continuation of the long-running objective: continue surveying and implementing valuable Multiwfn wavefunction analyses that can be visualized in VESTA, with priority for routes fed by ABACUS LCAO Molden files or direct ABACUS cube outputs.
+- [x] Recheck current repository state, pushed branch alignment, existing analysis matrix, current `grid-run`/`cube-preset` coverage, and local Multiwfn source before selecting the next bounded source-backed increment.  Preserve untracked `domain.cub` and `domain.pdb`.  Current branch is `main` tracking `origin/main`; repository-local identity is `Stardust0831 <13862180016@163.com>`.  Selected increment: UFF vdW repulsion/dispersion component routes backed by local Multiwfn `iuserfunc=93/94` and `ivdwprobe`.
+- [ ] Implement one additional valuable route or visualization control with focused tests, README/usage/skill/research/worklog/kanban notes, root-doc mirror, validation, commit, push, and branch verification.  Code/tests/docs now cover `grid-run --function repul` / `disp`, `cube-preset vdw-repulsion-potential` / `vdw-dispersion-potential`, run-local `iuserfunc=93/94`, run-local `ivdwprobe`, and preservation of generic `--function-index 100` behavior.  Subagent review found no blockers; its optional suggestions were handled by adding `resolve_grid_function("100")` coverage and documenting that the negative dispersion single-surface preset still uses `--positive-rgb` for color overrides.  Final validation passed: `py_compile`, 179 focused `tests.test_cube_preset tests.test_multiwfn_grid tests.test_cli` tests, 344 full no-GUI tests, CLI smokes, and `git diff --check`.  `git fetch --prune origin`, `git branch -a`, and `git ls-remote --heads origin` still show only `main`, `origin/main`, and `origin/HEAD -> origin/main`; no merge-back is needed.  Root-doc mirror checksum dry-run is empty.  Commit, push, and post-push verification are still pending.
 
 ## Current Request: 2026-06-11 README Refresh And Branch Consolidation For KED Routes
 

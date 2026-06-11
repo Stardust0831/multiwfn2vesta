@@ -72,6 +72,8 @@ multiwfn2vesta cube-preset hirshfeld-delta-g griddata.cub cube_products
 multiwfn2vesta cube-preset iri-scalar IRI.cub cube_products
 multiwfn2vesta cube-preset dori-scalar userfunc.cub cube_products
 multiwfn2vesta cube-preset vdw-potential vdWpot.cub cube_products
+multiwfn2vesta cube-preset vdw-repulsion-potential userfunc.cub cube_products
+multiwfn2vesta cube-preset vdw-dispersion-potential userfunc.cub cube_products
 multiwfn2vesta cube-preset potential pot_es.cube cube_products
 multiwfn2vesta cube-preset partial-charge pchg.cube cube_products
 multiwfn2vesta cube-preset wavefunction-norm wfc_norm.cube cube_products
@@ -304,10 +306,11 @@ available and passed with `-set`; generic `grid-run --function user-function`
 requires `--user-function-index IUSERFUNC`, while named routes
 `dori`, `local-electron-affinity`, `local-electron-attachment-energy`,
 `local-mulliken-electronegativity`, `local-hardness`,
+`vdw-repulsion-potential`, `vdw-dispersion-potential`,
 `thomas-fermi-ked`, `weizsacker-ked`, `pauli-ked`,
 `information-gain-density`, `shannon-entropy-density`,
 `fisher-information-density`, and `second-fisher-information-density`
-automatically patch `iuserfunc=20/27/-27/28/29/1200/114/49/50/51/52` through
+automatically patch `iuserfunc=20/27/-27/28/29/93/94/1200/114/49/50/51/52` through
 the same run-local `-set` route; the KED routes additionally patch
 `iKEDsel`;
 `grid-run --function becke` requires `--becke-atoms I J`,
@@ -328,7 +331,12 @@ standalone `iri-scalar`, `grid-run --function dori` uses standalone
 standalone `vdw-potential` with `+/-1.0` kcal/mol signed
 surfaces; `grid-run --function vdw-potential` defaults the UFF probe to
 carbon/6 through run-local `ivdwprobe` and accepts `--vdw-probe` for other
-probe atoms.  Use the existing two-cube `cube-preset iri` route when a
+probe atoms.  `grid-run --function repul` / `disp` use function `100`
+`iuserfunc=93/94` plus the same run-local `ivdwprobe` setting for UFF vdW
+repulsion/dispersion components, exporting `userfunc.cub` and using
+standalone `vdw-repulsion-potential` / `vdw-dispersion-potential` presets.
+Treat these as Multiwfn UFF-style vdW component fields, not ABACUS native
+electrostatic or exchange-correlation potential outputs.  Use the existing two-cube `cube-preset iri` route when a
 sign(lambda2)rho-like texture cube is available; use `cube-preset dori`
 when a DORI surface should be colored by sign(lambda2)rho according to
 Multiwfn `DORIfill.vmd`; use `vdw-map` when a vdW potential cube should

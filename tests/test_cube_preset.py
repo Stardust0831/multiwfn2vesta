@@ -72,6 +72,30 @@ vdw potential two
 """
 
 
+VDW_REPULSION_CUBE = """vdw repulsion one
+vdw repulsion two
+    2    -1.000000    -2.000000     0.500000
+    2     0.500000     0.000000     0.000000
+    2     0.000000     0.500000     0.000000
+    2     0.000000     0.000000     0.500000
+    8     8.000000    -1.000000    -2.000000     0.500000
+    1     1.000000    -0.500000    -2.000000     0.500000
+ 0.0 0.2 0.5 0.8 1.0 1.2 1.5 2.0
+"""
+
+
+VDW_DISPERSION_CUBE = """vdw dispersion one
+vdw dispersion two
+    2    -1.000000    -2.000000     0.500000
+    2     0.500000     0.000000     0.000000
+    2     0.000000     0.500000     0.000000
+    2     0.000000     0.000000     0.500000
+    8     8.000000    -1.000000    -2.000000     0.500000
+    1     1.000000    -0.500000    -2.000000     0.500000
+ -2.0 -1.5 -1.2 -1.0 -0.8 -0.5 -0.2 0.0
+"""
+
+
 ALIE_TEXTURE_CUBE = """alie one
 alie two
     2    -1.000000    -2.000000     0.500000
@@ -119,6 +143,8 @@ class TestCubePreset(unittest.TestCase):
         self.assertIn("kinetic-energy-density", text)
         self.assertIn("potential", text)
         self.assertIn("vdw-potential", text)
+        self.assertIn("vdw-repulsion-potential", text)
+        self.assertIn("vdw-dispersion-potential", text)
         self.assertIn("partial-charge", text)
         self.assertIn("wavefunction-norm", text)
         self.assertIn("local-information-entropy", text)
@@ -701,6 +727,49 @@ basin type two
             self.assertIn("kcal/mol", manifest)
             self.assertIn("sur_value=1.0", manifest)
             self.assertIn("use preset `vdw-map`", manifest)
+
+    def test_vdw_repulsion_preset_writes_single_positive_surface(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            cube = self.write_tmp(root, "userfunc.cub", VDW_REPULSION_CUBE)
+
+            result = run_preset("repul", cube, root / "products")
+
+            text = result.vesta_path.read_text(encoding="utf-8")
+            manifest = result.manifest_path.read_text(encoding="utf-8")
+
+            self.assertRegex(text, r"ISURF\n  1   1\s+1(?:\.0+)?\s+255\s+150\s+70\s+130\s+255")
+            self.assertNotRegex(text, r"\n  1   1\s+-1(?:\.0+)?")
+            self.assertNotIn("IMPORT_TEXTURE", text)
+            self.assertIn("canonical_preset: `vdw-repulsion-potential`", manifest)
+            self.assertIn("requested_preset: `repul`", manifest)
+            self.assertIn("effective_surface_mode: `single`", manifest)
+            self.assertIn("effective_isosurface: `1.0`", manifest)
+            self.assertIn("iuserfunc=93", manifest)
+            self.assertIn("repul.cub", manifest)
+            self.assertIn("kcal/mol", manifest)
+
+    def test_vdw_dispersion_preset_writes_single_negative_surface(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            cube = self.write_tmp(root, "userfunc.cub", VDW_DISPERSION_CUBE)
+
+            result = run_preset("disp", cube, root / "products")
+
+            text = result.vesta_path.read_text(encoding="utf-8")
+            manifest = result.manifest_path.read_text(encoding="utf-8")
+
+            self.assertRegex(text, r"ISURF\n  1   1\s+-1(?:\.0+)?\s+70\s+145\s+255\s+130\s+255")
+            self.assertNotRegex(text, r"\n  1   1\s+1(?:\.0+)?")
+            self.assertNotIn("IMPORT_TEXTURE", text)
+            self.assertIn("canonical_preset: `vdw-dispersion-potential`", manifest)
+            self.assertIn("requested_preset: `disp`", manifest)
+            self.assertIn("effective_surface_mode: `single`", manifest)
+            self.assertIn("effective_isosurface: `-1.0`", manifest)
+            self.assertIn("iuserfunc=94", manifest)
+            self.assertIn("disp.cub", manifest)
+            self.assertIn("kcal/mol", manifest)
+            self.assertIn("--positive-rgb", manifest)
 
     def test_abacus_partial_charge_preset_writes_single_positive_surface(self):
         with tempfile.TemporaryDirectory() as tmp:

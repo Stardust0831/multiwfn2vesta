@@ -101,6 +101,30 @@ vdw potential comment two
 """
 
 
+VDW_REPULSION_CUBE = """vdw repulsion comment one
+vdw repulsion comment two
+    2    -1.000000    -2.000000     0.500000
+    2     0.500000     0.000000     0.000000
+    2     0.000000     0.500000     0.000000
+    2     0.000000     0.000000     0.500000
+    8     8.000000    -1.000000    -2.000000     0.500000
+    1     1.000000    -0.500000    -2.000000     0.500000
+ 0.00 0.20 0.50 0.80 1.00 1.20 1.50 2.00
+"""
+
+
+VDW_DISPERSION_CUBE = """vdw dispersion comment one
+vdw dispersion comment two
+    2    -1.000000    -2.000000     0.500000
+    2     0.500000     0.000000     0.000000
+    2     0.000000     0.500000     0.000000
+    2     0.000000     0.000000     0.500000
+    8     8.000000    -1.000000    -2.000000     0.500000
+    1     1.000000    -0.500000    -2.000000     0.500000
+ -2.00 -1.50 -1.20 -1.00 -0.80 -0.50 -0.20 0.00
+"""
+
+
 EDR_CUBE = """edr comment one
 edr comment two
     2    -1.000000    -2.000000     0.500000
@@ -254,6 +278,12 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertIn("orbital-weighted-dual-descriptor", text)
         self.assertIn("default iuserfunc=95", text)
         self.assertIn("default iuserfunc=98", text)
+        self.assertIn("vdw-repulsion-potential", text)
+        self.assertIn("preset=vdw-repulsion-potential", text)
+        self.assertIn("vdw-dispersion-potential", text)
+        self.assertIn("preset=vdw-dispersion-potential", text)
+        self.assertIn("default iuserfunc=93", text)
+        self.assertIn("default iuserfunc=94", text)
         self.assertIn("requires --orbital", text)
         self.assertEqual(resolve_grid_function("rho").name, "density")
         self.assertEqual(resolve_grid_function("rho-gradient").name, "gradient")
@@ -292,6 +322,14 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertEqual(resolve_grid_function("vdwpot").output_filename, "vdWpot.cub")
         self.assertEqual(resolve_grid_function("vdw").settings_updates, (("ivdwprobe", 6),))
         self.assertEqual(resolve_grid_function("van-der-waals-potential").index, 25)
+        self.assertEqual(resolve_grid_function("repul").preset, "vdw-repulsion-potential")
+        self.assertEqual(resolve_grid_function("repulsion-potential").default_user_function_index, 93)
+        self.assertEqual(resolve_grid_function("vdw-repulsion").settings_updates, (("ivdwprobe", 6),))
+        self.assertEqual(resolve_grid_function("vdw-repulsion").mapped_preset, "vdw-map")
+        self.assertEqual(resolve_grid_function("disp").preset, "vdw-dispersion-potential")
+        self.assertEqual(resolve_grid_function("dispersion-potential").default_user_function_index, 94)
+        self.assertEqual(resolve_grid_function("vdw-dispersion").settings_updates, (("ivdwprobe", 6),))
+        self.assertEqual(resolve_grid_function("vdw-dispersion").mapped_preset, "vdw-map")
         self.assertEqual(resolve_grid_function("edr").index, 20)
         self.assertEqual(resolve_grid_function("edr").output_filename, "EDR.cub")
         self.assertEqual(resolve_grid_function("edrdmax").index, 21)
@@ -308,6 +346,7 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertEqual(resolve_grid_function("user-function").index, 100)
         self.assertEqual(resolve_grid_function("userfunc").output_filename, "userfunc.cub")
         self.assertEqual(resolve_grid_function(None, 100).name, "user-function")
+        self.assertEqual(resolve_grid_function("100").name, "user-function")
         self.assertEqual(resolve_grid_function("alpha-density").preset, "density")
         self.assertEqual(resolve_grid_function("rho-alpha").default_user_function_index, 1)
         self.assertEqual(resolve_grid_function("alpha-rho").mapped_preset, "surface-map")
@@ -537,6 +576,14 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         )
         self.assertEqual(
             build_grid_commands(resolve_grid_function("pauli-ked"), grid_mode="low"),
+            ["5", "100", "1", "2", "0", "q"],
+        )
+        self.assertEqual(
+            build_grid_commands(resolve_grid_function("repul"), grid_mode="low"),
+            ["5", "100", "1", "2", "0", "q"],
+        )
+        self.assertEqual(
+            build_grid_commands(resolve_grid_function("disp"), grid_mode="low"),
             ["5", "100", "1", "2", "0", "q"],
         )
         self.assertEqual(
@@ -1700,13 +1747,98 @@ class TestMultiwfnGridRunner(unittest.TestCase):
 
     def test_run_multiwfn_grid_rejects_vdw_probe_for_other_functions(self):
         with tempfile.TemporaryDirectory() as tmp:
-            with self.assertRaisesRegex(ValueError, "only valid for vdw-potential"):
+            with self.assertRaisesRegex(ValueError, "vdW potential routes"):
                 run_multiwfn_grid(
                     Path(tmp) / "h2o.fch",
                     Path(tmp) / "products",
                     function_name="density",
                     vdw_probe="O",
                 )
+
+    def test_run_multiwfn_grid_vdw_component_routes_patch_iuserfunc_and_probe(self):
+        cases = (
+            (
+                "repul",
+                "Ar",
+                18,
+                93,
+                VDW_REPULSION_CUBE,
+                "vdw-repulsion-potential",
+                "1.0",
+            ),
+            (
+                "disp",
+                "O",
+                8,
+                94,
+                VDW_DISPERSION_CUBE,
+                "vdw-dispersion-potential",
+                "-1.0",
+            ),
+        )
+        for function_name, requested_probe, expected_probe, expected_iuserfunc, cube_text, expected_preset, expected_isosurface in cases:
+            with self.subTest(function_name=function_name):
+                with tempfile.TemporaryDirectory() as tmp:
+                    root = Path(tmp)
+                    wavefunction = root / "h2o.fch"
+                    wavefunction.write_text("wavefunction", encoding="utf-8")
+                    candidate = self.make_candidate(root)
+                    (candidate.path.parent / "settings.ini").write_text(
+                        "ivdwprobe= 6 // stale probe\niuserfunc= 0 // stale userfunc\nother_setting= keep\n",
+                        encoding="utf-8",
+                    )
+
+                    def fake_run(command, **kwargs):
+                        cwd = Path(kwargs["cwd"])
+                        (cwd / "userfunc.cub").write_text(cube_text, encoding="utf-8")
+                        return subprocess.CompletedProcess(command, 0, stdout="ok", stderr="")
+
+                    with patch("multiwfn2vesta.multiwfn_grid.find_multiwfn", return_value=candidate):
+                        with patch("multiwfn2vesta.multiwfn_grid.subprocess.run", side_effect=fake_run) as mocked_run:
+                            result = run_multiwfn_grid(
+                                wavefunction,
+                                root / "products",
+                                function_name=function_name,
+                                vdw_probe=requested_probe,
+                                stem="case",
+                                grid_mode="low",
+                            )
+
+                    self.assertTrue(result.success)
+                    self.assertEqual(
+                        mocked_run.call_args.args[0],
+                        [
+                            str(candidate.path),
+                            str(wavefunction.resolve()),
+                            "-set",
+                            str((root / "products" / "multiwfn_grid_raw" / "multiwfn_grid_settings.ini").resolve()),
+                        ],
+                    )
+                    self.assertEqual(result.command_file.read_text(encoding="utf-8"), "5\n100\n1\n2\n0\nq\n")
+                    self.assertEqual(result.user_function_index, expected_iuserfunc)
+                    self.assertEqual(result.vdw_probe, expected_probe)
+                    self.assertIsNotNone(result.settings_override)
+                    settings_text = result.settings_override.read_text(encoding="utf-8")
+                    self.assertIn(f"ivdwprobe= {expected_probe} // stale probe", settings_text)
+                    self.assertIn(f"iuserfunc= {expected_iuserfunc} // stale userfunc", settings_text)
+                    self.assertIn("other_setting= keep", settings_text)
+                    self.assertEqual(result.raw_cube.name, "userfunc.cub")
+                    self.assertEqual(result.cube.name, f"case_{expected_preset}.cub")
+                    self.assertIsNotNone(result.vesta_result)
+                    self.assertEqual(
+                        result.vesta_result.vesta_path.name,
+                        f"case_{expected_preset}_{expected_preset}_cube.vesta",
+                    )
+                    recipe = result.recipe_path.read_text(encoding="utf-8")
+                    self.assertIn(f"function_name: `{expected_preset}`", recipe)
+                    self.assertIn("function_index: `100`", recipe)
+                    self.assertIn(f"user_function_index_iuserfunc: `{expected_iuserfunc}`", recipe)
+                    self.assertIn(f"vdw_probe_atomic_number_ivdwprobe: `{expected_probe}`", recipe)
+                    self.assertIn(f"auto_vesta_preset: `{expected_preset}`", recipe)
+                    manifest = result.vesta_result.manifest_path.read_text(encoding="utf-8")
+                    self.assertIn(f"canonical_preset: `{expected_preset}`", manifest)
+                    self.assertIn(f"effective_isosurface: `{expected_isosurface}`", manifest)
+                    self.assertIn("kcal/mol", manifest)
 
     def test_run_multiwfn_grid_vdw_probe_defaults_and_normalizes_inputs(self):
         cases = (

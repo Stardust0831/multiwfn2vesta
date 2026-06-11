@@ -1,5 +1,29 @@
 # Worklog
 
+## 2026-06-11: UFF vdW repulsion and dispersion component routes
+
+- Continued the ABACUS/Multiwfn/VESTA analysis survey after the selected KED
+  route closeout by adding source-backed UFF vdW component routes.
+- Rechecked local Multiwfn 2026.6.2 source evidence.  `function.f90` maps
+  function-100 `iuserfunc=93` to the UFF repulsion potential and
+  `iuserfunc=94` to the UFF dispersion potential through `vdwpotfunc`; the
+  source comments identify the unit as kcal/mol.  The vdW module also exports
+  analogous `repul.cub` and `disp.cub`, while `settings.ini` key `ivdwprobe`
+  selects the UFF probe atom.
+- Added named `grid-run` functions `vdw-repulsion-potential` and
+  `vdw-dispersion-potential`, with short aliases `repul` and `disp`.  Both
+  routes export `userfunc.cub`, write only run-local settings through
+  Multiwfn `-set`, default the probe atom to carbon/6, accept `--vdw-probe`,
+  and use `vdw-map` when `--surface-cube` is supplied.
+- Added `cube-preset vdw-repulsion-potential` and
+  `vdw-dispersion-potential`.  Repulsion uses a single positive `+1.0`
+  kcal/mol isosurface; dispersion uses a single negative `-1.0` kcal/mol
+  isosurface because the attractive component is normally negative.
+- Updated README, usage docs, skill notes, and the ABACUS/Multiwfn/VESTA
+  analysis matrix.  These component routes should be interpreted as
+  Multiwfn UFF-style vdW fields, not ABACUS native electrostatic or
+  exchange-correlation potential outputs.
+
 ## 2026-06-11: selected kinetic-energy-density grid routes
 
 - Continued the ABACUS/Multiwfn/VESTA analysis survey after the FOD closeout

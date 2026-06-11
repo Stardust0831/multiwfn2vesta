@@ -195,6 +195,26 @@ GRID_FUNCTIONS: Tuple[GridFunction, ...] = (
         mapped_preset="vdw-map",
         settings_updates=(("ivdwprobe", 6),),
     ),
+    GridFunction(
+        "vdw-repulsion-potential",
+        100,
+        "userfunc.cub",
+        "vdw-repulsion-potential",
+        ("vdw-repulsion", "repulsion-potential", "repul", "repul-potential"),
+        mapped_preset="vdw-map",
+        default_user_function_index=93,
+        settings_updates=(("ivdwprobe", 6),),
+    ),
+    GridFunction(
+        "vdw-dispersion-potential",
+        100,
+        "userfunc.cub",
+        "vdw-dispersion-potential",
+        ("vdw-dispersion", "dispersion-potential", "disp", "disp-potential"),
+        mapped_preset="vdw-map",
+        default_user_function_index=94,
+        settings_updates=(("ivdwprobe", 6),),
+    ),
     GridFunction("orbital-density", 44, "orbdens.cub", "orbital-density", ("orbdens", "mo-density"), True),
     GridFunction(
         "user-function",
@@ -443,6 +463,7 @@ for _function in GRID_FUNCTIONS:
     FUNCTION_BY_INDEX.setdefault(_function.index, _function)
     for _alias in _function.aliases:
         FUNCTION_BY_NAME[_alias] = _function
+FUNCTION_BY_INDEX[100] = FUNCTION_BY_NAME["user-function"]
 
 
 class MultiwfnGridResult(NamedTuple):
@@ -746,6 +767,10 @@ def _normalize_vdw_probe(value: Optional[object]) -> Optional[int]:
     if atomic_number < 1 or atomic_number >= len(VDW_PROBE_SYMBOLS):
         raise ValueError("--vdw-probe atomic number must be in the range 1..103")
     return atomic_number
+
+
+def _function_accepts_vdw_probe(function: GridFunction) -> bool:
+    return any(key == "ivdwprobe" for key, _value in function.settings_updates)
 
 
 def _normalize_float_pair(value: Optional[Sequence[float]], label: str) -> Optional[Tuple[float, float]]:
@@ -1192,6 +1217,7 @@ def _write_recipe(
             "- Function `19` source function uses global `refx,refy,refz` and `srcfuncmode`; the maintained stream sets the reference point through main menu `1000 -> 1`, copies the selected Multiwfn `settings.ini` when available, patches `srcfuncmode`, and passes the run-local settings file through `-set`.",
             "- Functions `9` and `10` evaluate ELF/LOL according to `ELFLOL_type`; the maintained stream defaults ordinary `elf`/`lol` to Becke definitions (`0`) and can patch other supported definitions through a run-local settings file.  D/D0 type `3` is accepted only for ELF because Multiwfn implements it only in the ELF branch.",
             "- Function `25` van der Waals potential uses `ivdwprobe` to select the UFF probe atom; the maintained stream defaults it to carbon (`6`) and can patch another probe element through a run-local settings file.",
+            "- Function `100` vdW component routes use `iuserfunc=93/94` for UFF repulsion/dispersion potential and also patch `ivdwprobe` through the run-local settings file.",
             "- Function `20` EDR(r;d) asks for length scale `d` in Bohr before grid setup and exports `EDR.cub`.",
             "- Function `21` D(r) can use Multiwfn's default EDR exponent set `20, 2.50, 1.50` or a manual count/start/increment set and exports `EDRDmax.cub`.",
             "- Function `100` KED named routes patch `iKEDsel` in the same run-local settings file: `3` selects Thomas-Fermi KED, `4` selects Weizsacker KED, and Pauli KED uses `iuserfunc=114` with selected KED minus Weizsacker KED.",
@@ -1398,10 +1424,10 @@ def run_multiwfn_grid(
             raise ValueError("--elflol-type 3/d-over-d0 is only valid for elf, not lol")
     elif elflol_type is not None:
         raise ValueError("--elflol-type is only valid for elf and lol")
-    if function.index == 25:
+    if _function_accepts_vdw_probe(function):
         normalized_vdw_probe = _normalize_vdw_probe(vdw_probe)
     elif vdw_probe is not None:
-        raise ValueError("--vdw-probe is only valid for vdw-potential")
+        raise ValueError("--vdw-probe is only valid for vdW potential routes")
     candidate = find_multiwfn(multiwfn_path)
     if candidate is None:
         raise FileNotFoundError(
@@ -1451,7 +1477,7 @@ def run_multiwfn_grid(
         if normalized_elflol_type is not None
         else settings_updates.get("ELFLOL_type")
     )
-    if function.index == 25 and normalized_vdw_probe is not None:
+    if _function_accepts_vdw_probe(function) and normalized_vdw_probe is not None:
         settings_updates["ivdwprobe"] = normalized_vdw_probe
     effective_vdw_probe = (
         normalized_vdw_probe
@@ -2055,6 +2081,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "50 for Shannon entropy density, 51/52 for Fisher information "
             "density, 28 for local Mulliken electronegativity, and 29 for "
             "local hardness, 114 for Pauli KED, 1200 for selected KED, and "
+            "93/94 for UFF vdW repulsion/dispersion potential components, "
             "95/96/97/98 for orbital-weighted "
             "Fukui+/Fukui-/Fukui0/dual descriptor. Named function-100 routes "
             "such as dori, local-electron-affinity, local-hardness, and "
@@ -2077,7 +2104,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "--vdw-probe",
         default=None,
         help=(
-            "Probe atom for function 25 vdW potential, as an element symbol "
+            "Probe atom for vdW potential routes, as an element symbol "
             "or atomic number. Defaults to carbon/6 through a run-local "
             "ivdwprobe setting."
         ),

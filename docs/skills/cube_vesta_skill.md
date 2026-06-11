@@ -355,6 +355,18 @@ passes it back through `cube-preset`.
   run-local `ivdwprobe` and accepts `--vdw-probe` for other probe atoms.  Use
   `vdw-map` instead when the vdW potential cube should color a density/surface
   cube.
+- `vdw-repulsion-potential` aliases: `vdw-repulsion`,
+  `repulsion-potential`, `repul`, `repul-potential`; single positive surface
+  for standalone UFF vdW repulsion potential cubes.  Use for Multiwfn
+  function-100 `userfunc.cub` with `iuserfunc=93`, or `repul.cub` from the
+  vdW potential module.  Default isosurface is `+1.0` kcal/mol.
+- `vdw-dispersion-potential` aliases: `vdw-dispersion`,
+  `dispersion-potential`, `disp`, `disp-potential`; single negative surface
+  for standalone UFF vdW dispersion potential cubes.  Use for Multiwfn
+  function-100 `userfunc.cub` with `iuserfunc=94`, or `disp.cub` from the
+  vdW potential module.  Default isosurface is `-1.0` kcal/mol because the
+  attractive dispersion component is normally negative.  This is still a
+  single-surface preset, so standalone color overrides use `--positive-rgb`.
 - `potential` aliases: `abacus-potential`, `out-pot`, `local-potential`,
   `pot-es`; signed direct potential cube isosurfaces, default magnitude
   `0.05`.  Use `esp` instead for density-surface potential coloring.

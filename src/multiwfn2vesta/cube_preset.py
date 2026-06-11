@@ -189,7 +189,7 @@ PRESETS: Tuple[CubePreset, ...] = (
     ),
     CubePreset(
         name="vdw-potential",
-        aliases=("vdw", "vdwpot", "vdw-potential-cube", "van-der-waals-potential"),
+        aliases=("vdw", "vdwpot", "vdw-potential-cube", "van-der-waals-potential", "vdw-total-potential"),
         description="Positive/negative isosurfaces for standalone van der Waals potential cubes.",
         surface_mode="signed",
         isosurface=1.0,
@@ -203,6 +203,40 @@ PRESETS: Tuple[CubePreset, ...] = (
             "grid-run defaults the Multiwfn ivdwprobe probe atom to carbon/6 and "
             "accepts --vdw-probe for other elements. "
             "For vdW potential mapped on a density/surface cube, use preset `vdw-map`."
+        ),
+    ),
+    CubePreset(
+        name="vdw-repulsion-potential",
+        aliases=("vdw-repulsion", "repulsion-potential", "repul", "repul-potential", "repul-cub"),
+        description="Single positive isosurface for standalone UFF vdW repulsion potential cubes.",
+        surface_mode="single",
+        isosurface=1.0,
+        positive_rgb=(255, 150, 70),
+        surface_opacity=(130, 255),
+        notes=(
+            "Use for Multiwfn function-100 userfunc.cub with iuserfunc=93, or repul.cub "
+            "from the vdW potential module.  Multiwfn evaluates the UFF repulsion "
+            "component in kcal/mol; grid-run defaults ivdwprobe to carbon/6 and "
+            "accepts --vdw-probe for other elements.  For mapped density/surface "
+            "figures, use preset `vdw-map` and tune the texture range per system."
+        ),
+    ),
+    CubePreset(
+        name="vdw-dispersion-potential",
+        aliases=("vdw-dispersion", "dispersion-potential", "disp", "disp-potential", "disp-cub"),
+        description="Single negative isosurface for standalone UFF vdW dispersion potential cubes.",
+        surface_mode="single",
+        isosurface=-1.0,
+        positive_rgb=(70, 145, 255),
+        surface_opacity=(130, 255),
+        notes=(
+            "Use for Multiwfn function-100 userfunc.cub with iuserfunc=94, or disp.cub "
+            "from the vdW potential module.  Multiwfn evaluates the attractive UFF "
+            "dispersion component in kcal/mol, which is normally negative; the default "
+            "single isosurface is therefore -1.0 kcal/mol.  Because this is still a "
+            "single-surface preset, color overrides use --positive-rgb.  For mapped "
+            "density/surface figures, use preset `vdw-map` and tune the texture range "
+            "per system."
         ),
     ),
     CubePreset(
