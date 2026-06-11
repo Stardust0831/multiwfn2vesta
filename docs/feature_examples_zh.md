@@ -69,7 +69,7 @@ multiwfn2vesta examples --coverage --json
 | spin-density、spin-polarization、alpha/beta density | open-shell/磁性体系 | signed spin-density surface，另配 atom coloring |
 | KED、Thomas-Fermi、Weizsacker、Pauli KED | H2O/benzene | positive KED isosurface 或映射到 density surface |
 | ELF/LOL | COF 或芳香分子 | ELF/LOL 等值面，必要时配 density frame |
-| ESP、positive/negative ESP、electric field magnitude | 极性分子、Ag(111)+benzene | potential surface 或 density surface texture |
+| ESP、electron-only ESP、positive/negative ESP、electric field magnitude | 极性分子、Ag(111)+benzene | potential surface 或 density surface texture；`electron-esp` 可拆出电子贡献 |
 | ALIE/LEA/LEAE | 芳香分子反应位点 | surface texture + `surface-extrema` |
 | vdW total/repulsion/dispersion | Ag(111)+benzene | density/interaction surface texture 或 standalone field |
 | IRI/RDG/DORI/Delta-g | H2O-HF、benzene dimer | mapped surface，关闭 sections |
@@ -89,7 +89,6 @@ multiwfn2vesta examples --coverage --json
 
 只读源码审计建议的下一批 Multiwfn function-100 路线：
 
-- `electron-esp`: `iuserfunc=14`，只显示电子贡献 ESP，可和已有 total/nuclear/positive/negative ESP 形成完整电势分解。
 - `RoSE` / `SEDD`: `iuserfunc=18/19`，适合慢电子区域、离域和弱相互作用区域分析。
 - 扩展 KED: `iuserfunc=1201/1202/1203/1204/1210`，适合 KED 差值、局域温度和 KED potential。
 - steric/SBL 场: `iuserfunc=40-47/60-67/110-113`，适合吸附排斥和界面相互作用解释。

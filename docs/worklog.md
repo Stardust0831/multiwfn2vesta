@@ -1,5 +1,29 @@
 # Worklog
 
+## 2026-06-12: electron-only ESP route for ABACUS/Multiwfn/VESTA workflows
+
+- Continued the long-running ABACUS-compatible Multiwfn/VESTA route survey by
+  adding a source-backed `electron-esp` route.
+- Local Multiwfn 2026.6.2 source evidence: function `100` with
+  `iuserfunc=14` calls `eleesp(x,y,z)`, while `0123dim.f90` exports
+  function-100 grids as `userfunc.cub`.  This gives the electron contribution
+  to electrostatic potential and complements existing total ESP, nuclear ESP,
+  positive/negative ESP, and electric-field-magnitude routes.
+- Added `grid-run --function electron-esp` with aliases
+  `electronic-esp`, `electron-mep`, `electronic-mep`,
+  `electron-electrostatic-potential`, and
+  `electronic-electrostatic-potential`.  The runner patches run-local
+  `iuserfunc=14` through Multiwfn `-set`, leaving global `settings.ini`
+  untouched.
+- Added `cube-preset electron-esp`, a single negative `-0.05` a.u.
+  isosurface preset for standalone electron ESP.  With `--surface-cube`, the
+  route falls back to `surface-map` so the electron ESP cube can color an
+  existing density or interaction surface.
+- Updated tests, README, Chinese manual, usage docs, feature/status indices,
+  research matrix, grid/cube skills, and kanban.  The route is documented as
+  ABACUS LCAO Molden compatible when the Molden file is validated for
+  Multiwfn.
+
 ## 2026-06-12: Feature-to-example coverage index and rendered overview
 
 - Continued the current feature-closure request by adding a function-centric

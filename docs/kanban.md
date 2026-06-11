@@ -2381,3 +2381,13 @@ Updated: 2026-06-12 02:50 CST
   - [x] Improve rough UX surfaces found during example closure. Added feature-centric example discovery and top-level help examples.
   - [x] Expand Chinese manual and keep docs mirrored.
   - [x] Verify tests/examples and commit/push after review. Focused examples/CLI tests, full no-GUI regression, Markdown links, image check, `examples --verify`, `git diff --check`, and docs mirror dry-run passed; commit/push details are recorded in the final response.
+
+## Active Goal Continuation: 2026-06-12 Next ABACUS-Compatible Multiwfn/VESTA Route
+
+- **User request:** Continue surveying valuable Multiwfn wavefunction analyses that VESTA can visualize, especially routes fed by ABACUS LCAO Molden files, and keep enriching the project rather than stopping at example closure.
+- **Scope guard:** Keep all edits under `/mnt/g/work/multiwfn2vesta`; preserve local untracked probe files such as `domain.cub` / `domain.pdb`; avoid system-level changes.
+- **Immediate plan:**
+  - [x] Record this continuation in the kanban before implementation.
+  - [x] Recheck branch/worktree, current `grid-run`/`cube-preset` coverage, and local Multiwfn source evidence. Current branch started aligned with `origin/main`; only `docs/kanban.md` and untracked `domain.cub` / `domain.pdb` were present before this increment.
+  - [x] Select one bounded source-backed route that is chemically useful, ABACUS Molden compatible, and VESTA friendly. Selected `electron-esp`: local Multiwfn `function.f90` maps function-100 `iuserfunc=14` to `eleesp(x,y,z)`, and function-100 exports `userfunc.cub`.
+  - [x] Implement code, tests, docs, skill/worklog/status notes, mirror docs, validate, then commit and push with `Stardust0831` identity. Code and focused tests now cover `grid-run --function electron-esp` and `cube-preset electron-esp`; full no-GUI regression, Markdown link check, CLI route discovery, and `git diff --check` passed. Final commit/push details are reported in the assistant response.

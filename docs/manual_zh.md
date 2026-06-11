@@ -187,7 +187,7 @@ multiwfn2vesta grid-run --list-functions
 - `spin-density`, `spin-polarization`, `alpha-density`, `beta-density`
 - `laplacian`, `hamiltonian-ked`, `lagrangian-ked`, `thomas-fermi-ked`, `weizsacker-ked`, `pauli-ked`
 - `elf`, `lol`
-- `esp`, `positive-esp`, `negative-esp`, `electric-field-magnitude`
+- `esp`, `electron-esp`, `positive-esp`, `negative-esp`, `electric-field-magnitude`
 - `alie`, `local-electron-affinity`, `local-electron-attachment-energy`
 - `vdw-potential`, `vdw-repulsion-potential`, `vdw-dispersion-potential`
 - `iri`, `rdg`, `dori`
@@ -206,19 +206,22 @@ multiwfn2vesta grid-run input.molden esp_map \
   --tex-physical -0.05 0.05
 ```
 
-若只想看 ESP 的正/负区域或电场强度，不需要手工改 Multiwfn
+若只想看电子贡献 ESP、ESP 的正/负区域或电场强度，不需要手工改 Multiwfn
 `settings.ini`，直接用命名路由：
 
 ```bash
+multiwfn2vesta grid-run input.molden esp_components --function electron-esp
 multiwfn2vesta grid-run input.molden esp_components --function positive-esp
 multiwfn2vesta grid-run input.molden esp_components --function negative-esp
 multiwfn2vesta grid-run input.molden efield --function electric-field-magnitude
 ```
 
-这三个命名路由都走 Multiwfn 函数 `100`，分别写 run-local
-`iuserfunc=101/102/103`，不会修改全局 Multiwfn 配置。正/负 ESP 分量适合
-在极性分子、吸附界面或电荷转移体系中快速分开看静电正负区域；电场强度适合
-看局域强场区域。若要映射到 density surface 上，再加
+这些命名路由都走 Multiwfn 函数 `100`，分别写 run-local
+`iuserfunc=14/101/102/103`，不会修改全局 Multiwfn 配置。`electron-esp`
+调用 Multiwfn 源码中的 `eleesp(x,y,z)`，即电子贡献静电势，通常按单负
+`-0.05` a.u. 等值面显示；正/负 ESP 分量适合在极性分子、吸附界面或电荷转移
+体系中快速分开看静电正负区域；电场强度适合看局域强场区域。若要映射到 density
+surface 上，再加
 `--surface-cube density.cub --tex-physical MIN MAX`。
 
 ## 8. AIM、IRI、IGMH 的组合图

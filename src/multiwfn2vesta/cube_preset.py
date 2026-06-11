@@ -188,6 +188,30 @@ PRESETS: Tuple[CubePreset, ...] = (
         ),
     ),
     CubePreset(
+        name="electron-esp",
+        aliases=(
+            "electronic-esp",
+            "electron-mep",
+            "electronic-mep",
+            "electron-electrostatic-potential",
+            "electronic-electrostatic-potential",
+        ),
+        description="Single negative isosurface for electrostatic potential from electrons only.",
+        surface_mode="single",
+        isosurface=-0.05,
+        positive_rgb=(70, 125, 255),
+        surface_opacity=(130, 255),
+        notes=(
+            "Use for Multiwfn function-100 userfunc.cub with iuserfunc=14. "
+            "Multiwfn evaluates the electron contribution to ESP through eleesp(x,y,z), "
+            "which is normally negative for the usual electrostatic-potential convention. "
+            "The standalone preset therefore uses a single -0.05 a.u. isosurface; "
+            "because this is a single-surface preset, color overrides use --positive-rgb. "
+            "For density-surface texture maps, use `grid-run --function electron-esp --surface-cube density.cub` "
+            "and tune --tex-physical for the selected system."
+        ),
+    ),
+    CubePreset(
         name="positive-esp",
         aliases=("positive-mep", "esp-positive", "mep-positive", "esp-pos", "mep-pos"),
         description="Single positive isosurface for the positive part of electrostatic potential.",

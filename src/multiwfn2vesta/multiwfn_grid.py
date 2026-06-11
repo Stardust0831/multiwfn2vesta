@@ -115,6 +115,21 @@ GRID_FUNCTIONS: Tuple[GridFunction, ...] = (
     ),
     GridFunction("esp", 12, "totesp.cub", "signed", ("mep", "total-esp", "electrostatic-potential"), mapped_preset="esp"),
     GridFunction(
+        "electron-esp",
+        100,
+        "userfunc.cub",
+        "electron-esp",
+        (
+            "electronic-esp",
+            "electron-mep",
+            "electronic-mep",
+            "electron-electrostatic-potential",
+            "electronic-electrostatic-potential",
+        ),
+        mapped_preset="surface-map",
+        default_user_function_index=14,
+    ),
+    GridFunction(
         "positive-esp",
         100,
         "userfunc.cub",

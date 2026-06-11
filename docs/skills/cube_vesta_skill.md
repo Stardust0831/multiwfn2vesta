@@ -292,14 +292,20 @@ passes it back through `cube-preset`.
   default magnitude `0.05`.  When generating the cube with `grid-run`, the
   generic `--function user-function` route still requires
   `--user-function-index IUSERFUNC`, while named routes automatically patch
-  common values: `dori` / `density-overlap-regions-indicator` = `20`,
+  common values: `alpha-density` / `beta-density` = `1` / `2`,
+  `electron-esp` / `electronic-esp` = `14`,
+  `dori` / `density-overlap-regions-indicator` = `20`,
   `local-electron-affinity` / `lea` = `27`,
   `local-electron-attachment-energy` / `leae` = `-27`,
   `local-mulliken-electronegativity` / `local-electronegativity` = `28`,
   `local-hardness` / `local-chemical-hardness` = `29`,
-  `information-gain-density` = `49`, `shannon-entropy-density` = `50`, and
+  `information-gain-density` = `49`, `shannon-entropy-density` = `50`,
   `fisher-information-density` / `second-fisher-information-density` =
-  `51` / `52`.  For LEA/LEAE density-surface maps, use
+  `51` / `52`, `fractional-occupation-density` / `fod` = `90`,
+  `vdw-repulsion-potential` / `vdw-dispersion-potential` = `93` / `94`,
+  ESP components = `101` / `102` / `103`, orbital-weighted Fukui/dual =
+  `95` / `96` / `97` / `98`, and selected KED routes = `1200` or `114`
+  plus run-local `iKEDsel`.  For LEA/LEAE density-surface maps, use
   `grid-run --function local-electron-affinity --surface-cube density.cub`
   or the lower-level `lea`/`leae` texture presets with `density.cub` plus
   `userfunc.cub`.  For local electronegativity/local hardness maps, use
@@ -307,6 +313,12 @@ passes it back through `cube-preset`.
   `--tex-percent`, `--tex-range-source surface-band`, `--surface-band`, or
   `--surface-nearest` directly through `grid-run` when the generic color
   scale needs tuning.
+- `electron-esp` aliases: `electronic-esp`, `electron-mep`,
+  `electronic-mep`, `electron-electrostatic-potential`; single negative
+  surface for Multiwfn function-100 `userfunc.cub` with `iuserfunc=14`,
+  default isosurface `-0.05`.  Multiwfn evaluates `eleesp(x,y,z)`, the
+  electron contribution to ESP; for mapped density/surface figures, generate
+  it with `grid-run --function electron-esp --surface-cube density.cub`.
 - `becke-weight` aliases: `becke`, `becke-overlap-weight`,
   `becke-atomic-weight`, `beckewei`; single positive surface for Multiwfn
   function `111` `Becke.cub`, default isosurface `0.5`.  When generating the

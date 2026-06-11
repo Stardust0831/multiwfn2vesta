@@ -82,6 +82,12 @@ multiwfn2vesta grid-run --list-functions
 - `esp`, aliases `mep`, `total-esp`, `electrostatic-potential`: function
   `12`, raw `totesp.cub`, preset `signed`; mapped preset `esp` with
   `--surface-cube`.
+- `electron-esp`, aliases `electronic-esp`, `electron-mep`,
+  `electronic-mep`: function `100`, raw `userfunc.cub`, preset
+  `electron-esp` with a single negative isosurface.  It patches run-local
+  `iuserfunc=14`; the inspected Multiwfn source evaluates `eleesp(x,y,z)`,
+  the electron contribution to ESP.  With `--surface-cube`, it falls back to
+  `surface-map` for density/surface texture maps.
 - `positive-esp`, aliases `positive-mep`, `esp-positive`, `mep-positive`,
   `esp-pos`, `mep-pos`; `negative-esp`, aliases `negative-mep`,
   `esp-negative`, `mep-negative`, `esp-neg`, `mep-neg`; and
@@ -134,6 +140,7 @@ multiwfn2vesta grid-run --list-functions
   from the selected Multiwfn `settings.ini` when available:
   `alpha-density` / `rho-alpha` = `1`,
   `beta-density` / `rho-beta` = `2`,
+  `electron-esp` / `electronic-esp` = `14`,
   `dori` / `density-overlap-regions-indicator` = `20`,
   `local-electron-affinity` / `lea` = `27`,
   `local-electron-attachment-energy` / `leae` = `-27`,
@@ -156,11 +163,11 @@ multiwfn2vesta grid-run --list-functions
   and `second-fisher-information-density` = `52`.  LEA/LEAE named routes
   also auto-select mapped presets `lea`/`leae` when `--surface-cube` is
   supplied; alpha/beta density, FOD, local Mulliken electronegativity, local
-  hardness, ESP component/electric-field routes, KED variants, and the
+  hardness, electron ESP/ESP component/electric-field routes, KED variants, and the
   orbital-weighted Fukui/dual routes fall back to the generic `surface-map`
   mapped preset.  Alpha/beta density, FOD, and
   Fukui+/Fukui-/Fukui0 standalone products use `density`, KED variants use
-  `kinetic-energy-density`, while orbital-weighted dual descriptor uses
+  `kinetic-energy-density`, electron ESP uses `electron-esp`, while orbital-weighted dual descriptor uses
   `signed`.  The 95..98 routes are
   single-wavefunction approximations and should not be confused with
   charged-state `fukui-run`; the current runner leaves Multiwfn
@@ -253,14 +260,15 @@ multiwfn2vesta grid-run --list-functions
   function `100`, raw `userfunc.cub`, default `iuserfunc=98`, standalone
   preset `signed`.  With `--surface-cube`, it uses `surface-map`; provide
   explicit `--tex-physical MIN MAX` for useful color scales.
-- `positive-esp`, `negative-esp`, and `electric-field-magnitude`: function
-  `100`, raw `userfunc.cub`, default `iuserfunc=101/102/103`, standalone
-  presets `positive-esp`, `negative-esp`, and `electric-field-magnitude`.
-  Use these for separating positive/negative electrostatic-potential regions
-  or visualizing field-strength hotspots.  With `--surface-cube`, they use
-  `surface-map`; provide `--tex-physical MIN MAX` when comparing multiple
-  structures.  The negative ESP standalone preset is still a single-surface
-  preset, so color overrides use `--positive-rgb`.
+- `electron-esp`, `positive-esp`, `negative-esp`, and
+  `electric-field-magnitude`: function `100`, raw `userfunc.cub`, default
+  `iuserfunc=14/101/102/103`, standalone presets `electron-esp`,
+  `positive-esp`, `negative-esp`, and `electric-field-magnitude`.  Use these
+  for separating electron-only, positive/negative electrostatic-potential
+  regions or visualizing field-strength hotspots.  With `--surface-cube`,
+  they use `surface-map`; provide `--tex-physical MIN MAX` when comparing
+  multiple structures.  The electron ESP and negative ESP standalone presets
+  are single-surface presets, so color overrides use `--positive-rgb`.
 - `vdw-potential`, aliases `vdw`, `vdwpot`,
   `van-der-waals-potential`: function `25`, raw `vdWpot.cub`, preset
   `vdw-potential` with signed `+/-1.0` kcal/mol isosurfaces.  Multiwfn
@@ -424,6 +432,7 @@ multiwfn2vesta grid-run input.fch products --function elf
 multiwfn2vesta grid-run input.fch products --function lol --elflol-type tsirelson
 multiwfn2vesta grid-run input.fch products --function esp --no-vesta
 multiwfn2vesta grid-run input.fch products --function esp --surface-cube density.cub --grid-mode cube --grid-cube density.cub
+multiwfn2vesta grid-run input.fch products --function electron-esp
 multiwfn2vesta grid-run input.fch products --function positive-esp
 multiwfn2vesta grid-run input.fch products --function negative-esp
 multiwfn2vesta grid-run input.fch products --function electric-field-magnitude

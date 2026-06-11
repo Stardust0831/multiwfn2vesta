@@ -343,6 +343,9 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertEqual(resolve_grid_function("dispersion-potential").default_user_function_index, 94)
         self.assertEqual(resolve_grid_function("vdw-dispersion").settings_updates, (("ivdwprobe", 6),))
         self.assertEqual(resolve_grid_function("vdw-dispersion").mapped_preset, "vdw-map")
+        self.assertEqual(resolve_grid_function("electron-esp").preset, "electron-esp")
+        self.assertEqual(resolve_grid_function("electronic-esp").default_user_function_index, 14)
+        self.assertEqual(resolve_grid_function("electron-mep").mapped_preset, "surface-map")
         self.assertEqual(resolve_grid_function("edr").index, 20)
         self.assertEqual(resolve_grid_function("edr").output_filename, "EDR.cub")
         self.assertEqual(resolve_grid_function("edrdmax").index, 21)
@@ -597,6 +600,10 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         )
         self.assertEqual(
             build_grid_commands(resolve_grid_function("disp"), grid_mode="low"),
+            ["5", "100", "1", "2", "0", "q"],
+        )
+        self.assertEqual(
+            build_grid_commands(resolve_grid_function("electron-esp"), grid_mode="low"),
             ["5", "100", "1", "2", "0", "q"],
         )
         self.assertEqual(
@@ -1236,6 +1243,7 @@ class TestMultiwfnGridRunner(unittest.TestCase):
 
     def test_run_esp_component_routes_patch_iuserfunc(self):
         cases = (
+            ("electron-esp", 14, "electron-esp", "-0.05"),
             ("positive-esp", 101, "positive-esp", "0.05"),
             ("negative-esp", 102, "negative-esp", "-0.05"),
             ("electric-field", 103, "electric-field-magnitude", "0.05"),

@@ -142,6 +142,7 @@ class TestCubePreset(unittest.TestCase):
         self.assertIn("lagrangian-ked", text)
         self.assertIn("kinetic-energy-density", text)
         self.assertIn("potential", text)
+        self.assertIn("electron-esp", text)
         self.assertIn("vdw-potential", text)
         self.assertIn("vdw-repulsion-potential", text)
         self.assertIn("vdw-dispersion-potential", text)
@@ -708,6 +709,13 @@ basin type two
 
     def test_esp_component_presets_write_single_surfaces(self):
         cases = (
+            (
+                "electron-esp",
+                SIGNED_CUBE,
+                r"ISURF\n  1   1\s+-0\.05\s+70\s+125\s+255\s+130\s+255",
+                "electron-esp",
+                "iuserfunc=14",
+            ),
             (
                 "esp-pos",
                 SIGNED_CUBE,

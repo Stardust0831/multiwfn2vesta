@@ -135,7 +135,7 @@ then delete the temporary branch.
   weight, promolecular Delta-g, Hirshfeld-partition Delta-g, standalone IRI
   scalar, standalone vdW total/repulsion/dispersion potential, ABACUS direct potential, partial charge,
   wavefunction norm cubes, ELF/LOL, IRI/RDG/NCI, DORI, ESP/MEP,
-  positive/negative ESP components, electric-field magnitude,
+  electron-only ESP, positive/negative ESP components, electric-field magnitude,
   IGM/IGMH/aIGM weak-interaction maps, ALIE/LEA/LEAE, and vdW-potential
   mapped surfaces.
 - Overlay Multiwfn molecular-surface extrema from `surfanalysis.pdb` onto
@@ -198,8 +198,9 @@ then delete the temporary branch.
   Hirshfeld-partition Delta-g, vdW potential with
   run-local `ivdwprobe` probe selection, function-100 UFF vdW
   repulsion/dispersion components with `iuserfunc=93/94`, function-100
-  positive/negative ESP and electric-field magnitude routes with
-  `iuserfunc=101/102/103`, and related scalar cubes, export
+  electron-only ESP with `iuserfunc=14`, positive/negative ESP and
+  electric-field magnitude routes with `iuserfunc=101/102/103`, and related
+  scalar cubes, export
   multiple orbitals through
   isolated batch runs, optionally write VESTA files through `cube-preset`,
   and map generated ESP/ALIE/vdW/sign(lambda2)rho cubes as textures on a
@@ -348,6 +349,8 @@ multiwfn2vesta grid-run input.molden grid_products \
   --vdw-probe Ar
 multiwfn2vesta grid-run input.molden grid_products \
   --function vdw-dispersion-potential
+multiwfn2vesta grid-run input.molden grid_products \
+  --function electron-esp
 multiwfn2vesta grid-run input.molden grid_products \
   --function positive-esp
 multiwfn2vesta grid-run input.molden grid_products \
@@ -500,6 +503,7 @@ multiwfn2vesta cube-preset vdw-potential vdWpot.cub cube_products
 multiwfn2vesta cube-preset vdw-repulsion-potential userfunc.cub cube_products
 multiwfn2vesta cube-preset vdw-dispersion-potential userfunc.cub cube_products
 multiwfn2vesta cube-preset potential pot_es.cube cube_products
+multiwfn2vesta cube-preset electron-esp userfunc.cub cube_products
 multiwfn2vesta cube-preset partial-charge pchg.cube cube_products
 multiwfn2vesta cube-preset wavefunction-norm wfc_norm.cube cube_products
 multiwfn2vesta cube-preset elf ELF.cub cube_products
@@ -595,6 +599,7 @@ Use `user-function`/`userfunc` for generic Multiwfn function `100`
 `userfunc.cub`; this generic route requires `--user-function-index
 IUSERFUNC`.  Source-backed named routes now imply common `iuserfunc` values:
 `alpha-density` / `beta-density` set `1` / `2`,
+`electron-esp` sets `14`,
 `dori` sets `20`, `local-electron-affinity` sets `27`,
 `local-electron-attachment-energy` sets `-27`,
 `local-mulliken-electronegativity` sets `28`, `local-hardness` sets `29`,
@@ -859,7 +864,7 @@ Common functions:
   preset `user-function`, signed by default.  Pass `--user-function-index
   IUSERFUNC` unless using a named route below.  Named routes
   `alpha-density`, `beta-density`,
-  `dori`, `local-electron-affinity`, `local-electron-attachment-energy`,
+  `electron-esp`, `dori`, `local-electron-affinity`, `local-electron-attachment-energy`,
   `local-mulliken-electronegativity`, `local-hardness`,
   `vdw-repulsion-potential`, `vdw-dispersion-potential`,
   `positive-esp`, `negative-esp`, `electric-field-magnitude`,
@@ -869,7 +874,7 @@ Common functions:
   `fractional-occupation-density`,
   `information-gain-density`, `shannon-entropy-density`,
   `fisher-information-density`, and `second-fisher-information-density`
-  automatically patch `iuserfunc=1/2/20/27/-27/28/29/93/94/101/102/103/90/1200/114/95/96/97/98/49/50/51/52`
+  automatically patch `iuserfunc=1/2/14/20/27/-27/28/29/93/94/101/102/103/90/1200/114/95/96/97/98/49/50/51/52`
   into a run-local `-set` settings file, leaving global Multiwfn settings
   untouched.  The KED variants also patch run-local `iKEDsel`.
 - `alpha-density` and `beta-density`: function `100`, raw `userfunc.cub`,
@@ -925,6 +930,13 @@ Common functions:
   defaulting to the `signed` preset; with `--surface-cube`,
   `esp`/`nuclear-esp` map through `cube-preset esp` and
   `signlambda2rho` maps through `cube-preset iri`.
+- `electron-esp` / `electronic-esp`: function `100`, raw `userfunc.cub`,
+  run-local `iuserfunc=14`, default `electron-esp` preset.  The inspected
+  Multiwfn source evaluates `eleesp(x,y,z)`, i.e. the electron contribution
+  to ESP, which is normally negative in the usual ESP convention.  The
+  standalone preset therefore uses a single `-0.05` a.u. surface; with
+  `--surface-cube`, it uses `surface-map` so the electron ESP can color an
+  existing density or interaction surface.
 - `positive-esp`, `negative-esp`, and `electric-field-magnitude`: function
   `100`, raw `userfunc.cub`, run-local `iuserfunc=101` / `102` / `103`.
   The inspected Multiwfn source clips total ESP below or above zero for the

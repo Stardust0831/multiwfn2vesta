@@ -69,7 +69,7 @@ multiwfn2vesta examples --needs-render
 | spin | `spin-density`, `spin-polarization`, `alpha-density`, `beta-density` | 磁性 Fe/O 或 open-shell 小分子 | 有入口 | 缺真实自旋体系效果图 |
 | KED | `hamiltonian-ked`, `lagrangian-ked`, `thomas-fermi-ked`, `weizsacker-ked`, `pauli-ked` | benzene/H2O | 有入口 | 缺物理解释型示例 |
 | ELF/LOL | `elf`, `lol`, `--elflol-type` | COF/Ag/benzene | 有入口 | ABACUS direct ELF 也可走 `cube-preset elf` |
-| ESP/ALIE/LEA/LEAE | `esp`, `positive-esp`, `negative-esp`, `electric-field-magnitude`, `alie`, `local-electron-affinity`, `local-electron-attachment-energy` | 芳香分子、极性分子、Ag(111)+benzene | 有 VESTA/cube | ESP H2O smoke 已有；ESP 正/负分量和电场强度路由已维护，缺正式 PNG 和 surface extrema 图 |
+| ESP/ALIE/LEA/LEAE | `esp`, `electron-esp`, `positive-esp`, `negative-esp`, `electric-field-magnitude`, `alie`, `local-electron-affinity`, `local-electron-attachment-energy` | 芳香分子、极性分子、Ag(111)+benzene | 有 VESTA/cube | ESP H2O smoke 已有；电子贡献 ESP、正/负分量和电场强度路由已维护，缺正式 PNG 和 surface extrema 图 |
 | vdW | `vdw-potential`, `vdw-repulsion-potential`, `vdw-dispersion-potential` | Ag(111)+benzene 或分子复合物 | 有入口 | 适合做吸附相互作用外围图 |
 | 弱相互作用标量 | `rdg`, `iri`, `dori`, `delta-g`, `hirshfeld-delta-g` | H2O dimer、benzene dimer、Ag adsorbate | IGMH 已闭环；IRI 有调试图 | IRI/DORI/Delta-g standalone 缺手册级图 |
 | 反应性 | `fod`, `orbital-weighted-fukui-*`, `orbital-weighted-dual-descriptor` | 小分子反应位点 | 有入口 | 需要真实 closed-shell 测试体系 |
