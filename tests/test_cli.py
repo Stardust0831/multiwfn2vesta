@@ -35,6 +35,7 @@ class TestUnifiedCli(unittest.TestCase):
         self.assertIn("aim-run", text)
         self.assertIn("aim-pdb", text)
         self.assertIn("aim-igmh", text)
+        self.assertIn("examples", text)
 
     def test_dispatches_discover_command(self):
         with patch("multiwfn2vesta.cli.discovery_report", return_value="report\n") as mocked:
@@ -283,6 +284,20 @@ class TestUnifiedCli(unittest.TestCase):
 
         self.assertEqual(code, 0)
         mocked.assert_called_once_with(["input.vesta", "out"])
+
+    def test_dispatches_examples_command(self):
+        with patch("multiwfn2vesta.cli.examples_index.main", return_value=0) as mocked:
+            code = cli.main(["examples", "--status", "ready"])
+
+        self.assertEqual(code, 0)
+        mocked.assert_called_once_with(["--status", "ready"])
+
+    def test_dispatches_examples_alias(self):
+        with patch("multiwfn2vesta.cli.examples_index.main", return_value=0) as mocked:
+            code = cli.main(["gallery", "--verify"])
+
+        self.assertEqual(code, 0)
+        mocked.assert_called_once_with(["--verify"])
 
     def test_dispatches_cube_preset_alias(self):
         with patch("multiwfn2vesta.cli.cube_preset.main", return_value=0) as mocked:

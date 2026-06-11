@@ -14,6 +14,7 @@ from . import (
     cube_arith,
     cube_preset,
     cube_vesta,
+    examples as examples_index,
     molden_check,
     multiwfn_aigm,
     multiwfn_atom_table,
@@ -52,6 +53,7 @@ COMMANDS: Dict[str, Tuple[str, str]] = {
     "aim-run": ("Run Multiwfn AIM on a wavefunction file, then convert PDB to VESTA", "multiwfn_aim"),
     "aim-pdb": ("Convert Multiwfn paths.pdb/CPs.pdb to atoms-only VESTA", "aim_vesta"),
     "aim-igmh": ("Style/render a saved AIM+IGMH VESTA overlay", "aim_igmh_vesta"),
+    "examples": ("List curated real examples, gallery assets, and runbooks", "examples"),
 }
 
 
@@ -103,6 +105,9 @@ ALIASES = {
     "multiwfn-aim": "aim-run",
     "aim-vesta": "aim-pdb",
     "igmh": "aim-igmh",
+    "example": "examples",
+    "gallery": "examples",
+    "example-gallery": "examples",
 }
 
 
@@ -149,6 +154,7 @@ Commands:
   aim-run    Run Multiwfn AIM on a wavefunction file, then convert to VESTA.
   aim-pdb    Convert Multiwfn paths.pdb/CPs.pdb to atoms-only VESTA.
   aim-igmh   Style a saved AIM+IGMH VESTA overlay, optionally render views.
+  examples   List curated real examples, gallery assets, and runbooks.
 
 Aliases:
   where, env  Aliases for discover.
@@ -186,6 +192,8 @@ Aliases:
   atom-color  Backward-compatible alias for abacus-mulliken-color.
   aim-vesta  Alias for aim-pdb.
   igmh       Alias for aim-igmh.
+  example, gallery, example-gallery
+             Aliases for examples.
 
 Examples:
   multiwfn2vesta discover
@@ -209,6 +217,8 @@ Examples:
   multiwfn2vesta aim-run input.molden aim_out
   multiwfn2vesta aim-pdb paths.pdb aim_atoms_only.vesta --cps-pdb CPs.pdb
   multiwfn2vesta aim-igmh overlay.vesta products --label-bcp-sites
+  multiwfn2vesta examples --status ready
+  multiwfn2vesta examples --verify
 
 Use `multiwfn2vesta <command> --help` for workflow-specific options.
 """
@@ -1124,6 +1134,7 @@ def interactive_main() -> int:
     print("16) Cube -> Multiwfn domain analysis -> VESTA")
     print("17) Charged-state wavefunctions -> Fukui/dual descriptor VESTA")
     print("18) Trajectory -> Multiwfn aIGM/amIGM cubes -> VESTA")
+    print("19) List curated examples / gallery / runbooks")
     print("q) Quit")
     choice = _prompt("choice", default="3").lower()
     if choice in {"0", "discover", "where", "env"}:
@@ -1169,6 +1180,8 @@ def interactive_main() -> int:
         return interactive_multiwfn_atom_color()
     if choice in {"13", "surface-extrema", "surf-extrema", "surfanalysis-vesta"}:
         return interactive_surface_extrema()
+    if choice in {"19", "examples", "example", "gallery", "example-gallery"}:
+        return examples_index.main([])
     if choice in {"q", "quit", "exit"}:
         return 0
     print(f"Unknown choice: {choice}")
@@ -1221,6 +1234,8 @@ def run_command(command: str, args: Sequence[str]) -> int:
         return aim_vesta.main(args)
     if command == "aim-igmh":
         return aim_igmh_vesta.main(args)
+    if command == "examples":
+        return examples_index.main(args)
     raise ValueError(f"Unknown command: {command}")
 
 

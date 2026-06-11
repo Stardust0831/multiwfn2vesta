@@ -12,6 +12,7 @@ VESTA 可打开、可渲染、可复用视角的文件。当前项目仍是实�
 cd /mnt/g/work/multiwfn2vesta/project
 export PATH=/mnt/g/work/multiwfn2vesta/project/bin:$PATH
 multiwfn2vesta --help
+multiwfn2vesta examples
 ```
 
 也可以 editable 安装：
@@ -51,7 +52,25 @@ VESTA 查找顺序同理，常见环境变量包括：
 
 大部分命令只写 `.vesta` 文件，不启动 VESTA；只有显式渲染三视图或图片时才会调用 VESTA。
 
-## 3. 推荐工作流总览
+## 3. 查看已有算例和效果图
+
+推荐先看 curated examples：
+
+```bash
+multiwfn2vesta examples
+multiwfn2vesta examples --status ready
+multiwfn2vesta examples --status needs-work
+multiwfn2vesta examples --verify
+```
+
+`--verify` 只检查项目内已提交的 runbook 和 gallery 图片是否存在，不要求本机必须有完整 `smoke/`
+历史目录。需要程序读取时可以用：
+
+```bash
+multiwfn2vesta examples --json
+```
+
+## 4. 推荐工作流总览
 
 | 起点 | 推荐命令 | 产物 | 典型用途 |
 | --- | --- | --- | --- |
@@ -68,7 +87,7 @@ VESTA 查找顺序同理，常见环境变量包括：
 | 已保存 AIM+IGMH 叠图 | `aim-igmh` | styled `.vesta`，可选三视图 PNG | 周期体系相互作用图 |
 | VESTA + 原子标量表 | `abacus-mulliken-color` / `multiwfn-atom-color` | colored `.vesta` | 电荷/磁矩/原子 Fukui 值染色 |
 
-## 4. ABACUS 到 Multiwfn
+## 5. ABACUS 到 Multiwfn
 
 ABACUS 需要 LCAO、单 Gamma/单 k、`nspin=1/2`，并输出 LCAO 波函数。推荐用最新 ABACUS
 `interfaces/Multiwfn_interface/molden.py`，项目命令会导出 converter 并记录来源。
@@ -80,7 +99,7 @@ multiwfn2vesta molden-check ABACUS_Multiwfn.molden --abacus
 
 ABACUS 伪势体系必须保留 `[Nval]`，这样 Multiwfn 看到的是有效价电子核电荷，而不是全电子原子序数。
 
-## 5. Cube 到 VESTA
+## 6. Cube 到 VESTA
 
 最通用入口：
 
@@ -115,7 +134,7 @@ multiwfn2vesta cube-preset elf ELF.cub products
 multiwfn2vesta cube-preset vdw-potential vdWpot.cub products
 ```
 
-## 6. Multiwfn grid-run
+## 7. Multiwfn grid-run
 
 `grid-run` 驱动 Multiwfn 主功能 `5`，从波函数生成一个实空间函数 cube，然后可选接 VESTA preset：
 
@@ -156,7 +175,7 @@ multiwfn2vesta grid-run input.molden esp_map \
   --tex-physical -0.05 0.05
 ```
 
-## 7. AIM、IRI、IGMH 的组合图
+## 8. AIM、IRI、IGMH 的组合图
 
 单独 AIM：
 
@@ -200,7 +219,7 @@ multiwfn2vesta aim-igmh input_overlay.vesta products \
 - IGMH/IRI 的 section plane 通常关闭。
 - 三视图应从同一个 `.vesta` 一次载入后旋转导出，而不是改三份坐标。
 
-## 8. 真实效果图
+## 9. 真实效果图
 
 当前已整理的效果图库见：
 
@@ -215,7 +234,7 @@ multiwfn2vesta aim-igmh input_overlay.vesta products \
 - H2O-HF IRI+AIM 调试证据
 - benzene NICS arrow 杂项
 
-## 9. 每个功能的 example 状态
+## 10. 每个功能的 example 状态
 
 详见：
 
@@ -229,7 +248,7 @@ multiwfn2vesta aim-igmh input_overlay.vesta products \
 - 图已存在但不够适合手册展示的标为调试证据或待重调视角，不算完成。
 - 暂不维护的 NICS/箭头作为 misc，不进入主功能完成度。
 
-## 10. 常见问题
+## 11. 常见问题
 
 ### VESTA 抢鼠标
 

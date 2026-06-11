@@ -1,6 +1,13 @@
 # Project Kanban
 
-Updated: 2026-06-12 01:20 CST
+Updated: 2026-06-12 01:23 CST
+
+## Active Goal Continuation: 2026-06-12 Formal Examples And CLI Discovery
+
+- [x] 需求入板: 继续长期目标，在已有中文手册和 gallery 的基础上，把真实体系 examples 进一步正式化，并优化用户从 CLI 找到这些 examples/状态矩阵的体验。
+- [x] 审计当前工作区、CLI、tests 和已新增中文文档，保护未跟踪 `domain.cub` / `domain.pdb`。
+- [x] 设计一个轻量 examples 发现入口和正式 examples runbook 结构，优先覆盖 Ag(111)+benzene IGMH+AIM、GC AIM、Cd/Cl 轨迹视频。
+- [x] 实现代码/文档/测试，重新镜像 docs，验证后用 `Stardust0831` 身份提交推送。已新增 `multiwfn2vesta examples`、`multiwfn2vesta-examples`、三个正式 runbook 和对应测试。验证通过：focused `py_compile`、focused `tests.test_examples tests.test_cli`、350-test no-GUI regression、markdown local-link check、`git diff --check`、`bin/multiwfn2vesta --help`、`bin/multiwfn2vesta examples --verify`、ready 文本列表和 needs-work JSON 列表。提交和推送仍在本轮最后执行。
 
 ## Current Request: 2026-06-12 Close Existing Features With Examples, Renders, And Chinese Manual
 

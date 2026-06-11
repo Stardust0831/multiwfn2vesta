@@ -29,6 +29,7 @@ Scriptable subcommands:
 
 ```bash
 multiwfn2vesta discover
+multiwfn2vesta examples --help
 multiwfn2vesta abacus-molden --help
 multiwfn2vesta cube-preset --help
 multiwfn2vesta surface-extrema --help
@@ -52,6 +53,8 @@ multiwfn2vesta aim-igmh --help
 Aliases:
 
 - `multiwfn2vesta where` and `multiwfn2vesta env` are aliases for `discover`.
+- `multiwfn2vesta example`, `multiwfn2vesta gallery`, and
+  `multiwfn2vesta example-gallery` are aliases for `examples`.
 - `multiwfn2vesta molden ...` and `multiwfn2vesta abacus-multiwfn-molden ...`
   are aliases for `abacus-molden`.
 - `multiwfn2vesta cube ...` is an alias for `cube-vesta`.
@@ -131,6 +134,22 @@ VESTA environment variables accepted:
 - `VestaPATH`
 - `Vestapath`
 - `VESTA_EXECUTABLE`
+
+### Find curated examples
+
+```bash
+multiwfn2vesta examples
+multiwfn2vesta examples --status ready
+multiwfn2vesta examples --status needs-work
+multiwfn2vesta examples --json
+multiwfn2vesta examples --verify
+```
+
+Use this before choosing a demonstration or regression target.  The command
+prints the Chinese manual, gallery, status matrix, formal runbook paths, and
+smoke evidence paths for curated real systems.  `--verify` checks only
+project-local runbooks and gallery assets, so it remains useful even when old
+workspace smoke directories are absent.
 
 ### ABACUS calculation to Molden
 

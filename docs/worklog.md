@@ -31,6 +31,28 @@
 - README now links the Chinese manual, gallery, and status matrix near the
   quick-start section and in the documentation map.
 
+## 2026-06-12: Curated examples CLI and formal runbooks
+
+- Added `multiwfn2vesta examples`, plus aliases `example`, `gallery`, and
+  `example-gallery`, to list curated real examples from the unified CLI.
+  The command supports status filtering, JSON output, absolute paths, and
+  `--verify` for checking project-local runbooks and gallery assets.
+- Added formal Chinese runbooks for the first three examples:
+  `examples/ag111_benzene_igmh_aim/README_zh.md`,
+  `examples/gc_aim/README_zh.md`, and
+  `examples/cdcl_trajectory_video/README_zh.md`.
+- Wired the examples index into `pyproject.toml` and `setup.py` as
+  `multiwfn2vesta-examples`, while keeping the unified
+  `multiwfn2vesta examples` route as the preferred entry.
+- Updated README, Chinese manual, usage docs, and CLI skill notes so users can
+  discover examples and verify project-local gallery/runbook assets without
+  searching through old smoke directories.
+- Validation passed in this working copy: focused `py_compile`, focused
+  `tests.test_examples tests.test_cli`, full 350-test no-GUI regression,
+  markdown local-link check, `git diff --check`, `bin/multiwfn2vesta
+  --help`, `bin/multiwfn2vesta examples --verify`, text example listing, and
+  JSON example listing.
+
 ## 2026-06-11: README branch-state refresh after vdW component routes
 
 - Rechecked the branch topology for the user-requested one-branch closeout:

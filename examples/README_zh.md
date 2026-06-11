@@ -3,14 +3,22 @@
 当前 `examples/` 目录还没有把所有 smoke 产物整理成可复跑的正式算例。本文件先作为中文入口，说明哪些
 真实体系已经有证据、哪些适合作为下一批正式 examples。
 
+可以用统一 CLI 查看当前 curated examples：
+
+```bash
+multiwfn2vesta examples
+multiwfn2vesta examples --status ready
+multiwfn2vesta examples --verify
+```
+
 ## 可先整理成正式 example 的体系
 
 | 优先级 | 体系 | 目标功能 | 现有证据 | 下一步 |
 | --- | --- | --- | --- | --- |
-| 1 | Ag(111)+benzene | ABACUS Molden -> Multiwfn IGMH+AIM -> VESTA 三视图 | `smoke/ag111_benzene_igmh_aim_periodic_cell_20260607/`，已复制 gallery 图 | 整理输入清单、命令记录、输出说明；后续重渲染更紧凑视角 |
-| 2 | GC 碱基对 | AIM paths/BCP overlay | `smoke/20260605_sob445_more_aim_examples/gc/`，已复制 gallery 图 | 做一个轻量 AIM 教程 example |
-| 3 | benzene | AIM 基础例和 NICS/vector misc | `smoke/20260605_sob445_more_aim_examples/benzene/`，`smoke/20260605_nics_vesta_vectors/` | AIM 可入主线；NICS/vector 仅放 misc |
-| 4 | Cd/Cl 轨迹 | ASE trajectory -> VESTA frames -> mp4 | `smoke/vesta_trajectory_video_1608/ase_nvt_refstyle_stride20_cdcl3p50/` | 整理 poster frame、mp4、Boundary/bond/style 参数 |
+| 1 | Ag(111)+benzene | ABACUS Molden -> Multiwfn IGMH+AIM -> VESTA 三视图 | `../../smoke/ag111_benzene_igmh_aim_periodic_cell_20260607/`，已复制 gallery 图 | 整理输入清单、命令记录、输出说明；后续重渲染更紧凑视角 |
+| 2 | GC 碱基对 | AIM paths/BCP overlay | `../../smoke/20260605_sob445_more_aim_examples/gc/`，已复制 gallery 图 | 做一个轻量 AIM 教程 example |
+| 3 | benzene | AIM 基础例和 NICS/vector misc | `../../smoke/20260605_sob445_more_aim_examples/benzene/`，`../../smoke/20260605_nics_vesta_vectors/` | AIM 可入主线；NICS/vector 仅放 misc |
+| 4 | Cd/Cl 轨迹 | ASE trajectory -> VESTA frames -> mp4 | `../../smoke/vesta_trajectory_video_1608/ase_nvt_refstyle_stride20_cdcl3p50/` | 整理 poster frame、mp4、Boundary/bond/style 参数 |
 
 ## 暂不作为完成 example 的体系
 

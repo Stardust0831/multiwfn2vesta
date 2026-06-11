@@ -223,6 +223,8 @@ From this repository:
 cd /mnt/g/work/multiwfn2vesta/project
 export PATH=/mnt/g/work/multiwfn2vesta/project/bin:$PATH
 multiwfn2vesta --help
+multiwfn2vesta examples --status ready
+multiwfn2vesta examples --verify
 ```
 
 After the `PATH` line above, `multiwfn2vesta` can be run from any directory.
@@ -250,6 +252,15 @@ For day-to-day use, start from the Chinese manual and the example gallery:
 - [功能 example 状态矩阵](docs/example_status_matrix_zh.md)
 - [examples 规划](examples/README_zh.md)
 
+The same index is available from the CLI:
+
+```bash
+multiwfn2vesta examples
+multiwfn2vesta examples --status needs-work
+multiwfn2vesta examples --json
+multiwfn2vesta examples --verify
+```
+
 The gallery only includes images that have already been rendered in the local
 workspace and copied into `docs/assets/gallery/`.  Features that have a CLI
 entry but do not yet have a real rendered example are explicitly marked in the
@@ -259,6 +270,7 @@ status matrix instead of being treated as finished examples.
 
 ```bash
 multiwfn2vesta discover
+multiwfn2vesta examples --status ready
 multiwfn2vesta abacus-molden abacus_calc ABACUS_Multiwfn.molden
 multiwfn2vesta molden-check ABACUS_Multiwfn.molden --abacus
 multiwfn2vesta cube-preset --list-presets
