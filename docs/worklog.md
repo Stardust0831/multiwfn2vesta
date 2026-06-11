@@ -1,5 +1,36 @@
 # Worklog
 
+## 2026-06-12: Chinese manual, example gallery, and feature closure matrix
+
+- Redirected the current work from adding another Multiwfn source-backed route
+  to closing existing project capabilities with real examples, rendered
+  images, and a Chinese manual.
+- Added `docs/manual_zh.md` as the Chinese operating manual for the unified
+  `multiwfn2vesta` CLI.  It covers executable discovery, ABACUS Molden
+  handoff, cube/VESTA routes, `grid-run`, AIM/IRI/IGMH workflows,
+  atom-coloring routes, rendering caveats, and common troubleshooting.
+- Added `docs/example_gallery_zh.md`, which only indexes examples that already
+  have real local VESTA/PNG evidence.  The first gallery set covers
+  Ag(111)+benzene IGMH+AIM three-view renders, benzene/phenanthrene AIM,
+  H2O-HF IRI+AIM, a Cd/Cl trajectory frame, and a benzene NICS-vector misc
+  prototype.
+- Copied representative rendered PNGs into `docs/assets/gallery/` so the
+  examples are visible from the repository documentation and do not depend on
+  absolute smoke paths.
+- Added `docs/example_status_matrix_zh.md` to track every top-level CLI
+  workflow and major preset/function group as `已闭环`, `有 VESTA/cube`,
+  `有入口`, or `暂存/杂项`.  This keeps missing rendered examples explicit
+  instead of treating all implemented code paths as finished examples.
+- After read-only subagent review, tightened the quality labels: GC is the
+  preferred AIM manual example, phenanthrene is retained only as a
+  needs-better-view asset, H2O-HF IRI+AIM is recorded as debugging evidence
+  rather than a finished gallery example, and the Cd/Cl NVT high-bitrate video
+  is the preferred trajectory evidence.
+- Added `examples/README_zh.md` as a staging plan for promoting smoke
+  directories into formal examples.
+- README now links the Chinese manual, gallery, and status matrix near the
+  quick-start section and in the documentation map.
+
 ## 2026-06-11: README branch-state refresh after vdW component routes
 
 - Rechecked the branch topology for the user-requested one-branch closeout:

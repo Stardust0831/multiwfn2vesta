@@ -241,6 +241,20 @@ root, either add `project/bin` to `PATH` as above, run
 `bin/multiwfn2vesta ...`, or, for a one-off module invocation, use
 `PYTHONPATH=src python3 -m multiwfn2vesta.cli`.
 
+## Chinese Manual And Examples
+
+For day-to-day use, start from the Chinese manual and the example gallery:
+
+- [中文手册](docs/manual_zh.md)
+- [效果图库和真实算例索引](docs/example_gallery_zh.md)
+- [功能 example 状态矩阵](docs/example_status_matrix_zh.md)
+- [examples 规划](examples/README_zh.md)
+
+The gallery only includes images that have already been rendered in the local
+workspace and copied into `docs/assets/gallery/`.  Features that have a CLI
+entry but do not yet have a real rendered example are explicitly marked in the
+status matrix instead of being treated as finished examples.
+
 ## Find Multiwfn and VESTA
 
 ```bash
@@ -1712,6 +1726,11 @@ and `aim_atoms_only.vesta` without launching VESTA.
 
 ## Documentation Map
 
+- `docs/manual_zh.md`: Chinese user manual for the maintained workflows.
+- `docs/example_gallery_zh.md`: rendered example gallery with real systems.
+- `docs/example_status_matrix_zh.md`: per-feature example/rendering status.
+- `examples/README_zh.md`: Chinese plan for promoting smoke runs to formal
+  examples.
 - `docs/usage.md`: fuller user guide.
 - `docs/skills/multiwfn2vesta_cli_skill.md`: CLI operating notes.
 - `docs/skills/cube_vesta_skill.md`: ABACUS/Multiwfn cube to VESTA workflow.

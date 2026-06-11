@@ -1,6 +1,22 @@
 # Project Kanban
 
-Updated: 2026-06-11 23:51 CST
+Updated: 2026-06-12 01:20 CST
+
+## Current Request: 2026-06-12 Close Existing Features With Examples, Renders, And Chinese Manual
+
+- [x] 需求入板: 把当前已有功能进一步闭环，准备有价值的真实体系算例，优化使用体验，准备中文手册；每个功能都要逐步配 example 和效果图。
+- [x] 审计当前功能、已有 smoke/example/render 产物和可复用体系，避免重新造一套割裂流程。首批可复用真实图包括 Ag(111)+benzene IGMH+AIM 三视图、benzene/phenanthrene AIM、H2O-HF IRI+AIM、Cd/Cl 轨迹帧和 benzene NICS vector 杂项。
+- [x] 设计中文手册与 example gallery 结构，给功能组指定代表体系、输入来源、命令、预期产物和渲染策略；已新增 `docs/manual_zh.md`、`docs/example_gallery_zh.md` 和 `docs/example_status_matrix_zh.md`。
+- [x] 先落地一批高价值、可验证的闭环 examples 和渲染图；代表 PNG 已复制到 `docs/assets/gallery/`。不能当场完整渲染的功能在状态矩阵中标为 `有 VESTA/cube` 或 `有入口`，不假装已闭环。
+- [x] 根据子 agent 只读审计修正示例质量判断：AIM 主图优先 `gc` 而非 phenanthrene；H2O/H2O-HF IRI+AIM 当前图只作为待完善/调试图，不标为手册级闭环；轨迹视频优先记录 NVT 高码率 mp4；Mulliken coloring 和 NICS arrows 只作为已打通/杂项。已新增 `examples/README_zh.md` 作为 smoke 正式化规划。
+- [x] 优化统一 CLI/文档使用体验，补充 README 链接后验证、镜像 docs、提交推送。审计修正后已重跑并通过：markdown 本地链接检查、PNG file 检查、`git diff --check`、`bin/multiwfn2vesta --help`、`cube-preset --list-presets` 和 `grid-run --list-functions`；docs 镜像 dry-run 为空。提交和推送仍在本轮最后执行。
+
+## Active Goal Continuation: 2026-06-12 Multiwfn/VESTA Analysis Route Expansion
+
+- [x] 需求入板: 继续长期目标，调研并实现更多有价值的 Multiwfn 波函数分析到 VESTA 的可视化路线，优先关注 ABACUS LCAO Molden 或 ABACUS cube 能支撑的工作流。
+- [x] 审计当前仓库、分支、README/docs 和已实现 `grid-run`/`cube-preset` 覆盖，保护未跟踪本地探针文件。
+- [ ] 读取本地 Multiwfn 源码，选择一个边界清晰、对 VESTA 可视化有价值的下一增量。当前被用户新需求降级，优先闭环已有功能的 examples、效果图和中文手册。
+- [ ] 实现代码、测试和文档，镜像 docs，验证后用 `Stardust0831` 身份提交并推送。
 
 ## Current Request: 2026-06-11 README Refresh And Main-Only Branch Closeout
 
