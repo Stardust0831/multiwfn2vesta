@@ -1,5 +1,24 @@
 # Worklog
 
+## 2026-06-12: Feature closure UX, real-system selection, and gallery discovery
+
+- Continued the current feature-closure request by making the example index
+  more queryable from the maintained CLI instead of adding another isolated
+  analysis route.
+- Added `multiwfn2vesta examples --command <term>` so a user can start from a
+  command such as `grid-run`, `aim-igmh`, or `trajectory-video` and see the
+  recommended real system, runbook, gallery status, and next closure step.
+- Added `multiwfn2vesta examples --gallery-assets` to list committed
+  project-local PNG figures only, and `multiwfn2vesta examples --systems` to
+  list recommended non-toy systems for future examples.
+- The recommended system set currently prioritizes Ag(111)+benzene, GC base
+  pair, benzene dimer, H2O-HF, COF_12000N2 monolayer, a real open-shell or
+  magnetic system, and Cd/Cl trajectories.  Ready figures remain limited to
+  genuinely rendered local assets; no VESTA GUI render was launched in this
+  pass.
+- Updated tests, README, Chinese manual, usage docs, feature/status matrices,
+  CLI skill notes, and the kanban so the new discovery route is documented.
+
 ## 2026-06-12: RoSE/SEDD scalar routes and feature-closure audit
 
 - Continued the ABACUS-compatible Multiwfn/VESTA analysis route survey by

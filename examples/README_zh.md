@@ -10,6 +10,9 @@ multiwfn2vesta examples
 multiwfn2vesta examples --status ready
 multiwfn2vesta examples --coverage
 multiwfn2vesta examples --needs-render
+multiwfn2vesta examples --command grid-run
+multiwfn2vesta examples --gallery-assets
+multiwfn2vesta examples --systems
 multiwfn2vesta examples --verify
 ```
 

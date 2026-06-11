@@ -8,7 +8,17 @@
 ![current feature overview](assets/gallery/current_feature_overview.png)
 
 按功能反查 example 覆盖状态见 `feature_examples_zh.md`，命令入口是
-`multiwfn2vesta examples --coverage`。
+`multiwfn2vesta examples --coverage`。只想列出已经提交到项目内的 PNG 时用：
+
+```bash
+multiwfn2vesta examples --gallery-assets
+```
+
+准备新 example 前，先用下面的命令看推荐真体系，避免用 toy placeholder 冒充成品：
+
+```bash
+multiwfn2vesta examples --systems
+```
 
 ## 高价值代表体系
 

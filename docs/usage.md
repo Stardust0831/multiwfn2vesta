@@ -55,7 +55,9 @@ multiwfn2vesta trajectory-video --help
 - `examples`: 列出当前已整理的真实算例、gallery 图、runbook、状态矩阵；支持
   `--status ready/needs-work/misc`、`--id`、`--json`、`--verify` 和
   `--verify-smoke`；`--coverage` 按功能列出推荐真实体系、runbook、效果图状态和下一步；
-  `--needs-render` 只列出缺手册级渲染或缺真实体系的功能；`--verify` 检查仓库内
+  `--needs-render` 只列出缺手册级渲染或缺真实体系的功能；`--command` 按命令或功能关键词筛选；
+  `--gallery-assets` 只列出已经提交到项目内的 PNG 效果图；`--systems` 列出当前推荐用于闭环示例的真体系；
+  `--verify` 检查仓库内
   runbook/gallery/manifest，`--verify-smoke` 检查工作区本地大文件或历史渲染证据
 - `abacus-molden`: 从 ABACUS LCAO 计算目录调用最新
   `interfaces/Multiwfn_interface/molden.py`，生成并验证给 Multiwfn 用的
@@ -137,6 +139,9 @@ multiwfn2vesta --help
 multiwfn2vesta discover
 multiwfn2vesta examples --status ready
 multiwfn2vesta examples --coverage
+multiwfn2vesta examples --command grid-run
+multiwfn2vesta examples --gallery-assets
+multiwfn2vesta examples --systems
 ```
 
 Multiwfn 查找顺序：

@@ -383,7 +383,158 @@ FEATURE_COVERAGE: List[Dict[str, object]] = [
         "gallery": ["docs/assets/gallery/cdcl_nvt_trajectory_frame.png"],
         "next": "Add an optional VESTA PNG rendering layer that does not steal focus when possible.",
     },
+    {
+        "command": "examples",
+        "feature": "Curated example, gallery, feature-coverage, and real-system discovery",
+        "status": "ready",
+        "example": "project example index",
+        "system": "maintained real-system gallery",
+        "runbook": "docs/feature_examples_zh.md",
+        "gallery": ["docs/assets/gallery/current_feature_overview.png"],
+        "next": "Keep the coverage table synchronized whenever a workflow gains or loses ready example status.",
+    },
 ]
+
+
+SYSTEM_RECOMMENDATIONS: List[Dict[str, object]] = [
+    {
+        "id": "ag111_benzene",
+        "priority": 1,
+        "title": "Ag(111)+benzene periodic adsorption slab",
+        "value": "Best current end-to-end periodic showcase for ABACUS LCAO Molden, fragment weak interactions, AIM topology, vdW/ESP fields, and three-view VESTA figures.",
+        "covers": [
+            "abacus-molden",
+            "molden-check",
+            "igmh-run",
+            "aim-run",
+            "aim-igmh",
+            "grid-run vdW/ESP",
+        ],
+        "example": "ag111_benzene_igmh_aim",
+        "status": "ready-core; more scalar renders pending",
+        "next": "Use the same validated Molden/cell to add vdW component, ESP, electric-field, and steric/SBL figures without changing the main showcase system.",
+    },
+    {
+        "id": "gc_base_pair",
+        "priority": 2,
+        "title": "GC base pair",
+        "value": "Compact molecular hydrogen-bond topology system with meaningful AIM BCPs and a natural target for IRI/RDG, ESP-on-density, and RoSE/SEDD paired figures.",
+        "covers": ["aim-run", "aim-pdb", "iri-run", "grid-run rose/sedd", "surface-extrema"],
+        "example": "gc_aim",
+        "status": "ready AIM; IRI/grid renders pending",
+        "next": "Promote GC from AIM-only to a paired AIM + weak-interaction scalar tutorial after a clean IRI/RoSE/SEDD render.",
+    },
+    {
+        "id": "benzene_dimer",
+        "priority": 3,
+        "title": "Benzene dimer or substituted aromatic dimer",
+        "value": "Small, interpretable dispersion/pi-stacking system for RDG/IRI/DORI/Delta-g, RoSE/SEDD, vdW potential, and orbital/Fukui demonstrations.",
+        "covers": ["iri-run", "grid-run", "cube-preset", "cube-arith", "fukui-run"],
+        "example": "planned_benzene_dimer_scalar_suite",
+        "status": "recommended; not yet rendered",
+        "next": "Prepare one validated Molden and reuse it for a compact scalar-field gallery instead of creating one toy per scalar.",
+    },
+    {
+        "id": "h2o_hf_complex",
+        "priority": 4,
+        "title": "H2O-HF hydrogen-bond complex",
+        "value": "Fast weak-interaction regression system; already useful for IRI texture range, section suppression, and AIM/cube alignment debugging.",
+        "covers": ["iri-run", "aim-pdb", "cube-vesta", "cube-preset"],
+        "example": "h2o_hf_iri_aim_debug",
+        "status": "debug render only",
+        "next": "Keep as a fast regression fixture, but do not use it as the main manual figure until IRI surface visibility is fixed.",
+    },
+    {
+        "id": "cof_12000n2_monolayer",
+        "priority": 5,
+        "title": "COF_12000N2 monolayer with vacuum",
+        "value": "Periodic porous 2D material candidate for ABACUS direct electron density, electrostatic potential, ELF/LOL, partial charge, and atom-coloring examples.",
+        "covers": ["cube-vesta", "cube-preset", "grid-run ELF/ESP", "abacus-mulliken-color", "multiwfn-atom-color"],
+        "example": "planned_cof_direct_cube_suite",
+        "status": "recommended; calculation/render pending",
+        "next": "Use a clean single-layer cell and commit only light runbooks/gallery PNGs, not full ABACUS wavefunction outputs.",
+    },
+    {
+        "id": "open_shell_or_magnetic_system",
+        "priority": 6,
+        "title": "Open-shell molecule, magnetic oxide, or spin-polarized adsorbate",
+        "value": "Needed for spin-density, alpha/beta density, spin-polarization, Mulliken magnetism coloring, and atom-table coloring figures.",
+        "covers": ["grid-run spin", "cube-arith spin-density", "abacus-mulliken-color", "multiwfn-atom-color"],
+        "example": "planned_spin_coloring_suite",
+        "status": "missing real showcase",
+        "next": "Replace the current toy Fe coloring smoke with a chemically meaningful spin or charge example plus a legend.",
+    },
+    {
+        "id": "cdcl_trajectory",
+        "priority": 7,
+        "title": "Cd/Cl NVT/NPT trajectory",
+        "value": "Best current video workflow system because it exercises extXYZ frames, reference VESTA style reuse, custom Cd-Cl bonding, Boundary, PNG sequence, and high-bitrate MP4.",
+        "covers": ["trajectory-frames", "trajectory-video"],
+        "example": "cdcl_trajectory_video",
+        "status": "ready for frame/video layer",
+        "next": "Add direct ASE .traj reading or a stable converter policy, then close the VESTA PNG render layer if focus stealing can be avoided.",
+    },
+]
+
+
+COVERAGE_COMMAND_ALIASES: Dict[str, str] = {
+    "where": "discover",
+    "env": "discover",
+    "molden": "abacus-molden",
+    "abacus-multiwfn-molden": "abacus-molden",
+    "check-molden": "molden-check",
+    "abacus-molden-check": "molden-check",
+    "cube": "cube-vesta",
+    "preset": "cube-preset",
+    "analysis-cube": "cube-preset",
+    "surf-extrema": "surface-extrema",
+    "surfanalysis-vesta": "surface-extrema",
+    "cube-math": "cube-arith",
+    "density-diff": "cube-arith",
+    "fukui-cube": "cube-arith",
+    "multiwfn-iri": "iri-run",
+    "rdg-run": "iri-run",
+    "multiwfn-igmh": "igmh-run",
+    "multiwfn-igmh-run": "igmh-run",
+    "multiwfn-igm": "igm-run",
+    "multiwfn-igm-run": "igm-run",
+    "multiwfn-migm": "migm-run",
+    "multiwfn-migm-run": "migm-run",
+    "multiwfn-aigm": "aigm-run",
+    "multiwfn-aigm-run": "aigm-run",
+    "averaged-igm-run": "aigm-run",
+    "multiwfn-amigm": "amigm-run",
+    "multiwfn-amigm-run": "amigm-run",
+    "averaged-migm-run": "amigm-run",
+    "multiwfn-grid": "grid-run",
+    "scalar-cube-run": "grid-run",
+    "function-cube": "grid-run",
+    "multiwfn-fukui": "fukui-run",
+    "multiwfn-fukui-run": "fukui-run",
+    "dual-descriptor-run": "fukui-run",
+    "multiwfn-stm": "stm-run",
+    "multiwfn-stm-run": "stm-run",
+    "ldos-run": "stm-run",
+    "multiwfn-domain": "domain-run",
+    "multiwfn-domain-run": "domain-run",
+    "cube-domain": "domain-run",
+    "mulliken-color": "abacus-mulliken-color",
+    "atom-color": "abacus-mulliken-color",
+    "multiwfn-table-color": "multiwfn-atom-color",
+    "atom-table-color": "multiwfn-atom-color",
+    "multiwfn-aim": "aim-run",
+    "aim-vesta": "aim-pdb",
+    "igmh": "aim-igmh",
+    "traj-frames": "trajectory-frames",
+    "xyz-vesta-frames": "trajectory-frames",
+    "vesta-trajectory-frames": "trajectory-frames",
+    "traj-video": "trajectory-video",
+    "trajectory-mp4": "trajectory-video",
+    "vesta-trajectory-video": "trajectory-video",
+    "example": "examples",
+    "gallery": "examples",
+    "example-gallery": "examples",
+}
 
 
 def _project_path(path_text: str) -> Path:
@@ -453,11 +604,65 @@ def examples_for_json(
     return records
 
 
+def _normalize_terms(values: Optional[Sequence[str]]) -> Optional[Set[str]]:
+    if not values:
+        return None
+    terms: Set[str] = set()
+    for item in values:
+        for part in item.split(","):
+            value = part.strip().lower()
+            if value:
+                terms.add(value)
+    return terms or None
+
+
+def _command_text_matches(term: str, command_text: str) -> bool:
+    if term == command_text:
+        return True
+    command_parts = [part.strip() for part in command_text.replace("/", " ").split()]
+    return term in command_parts or term in command_text
+
+
+def _known_coverage_command_terms() -> Set[str]:
+    terms = set(COVERAGE_COMMAND_ALIASES)
+    for item in FEATURE_COVERAGE:
+        command_text = str(item.get("command", "")).lower()
+        terms.add(command_text)
+        terms.update(part.strip() for part in command_text.replace("/", " ").split() if part.strip())
+    return terms
+
+
+def _coverage_matches_terms(record: Dict[str, object], terms: Optional[Set[str]]) -> bool:
+    if not terms:
+        return True
+    command_text = str(record.get("command", "")).lower()
+    keyword_text = " ".join(
+        str(record.get(key, ""))
+        for key in ("feature", "system", "next")
+    ).lower()
+    known_command_terms = _known_coverage_command_terms()
+    for term in terms:
+        canonical = COVERAGE_COMMAND_ALIASES.get(term)
+        if canonical:
+            if _command_text_matches(canonical, command_text):
+                return True
+            continue
+        if term in known_command_terms:
+            if _command_text_matches(term, command_text):
+                return True
+            continue
+        if term in keyword_text:
+            return True
+    return False
+
+
 def feature_coverage_for_json(
     status: str = "all",
     absolute: bool = False,
     needs_render: bool = False,
+    commands: Optional[Sequence[str]] = None,
 ) -> List[Dict[str, object]]:
+    command_terms = _normalize_terms(commands)
     records: List[Dict[str, object]] = []
     for item in FEATURE_COVERAGE:
         item_status = str(item["status"])
@@ -465,11 +670,56 @@ def feature_coverage_for_json(
             continue
         if needs_render and item_status not in {"needs-render", "needs-example"}:
             continue
+        if not _coverage_matches_terms(item, command_terms):
+            continue
         record = dict(item)
         record["runbook"] = _display_path(str(record["runbook"]), absolute=absolute)
         record["gallery"] = [_display_path(str(path), absolute=absolute) for path in record.get("gallery", [])]  # type: ignore[arg-type]
         records.append(record)
     return records
+
+
+def gallery_for_json(
+    status: str = "all",
+    absolute: bool = False,
+    ids: Optional[Sequence[str]] = None,
+) -> List[Dict[str, object]]:
+    selected_ids = _normalize_ids(ids)
+    records: List[Dict[str, object]] = []
+    for example in _iter_examples(status, selected_ids):
+        for image in example.get("gallery", []):  # type: ignore[assignment]
+            image_text = str(image)
+            records.append(
+                {
+                    "example_id": example["id"],
+                    "status": example["status"],
+                    "title": example["title"],
+                    "system": example["system"],
+                    "image": _display_path(image_text, absolute=absolute),
+                    "exists": _project_path(image_text).exists(),
+                    "runbook": _display_path(str(example["runbook"]), absolute=absolute),
+                    "note": example["note"],
+                }
+            )
+    if selected_ids is None and status in {"all", "ready"}:
+        image_text = "docs/assets/gallery/current_feature_overview.png"
+        records.append(
+            {
+                "example_id": "examples",
+                "status": "ready",
+                "title": "Feature overview gallery",
+                "system": "maintained real-system gallery",
+                "image": _display_path(image_text, absolute=absolute),
+                "exists": _project_path(image_text).exists(),
+                "runbook": _display_path("docs/feature_examples_zh.md", absolute=absolute),
+                "note": "Rendered overview assembled from committed gallery PNGs; not a separate scientific calculation.",
+            }
+        )
+    return records
+
+
+def systems_for_json() -> List[Dict[str, object]]:
+    return [dict(item) for item in sorted(SYSTEM_RECOMMENDATIONS, key=lambda item: int(item["priority"]))]
 
 
 def _print_text(status: str = "all", absolute: bool = False, ids: Optional[Set[str]] = None) -> None:
@@ -508,10 +758,22 @@ def _print_text(status: str = "all", absolute: bool = False, ids: Optional[Set[s
     print("Use --json for machine-readable output.")
 
 
-def _print_coverage(status: str = "all", absolute: bool = False, needs_render: bool = False) -> None:
-    records = feature_coverage_for_json(status=status, absolute=absolute, needs_render=needs_render)
+def _print_coverage(
+    status: str = "all",
+    absolute: bool = False,
+    needs_render: bool = False,
+    commands: Optional[Sequence[str]] = None,
+) -> None:
+    records = feature_coverage_for_json(
+        status=status,
+        absolute=absolute,
+        needs_render=needs_render,
+        commands=commands,
+    )
     print("multiwfn2vesta feature example coverage\n")
     print(f"Docs: {_display_path('docs/feature_examples_zh.md', absolute=absolute)}")
+    if commands:
+        print("Command filter: " + ", ".join(commands))
     print()
     if not records:
         print("No feature coverage records match the selected filters.")
@@ -530,6 +792,34 @@ def _print_coverage(status: str = "all", absolute: bool = False, needs_render: b
     print()
     print("Status: ready means example + project gallery image; linked means covered through another ready workflow;")
     print("needs-render means workflow exists but needs a better project-local figure; needs-example means a real system is still missing.")
+
+
+def _print_gallery(status: str = "all", absolute: bool = False, ids: Optional[Set[str]] = None) -> None:
+    records = gallery_for_json(status=status, absolute=absolute, ids=sorted(ids) if ids else None)
+    print("multiwfn2vesta rendered gallery assets\n")
+    print(f"Docs: {_display_path('docs/example_gallery_zh.md', absolute=absolute)}")
+    print()
+    if not records:
+        print("No gallery assets match the selected filters.")
+        return
+    for record in records:
+        exists = "present" if record["exists"] else "missing"
+        print(f"- [{record['status']}] {record['example_id']}: {record['title']}")
+        print(f"  system: {record['system']}")
+        print(f"  image: {record['image']} ({exists})")
+        print(f"  runbook: {record['runbook']}")
+        print(f"  note: {record['note']}")
+
+
+def _print_systems() -> None:
+    print("multiwfn2vesta recommended real systems\n")
+    for item in systems_for_json():
+        print(f"- {item['priority']}. {item['id']}: {item['title']}")
+        print(f"  value: {item['value']}")
+        print("  covers: " + ", ".join(str(value) for value in item["covers"]))  # type: ignore[index]
+        print(f"  example: {item['example']}")
+        print(f"  status: {item['status']}")
+        print(f"  next: {item['next']}")
 
 
 def _verify_project_files(status: str = "all", ids: Optional[Set[str]] = None) -> int:
@@ -601,6 +891,13 @@ def build_parser() -> argparse.ArgumentParser:
         help="List maintained commands/features with their recommended example systems and figure status.",
     )
     parser.add_argument(
+        "--command",
+        action="append",
+        dest="commands",
+        metavar="COMMAND_OR_TERM",
+        help="Filter --coverage records by command, alias, or feature term. Implies --coverage.",
+    )
+    parser.add_argument(
         "--coverage-status",
         choices=["all", "ready", "linked", "needs-render", "needs-example", "misc"],
         default="all",
@@ -610,6 +907,16 @@ def build_parser() -> argparse.ArgumentParser:
         "--needs-render",
         action="store_true",
         help="Shortcut for --coverage records that still need a real render or real example.",
+    )
+    parser.add_argument(
+        "--gallery-assets",
+        action="store_true",
+        help="List project-local rendered PNG assets grouped by curated example.",
+    )
+    parser.add_argument(
+        "--systems",
+        action="store_true",
+        help="List recommended real systems for closing examples instead of toy placeholders.",
     )
     parser.add_argument(
         "--verify",
@@ -640,7 +947,25 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         if args.verify_smoke:
             exit_code = max(exit_code, _verify_smoke_files(args.status, selected_ids))
         return exit_code
-    if args.coverage or args.needs_render:
+    if args.gallery_assets:
+        if args.json:
+            print(
+                json.dumps(
+                    gallery_for_json(args.status, absolute=args.absolute, ids=args.ids),
+                    ensure_ascii=False,
+                    indent=2,
+                )
+            )
+        else:
+            _print_gallery(args.status, absolute=args.absolute, ids=selected_ids)
+        return 0
+    if args.systems:
+        if args.json:
+            print(json.dumps(systems_for_json(), ensure_ascii=False, indent=2))
+        else:
+            _print_systems()
+        return 0
+    if args.coverage or args.needs_render or args.commands:
         if args.json:
             print(
                 json.dumps(
@@ -648,6 +973,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                         args.coverage_status,
                         absolute=args.absolute,
                         needs_render=args.needs_render,
+                        commands=args.commands,
                     ),
                     ensure_ascii=False,
                     indent=2,
@@ -658,6 +984,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 args.coverage_status,
                 absolute=args.absolute,
                 needs_render=args.needs_render,
+                commands=args.commands,
             )
         return 0
     if args.json:

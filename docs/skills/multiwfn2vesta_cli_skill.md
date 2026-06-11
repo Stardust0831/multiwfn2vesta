@@ -152,6 +152,9 @@ multiwfn2vesta examples --status needs-work
 multiwfn2vesta examples --id cdcl_trajectory_video
 multiwfn2vesta examples --coverage
 multiwfn2vesta examples --needs-render
+multiwfn2vesta examples --command grid-run
+multiwfn2vesta examples --gallery-assets
+multiwfn2vesta examples --systems
 multiwfn2vesta examples --json
 multiwfn2vesta examples --verify
 multiwfn2vesta examples --id cdcl_trajectory_video --verify-smoke
@@ -169,7 +172,10 @@ to be committed.
 Use `--coverage` when selecting a workflow by feature instead of by system.
 It prints the recommended real system, runbook, gallery image status, and next
 closure step for each maintained command.  Use `--needs-render` to list only
-commands that still need a better figure or a real example.
+commands that still need a better figure or a real example.  Use
+`--command <command-or-term>` when the user asks "this function/example is
+where?", `--gallery-assets` when they ask for the current rendered figures,
+and `--systems` before proposing a new real-system example.
 
 ### Rendered trajectory frames to MP4
 

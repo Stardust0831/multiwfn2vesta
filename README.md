@@ -239,6 +239,9 @@ export PATH=/mnt/g/work/multiwfn2vesta/project/bin:$PATH
 multiwfn2vesta --help
 multiwfn2vesta examples --status ready
 multiwfn2vesta examples --coverage
+multiwfn2vesta examples --command grid-run
+multiwfn2vesta examples --gallery-assets
+multiwfn2vesta examples --systems
 multiwfn2vesta examples --verify
 ```
 
@@ -279,6 +282,9 @@ multiwfn2vesta examples --status needs-work
 multiwfn2vesta examples --id cdcl_trajectory_video
 multiwfn2vesta examples --coverage
 multiwfn2vesta examples --needs-render
+multiwfn2vesta examples --command aim-igmh
+multiwfn2vesta examples --gallery-assets
+multiwfn2vesta examples --systems
 multiwfn2vesta examples --json
 multiwfn2vesta examples --verify
 multiwfn2vesta examples --id cdcl_trajectory_video --verify-smoke
@@ -297,6 +303,10 @@ The feature-coverage view is the fastest way to answer "which real system
 should demonstrate this command?".  It reports whether a command is `ready`,
 covered through another ready workflow, still needs a better render, or still
 needs a real system.
+Use `--command <name-or-term>` to filter that view to one workflow, use
+`--gallery-assets` to list only committed PNG figures, and use `--systems`
+when choosing a real system for the next example instead of falling back to a
+toy placeholder.
 
 ## Find Multiwfn and VESTA
 

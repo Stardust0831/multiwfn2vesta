@@ -98,6 +98,93 @@ class TestExamplesIndex(unittest.TestCase):
         self.assertIn("surface-extrema", text)
         self.assertNotIn("aim-igmh", text)
 
+    def test_command_filter_implies_coverage(self):
+        output = io.StringIO()
+        with patch("sys.stdout", output):
+            code = examples.main(["--command", "trajectory-video"])
+
+        self.assertEqual(code, 0)
+        text = output.getvalue()
+        self.assertIn("feature example coverage", text)
+        self.assertIn("trajectory-video", text)
+        self.assertIn("cdcl_trajectory_video", text)
+        self.assertNotIn("surface-extrema", text)
+
+    def test_command_filter_supports_feature_terms_and_json(self):
+        output = io.StringIO()
+        with patch("sys.stdout", output):
+            code = examples.main(["--command", "rose", "--json"])
+
+        self.assertEqual(code, 0)
+        records = json.loads(output.getvalue())
+        commands = {item["command"] for item in records}
+        self.assertEqual(commands, {"grid-run --function rose/sedd"})
+
+    def test_command_filter_supports_cli_aliases(self):
+        output = io.StringIO()
+        with patch("sys.stdout", output):
+            code = examples.main(["--command", "rdg-run", "--json"])
+
+        self.assertEqual(code, 0)
+        records = json.loads(output.getvalue())
+        self.assertEqual([item["command"] for item in records], ["iri-run"])
+
+    def test_command_filter_examples_does_not_match_runbook_paths(self):
+        output = io.StringIO()
+        with patch("sys.stdout", output):
+            code = examples.main(["--command", "examples", "--json"])
+
+        self.assertEqual(code, 0)
+        records = json.loads(output.getvalue())
+        self.assertEqual([item["command"] for item in records], ["examples"])
+        self.assertEqual(records[0]["gallery"], ["docs/assets/gallery/current_feature_overview.png"])
+
+    def test_gallery_assets_output_lists_project_images(self):
+        output = io.StringIO()
+        with patch("sys.stdout", output):
+            code = examples.main(["--gallery-assets", "--status", "ready"])
+
+        self.assertEqual(code, 0)
+        text = output.getvalue()
+        self.assertIn("rendered gallery assets", text)
+        self.assertIn("ag111_benzene_igmh_aim_front.png", text)
+        self.assertIn("gc_aim_overlay.png", text)
+        self.assertIn("current_feature_overview.png", text)
+        self.assertNotIn("h2o_iri_aim_overlay.png", text)
+
+    def test_gallery_assets_json_includes_existence_flag(self):
+        output = io.StringIO()
+        with patch("sys.stdout", output):
+            code = examples.main(["--gallery-assets", "--id", "gc_aim", "--json"])
+
+        self.assertEqual(code, 0)
+        records = json.loads(output.getvalue())
+        self.assertEqual([item["example_id"] for item in records], ["gc_aim"])
+        self.assertTrue(records[0]["exists"])
+        self.assertEqual(records[0]["image"], "docs/assets/gallery/gc_aim_overlay.png")
+
+    def test_systems_output_lists_valuable_real_systems(self):
+        output = io.StringIO()
+        with patch("sys.stdout", output):
+            code = examples.main(["--systems"])
+
+        self.assertEqual(code, 0)
+        text = output.getvalue()
+        self.assertIn("recommended real systems", text)
+        self.assertIn("ag111_benzene", text)
+        self.assertIn("gc_base_pair", text)
+        self.assertIn("cof_12000n2_monolayer", text)
+
+    def test_systems_json_is_priority_ordered(self):
+        output = io.StringIO()
+        with patch("sys.stdout", output):
+            code = examples.main(["--systems", "--json"])
+
+        self.assertEqual(code, 0)
+        records = json.loads(output.getvalue())
+        self.assertEqual(records[0]["id"], "ag111_benzene")
+        self.assertLess(records[0]["priority"], records[-1]["priority"])
+
     def test_coverage_json_filter(self):
         output = io.StringIO()
         with patch("sys.stdout", output):

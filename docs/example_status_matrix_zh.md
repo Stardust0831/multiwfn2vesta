@@ -19,7 +19,18 @@
 ```bash
 multiwfn2vesta examples --coverage
 multiwfn2vesta examples --needs-render
+multiwfn2vesta examples --command aim-igmh
+multiwfn2vesta examples --gallery-assets
+multiwfn2vesta examples --systems
 ```
+
+本轮审计后的使用原则：
+
+- `ready` 只给已经有真实体系、runbook 和项目内 PNG 的功能；目前主力是 Ag(111)+benzene、GC AIM 和 Cd/Cl 轨迹。
+- `linked` 表示功能已被某个 ready workflow 间接覆盖，但还没有独立教程图。
+- `needs-render` 表示代码路径或 smoke 经验存在，但还必须真实渲染后才能进入手册主图。
+- `needs-example` 表示还缺真实输入链路；只能先给推荐体系和 runbook 计划。
+- 新功能闭环时先运行 `multiwfn2vesta examples --systems` 选体系，再用 `--command` 检查同类功能已有状态。
 
 ## 顶层 CLI 功能
 

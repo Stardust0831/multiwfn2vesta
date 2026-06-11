@@ -78,6 +78,9 @@ multiwfn2vesta examples --status needs-work
 multiwfn2vesta examples --id cdcl_trajectory_video
 multiwfn2vesta examples --coverage
 multiwfn2vesta examples --needs-render
+multiwfn2vesta examples --command grid-run
+multiwfn2vesta examples --gallery-assets
+multiwfn2vesta examples --systems
 multiwfn2vesta examples --verify
 multiwfn2vesta examples --id cdcl_trajectory_video --verify-smoke
 ```
@@ -89,6 +92,8 @@ mp4、PNG 序列或中间 VESTA frame，这些大文件默认不提交。需要�
 ```bash
 multiwfn2vesta examples --json
 multiwfn2vesta examples --coverage --json
+multiwfn2vesta examples --command aim-igmh --json
+multiwfn2vesta examples --gallery-assets --json
 ```
 
 `--coverage` 的粒度是功能，而不是单个体系。它会回答某个 CLI 命令现在应该用什么体系演示、
@@ -97,6 +102,38 @@ multiwfn2vesta examples --coverage --json
 ```bash
 multiwfn2vesta examples --needs-render
 ```
+
+如果已经知道要用哪个功能，直接按命令筛选：
+
+```bash
+multiwfn2vesta examples --command aim-igmh
+multiwfn2vesta examples --command grid-run
+multiwfn2vesta examples --command trajectory-video
+```
+
+如果目标是准备新 example，先看推荐真体系：
+
+```bash
+multiwfn2vesta examples --systems
+```
+
+当前推荐体系的取舍是：
+
+- Ag(111)+benzene：周期性 ABACUS LCAO Molden 主线，适合 IGMH/AIM、vdW、ESP、电场、后续 steric/SBL。
+- GC 碱基对：AIM 氢键拓扑已经 ready，适合继续补 IRI/RDG、RoSE/SEDD、surface extrema。
+- benzene dimer 或取代芳香二聚体：适合弱相互作用标量场、vdW、Fukui/dual descriptor 的轻量教程。
+- H2O-HF：保留为快速 IRI/AIM 调试体系，暂不作为最终手册主图。
+- COF_12000N2 单层：适合 ABACUS direct cube、电子密度、静电势、ELF/LOL、原子电荷染色。
+- open-shell/磁性体系：用于 spin density、Mulliken magnetism 和 atom value coloring。
+- Cd/Cl 轨迹：用于 trajectory frame、Boundary、成键判据和高码率视频。
+
+如果只想看当前已经提交到项目里的效果图：
+
+```bash
+multiwfn2vesta examples --gallery-assets
+```
+
+这一步不会启动 VESTA，也不会检查大体积 `smoke/` 文件；它只列出项目内轻量 PNG。
 
 ## 4. 推荐工作流总览
 

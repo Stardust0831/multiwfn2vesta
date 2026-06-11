@@ -16,6 +16,9 @@
 ```bash
 multiwfn2vesta examples --coverage
 multiwfn2vesta examples --needs-render
+multiwfn2vesta examples --command grid-run
+multiwfn2vesta examples --gallery-assets
+multiwfn2vesta examples --systems
 multiwfn2vesta examples --coverage --coverage-status ready
 multiwfn2vesta examples --coverage --json
 ```
@@ -86,6 +89,12 @@ multiwfn2vesta examples --coverage --json
 ![current feature overview](assets/gallery/current_feature_overview.png)
 
 单图入口见 `docs/example_gallery_zh.md`。
+
+CLI 入口补充：
+
+- `multiwfn2vesta examples --command <命令或关键词>`：从某个功能反查推荐体系、状态和下一步。
+- `multiwfn2vesta examples --gallery-assets`：只列出已提交的项目内 PNG，不检查本地大文件。
+- `multiwfn2vesta examples --systems`：列出当前推荐真体系，帮助新 example 避免 toy placeholder。
 
 ## 后续高价值扩展候选
 
