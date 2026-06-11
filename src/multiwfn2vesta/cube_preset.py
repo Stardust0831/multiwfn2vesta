@@ -210,7 +210,11 @@ PRESETS: Tuple[CubePreset, ...] = (
         surface_mode="single",
         isosurface=0.80,
         positive_rgb=(255, 190, 60),
-        notes="Use for ABACUS out_elf cubes or Multiwfn ELF cubes; tune the isosurface for each system.",
+        notes=(
+            "Use for ABACUS out_elf cubes or Multiwfn ELF cubes; tune the isosurface for each system. "
+            "grid-run defaults Multiwfn function 9 to ELFLOL_type=0 (Becke) and can patch "
+            "Tsirelson, Tian-Lu, or ELF-only D/D0 definitions with --elflol-type."
+        ),
     ),
     CubePreset(
         name="lol",
@@ -219,7 +223,11 @@ PRESETS: Tuple[CubePreset, ...] = (
         surface_mode="single",
         isosurface=0.50,
         positive_rgb=(120, 210, 120),
-        notes="Use for Multiwfn LOL cubes; tune the isosurface for each system.",
+        notes=(
+            "Use for Multiwfn LOL cubes; tune the isosurface for each system. "
+            "grid-run defaults Multiwfn function 10 to ELFLOL_type=0 (Becke) and can patch "
+            "Tsirelson or Tian-Lu definitions with --elflol-type."
+        ),
     ),
     CubePreset(
         name="local-information-entropy",

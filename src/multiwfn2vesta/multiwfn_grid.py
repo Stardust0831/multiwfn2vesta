@@ -71,8 +71,22 @@ GRID_FUNCTIONS: Tuple[GridFunction, ...] = (
         ("g-r", "g(r)", "kinetic-g", "lagrangian-kinetic-density"),
     ),
     GridFunction("nuclear-esp", 8, "nucleiesp.cub", "signed", ("nuc-esp", "nuclear-potential"), mapped_preset="esp"),
-    GridFunction("elf", 9, "ELF.cub", "elf", ("electron-localization-function",)),
-    GridFunction("lol", 10, "LOL.cub", "lol", ("localized-orbital-locator",)),
+    GridFunction(
+        "elf",
+        9,
+        "ELF.cub",
+        "elf",
+        ("electron-localization-function",),
+        settings_updates=(("ELFLOL_type", 0),),
+    ),
+    GridFunction(
+        "lol",
+        10,
+        "LOL.cub",
+        "lol",
+        ("localized-orbital-locator",),
+        settings_updates=(("ELFLOL_type", 0),),
+    ),
     GridFunction(
         "local-information-entropy",
         11,
@@ -275,6 +289,7 @@ class MultiwfnGridResult(NamedTuple):
     pair_correlation_type: Optional[int]
     source_function_mode: Optional[int]
     user_function_index: Optional[int]
+    elflol_type: Optional[int]
     settings_override: Optional[Path]
 
 
@@ -491,32 +506,64 @@ def _effective_user_function_index(function: GridFunction, value: Optional[int])
         raise
 
 
+def _normalize_elflol_type(value: Optional[object]) -> Optional[int]:
+    if value is None:
+        return None
+    text = str(value).strip().lower().replace("_", "-")
+    aliases = {
+        "0": 0,
+        "becke": 0,
+        "default": 0,
+        "original": 0,
+        "1": 1,
+        "tsirelson": 1,
+        "2": 2,
+        "tian-lu": 2,
+        "tianlu": 2,
+        "special": 2,
+        "new": 2,
+        "3": 3,
+        "d-over-d0": 3,
+        "d/d0": 3,
+        "dd0": 3,
+        "d-d0": 3,
+    }
+    try:
+        return aliases[text]
+    except KeyError:
+        raise ValueError(
+            "--elflol-type must be one of 0/becke, 1/tsirelson, "
+            "2/tian-lu, or 3/d-over-d0"
+        )
+
+
 def _write_run_local_settings(
     path: Path,
     updates: Dict[str, int],
     *,
     base_settings: Optional[Path] = None,
 ) -> None:
-    normalized_updates = {key.lower(): int(value) for key, value in updates.items()}
+    normalized_updates = {str(key): int(value) for key, value in updates.items()}
+    match_updates = {key.lower(): (key, value) for key, value in normalized_updates.items()}
     path.parent.mkdir(parents=True, exist_ok=True)
     if base_settings is not None and base_settings.exists():
         text = base_settings.read_text(encoding="utf-8", errors="replace")
         lines = text.splitlines()
         replaced = set()
         for index, line in enumerate(lines):
-            for key, value in normalized_updates.items():
-                if key in replaced:
+            for match_key, (output_key, value) in match_updates.items():
+                if match_key in replaced:
                     continue
-                if re.match(rf"\s*{re.escape(key)}\s*=", line, flags=re.IGNORECASE):
+                if re.match(rf"\s*{re.escape(output_key)}\s*=", line, flags=re.IGNORECASE):
                     suffix = ""
                     comment_index = line.find("//")
                     if comment_index != -1:
                         suffix = " " + line[comment_index:].lstrip()
                     indent = re.match(r"\s*", line).group(0)
-                    lines[index] = f"{indent}{key}= {value}{suffix}"
-                    replaced.add(key)
+                    lines[index] = f"{indent}{output_key}= {value}{suffix}"
+                    replaced.add(match_key)
                     break
-        missing = [key for key in normalized_updates if key not in replaced]
+        missing = [key for key in normalized_updates if key.lower() not in replaced]
         if missing:
             if lines and lines[-1].strip():
                 lines.append("")
@@ -799,6 +846,7 @@ def _write_recipe(
     pair_correlation_type: Optional[int] = None,
     source_function_mode: Optional[int] = None,
     user_function_index: Optional[int] = None,
+    elflol_type: Optional[int] = None,
     settings_override: Optional[Path] = None,
     error: Optional[str] = None,
 ) -> None:
@@ -826,6 +874,7 @@ def _write_recipe(
         pair_correlation_type = result.pair_correlation_type
         source_function_mode = result.source_function_mode
         user_function_index = result.user_function_index
+        elflol_type = result.elflol_type
         settings_override = result.settings_override
 
     lines = [
@@ -863,6 +912,7 @@ def _write_recipe(
             f"- pair_correlation_type: `{pair_correlation_type}`",
             f"- source_function_mode: `{source_function_mode}`",
             f"- user_function_index_iuserfunc: `{user_function_index}`",
+            f"- elflol_type: `{elflol_type}`",
             f"- local_settings_file: `{settings_override}`",
             f"- vesta_file: `{vesta_result.vesta_path if vesta_result is not None else None}`",
             f"- vesta_recipe: `{vesta_result.manifest_path if vesta_result is not None else None}`",
@@ -875,6 +925,7 @@ def _write_recipe(
             "- The default cube filename is determined by the selected real-space function index in Multiwfn source `0123dim.f90`.",
             "- Function `17` uses `pairfunc(refx,refy,refz,x,y,z)` for correlation hole/factor, exchange-correlation density, or pair density; the maintained stream sets the reference point through main menu `1000 -> 1`, copies the selected Multiwfn `settings.ini` when available, patches `pairfunctype` and `paircorrtype`, and passes the run-local settings file through `-set`.",
             "- Function `19` source function uses global `refx,refy,refz` and `srcfuncmode`; the maintained stream sets the reference point through main menu `1000 -> 1`, copies the selected Multiwfn `settings.ini` when available, patches `srcfuncmode`, and passes the run-local settings file through `-set`.",
+            "- Functions `9` and `10` evaluate ELF/LOL according to `ELFLOL_type`; the maintained stream defaults ordinary `elf`/`lol` to Becke definitions (`0`) and can patch other supported definitions through a run-local settings file.  D/D0 type `3` is accepted only for ELF because Multiwfn implements it only in the ELF branch.",
             "- Function `20` EDR(r;d) asks for length scale `d` in Bohr before grid setup and exports `EDR.cub`.",
             "- Function `21` D(r) can use Multiwfn's default EDR exponent set `20, 2.50, 1.50` or a manual count/start/increment set and exports `EDRDmax.cub`.",
             "- Function `100` evaluates `userfunc(x,y,z)` using `iuserfunc` from settings; the maintained stream copies the selected Multiwfn `settings.ini` when available, patches `iuserfunc`, passes the run-local settings file through `-set`, and exports `userfunc.cub`.  Special external-grid modes `-1`, `-3`, and Shubin `57/58/59` are intentionally excluded from this generic route.",
@@ -978,6 +1029,7 @@ def run_multiwfn_grid(
     pair_correlation_type: Optional[int] = None,
     source_function_mode: Optional[int] = None,
     user_function_index: Optional[int] = None,
+    elflol_type: Optional[object] = None,
     timeout: Optional[int] = None,
     nthreads: Optional[int] = None,
     stem: Optional[str] = None,
@@ -1015,6 +1067,7 @@ def run_multiwfn_grid(
     normalized_pair_correlation_type: Optional[int] = None
     normalized_source_function_mode: Optional[int] = None
     normalized_user_function_index: Optional[int] = None
+    normalized_elflol_type: Optional[int] = None
     if function.index in {17, 19}:
         normalized_reference_point = _normalize_reference_point(reference_point)
         normalized_reference_unit = _normalize_reference_unit(reference_unit)
@@ -1044,6 +1097,12 @@ def run_multiwfn_grid(
         normalized_user_function_index = _effective_user_function_index(function, user_function_index)
     elif user_function_index is not None:
         raise ValueError("--user-function-index is only valid for user-function")
+    if function.index in {9, 10}:
+        normalized_elflol_type = _normalize_elflol_type(elflol_type)
+        if function.index == 10 and normalized_elflol_type == 3:
+            raise ValueError("--elflol-type 3/d-over-d0 is only valid for elf, not lol")
+    elif elflol_type is not None:
+        raise ValueError("--elflol-type is only valid for elf and lol")
     candidate = find_multiwfn(multiwfn_path)
     if candidate is None:
         raise FileNotFoundError(
@@ -1086,6 +1145,13 @@ def run_multiwfn_grid(
         settings_updates["iuserfunc"] = (
             normalized_user_function_index if normalized_user_function_index is not None else 0
         )
+    if function.index in {9, 10} and normalized_elflol_type is not None:
+        settings_updates["ELFLOL_type"] = normalized_elflol_type
+    effective_elflol_type = (
+        normalized_elflol_type
+        if normalized_elflol_type is not None
+        else settings_updates.get("ELFLOL_type")
+    )
 
     settings_override: Optional[Path] = None
     if settings_updates:
@@ -1184,6 +1250,7 @@ def run_multiwfn_grid(
             pair_correlation_type=normalized_pair_correlation_type,
             source_function_mode=normalized_source_function_mode,
             user_function_index=normalized_user_function_index,
+            elflol_type=effective_elflol_type,
             settings_override=settings_override,
             error=error,
         )
@@ -1217,6 +1284,7 @@ def run_multiwfn_grid(
             pair_correlation_type=normalized_pair_correlation_type,
             source_function_mode=normalized_source_function_mode,
             user_function_index=normalized_user_function_index,
+            elflol_type=effective_elflol_type,
             settings_override=settings_override,
         )
     except OSError as exc:
@@ -1245,6 +1313,7 @@ def run_multiwfn_grid(
             pair_correlation_type=normalized_pair_correlation_type,
             source_function_mode=normalized_source_function_mode,
             user_function_index=normalized_user_function_index,
+            elflol_type=effective_elflol_type,
             settings_override=settings_override,
             error=error,
         )
@@ -1278,6 +1347,7 @@ def run_multiwfn_grid(
             pair_correlation_type=normalized_pair_correlation_type,
             source_function_mode=normalized_source_function_mode,
             user_function_index=normalized_user_function_index,
+            elflol_type=effective_elflol_type,
             settings_override=settings_override,
         )
 
@@ -1370,6 +1440,7 @@ def run_multiwfn_grid(
         pair_correlation_type=normalized_pair_correlation_type,
         source_function_mode=normalized_source_function_mode,
         user_function_index=normalized_user_function_index,
+        elflol_type=effective_elflol_type,
         settings_override=settings_override,
     )
     _write_recipe(recipe_path, result=result)
@@ -1645,6 +1716,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "handled by this generic route."
         ),
     )
+    parser.add_argument(
+        "--elflol-type",
+        default=None,
+        help=(
+            "Multiwfn ELFLOL_type for function 9 ELF or function 10 LOL. "
+            "Accepted values/aliases: 0/becke, 1/tsirelson, 2/tian-lu, "
+            "3/d-over-d0 (ELF only). Ordinary elf/lol default to Becke "
+            "definitions."
+        ),
+    )
     parser.add_argument("--timeout", type=int)
     parser.add_argument("--nthreads", type=int)
     parser.add_argument("--stem")
@@ -1725,14 +1806,15 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 or args.pair_correlation_type is not None
                 or args.source_function_mode is not None
                 or args.user_function_index is not None
+                or args.elflol_type is not None
             ):
                 raise ValueError(
                     "--edr-length, --edr-exponents, --becke-atoms, "
                     "--hirshfeld-atoms, --hirshfeld-density-type, "
                     "--reference-point, --reference-unit, "
                     "--pair-function-type, --pair-correlation-type, and "
-                    "--source-function-mode, --user-function-index are not "
-                    "supported with --orbitals"
+                    "--source-function-mode, --user-function-index, and "
+                    "--elflol-type are not supported with --orbitals"
                 )
             result = run_multiwfn_grid_batch(
                 args.wavefunction,
@@ -1795,6 +1877,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             pair_correlation_type=args.pair_correlation_type,
             source_function_mode=args.source_function_mode,
             user_function_index=args.user_function_index,
+            elflol_type=args.elflol_type,
             timeout=args.timeout,
             nthreads=args.nthreads,
             stem=args.stem,

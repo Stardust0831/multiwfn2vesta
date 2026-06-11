@@ -461,6 +461,11 @@ both use Multiwfn function `5` and raw `spindensity.cub`; the runner
 disambiguates them by copying the selected Multiwfn `settings.ini` when
 available, patching run-local `ipolarpara=0` or `ipolarpara=1`, and passing
 that file with `-set`.
+`grid-run --function elf` and `grid-run --function lol` both patch run-local
+`ELFLOL_type=0` by default, fixing ordinary Becke ELF/LOL definitions.  Use
+`--elflol-type tsirelson` or `--elflol-type tian-lu` to request alternate
+ELF/LOL definitions, or `--elflol-type d-over-d0` for the ELF-only D/D0 term
+without changing global settings.
 Generic `grid-run --function user-function` requires `--user-function-index
 IUSERFUNC`; named routes automatically patch common source-backed values:
 `local-electron-affinity` / `lea` = `27`,

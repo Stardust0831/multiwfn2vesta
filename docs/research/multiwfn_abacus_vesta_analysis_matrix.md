@@ -33,6 +33,14 @@ Multiwfn evidence:
   both cases as `spindensity.cub`.  The maintained runner therefore patches
   `ipolarpara` through a run-local `multiwfn_grid_settings.ini` and `-set`
   for both `spin-density` and `spin-polarization`.
+- Multiwfn `settings.ini` key `ELFLOL_type` changes main-function-5 functions
+  `9`/`10` between Becke (`0`), Tsirelson (`1`), and Tian Lu/special (`2`)
+  ELF/LOL definitions; D/D0-only (`3`) is implemented only in the ELF
+  branch.  Local `function.f90` changes the function labels and `ELF_LOL`
+  formulae according to this setting, while `0123dim.f90` still exports
+  `ELF.cub` and `LOL.cub`.  The maintained runner defaults ordinary
+  `elf`/`lol` to run-local `ELFLOL_type=0`, exposes `--elflol-type` for the
+  other supported variants, and rejects LOL+D/D0.
 - Multiwfn `function.f90` lists function `22` as Delta-g with promolecular
   approximation, and `0123dim.f90` exports it as `Delta_g.cub` while leaving
   the global `sur_value=0.05`; this standalone cube is separate from
@@ -190,7 +198,7 @@ occupations, and density derivatives from the wavefunction representation.
 | Generic cube visualizer | Any `.cub` from Multiwfn or ABACUS | Strong: `out_chg`, `out_pot`, `out_pchg`, `out_wfc_*`, `out_elf` | Cube | Density/texture import, isosurface, section off by default | Implemented as `multiwfn2vesta cube-vesta`; `cube-preset` adds common analysis defaults, including direct ABACUS potential/partial-charge/wavefunction-norm presets |
 | Molecular orbitals and band wavefunctions | Full wavefunction Molden/FCH/WFN, or ABACUS real-space `get_wf` cubes | Strong for Gamma LCAO Molden; direct cube route for selected bands | `orb*.cub`, `MOvalue.cub`, `orbdens.cub`, or ABACUS `wfi*.cube` | Positive/negative orbital isosurfaces; orbital-density magnitude as a single surface | `cube-preset orbital` and `cube-preset orbital-density` implemented; `grid-run --function orbital --orbital ...`, `grid-run --function orbital-density --orbital ...`, and `grid-run --orbitals ...` cover isolated orbital exports |
 | Electron density, gradient norm, spin density/spin polarization, Laplacian, kinetic density | Full wavefunction, or ABACUS density cubes for density only | Strong for density cube; Molden route for derivatives | `density.cub`, `gradient.cub`, `spindensity.cub`, `laplacian.cub`, `K(r).cub`, `G(r).cub` | Single/positive-negative isosurfaces or slices | `grid-run` now covers density, gradient norm, spin density, spin-polarization parameter, Laplacian, and K(r)/G(r) single cubes; `cube-preset gradient-norm`, `spin-density`, `spin-polarization`, `laplacian`, `hamiltonian-ked`, and `lagrangian-ked` provide maintained display defaults; `grid-run` writes run-local `ipolarpara=0/1` for the two function-5 routes, and `cube-arith --operation spin-density` builds alpha-minus-beta spin-density cubes from compatible spin-channel density cubes and routes them to `cube-preset spin-density` |
-| ELF/LOL | Full wavefunction; ABACUS direct `out_elf` for ELF | Strong for ELF direct; Molden route for Multiwfn ELF/LOL | `ELF.cub`, `LOL.cub`, ABACUS `elf*.cube` | Isosurfaces around localized regions | `grid-run` now covers Multiwfn ELF/LOL; `cube-preset elf/lol` remains the VESTA writer |
+| ELF/LOL | Full wavefunction; ABACUS direct `out_elf` for ELF | Strong for ELF direct; Molden route for Multiwfn ELF/LOL | `ELF.cub`, `LOL.cub`, ABACUS `elf*.cube` | Isosurfaces around localized regions | `grid-run` covers Multiwfn ELF/LOL and now fixes ordinary `elf`/`lol` to run-local `ELFLOL_type=0`; `--elflol-type tsirelson/tian-lu` exposes alternate ELF/LOL definitions, `d-over-d0` is accepted only for ELF, and `cube-preset elf/lol` remains the VESTA writer |
 | AIM/QTAIM topology | Full wavefunction Molden/FCH/WFN/WFX | Feasible for Gamma LCAO Molden with `[Nval]`; validated on Ag(111)+benzene | `CPs.pdb`, `paths.pdb`, `CPprop.txt`, `mol.pdb` | Atoms-only pseudo-sites, no AIM bonds, optional labels | Already partly implemented; add ABACUS-aware recipes |
 | IGM/IGMH + AIM overlay | Full wavefunction and fragment definitions | Feasible for Gamma LCAO Molden; validated on Ag(111)+benzene | `dg_inter.cub`, `sl2r.cub`, AIM PDBs | Multi-phase VESTA density/texture plus AIM pseudo-sites | `igmh-run`/`igm-run`/`migm-run` now automate standard Multiwfn fragment streams and call `cube-preset igmh`/`igm`; saved AIM+IGMH overlay styling is implemented |
 | aIGM/amIGM trajectory average | Multiwfn-readable trajectory plus fragment definitions | Indirect: ABACUS can provide AIMD trajectories, not a single Molden route | `avgdg_inter.cub`, `avgsl2r.cub`, optional `avgRDG.cub`, `thermflu.cub` | Averaged delta-g surface colored by averaged sign(lambda2)rho or TFI | `aigm-run`/`amigm-run` now automate the trajectory-average stream and call `cube-preset aigm`/`aigm-tfi` |
@@ -401,6 +409,10 @@ Main gaps:
   iri-scalar` route and `grid-run --function iri` maps to it.  The existing
   `cube-preset iri`/`rdg` route remains reserved for two-cube IRI/RDG/NCI
   surfaces colored by sign(lambda2)rho-like texture cubes.
+- ELF/LOL visualization now patches `ELFLOL_type=0` through run-local
+  settings by default for `grid-run --function elf/lol`, and
+  `--elflol-type` exposes Tsirelson and Tian-Lu/special for ELF/LOL, plus
+  ELF-only D/D0, without changing global Multiwfn settings.
 - Local information entropy now has a distinct `cube-preset
   local-information-entropy` route and `grid-run --function
   information-entropy` maps to Multiwfn function `11` `infoentro.cub`.

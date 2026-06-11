@@ -76,7 +76,8 @@ multiwfn2vesta aim-igmh --help
   `avgRDG.cub`、`thermflu.cub`、`output.txt`，再通过 `cube-preset aigm`
   或 `cube-preset aigm-tfi` 写 mapped-surface `.vesta`
 - `grid-run`: 从 Multiwfn 可读波函数文件调用主菜单 `5` 的 real-space
-  function grid，导出 density、MO/orbital、Laplacian、K(r)/G(r)、ELF、LOL、
+  function grid，导出 density、MO/orbital、Laplacian、K(r)/G(r)、ELF/LOL
+  及其 `ELFLOL_type` 变体、
   ESP/MEP、ALIE、EDR(r;d)、D(r)、RDG/IRI-like、
   promolecular RDG/sign(lambda2)rho 等单 cube，并可自动接 `cube-preset`
   写 `.vesta`
@@ -370,7 +371,11 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
 - `wavefunction-norm`：单正值等值面，别名包括 `out-wfc-norm`、
   `wavefunction-magnitude`，用于 ABACUS `out_wfc_norm` 非负波函数模/模方；
   对 `out_wfc_re_im` 的实部/虚部 signed cube 仍用 `signed`/`orbital`
-- `elf` / `lol`：局域化函数等值面
+- `elf` / `lol`：局域化函数等值面；通过 `grid-run` 生成时默认会复制所选
+  Multiwfn `settings.ini` 并写本地 `ELFLOL_type=0`，固定为 Becke ELF/LOL
+  定义。用 `--elflol-type tsirelson` 或 `--elflol-type tian-lu` 可以生成其它
+  Multiwfn 支持的 ELF/LOL 变体；`--elflol-type d-over-d0` 只适用于 ELF 的
+  D/D0 项，且不改全局 settings
 - `stm`：别名包括 `ldos`、`stm-ldos`、`tunneling-current`，用于
   Multiwfn 常电流 STM 导出的 `STM.cub`，默认等值面 `0.001`
 - `domain`：别名包括 `domain-cube`、`domain-analysis`、`binary-domain`，
@@ -831,6 +836,15 @@ bin/multiwfn2vesta grid-run \
 `h2o_density_density_cube.vesta` 和两个 recipe。另一个真实 smoke 用
 `--function elf --no-vesta` 生成 raw `ELF.cub` 和 `h2o_elf.cub`：
 `/mnt/g/work/multiwfn2vesta/smoke/multiwfn_grid_run_smoke_20260610_h2o_elf/products/`。
+普通 `elf`/`lol` 会固定 `ELFLOL_type=0`；`tsirelson`/`tian-lu` 可用于
+ELF 和 LOL，`d-over-d0` 是 ELF-only。显式变体示例：
+
+```bash
+multiwfn2vesta grid-run input.fch grid_products \
+  --function lol \
+  --elflol-type tsirelson \
+  --grid-points 80 80 80
+```
 
 新增 mapped-surface smoke：
 `/mnt/g/work/multiwfn2vesta/smoke/multiwfn_grid_surface_cube_map_20260610/h2o_esp_map/`。

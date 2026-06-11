@@ -56,8 +56,15 @@ multiwfn2vesta grid-run --list-functions
   `lagrangian-ked` with a single positive isosurface.
 - `nuclear-esp`: function `8`, raw `nucleiesp.cub`, preset `signed`;
   mapped preset `esp` when `--surface-cube` is supplied.
-- `elf`: function `9`, raw `ELF.cub`, preset `elf`.
-- `lol`: function `10`, raw `LOL.cub`, preset `lol`.
+- `elf`: function `9`, raw `ELF.cub`, preset `elf`.  The runner writes
+  run-local `ELFLOL_type=0` by default, so ordinary ELF uses the Becke
+  definition even if the global Multiwfn settings were changed.  Use
+  `--elflol-type 1/tsirelson` or `2/tian-lu` for alternate ELF definitions,
+  and `3/d-over-d0` only when the ELF D/D0 term is desired.
+- `lol`: function `10`, raw `LOL.cub`, preset `lol`.  It uses the same
+  `ELFLOL_type` mechanism as ELF and also defaults to the Becke definition.
+  LOL supports `tsirelson` and `tian-lu`; the D/D0-only type is rejected
+  because Multiwfn implements it only for ELF.
 - `local-information-entropy`, aliases `information-entropy`, `infoentro`,
   `local-info-entropy`, `local-shannon-entropy`: function `11`, raw
   `infoentro.cub`, preset `local-information-entropy` with signed
@@ -277,6 +284,7 @@ multiwfn2vesta grid-run input.fch products --function spin-polarization
 multiwfn2vesta grid-run input.fch products --function orbital --orbital h
 multiwfn2vesta grid-run input.fch products --orbitals h l l+1 --no-vesta
 multiwfn2vesta grid-run input.fch products --function elf
+multiwfn2vesta grid-run input.fch products --function lol --elflol-type tsirelson
 multiwfn2vesta grid-run input.fch products --function esp --no-vesta
 multiwfn2vesta grid-run input.fch products --function esp --surface-cube density.cub --grid-mode cube --grid-cube density.cub
 multiwfn2vesta grid-run input.fch products --function hamiltonian-ked --no-vesta

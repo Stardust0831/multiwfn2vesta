@@ -1,5 +1,37 @@
 # Worklog
 
+## 2026-06-11: ELF/LOL run-local definition control
+
+- Continued the long-running ABACUS/Multiwfn/VESTA analysis objective by
+  adding a settings-controlled variant route rather than a new function
+  number.
+- Rechecked local Multiwfn 2026.6.2 source evidence: `settings.ini` defines
+  `ELFLOL_type=0/1/2/3`; `function.f90` changes function `9`/`10` labels and
+  the `ELF_LOL` formulae according to this setting; `0123dim.f90` still
+  exports `ELF.cub` and `LOL.cub`.
+- `grid-run --function elf` and `grid-run --function lol` now write a
+  run-local `multiwfn_grid_settings.ini` with `ELFLOL_type=0` by default,
+  preserving ordinary Becke ELF/LOL semantics even if the user's global
+  Multiwfn settings were changed.
+- Added `--elflol-type` aliases for the other supported definitions:
+  `tsirelson`, `tian-lu`, and ELF-only `d-over-d0`.  The value is recorded
+  in the grid recipe as `elflol_type`, and LOL now rejects the D/D0-only
+  mode because Multiwfn implements it only in the ELF branch.
+- Updated cube-preset notes, README repository status, usage notes, reusable
+  skill notes, research matrix, and kanban before final validation and commit
+  closeout.
+- Read-only subagent review found one blocker: `ELFLOL_type=3` is only
+  implemented for ELF in Multiwfn, so `grid-run --function lol --elflol-type
+  d-over-d0` must not be accepted.  The final code rejects that combination
+  and documents D/D0 as ELF-only.
+- Validation passed: focused `py_compile`, focused
+  `tests.test_multiwfn_grid` with 60 tests, combined
+  `tests.test_multiwfn_grid tests.test_cube_preset` with 104 tests, full
+  no-GUI `unittest discover -s tests -v` with 320 tests, CLI smoke for
+  `grid-run --list-functions`, `grid-run --help`, and
+  `cube-preset --list-presets`, `git diff --check`, and root docs checksum
+  mirror dry-run.
+
 ## 2026-06-11: Spin-polarization grid route and README branch refresh
 
 - User requested a README refresh, branch consolidation check, and continued

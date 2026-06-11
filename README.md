@@ -25,8 +25,9 @@ point.
   local `main`, `origin/main`, and `origin/HEAD`; `git ls-remote --heads
   origin` returned only `refs/heads/main`.  No merge-back was needed because
   there was no extra local or remote feature branch to consolidate.
-- Feature closeouts, including the user-function and spin-polarization grid
-  routes, are kept on the maintained `main` branch.  Use
+- Feature closeouts, including the user-function, spin-polarization, and
+  ELF/LOL definition-control grid routes, are kept on the maintained `main`
+  branch.  Use
   `git log --oneline --decorate -5` after pulling if an exact current commit
   hash is needed.
 - Local untracked probe files such as `domain.cub` and `domain.pdb` are not
@@ -134,7 +135,8 @@ then delete the temporary branch.
 - Run Multiwfn main function `5` real-space grid generation from a
   wavefunction file, export density, orbital/MO, spin density,
   spin-polarization parameter, Laplacian, K(r)/G(r) kinetic-energy-density
-  cubes, ELF, LOL, ESP/MEP, ALIE, RDG/IRI-like,
+  cubes, ELF/LOL with run-local `ELFLOL_type` control, ESP/MEP,
+  ALIE, RDG/IRI-like,
   promolecular RDG/sign(lambda2)rho, local information entropy, EDR(r;d),
   orbital-overlap distance D(r), pair/correlation functions with run-local
   `pairfunctype`/`paircorrtype`, source function with run-local
@@ -697,6 +699,11 @@ Common functions:
   `--surface-cube`, it maps through `cube-preset vdw-map` instead so the
   generated vdW potential cube colors an existing density/surface cube.
 - `elf` and `lol`: localization cubes, defaulting to `cube-preset elf/lol`.
+  The runner copies the selected Multiwfn `settings.ini` when available and
+  writes run-local `ELFLOL_type=0` for ordinary Becke ELF/LOL definitions.
+  Use `--elflol-type tsirelson` or `--elflol-type tian-lu` for alternate
+  ELF/LOL definitions, or `--elflol-type d-over-d0` for the ELF-only D/D0
+  term, without changing global settings.
 - `alie` / `avglocion`: function `18`, raw `avglocion.cub`.  With
   `--surface-cube density.cub`, the generated ALIE cube is used as the
   texture for `cube-preset alie`.
@@ -729,6 +736,13 @@ Grid setup defaults to explicit point counts:
 ```bash
 multiwfn2vesta grid-run input.fch grid_products \
   --function elf \
+  --elflol-type becke \
+  --grid-mode points \
+  --grid-points 120 120 120
+
+multiwfn2vesta grid-run input.fch grid_products \
+  --function lol \
+  --elflol-type tsirelson \
   --grid-mode points \
   --grid-points 120 120 120
 

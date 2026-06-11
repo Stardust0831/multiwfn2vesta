@@ -327,7 +327,12 @@ passes it back through `cube-preset`.
   nonnegative ABACUS `out_wfc_norm` cubes, default isosurface `0.001`.
   Use `signed`/`orbital` for real/imaginary `out_wfc_re_im` cubes.
 - `elf` alias: `abacus-elf`; single surface, default isosurface `0.80`.
-- `lol`; single surface, default isosurface `0.50`.
+  For Multiwfn-generated ELF, `grid-run` defaults function `9` to
+  `ELFLOL_type=0` and accepts `--elflol-type` for Tsirelson/Tian-Lu
+  variants, plus ELF-only D/D0.
+- `lol`; single surface, default isosurface `0.50`.  Multiwfn LOL uses the
+  same run-local `ELFLOL_type` control as ELF when generated through
+  `grid-run`.
 - `iri` aliases: `rdg`, `nci`, `weak-interaction`; requires
   `--texture-cube`, defaults to `--isosurface 1.0`,
   `--tex-physical -0.04 0.04`, and surface-band texture scaling.

@@ -1,37 +1,58 @@
 # Project Kanban
 
-Updated: 2026-06-11 19:35 CST
+Updated: 2026-06-11 19:29 CST
 
-## Current Request: 2026-06-11 README Update And Branch Consolidation With Spin Route
+## Active Goal Continuation: 2026-06-11 Next Wavefunction Visualization Increment
+
+- [x] Record automatic continuation of the long-running objective: keep
+  surveying Multiwfn analyses that can become VESTA products, prioritizing
+  routes that ABACUS can feed through LCAO Molden files or direct cube
+  outputs.
+- [x] Recheck current branch and worktree before editing.  Local `main` is
+  aligned with `origin/main` at
+  `e5f9d7aa1016d2ffb7df5a60b1a63708a0b5008d`; only local untracked probes
+  `domain.cub` and `domain.pdb` are present and must remain uncommitted.
+- [x] Recheck current `grid-run` and `cube-preset` coverage against local
+  Multiwfn source and select one bounded, source-backed next increment.
+  Selected increment: expose run-local `ELFLOL_type` control for
+  `grid-run --function elf/lol`.  Source evidence: Multiwfn `settings.ini`
+  defines `ELFLOL_type=0/1/2/3`; `function.f90` changes function `9/10`
+  labels between Becke, Tsirelson, and Tian Lu definitions according to this
+  setting; `ELF_LOL` evaluates different formulae; and `0123dim.f90` still
+  exports `ELF.cub`/`LOL.cub`.  The implementation should patch a run-local
+  settings file and default ordinary `elf`/`lol` to Becke definitions so
+  global Multiwfn settings do not silently change output semantics.
+- [x] Implement the selected increment with tests, documentation, root docs
+  sync, validation, review, commit, push, and branch verification.  The
+  implementation and docs are complete; final commit hash and post-push
+  branch alignment are reported in the assistant response to avoid a
+  self-referential hash here.
+
+## Current Request: 2026-06-11 README Update And Branch Consolidation With ELF/LOL Route
 
 - [x] Record user request immediately: update README, inspect the unusual
   branch state, converge back to one maintained branch if needed, and keep
   git identity as `Stardust0831`.
 - [x] Confirm current repository-local identity is already
   `Stardust0831 <13862180016@163.com>`.
-- [x] Recheck local/remote branches after fetch and decide whether a merge is
-  actually needed.  After `git fetch --prune origin`, local `main`,
-  `origin/main`, and `origin/HEAD` point at
-  `cc56b650b26a9138a93cd6a8386ec6d3c5e52870`; `git ls-remote --heads
+- [x] Recheck local/remote branches and decide whether a merge is actually
+  needed.  Local `main`, `origin/main`, and `origin/HEAD` are aligned at
+  `e5f9d7aa1016d2ffb7df5a60b1a63708a0b5008d`; `git ls-remote --heads
   origin` exposes only `refs/heads/main`, so there is no extra branch to
-  merge back.
-- [x] Finish or explicitly defer the current uncommitted spin-polarization
-  route before updating README, so documentation reflects the real CLI state.
-  Decision: finish it now.  Added `grid-run --function spin-polarization`,
-  `cube-preset spin-polarization`, run-local `ipolarpara=0/1` handling for
-  the two function-5 routes, focused tests, and README/usage/skill/research
-  notes.
-- [x] Sync root docs mirror, validate, review, commit, push, and verify final
-  branch alignment while preserving local untracked `domain.cub` and
-  `domain.pdb`.  Pre-commit status: root docs checksum dry-run is empty;
-  focused 101-test cube/grid regression passed; full no-GUI regression passed
-  with 317 tests; focused `py_compile`, `grid-run --list-functions`,
-  `cube-preset --list-presets`, `grid-run --help`, `multiwfn2vesta --help`,
-  and `git diff --check` passed.  Read-only subagent review found no
-  blocker and approved commit, with the caveat to keep `domain.cub` and
-  `domain.pdb` untracked.  Final commit hash and post-push branch alignment
-  are reported in the assistant response to avoid a self-referential hash in
-  this document.
+  merge back right now.
+- [x] Preserve local untracked probe files `domain.cub` and `domain.pdb`;
+  they are not part of the maintained branch state.
+- [x] Finish the current uncommitted ELF/LOL run-local definition-control
+  route, update README/usage/skill/research/worklog notes, sync root docs,
+  validate, review, commit, push, and verify final one-branch alignment.
+  Final pre-commit state: README and docs are updated, root docs checksum
+  dry-run is empty, focused `py_compile` passed, `tests.test_multiwfn_grid`
+  passed with 60 tests, combined cube/grid tests passed with 104 tests, full
+  no-GUI regression passed with 320 tests, CLI smoke passed, and
+  `git diff --check` is clean.  Read-only subagent review found one blocker
+  (`LOL + d-over-d0`), which was fixed by making D/D0 ELF-only in code,
+  docs, and tests.  Final commit hash and post-push branch alignment are
+  reported in the assistant response.
 
 ## Active Goal Continuation: 2026-06-11 Spin Polarization Survey
 

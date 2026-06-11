@@ -190,6 +190,7 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertIn("preset=spin-polarization", text)
         self.assertIn("settings: ipolarpara=0", text)
         self.assertIn("settings: ipolarpara=1", text)
+        self.assertIn("settings: ELFLOL_type=0", text)
         self.assertIn("preset=laplacian", text)
         self.assertIn("preset=hamiltonian-ked", text)
         self.assertIn("preset=lagrangian-ked", text)
@@ -233,6 +234,8 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertEqual(resolve_grid_function("spin-polarization").preset, "spin-polarization")
         self.assertEqual(resolve_grid_function("spin-pol").settings_updates, (("ipolarpara", 1),))
         self.assertEqual(resolve_grid_function(None, 5).name, "spin-density")
+        self.assertEqual(resolve_grid_function("elf").settings_updates, (("ELFLOL_type", 0),))
+        self.assertEqual(resolve_grid_function("lol").settings_updates, (("ELFLOL_type", 0),))
         self.assertEqual(resolve_grid_function("lap").preset, "laplacian")
         self.assertEqual(resolve_grid_function("orbdens").preset, "orbital-density")
         self.assertEqual(resolve_grid_function("rdg").preset, "rdg-scalar")
@@ -674,6 +677,72 @@ class TestMultiwfnGridRunner(unittest.TestCase):
                     self.assertIn("local_settings_file:", recipe)
                     manifest = result.vesta_result.manifest_path.read_text(encoding="utf-8")
                     self.assertIn(f"canonical_preset: `{expected_preset}`", manifest)
+
+    def test_run_multiwfn_grid_elf_lol_routes_patch_elflol_type(self):
+        cases = (
+            ("elf", None, "0", "ELF.cub", "elf"),
+            ("elf", "d-over-d0", "3", "ELF.cub", "elf"),
+            ("lol", "tsirelson", "1", "LOL.cub", "lol"),
+        )
+        for function_name, requested_type, expected_value, raw_name, expected_preset in cases:
+            with self.subTest(function_name=function_name):
+                with tempfile.TemporaryDirectory() as tmp:
+                    root = Path(tmp)
+                    wavefunction = root / "h2o.fch"
+                    wavefunction.write_text("wavefunction", encoding="utf-8")
+                    candidate = self.make_candidate(root)
+                    (candidate.path.parent / "settings.ini").write_text(
+                        "ELFLOL_type= 2 // stale global setting\nother_setting= keep\n",
+                        encoding="utf-8",
+                    )
+
+                    def fake_run(command, **kwargs):
+                        cwd = Path(kwargs["cwd"])
+                        (cwd / raw_name).write_text(IRI_CUBE, encoding="utf-8")
+                        return subprocess.CompletedProcess(command, 0, stdout="ok", stderr="")
+
+                    with patch("multiwfn2vesta.multiwfn_grid.find_multiwfn", return_value=candidate):
+                        with patch("multiwfn2vesta.multiwfn_grid.subprocess.run", side_effect=fake_run) as mocked_run:
+                            result = run_multiwfn_grid(
+                                wavefunction,
+                                root / "products",
+                                function_name=function_name,
+                                stem="case",
+                                grid_points=(10, 11, 12),
+                                elflol_type=requested_type,
+                            )
+
+                    self.assertTrue(result.success)
+                    self.assertEqual(
+                        mocked_run.call_args.args[0],
+                        [
+                            str(candidate.path),
+                            str(wavefunction.resolve()),
+                            "-set",
+                            str((root / "products" / "multiwfn_grid_raw" / "multiwfn_grid_settings.ini").resolve()),
+                        ],
+                    )
+                    self.assertEqual(result.elflol_type, int(expected_value))
+                    self.assertIsNotNone(result.settings_override)
+                    settings_text = result.settings_override.read_text(encoding="utf-8")
+                    self.assertIn(f"ELFLOL_type= {expected_value} // stale global setting", settings_text)
+                    self.assertIn("other_setting= keep", settings_text)
+                    self.assertEqual(result.raw_cube.name, raw_name)
+                    self.assertEqual(result.cube.name, f"case_{function_name}.cub")
+                    recipe = result.recipe_path.read_text(encoding="utf-8")
+                    self.assertIn(f"elflol_type: `{expected_value}`", recipe)
+                    manifest = result.vesta_result.manifest_path.read_text(encoding="utf-8")
+                    self.assertIn(f"canonical_preset: `{expected_preset}`", manifest)
+
+    def test_run_multiwfn_grid_rejects_lol_d_over_d0(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            with self.assertRaisesRegex(ValueError, "only valid for elf"):
+                run_multiwfn_grid(
+                    Path(tmp) / "h2o.fch",
+                    Path(tmp) / "products",
+                    function_name="lol",
+                    elflol_type="d-over-d0",
+                )
 
     def test_run_multiwfn_grid_information_entropy_uses_dedicated_preset(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -1642,6 +1711,42 @@ class TestMultiwfnGridRunner(unittest.TestCase):
             )
             settings = root / "products" / "multiwfn_grid_raw" / "multiwfn_grid_settings.ini"
             self.assertIn("srcfuncmode= 2", settings.read_text(encoding="utf-8"))
+
+    def test_main_elf_accepts_elflol_type_alias(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            wavefunction = root / "h2o.fch"
+            wavefunction.write_text("wavefunction", encoding="utf-8")
+            candidate = self.make_candidate(root)
+
+            def fake_run(command, **kwargs):
+                Path(kwargs["cwd"], "ELF.cub").write_text(DENSITY_CUBE, encoding="utf-8")
+                return subprocess.CompletedProcess(command, 0, stdout="ok", stderr="")
+
+            with patch("multiwfn2vesta.multiwfn_grid.find_multiwfn", return_value=candidate):
+                with patch("multiwfn2vesta.multiwfn_grid.subprocess.run", side_effect=fake_run):
+                    with patch("sys.stdout", io.StringIO()):
+                        code = __import__("multiwfn2vesta.multiwfn_grid", fromlist=["main"]).main(
+                            [
+                                str(wavefunction),
+                                str(root / "products"),
+                                "--function",
+                                "elf",
+                                "--elflol-type",
+                                "tian-lu",
+                                "--grid-mode",
+                                "low",
+                                "--no-vesta",
+                            ]
+                        )
+
+            self.assertEqual(code, 0)
+            self.assertEqual(
+                (root / "products" / "multiwfn_grid_input.txt").read_text(encoding="utf-8"),
+                "5\n9\n1\n2\n0\nq\n",
+            )
+            settings = root / "products" / "multiwfn_grid_raw" / "multiwfn_grid_settings.ini"
+            self.assertIn("ELFLOL_type= 2", settings.read_text(encoding="utf-8"))
 
     def test_main_pair_function_accepts_reference_and_pair_options(self):
         with tempfile.TemporaryDirectory() as tmp:

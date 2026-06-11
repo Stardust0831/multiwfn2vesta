@@ -244,6 +244,12 @@ defaults where the source defines them.  For `gradient.cub`, `infoentro.cub`,
 `fermihole.cub`, `EDR.cub`, `EDRDmax.cub`, `srcfunc.cub`, `Delta_g.cub`,
 and function `23` `griddata.cub`, Multiwfn leaves the function at the global
 `sur_value=0.05`, so tune the VESTA isosurface per system.
+For Multiwfn functions `9`/`10`, `grid-run --function elf` and
+`grid-run --function lol` force run-local `ELFLOL_type=0` by default, giving
+ordinary Becke ELF/LOL definitions.  Use `--elflol-type tsirelson` or
+`--elflol-type tian-lu` to request alternate ELF/LOL definitions, or
+`--elflol-type d-over-d0` for the ELF-only D/D0 term, without modifying
+global settings.
 For Multiwfn function `5`, `grid-run --function spin-density` forces
 `ipolarpara=0`, while `grid-run --function spin-polarization` forces
 `ipolarpara=1`; both settings are written to a run-local file copied from the
