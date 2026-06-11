@@ -4,7 +4,8 @@
 Multiwfn workflows and preparing VESTA visualization files.  The currently
 maintained path covers ABACUS Molden handoff, cube-to-VESTA files, Multiwfn
 real-space grid, charged-state and orbital-weighted Fukui/dual-descriptor
-maps, STM/LDOS, cube-domain extraction, basin cube display, AIM, IRI/RDG,
+maps, selected kinetic-energy-density variants, STM/LDOS, cube-domain
+extraction, basin cube display, AIM, IRI/RDG,
 and IGM/IGMH command streams, aIGM/amIGM trajectory-average weak-interaction maps,
 atoms-only topology overlays, surface extrema overlays, and AIM+IGMH
 multi-phase VESTA figures.
@@ -48,6 +49,7 @@ point.
   cubes with run-local probe-atom control, local Mulliken electronegativity
   and local hardness function-100 routes, spin-channel alpha/beta density
   function-100 routes, fractional occupation density function-100 route,
+  selected kinetic-energy-density function-100 routes,
   ABACUS direct cube presets for potential, partial-charge, and
   wavefunction-norm cubes,
   charged-state `fukui-run` orchestration, orbital-weighted Fukui/dual
@@ -109,6 +111,7 @@ then delete the temporary branch.
 - Apply analysis-oriented cube presets for common ABACUS/Multiwfn products
   such as density, orbitals/wavefunctions, orbital density, spin density,
   spin-polarization parameter, Laplacian, K(r)/G(r) kinetic-density cubes,
+  selected Thomas-Fermi/Weizsacker/Pauli kinetic-energy-density cubes,
   standalone RDG/promolecular
   RDG, local information entropy, EDR(r;d),
   orbital-overlap distance D(r), Becke atomic/overlap weight, Hirshfeld
@@ -130,6 +133,10 @@ then delete the temporary branch.
 - Run fractional occupation number weighted electron density (FOD) cubes
   through Multiwfn function `100` `iuserfunc=90`, useful for visualizing
   density contributions associated with fractional orbital occupations.
+- Run selected kinetic-energy-density variants through Multiwfn function
+  `100`: Thomas-Fermi and Weizsacker KED use `iuserfunc=1200` with
+  run-local `iKEDsel=3/4`, while Pauli KED uses `iuserfunc=114` with
+  run-local `iKEDsel=2`.
 - Run high-level Fukui/dual-descriptor maps from neutral, anion, and cation
   wavefunction files by generating Multiwfn density cubes on a shared neutral
   grid and then delegating the map arithmetic to `cube-arith`.
@@ -159,6 +166,7 @@ then delete the temporary branch.
   `srcfuncmode`, user-defined `iuserfunc` cubes such as DORI, LEA/LEAE, and
   information-theory densities, spin-resolved alpha/beta density, Becke
   atomic/overlap weight, Hirshfeld weight, fractional occupation density,
+  selected Thomas-Fermi/Weizsacker/Pauli kinetic-energy-density variants,
   promolecular Delta-g,
   Hirshfeld-partition Delta-g, vdW potential with
   run-local `ivdwprobe` probe selection, and related scalar cubes, export
@@ -274,6 +282,8 @@ multiwfn2vesta grid-run input.molden grid_products \
 multiwfn2vesta grid-run input.molden grid_products \
   --function fod
 multiwfn2vesta grid-run input.molden grid_products \
+  --function pauli-ked
+multiwfn2vesta grid-run input.molden grid_products \
   --function orbital-weighted-dual-descriptor
 multiwfn2vesta grid-run input.molden grid_products \
   --function dori
@@ -377,6 +387,7 @@ multiwfn2vesta cube-preset spin-polarization spindensity.cub cube_products
 multiwfn2vesta cube-preset laplacian laplacian.cub cube_products
 multiwfn2vesta cube-preset hamiltonian-ked 'K(r).cub' cube_products
 multiwfn2vesta cube-preset lagrangian-ked 'G(r).cub' cube_products
+multiwfn2vesta cube-preset kinetic-energy-density userfunc.cub cube_products
 multiwfn2vesta cube-preset local-information-entropy infoentro.cub cube_products
 multiwfn2vesta cube-preset electron-delocalization-range EDR.cub cube_products
 multiwfn2vesta cube-preset orbital-overlap-distance EDRDmax.cub cube_products
@@ -420,7 +431,7 @@ Available presets can be listed with `multiwfn2vesta cube-preset
 --list-presets`.  Current presets cover density-like scalar cubes, signed
 orbital/wavefunction/density-difference cubes, Multiwfn gradient norm,
 orbital-density, spin-density, spin-polarization parameter, Laplacian, K(r),
-G(r), local information entropy, electron delocalization range,
+G(r), selected kinetic-energy-density variants, local information entropy, electron delocalization range,
 orbital-overlap distance, standalone pair/correlation function, source
 function, Becke atomic/overlap weight, Hirshfeld weight, RDG, promolecular
 RDG, and promolecular Delta-g, Hirshfeld-partition Delta-g, standalone IRI
@@ -483,14 +494,17 @@ IUSERFUNC`.  Source-backed named routes now imply common `iuserfunc` values:
 `dori` sets `20`, `local-electron-affinity` sets `27`,
 `local-electron-attachment-energy` sets `-27`,
 `local-mulliken-electronegativity` sets `28`, `local-hardness` sets `29`,
+`thomas-fermi-ked` / `weizsacker-ked` set `1200` with run-local
+`iKEDsel=3/4`, `pauli-ked` sets `114` with run-local `iKEDsel=2`,
 `orbital-weighted-fukui-plus` / `minus` / `zero` set `95` / `96` / `97`,
 `orbital-weighted-dual-descriptor` sets `98`,
 `fractional-occupation-density` sets `90`,
 `information-gain-density` sets `49`, `shannon-entropy-density` sets `50`,
 and `fisher-information-density` / `second-fisher-information-density` set
 `51` / `52`.  The runner copies the selected Multiwfn `settings.ini` when
-available, patches only `iuserfunc`, and passes the run-local settings file
-with `-set`.  Generic standalone `userfunc.cub` uses signed `+/-0.05`
+available, patches route-specific run-local settings such as `iuserfunc`, and
+for KED variants also patches `iKEDsel`, then passes the settings file with
+`-set`.  Generic standalone `userfunc.cub` uses signed `+/-0.05`
 surfaces by default; `grid-run --function dori` uses the `dori-scalar`
 single-surface preset at `0.95`, and LEA/LEAE named routes automatically
 select the `lea`/`leae` mapped-surface preset when `--surface-cube
@@ -499,8 +513,9 @@ hardness use the generic `surface-map` mapped preset when `--surface-cube`
 is supplied; pass `--tex-physical`, `--tex-range-source surface-band`,
 `--surface-band`, or `--tex-percent` to tune the texture scale from
 `grid-run`.  Alpha/beta density, FOD, and orbital-weighted
-Fukui+/Fukui-/Fukui0 use the `density` preset, the orbital-weighted dual
-descriptor uses the `signed` preset, and these routes can use the generic
+Fukui+/Fukui-/Fukui0 use the `density` preset, KED variants use the
+`kinetic-energy-density` preset, the orbital-weighted dual descriptor uses the
+`signed` preset, and these routes can use the generic
 `surface-map` mapped preset with `--surface-cube`;
 explicit `--tex-physical MIN MAX` is recommended for mapped dual-descriptor
 figures.  These orbital-weighted routes are single-wavefunction approximations,
@@ -739,14 +754,15 @@ Common functions:
   `alpha-density`, `beta-density`,
   `dori`, `local-electron-affinity`, `local-electron-attachment-energy`,
   `local-mulliken-electronegativity`, `local-hardness`,
+  `thomas-fermi-ked`, `weizsacker-ked`, `pauli-ked`,
   `orbital-weighted-fukui-plus`, `orbital-weighted-fukui-minus`,
   `orbital-weighted-fukui-zero`, `orbital-weighted-dual-descriptor`,
   `fractional-occupation-density`,
   `information-gain-density`, `shannon-entropy-density`,
   `fisher-information-density`, and `second-fisher-information-density`
-  automatically patch `iuserfunc=1/2/20/27/-27/28/29/90/95/96/97/98/49/50/51/52`
+  automatically patch `iuserfunc=1/2/20/27/-27/28/29/90/1200/114/95/96/97/98/49/50/51/52`
   into a run-local `-set` settings file, leaving global Multiwfn settings
-  untouched.
+  untouched.  The KED variants also patch run-local `iKEDsel`.
 - `alpha-density` and `beta-density`: function `100`, raw `userfunc.cub`,
   run-local `iuserfunc=1` / `2`, default `density` preset.  Multiwfn evaluates
   `fspindens(x,y,z,'a')` / `fspindens(x,y,z,'b')`; use these for
@@ -768,6 +784,16 @@ Common functions:
   before chemical interpretation.  The shared `density` preset default
   isosurface `0.01` may be too high for FOD; try `--isosurface 0.001` or tune
   the level per system.
+- `thomas-fermi-ked` / `tf-ked`, `weizsacker-ked` / `vw-ked`, and
+  `pauli-ked`: function `100`, raw `userfunc.cub`, default
+  `kinetic-energy-density` preset.  Thomas-Fermi and Weizsacker KED patch
+  run-local `iuserfunc=1200` with `iKEDsel=3` / `4`; Pauli KED patches
+  `iuserfunc=114` with `iKEDsel=2`, i.e. Lagrangian KED minus Weizsacker KED
+  in the inspected Multiwfn source.  These cubes are normally displayed as
+  positive scalar fields, but inspect the value range and tune `--isosurface`
+  per system.  They come from Molden orbitals and derivatives rather than an
+  ABACUS native real-space KED output, so use validated ABACUS LCAO Molden
+  files.
 - `electron-delocalization-range` / `edr`: function `20`, raw `EDR.cub`,
   preset `electron-delocalization-range`, single positive surface by default.
   Pass `--edr-length D_BOHR`; Multiwfn asks for this EDR length scale before

@@ -1,6 +1,18 @@
 # Project Kanban
 
-Updated: 2026-06-11 22:10 CST
+Updated: 2026-06-11 23:18 CST
+
+## Current Request: 2026-06-11 README Refresh And Branch Consolidation For KED Routes
+
+- [x] Record user request immediately: update README, resolve the unusual branch state back to one maintained branch if needed, and use repository-local Git identity `Stardust0831`.
+- [x] Finish the selected kinetic-energy-density route increment already in progress: code, tests, README, usage docs, skill notes, research matrix, worklog, root-doc mirror, validation, commit, push, and branch verification.  Code/docs/tests are implemented; read-only subagent review found no blocking issue and low-priority wording refinements around `iKEDsel`/KED sign wording were handled.  Validation passed: `py_compile`, 122 focused `tests.test_cube_preset tests.test_multiwfn_grid` tests, 128 focused `tests.test_multiwfn_grid tests.test_cli` tests, 340 full no-GUI tests, CLI smokes, and `git diff --check`.  Root-doc mirror checksum dry-run is expected to be empty after this final kanban update; final commit hash, push result, and post-push branch verification are reported in the assistant response.
+- [x] Confirm remote/local branch topology before commit; `git fetch --prune origin`, `git branch -a`, and `git ls-remote --heads origin` show only `main`, `origin/main`, and `origin/HEAD -> origin/main`, so no real merge-back is needed.
+
+## Active Goal Continuation: 2026-06-11 Next Multiwfn/VESTA Wavefunction Analysis Increment
+
+- [x] Record automatic continuation of the long-running objective: survey and implement valuable Multiwfn wavefunction analyses that can be visualized in VESTA, prioritizing routes fed by ABACUS LCAO Molden files or direct ABACUS cube outputs.
+- [x] Recheck current repository state, existing analysis matrix, local Multiwfn source coverage, and remote branch state before selecting the next bounded source-backed increment. Current `main`, `origin/main`, and `origin/HEAD` are aligned at `374955f1e7ea5814c66a898224d87d0bb6b40ea7`; only this kanban update plus untracked `domain.cub` and `domain.pdb` are present. Selected increment: selected kinetic-energy-density function-100 routes backed by local Multiwfn `iuserfunc=1200` plus `iKEDsel`, and Pauli KED backed by `iuserfunc=114`.
+- [x] Implement named `grid-run` routes for Weizsacker KED, Thomas-Fermi KED, and Pauli KED with focused tests, README/usage/skill/research/worklog/kanban notes, root-docs mirror, validation, commit, push, and branch verification.  The route mappings are `weizsacker-ked=iuserfunc=1200+iKEDsel=4`, `thomas-fermi-ked=iuserfunc=1200+iKEDsel=3`, and `pauli-ked=iuserfunc=114+iKEDsel=2`; each exports `userfunc.cub`, uses standalone `kinetic-energy-density`, and uses `surface-map` with `--surface-cube`.  Final commit/push details are reported in the assistant response.
 
 ## Current Request: 2026-06-11 README Refresh And One-Branch Closeout For FOD Route
 

@@ -54,6 +54,15 @@ multiwfn2vesta grid-run --list-functions
 - `lagrangian-ked`, aliases `g-r`, `g(r)`, `kinetic-g`,
   `lagrangian-kinetic-density`: function `7`, raw `G(r).cub`, preset
   `lagrangian-ked` with a single positive isosurface.
+- `thomas-fermi-ked`, aliases `tf-ked`,
+  `thomas-fermi-kinetic-energy-density`; `weizsacker-ked`, aliases
+  `weizsaecker-ked`, `von-weizsacker-ked`, `vw-ked`; and `pauli-ked`,
+  alias `pauli-kinetic-energy-density`: function `100`, raw `userfunc.cub`,
+  preset `kinetic-energy-density` with a single positive isosurface.
+  Thomas-Fermi and Weizsacker KED patch `iuserfunc=1200` and run-local
+  `iKEDsel=3` / `4`; Pauli KED patches `iuserfunc=114` and `iKEDsel=2`,
+  corresponding to selected Lagrangian KED minus Weizsacker KED in the
+  inspected source.
 - `nuclear-esp`: function `8`, raw `nucleiesp.cub`, preset `signed`;
   mapped preset `esp` when `--surface-cube` is supplied.
 - `elf`: function `9`, raw `ELF.cub`, preset `elf`.  The runner writes
@@ -118,6 +127,9 @@ multiwfn2vesta grid-run --list-functions
   `local-electron-attachment-energy` / `leae` = `-27`,
   `local-mulliken-electronegativity` / `local-electronegativity` = `28`,
   `local-hardness` / `local-chemical-hardness` = `29`,
+  `thomas-fermi-ked` / `tf-ked` = `1200` plus `iKEDsel=3`,
+  `weizsacker-ked` / `vw-ked` = `1200` plus `iKEDsel=4`,
+  `pauli-ked` = `114` plus `iKEDsel=2`,
   `orbital-weighted-fukui-plus` / `ow-fplus` = `95`,
   `orbital-weighted-fukui-minus` / `ow-fminus` = `96`,
   `orbital-weighted-fukui-zero` / `ow-f0` = `97`,
@@ -129,10 +141,11 @@ multiwfn2vesta grid-run --list-functions
   and `second-fisher-information-density` = `52`.  LEA/LEAE named routes
   also auto-select mapped presets `lea`/`leae` when `--surface-cube` is
   supplied; alpha/beta density, FOD, local Mulliken electronegativity, local
-  hardness, and the orbital-weighted Fukui/dual routes fall back to the
+  hardness, KED variants, and the orbital-weighted Fukui/dual routes fall back to the
   generic `surface-map` mapped preset.  Alpha/beta density, FOD, and
-  Fukui+/Fukui-/Fukui0 standalone products use `density`, while
-  orbital-weighted dual descriptor uses `signed`.  The 95..98 routes are
+  Fukui+/Fukui-/Fukui0 standalone products use `density`, KED variants use
+  `kinetic-energy-density`, while orbital-weighted dual descriptor uses
+  `signed`.  The 95..98 routes are
   single-wavefunction approximations and should not be confused with
   charged-state `fukui-run`; the current runner leaves Multiwfn
   `orbwei_delta` at its source default `0.1` a.u.  Special external-grid
@@ -208,6 +221,12 @@ multiwfn2vesta grid-run --list-functions
   multi-k, SOC/noncollinear, or metallic cases.  The shared `density` preset
   default isosurface `0.01` may be too high for FOD; try `--isosurface 0.001`
   or tune per system.
+- `thomas-fermi-ked`, `weizsacker-ked`, and `pauli-ked`: function `100`,
+  raw `userfunc.cub`, standalone preset `kinetic-energy-density`.
+  The first two use `iuserfunc=1200` and run-local `iKEDsel=3/4`; Pauli KED
+  uses `iuserfunc=114` and `iKEDsel=2`.  These routes are Molden-orbital
+  derivative analyses rather than ABACUS native KED cubes; for ABACUS use,
+  keep to validated LCAO Molden files and tune `--isosurface` per system.
 - `orbital-weighted-fukui-plus`, `orbital-weighted-fukui-minus`, and
   `orbital-weighted-fukui-zero`: function `100`, raw `userfunc.cub`, default
   `iuserfunc=95` / `96` / `97`, standalone preset `density`.  Use these when

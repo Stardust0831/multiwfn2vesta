@@ -50,6 +50,7 @@ multiwfn2vesta cube-preset spin-polarization spindensity.cub cube_products
 multiwfn2vesta cube-preset laplacian laplacian.cub cube_products
 multiwfn2vesta cube-preset hamiltonian-ked 'K(r).cub' cube_products
 multiwfn2vesta cube-preset lagrangian-ked 'G(r).cub' cube_products
+multiwfn2vesta cube-preset kinetic-energy-density userfunc.cub cube_products
 multiwfn2vesta cube-preset local-information-entropy infoentro.cub cube_products
 multiwfn2vesta cube-preset electron-delocalization-range EDR.cub cube_products
 multiwfn2vesta cube-preset orbital-overlap-distance EDRDmax.cub cube_products
@@ -246,6 +247,12 @@ passes it back through `cube-preset`.
   surfaces for Multiwfn `K(r).cub`, default magnitude `0.01`.
 - `lagrangian-ked` aliases: `g-r`, `g(r)`, `kinetic-g`; single positive
   surface for Multiwfn `G(r).cub`, default isosurface `0.01`.
+- `kinetic-energy-density` aliases: `positive-ked`, `ked`,
+  `thomas-fermi-ked`, `tf-ked`, `weizsacker-ked`, `vw-ked`, `pauli-ked`;
+  single positive surface for selected function-100 KED variants exported as
+  `userfunc.cub`, default isosurface `0.01`.  Use this for
+  `grid-run --function thomas-fermi-ked`, `weizsacker-ked`, or `pauli-ked`;
+  inspect the value range and tune the isosurface per system.
 - `local-information-entropy` aliases: `information-entropy`, `infoentro`,
   `local-info-entropy`, `local-shannon-entropy`; positive/negative surfaces
   for Multiwfn `infoentro.cub`, default magnitude `0.05`.  Multiwfn function

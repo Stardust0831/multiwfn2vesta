@@ -289,6 +289,47 @@ GRID_FUNCTIONS: Tuple[GridFunction, ...] = (
         default_user_function_index=29,
     ),
     GridFunction(
+        "weizsacker-ked",
+        100,
+        "userfunc.cub",
+        "kinetic-energy-density",
+        (
+            "weizsaecker-ked",
+            "von-weizsacker-ked",
+            "vw-ked",
+            "weizsacker-kinetic-energy-density",
+        ),
+        mapped_preset="surface-map",
+        default_user_function_index=1200,
+        settings_updates=(("iKEDsel", 4),),
+    ),
+    GridFunction(
+        "thomas-fermi-ked",
+        100,
+        "userfunc.cub",
+        "kinetic-energy-density",
+        (
+            "tf-ked",
+            "thomas-fermi-kinetic-energy-density",
+        ),
+        mapped_preset="surface-map",
+        default_user_function_index=1200,
+        settings_updates=(("iKEDsel", 3),),
+    ),
+    GridFunction(
+        "pauli-ked",
+        100,
+        "userfunc.cub",
+        "kinetic-energy-density",
+        (
+            "pauli-kinetic-energy-density",
+            "tp-ked",
+        ),
+        mapped_preset="surface-map",
+        default_user_function_index=114,
+        settings_updates=(("iKEDsel", 2),),
+    ),
+    GridFunction(
         "orbital-weighted-fukui-plus",
         100,
         "userfunc.cub",
@@ -1109,6 +1150,7 @@ def _write_recipe(
                 f"- function_index: `{function.index}`",
                 f"- multiwfn_default_cube: `{function.output_filename}`",
                 f"- auto_vesta_preset: `{function.preset}`",
+                f"- function_settings_updates: `{function.settings_updates}`",
             ]
         )
     lines.extend(
@@ -1152,6 +1194,7 @@ def _write_recipe(
             "- Function `25` van der Waals potential uses `ivdwprobe` to select the UFF probe atom; the maintained stream defaults it to carbon (`6`) and can patch another probe element through a run-local settings file.",
             "- Function `20` EDR(r;d) asks for length scale `d` in Bohr before grid setup and exports `EDR.cub`.",
             "- Function `21` D(r) can use Multiwfn's default EDR exponent set `20, 2.50, 1.50` or a manual count/start/increment set and exports `EDRDmax.cub`.",
+            "- Function `100` KED named routes patch `iKEDsel` in the same run-local settings file: `3` selects Thomas-Fermi KED, `4` selects Weizsacker KED, and Pauli KED uses `iuserfunc=114` with selected KED minus Weizsacker KED.",
             "- Function `100` evaluates `userfunc(x,y,z)` using `iuserfunc` from settings; the maintained stream copies the selected Multiwfn `settings.ini` when available, patches `iuserfunc`, passes the run-local settings file through `-set`, and exports `userfunc.cub`.  Special external-grid modes `-1`, `-3`, and Shubin `57/58/59` are intentionally excluded from this generic route.",
             "- Function `111` Becke weight asks for atom indices `I,J` before grid setup and exports `Becke.cub`; `J=0` means atomic weight and two positive indices mean overlap weight.",
             "- Function `112` Hirshfeld weight asks for an atom selection string and an atomic-density source before grid setup; the maintained command stream uses built-in atomic densities and exports `Hirshfeld.cub`.",
@@ -2011,7 +2054,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "49 for information gain, 90 for fractional occupation density, "
             "50 for Shannon entropy density, 51/52 for Fisher information "
             "density, 28 for local Mulliken electronegativity, and 29 for "
-            "local hardness, and 95/96/97/98 for orbital-weighted "
+            "local hardness, 114 for Pauli KED, 1200 for selected KED, and "
+            "95/96/97/98 for orbital-weighted "
             "Fukui+/Fukui-/Fukui0/dual descriptor. Named function-100 routes "
             "such as dori, local-electron-affinity, local-hardness, and "
             "orbital-weighted-dual-descriptor provide defaults. "

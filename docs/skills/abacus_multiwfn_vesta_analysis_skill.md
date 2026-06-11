@@ -56,6 +56,7 @@ multiwfn2vesta cube-preset spin-polarization spindensity.cub cube_products
 multiwfn2vesta cube-preset laplacian laplacian.cub cube_products
 multiwfn2vesta cube-preset hamiltonian-ked 'K(r).cub' cube_products
 multiwfn2vesta cube-preset lagrangian-ked 'G(r).cub' cube_products
+multiwfn2vesta cube-preset kinetic-energy-density userfunc.cub cube_products
 multiwfn2vesta cube-preset local-information-entropy infoentro.cub cube_products
 multiwfn2vesta cube-preset electron-delocalization-range EDR.cub cube_products
 multiwfn2vesta cube-preset orbital-overlap-distance EDRDmax.cub cube_products
@@ -237,6 +238,7 @@ Useful `grid-run` functions for ABACUS-compatible Molden files include
 `promolecular-rdg`,
 `pair-function`, `source-function`, `edr`, `edrdmax`, `becke`, `hirshfeld`,
 `delta-g`, `hirshfeld-delta-g`, `iri`, `dori`, `fod`,
+`thomas-fermi-ked`, `weizsacker-ked`, `pauli-ked`,
 `orbital-weighted-fukui-plus`, `orbital-weighted-fukui-minus`,
 `orbital-weighted-fukui-zero`, `orbital-weighted-dual-descriptor`,
 `vdw-potential`, and
@@ -273,6 +275,15 @@ fractional occupations are meaningful and correctly present in the ABACUS
 Molden file; ordinary integer-occupation calculations usually give little or
 no FOD.  The shared `density` preset default isosurface `0.01` may be too high
 for FOD; try `--isosurface 0.001` or tune per system.
+For selected kinetic-energy-density variants, use
+`grid-run --function thomas-fermi-ked`, `weizsacker-ked`, or `pauli-ked`.
+Thomas-Fermi and Weizsacker KED use function `100` with `iuserfunc=1200` plus
+run-local `iKEDsel=3/4`; Pauli KED uses `iuserfunc=114` with `iKEDsel=2`,
+which the inspected Multiwfn source implements as Lagrangian KED minus
+Weizsacker KED.  These are Molden-orbital derivative analyses, not ABACUS
+native KED cubes.  For ABACUS, limit the route to validated LCAO Molden files,
+remember that pseudopotential results are valence-context quantities controlled
+by `[Nval]`, and tune the `kinetic-energy-density` isosurface per system.
 For orbital-weighted Fukui and dual descriptor, use the function-100 named
 routes (`iuserfunc=95/96/97/98`) only when the ABACUS Molden file contains
 complete occupied/virtual orbital information and the single-determinant
@@ -293,10 +304,12 @@ available and passed with `-set`; generic `grid-run --function user-function`
 requires `--user-function-index IUSERFUNC`, while named routes
 `dori`, `local-electron-affinity`, `local-electron-attachment-energy`,
 `local-mulliken-electronegativity`, `local-hardness`,
+`thomas-fermi-ked`, `weizsacker-ked`, `pauli-ked`,
 `information-gain-density`, `shannon-entropy-density`,
 `fisher-information-density`, and `second-fisher-information-density`
-automatically patch `iuserfunc=20/27/-27/28/29/49/50/51/52` through the same
-run-local `-set` route;
+automatically patch `iuserfunc=20/27/-27/28/29/1200/114/49/50/51/52` through
+the same run-local `-set` route; the KED routes additionally patch
+`iKEDsel`;
 `grid-run --function becke` requires `--becke-atoms I J`,
 with `I J` for Becke overlap weight and `I 0` for Becke atomic weight;
 `grid-run --function hirshfeld` requires
@@ -310,7 +323,8 @@ Multiwfn's built-in atomic-density mode.  `infoentro.cub` uses signed
 uses standalone `promolecular-delta-g`, function `23` generic
 `griddata.cub` uses standalone `hirshfeld-delta-g`, `IRI.cub` uses
 standalone `iri-scalar`, `grid-run --function dori` uses standalone
-`dori-scalar` (`iuserfunc=20`, isosurface `0.95`), and `vdWpot.cub` uses
+`dori-scalar` (`iuserfunc=20`, isosurface `0.95`), selected KED
+`userfunc.cub` uses standalone `kinetic-energy-density`, and `vdWpot.cub` uses
 standalone `vdw-potential` with `+/-1.0` kcal/mol signed
 surfaces; `grid-run --function vdw-potential` defaults the UFF probe to
 carbon/6 through run-local `ivdwprobe` and accepts `--vdw-probe` for other

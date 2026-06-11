@@ -242,6 +242,14 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertIn("default iuserfunc=-27", text)
         self.assertIn("default iuserfunc=28", text)
         self.assertIn("default iuserfunc=29", text)
+        self.assertIn("thomas-fermi-ked", text)
+        self.assertIn("weizsacker-ked", text)
+        self.assertIn("pauli-ked", text)
+        self.assertIn("default iuserfunc=1200", text)
+        self.assertIn("default iuserfunc=114", text)
+        self.assertIn("settings: iKEDsel=3", text)
+        self.assertIn("settings: iKEDsel=4", text)
+        self.assertIn("settings: iKEDsel=2", text)
         self.assertIn("orbital-weighted-fukui-plus", text)
         self.assertIn("orbital-weighted-dual-descriptor", text)
         self.assertIn("default iuserfunc=95", text)
@@ -326,6 +334,14 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertEqual(resolve_grid_function("electronegativity").default_user_function_index, 28)
         self.assertEqual(resolve_grid_function("local-hardness").mapped_preset, "surface-map")
         self.assertEqual(resolve_grid_function("local-chemical-hardness").default_user_function_index, 29)
+        self.assertEqual(resolve_grid_function("thomas-fermi-ked").preset, "kinetic-energy-density")
+        self.assertEqual(resolve_grid_function("tf-ked").default_user_function_index, 1200)
+        self.assertEqual(resolve_grid_function("tf-ked").settings_updates, (("iKEDsel", 3),))
+        self.assertEqual(resolve_grid_function("weizsacker-ked").default_user_function_index, 1200)
+        self.assertEqual(resolve_grid_function("vw-ked").settings_updates, (("iKEDsel", 4),))
+        self.assertEqual(resolve_grid_function("pauli-ked").default_user_function_index, 114)
+        self.assertEqual(resolve_grid_function("pauli-kinetic-energy-density").settings_updates, (("iKEDsel", 2),))
+        self.assertEqual(resolve_grid_function("pauli-ked").mapped_preset, "surface-map")
         self.assertEqual(resolve_grid_function("ow-fukui-plus").preset, "density")
         self.assertEqual(resolve_grid_function("orbital-weighted-fplus").default_user_function_index, 95)
         self.assertEqual(resolve_grid_function("ow-fukui-minus").default_user_function_index, 96)
@@ -517,6 +533,10 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         )
         self.assertEqual(
             build_grid_commands(resolve_grid_function("fod"), grid_mode="low"),
+            ["5", "100", "1", "2", "0", "q"],
+        )
+        self.assertEqual(
+            build_grid_commands(resolve_grid_function("pauli-ked"), grid_mode="low"),
             ["5", "100", "1", "2", "0", "q"],
         )
         self.assertEqual(
@@ -1319,6 +1339,61 @@ class TestMultiwfnGridRunner(unittest.TestCase):
             manifest = result.vesta_result.manifest_path.read_text(encoding="utf-8")
             self.assertIn("canonical_preset: `surface-map`", manifest)
             self.assertIn("effective_tex_physical: `0.0` to `0.005`", manifest)
+
+    def test_run_ked_named_user_functions_patch_iuserfunc_and_ikedsel(self):
+        cases = (
+            ("thomas-fermi-ked", 1200, 3, "case_thomas-fermi-ked.cub"),
+            ("weizsacker-ked", 1200, 4, "case_weizsacker-ked.cub"),
+            ("pauli-ked", 114, 2, "case_pauli-ked.cub"),
+        )
+        for function_name, expected_iuserfunc, expected_ikedsel, expected_cube in cases:
+            with self.subTest(function_name=function_name):
+                with tempfile.TemporaryDirectory() as tmp:
+                    root = Path(tmp)
+                    wavefunction = root / "h2o.fch"
+                    wavefunction.write_text("wavefunction", encoding="utf-8")
+                    candidate = self.make_candidate(root)
+                    (candidate.path.parent / "settings.ini").write_text(
+                        "iuserfunc= 0 // stale userfunc\niKEDsel= 0 // stale KED\n",
+                        encoding="utf-8",
+                    )
+
+                    def fake_run(command, **kwargs):
+                        cwd = Path(kwargs["cwd"])
+                        (cwd / "userfunc.cub").write_text(USER_FUNCTION_CUBE, encoding="utf-8")
+                        return subprocess.CompletedProcess(command, 0, stdout="ok", stderr="")
+
+                    with patch("multiwfn2vesta.multiwfn_grid.find_multiwfn", return_value=candidate):
+                        with patch("multiwfn2vesta.multiwfn_grid.subprocess.run", side_effect=fake_run):
+                            result = run_multiwfn_grid(
+                                wavefunction,
+                                root / "products",
+                                function_name=function_name,
+                                stem="case",
+                                grid_mode="low",
+                            )
+
+                    self.assertTrue(result.success)
+                    self.assertEqual(result.user_function_index, expected_iuserfunc)
+                    self.assertEqual(result.cube.name, expected_cube)
+                    self.assertEqual(result.raw_cube.name, "userfunc.cub")
+                    self.assertIsNotNone(result.settings_override)
+                    settings_text = result.settings_override.read_text(encoding="utf-8")
+                    self.assertIn(f"iuserfunc= {expected_iuserfunc} // stale userfunc", settings_text)
+                    self.assertIn(f"iKEDsel= {expected_ikedsel} // stale KED", settings_text)
+                    self.assertIsNotNone(result.vesta_result)
+                    self.assertEqual(
+                        result.vesta_result.vesta_path.name,
+                        expected_cube.replace(".cub", "_kinetic-energy-density_cube.vesta"),
+                    )
+                    recipe = result.recipe_path.read_text(encoding="utf-8")
+                    self.assertIn(f"function_name: `{function_name}`", recipe)
+                    self.assertIn(f"user_function_index_iuserfunc: `{expected_iuserfunc}`", recipe)
+                    self.assertIn(f"('iKEDsel', {expected_ikedsel})", recipe)
+                    self.assertIn("auto_vesta_preset: `kinetic-energy-density`", recipe)
+                    manifest = result.vesta_result.manifest_path.read_text(encoding="utf-8")
+                    self.assertIn("canonical_preset: `kinetic-energy-density`", manifest)
+                    self.assertIn("effective_surface_mode: `single`", manifest)
 
     def test_run_orbital_weighted_dual_descriptor_surface_map_passes_texture_scale(self):
         with tempfile.TemporaryDirectory() as tmp:

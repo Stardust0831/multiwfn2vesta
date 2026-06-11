@@ -148,6 +148,32 @@ PRESETS: Tuple[CubePreset, ...] = (
         ),
     ),
     CubePreset(
+        name="kinetic-energy-density",
+        aliases=(
+            "positive-ked",
+            "ked",
+            "ked-scalar",
+            "thomas-fermi-ked",
+            "tf-ked",
+            "weizsacker-ked",
+            "weizsaecker-ked",
+            "von-weizsacker-ked",
+            "vw-ked",
+            "pauli-ked",
+        ),
+        description="Single positive isosurface for selected kinetic-energy-density variants.",
+        surface_mode="single",
+        isosurface=0.01,
+        positive_rgb=(120, 220, 130),
+        surface_opacity=(145, 255),
+        notes=(
+            "Use for Multiwfn function-100 userfunc.cub routes that export selected "
+            "KED variants such as Thomas-Fermi, Weizsacker, and Pauli kinetic energy density. "
+            "These are normally displayed as positive scalar fields; inspect the range and "
+            "tune the isosurface per system."
+        ),
+    ),
+    CubePreset(
         name="potential",
         aliases=("potential-cube", "abacus-potential", "out-pot", "local-potential", "pot-es", "mep-cube"),
         description="Positive/negative isosurfaces for direct potential cubes.",

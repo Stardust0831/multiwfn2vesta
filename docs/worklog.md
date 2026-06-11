@@ -1,5 +1,40 @@
 # Worklog
 
+## 2026-06-11: selected kinetic-energy-density grid routes
+
+- Continued the ABACUS/Multiwfn/VESTA analysis survey after the FOD closeout
+  by selecting three source-backed kinetic-energy-density function-100 routes:
+  Thomas-Fermi KED, Weizsacker KED, and Pauli KED.
+- Rechecked local Multiwfn 2026.6.2 source evidence.  `settings.ini` exposes
+  `iuserfunc` and `iKEDsel`; `function.f90` maps `iuserfunc=1200` to
+  `KED(x,y,z,iKEDsel)`, with `iKEDsel=3` for Thomas-Fermi KED and
+  `iKEDsel=4` for Weizsacker KED.  The inspected source maps
+  `iuserfunc=114` to Pauli KED, implemented as selected KED minus Weizsacker
+  KED; the maintained route uses `iKEDsel=2`.
+- Added named `grid-run` functions `thomas-fermi-ked`, `weizsacker-ked`, and
+  `pauli-ked`, with aliases such as `tf-ked`, `vw-ked`, and
+  `pauli-kinetic-energy-density`.  Each route exports Multiwfn
+  `userfunc.cub`, writes only run-local settings through `-set`, leaves global
+  Multiwfn settings untouched, and falls back to `surface-map` when
+  `--surface-cube` is supplied.
+- Added `cube-preset kinetic-energy-density` for standalone selected KED
+  variants.  It uses a single positive isosurface, aliases the selected KED
+  route names so explicit `cube-preset pauli-ked userfunc.cub ...` resolves to
+  the same maintained style, and records that users should inspect the value
+  range and tune the isosurface per system.
+- Documented caveats: these cubes come from Molden orbital derivatives rather
+  than ABACUS native real-space KED output; ABACUS use should stay on
+  validated LCAO Molden files, pseudopotential interpretation depends on
+  `[Nval]`/valence context, and `--isosurface` should be tuned per system.
+- Validation passed in this working copy: `py_compile`, 122 focused
+  `tests.test_cube_preset tests.test_multiwfn_grid` tests, 128 focused
+  `tests.test_multiwfn_grid tests.test_cli` tests, 340 full no-GUI tests,
+  CLI smokes for top-level help, `grid-run --list-functions`, `grid-run
+  --help`, and `cube-preset --list-presets`, plus `git diff --check`.  After
+  `git fetch --prune origin`, only `main`, `origin/main`, and
+  `origin/HEAD -> origin/main` are present, so no real branch merge-back is
+  needed before committing.
+
 ## 2026-06-11: fractional occupation density FOD route
 
 - Continued the ABACUS/Multiwfn/VESTA analysis survey after the spin-channel

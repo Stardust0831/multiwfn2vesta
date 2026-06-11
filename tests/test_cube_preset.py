@@ -116,6 +116,7 @@ class TestCubePreset(unittest.TestCase):
         self.assertIn("laplacian", text)
         self.assertIn("hamiltonian-ked", text)
         self.assertIn("lagrangian-ked", text)
+        self.assertIn("kinetic-energy-density", text)
         self.assertIn("potential", text)
         self.assertIn("vdw-potential", text)
         self.assertIn("partial-charge", text)
@@ -167,6 +168,31 @@ domain two
             self.assertIn("canonical_preset: `domain`", manifest)
             self.assertIn("effective_isosurface: `0.5`", manifest)
             self.assertIn("Binary Multiwfn domain.cub isosurface", manifest)
+
+    def test_kinetic_energy_density_preset_writes_single_positive_surface(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            cube = self.write_tmp(root, "userfunc.cub", """ked one
+ked two
+    2    -1.000000    -2.000000     0.500000
+    2     0.500000     0.000000     0.000000
+    2     0.000000     0.500000     0.000000
+    2     0.000000     0.000000     0.500000
+    8     8.000000    -1.000000    -2.000000     0.500000
+    1     1.000000    -0.500000    -2.000000     0.500000
+ 0.000 0.004 0.008 0.010 0.012 0.020 0.030 0.040
+""")
+
+            result = run_preset("pauli-ked", cube, root / "products")
+
+            manifest = result.manifest_path.read_text(encoding="utf-8")
+
+            self.assertIn("canonical_preset: `kinetic-energy-density`", manifest)
+            self.assertIn("requested_preset: `pauli-ked`", manifest)
+            self.assertIn("effective_surface_mode: `single`", manifest)
+            self.assertIn("effective_isosurface: `0.01`", manifest)
+            self.assertIn("selected kinetic-energy-density variants", manifest)
+            self.assertIn("inspect the range", manifest)
 
     def test_basin_preset_uses_binary_isosurface_default(self):
         with tempfile.TemporaryDirectory() as tmp:

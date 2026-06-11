@@ -59,7 +59,7 @@ multiwfn2vesta aim-igmh --help
   orbital/signed、spin density、Laplacian、K(r)/G(r)、ABACUS direct
   potential、partial charge、wavefunction norm、ELF/LOL、IRI/RDG/NCI、DORI、
   EDR(r;d)、D(r)、IGM/IGMH/aIGM、ESP/MEP、ALIE/LEA/LEAE、
-  userfunc/iuserfunc、standalone vdW potential、vdW map
+  userfunc/iuserfunc、selected KED variants、standalone vdW potential、vdW map
 - `surface-extrema`: 把 Multiwfn `surfanalysis.pdb` 的分子表面极值点作为
   atoms-only phase 叠加到已有 `.vesta` 文件中
 - `cube-arith`: 对兼容 cube 做线性组合，用于 density difference、
@@ -80,7 +80,8 @@ multiwfn2vesta aim-igmh --help
   及其 `ELFLOL_type` 变体、
   ESP/MEP、ALIE、EDR(r;d)、D(r)、RDG/IRI-like、
   promolecular RDG/sign(lambda2)rho、function-100 alpha/beta density 和
-  FOD 等单 cube，并可自动接 `cube-preset` 写 `.vesta`
+  FOD、Thomas-Fermi/Weizsacker/Pauli KED 等单 cube，并可自动接
+  `cube-preset` 写 `.vesta`
 - `fukui-run`: 从中性、阴离子、阳离子波函数分别生成共享格点的 density
   cube，再调用 `cube-arith` 生成 Fukui+/Fukui-/dual descriptor cube 和
   可选 `.vesta`
@@ -224,6 +225,7 @@ multiwfn2vesta cube-preset spin-polarization spindensity.cub cube_products
 multiwfn2vesta cube-preset laplacian laplacian.cub cube_products
 multiwfn2vesta cube-preset hamiltonian-ked 'K(r).cub' cube_products
 multiwfn2vesta cube-preset lagrangian-ked 'G(r).cub' cube_products
+multiwfn2vesta cube-preset kinetic-energy-density userfunc.cub cube_products
 multiwfn2vesta cube-preset local-information-entropy infoentro.cub cube_products
 multiwfn2vesta cube-preset electron-delocalization-range EDR.cub cube_products
 multiwfn2vesta cube-preset orbital-overlap-distance EDRDmax.cub cube_products
@@ -287,6 +289,10 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
   Multiwfn `K(r).cub`，默认幅值 `0.01`
 - `lagrangian-ked`：单正值等值面，别名包括 `g(r)`、`kinetic-g`，用于
   Multiwfn `G(r).cub`，默认等值面 `0.01`
+- `kinetic-energy-density`：单正值等值面，别名包括
+  `thomas-fermi-ked`、`weizsacker-ked`、`vw-ked`、`pauli-ked`，用于
+  function-100 导出的 KED 派生 `userfunc.cub`；默认等值面 `0.01`。
+  这些量通常按正标量场显示，但需要检查数据范围并按体系微调
 - `local-information-entropy`：正/负等值面，别名包括
   `information-entropy`、`infoentro`、`local-info-entropy`，用于
   Multiwfn `infoentro.cub`；Multiwfn 函数 `11` 计算局部信息熵
@@ -327,14 +333,16 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
   `beta-density`、`dori`、
   `local-electron-affinity`、`local-electron-attachment-energy`、
   `local-mulliken-electronegativity`、`local-hardness`、
+  `thomas-fermi-ked`、`weizsacker-ked`、`pauli-ked`、
   `orbital-weighted-fukui-plus`、`orbital-weighted-fukui-minus`、
   `orbital-weighted-fukui-zero`、`orbital-weighted-dual-descriptor`、
   `fractional-occupation-density`、
   `information-gain-density`、`shannon-entropy-density`、
   `fisher-information-density`、`second-fisher-information-density` 会分别
-  自动 patch `iuserfunc=1/2/20/27/-27/28/29/90/95/96/97/98/49/50/51/52`。
+  自动 patch `iuserfunc=1/2/20/27/-27/28/29/90/1200/114/95/96/97/98/49/50/51/52`。
+  KED 变体还会额外 patch run-local `iKEDsel`。
   runner 优先复制所选 Multiwfn 同目录的 `settings.ini`，只 patch
-  `iuserfunc` 后通过 run-local `-set` 传入；
+  当前路线需要的 run-local 键后通过 `-set` 传入；
   `-1/-3` 外部格点插值和 `57/58/59` Shubin 特殊模式暂不走这个通用路线
 - `becke-weight`：单正值等值面，别名包括 `becke`、
   `becke-overlap-weight`、`becke-atomic-weight`，用于 Multiwfn 函数
@@ -643,6 +651,14 @@ multiwfn2vesta grid-run --list-functions
   `cube-preset hamiltonian-ked`
 - `lagrangian-ked` / `g(r)`：函数 `7`，原始输出 `G(r).cub`，默认接
   `cube-preset lagrangian-ked`
+- `thomas-fermi-ked` / `tf-ked`、`weizsacker-ked` / `vw-ked`、
+  `pauli-ked`：函数 `100`，原始输出 `userfunc.cub`，默认接
+  `cube-preset kinetic-energy-density`。Thomas-Fermi 和 Weizsacker KED
+  自动写 run-local `iuserfunc=1200` 且分别设置 `iKEDsel=3` / `4`；Pauli
+  KED 自动写 `iuserfunc=114` 和 `iKEDsel=2`，即本地 Multiwfn 源码里的
+  Lagrangian KED minus Weizsacker KED。ABACUS 路线依赖 Molden 轨道及其
+  导数，不是 ABACUS 原生 KED cube；建议限于已验证的 LCAO Molden，并按
+  体系调 `--isosurface`
 - `local-information-entropy` / `information-entropy`：函数 `11`，原始
   输出 `infoentro.cub`，默认接 `cube-preset local-information-entropy`，
   按正/负等值面显示，默认幅值 `0.05`
@@ -664,12 +680,14 @@ multiwfn2vesta grid-run --list-functions
   `alpha-density`、`beta-density`、`dori`、
   `local-electron-affinity`、`local-electron-attachment-energy`、
   `local-mulliken-electronegativity`、`local-hardness`、
+  `thomas-fermi-ked`、`weizsacker-ked`、`pauli-ked`、
   `orbital-weighted-fukui-plus`、`orbital-weighted-fukui-minus`、
   `orbital-weighted-fukui-zero`、`orbital-weighted-dual-descriptor`、
   `fractional-occupation-density`、
   `information-gain-density`、`shannon-entropy-density`、
   `fisher-information-density`、`second-fisher-information-density`，这些会
-  自动设置 `iuserfunc=1/2/20/27/-27/28/29/90/95/96/97/98/49/50/51/52`；
+  自动设置 `iuserfunc=1/2/20/27/-27/28/29/90/1200/114/95/96/97/98/49/50/51/52`；
+  KED 变体还会额外设置 run-local `iKEDsel`；
   LEA/LEAE 若要画成 density surface 上的染色图，可在 `grid-run` 中加
   `--surface-cube density.cub` 自动选 `lea` / `leae` mapped preset，也可
   手动用 `cube-preset lea` / `cube-preset leae`；局域 Mulliken
@@ -730,6 +748,13 @@ multiwfn2vesta grid-run --list-functions
   多 k 点、SOC/noncollinear 结果要谨慎解释。`density` preset 默认
   等值面 `0.01` 对 FOD 可能偏高，看不到时先试 `--isosurface 0.001`，
   再按体系调节
+- `thomas-fermi-ked` / `tf-ked`、`weizsacker-ked` / `vw-ked`、
+  `pauli-ked`：函数 `100`，原始输出 `userfunc.cub`，自动接
+  `kinetic-energy-density` preset。前两者设置 `iuserfunc=1200` 并分别
+  设置 `iKEDsel=3` / `4`，Pauli KED 设置 `iuserfunc=114` 和 `iKEDsel=2`。
+  这些量通常作为正标量场显示，但需要检查实际数据范围；数值尺度依
+  体系、占据、NAO-to-GTO 转换和赝势价电子定义而变。对 ABACUS Molden
+  结果建议显式调 `--isosurface`
 - `orbital-weighted-fukui-plus` / `orbital-weighted-fukui-minus` /
   `orbital-weighted-fukui-zero`：函数 `100`，原始输出 `userfunc.cub`，
   自动写 run-local `iuserfunc=95` / `96` / `97`，默认接 `density`
