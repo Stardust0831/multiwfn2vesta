@@ -111,6 +111,8 @@ multiwfn2vesta grid-run --list-functions
   `userfunc.cub` output, but automatically patch the source-backed
   `iuserfunc` value into a run-local `multiwfn_grid_settings.ini` copied
   from the selected Multiwfn `settings.ini` when available:
+  `alpha-density` / `rho-alpha` = `1`,
+  `beta-density` / `rho-beta` = `2`,
   `dori` / `density-overlap-regions-indicator` = `20`,
   `local-electron-affinity` / `lea` = `27`,
   `local-electron-attachment-energy` / `leae` = `-27`,
@@ -124,11 +126,12 @@ multiwfn2vesta grid-run --list-functions
   `shannon-entropy-density` = `50`, `fisher-information-density` = `51`,
   and `second-fisher-information-density` = `52`.  LEA/LEAE named routes
   also auto-select mapped presets `lea`/`leae` when `--surface-cube` is
-  supplied; local Mulliken electronegativity, local hardness, and the
-  orbital-weighted Fukui/dual routes fall back to the generic `surface-map`
-  mapped preset.  Fukui+/Fukui-/Fukui0 standalone products use `density`,
-  while orbital-weighted dual descriptor uses `signed`.  These 95..98 routes
-  are single-wavefunction approximations and should not be confused with
+  supplied; alpha/beta density, local Mulliken electronegativity, local
+  hardness, and the orbital-weighted Fukui/dual routes fall back to the
+  generic `surface-map` mapped preset.  Alpha/beta density and
+  Fukui+/Fukui-/Fukui0 standalone products use `density`, while
+  orbital-weighted dual descriptor uses `signed`.  The 95..98 routes are
+  single-wavefunction approximations and should not be confused with
   charged-state `fukui-run`; the current runner leaves Multiwfn
   `orbwei_delta` at its source default `0.1` a.u.  Special external-grid
   modes `-1`, `-3`, and Shubin `57/58/59` are intentionally rejected by this
@@ -182,6 +185,16 @@ multiwfn2vesta grid-run --list-functions
   `--tex-percent`, `--tex-range-source surface-band`, `--surface-band`, or
   `--surface-nearest` from `grid-run` when the generic color scale is not
   chemically appropriate.
+- `alpha-density` and `beta-density`: function `100`, raw `userfunc.cub`,
+  default `iuserfunc=1` / `2`, standalone preset `density`.  Multiwfn
+  evaluates `fspindens(x,y,z,'a')` / `fspindens(x,y,z,'b')`; use these for
+  spin-channel density visualization, and use `spin-density` for
+  alpha-minus-beta maps.  Closed-shell inputs usually yield two half-density
+  channels.  For ABACUS Molden, this is intended for validated `nspin=2`
+  LCAO exports; SOC/noncollinear, multi-k, and metallic fractional-occupation
+  cases need extra interpretation.  Multiwfn `fspindens` does not include all
+  EDF density contributions handled by `fdens`, so special EDF/ECP files may
+  not satisfy alpha plus beta equals total density exactly.
 - `orbital-weighted-fukui-plus`, `orbital-weighted-fukui-minus`, and
   `orbital-weighted-fukui-zero`: function `100`, raw `userfunc.cub`, default
   `iuserfunc=95` / `96` / `97`, standalone preset `density`.  Use these when

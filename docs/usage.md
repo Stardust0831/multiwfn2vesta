@@ -79,8 +79,8 @@ multiwfn2vesta aim-igmh --help
   function grid，导出 density、MO/orbital、Laplacian、K(r)/G(r)、ELF/LOL
   及其 `ELFLOL_type` 变体、
   ESP/MEP、ALIE、EDR(r;d)、D(r)、RDG/IRI-like、
-  promolecular RDG/sign(lambda2)rho 等单 cube，并可自动接 `cube-preset`
-  写 `.vesta`
+  promolecular RDG/sign(lambda2)rho、function-100 alpha/beta density 等单
+  cube，并可自动接 `cube-preset` 写 `.vesta`
 - `fukui-run`: 从中性、阴离子、阳离子波函数分别生成共享格点的 density
   cube，再调用 `cube-arith` 生成 Fukui+/Fukui-/dual descriptor cube 和
   可选 `.vesta`
@@ -323,14 +323,15 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
   `leae-function`、`shannon-entropy-density`、`fisher-information-density`；
   用于 Multiwfn 函数 `100` 的 `userfunc.cub`；通用
   `grid-run --function user-function` 需要
-  `--user-function-index IUSERFUNC`。命名路由 `dori`、
+  `--user-function-index IUSERFUNC`。命名路由 `alpha-density`、
+  `beta-density`、`dori`、
   `local-electron-affinity`、`local-electron-attachment-energy`、
   `local-mulliken-electronegativity`、`local-hardness`、
   `orbital-weighted-fukui-plus`、`orbital-weighted-fukui-minus`、
   `orbital-weighted-fukui-zero`、`orbital-weighted-dual-descriptor`、
   `information-gain-density`、`shannon-entropy-density`、
   `fisher-information-density`、`second-fisher-information-density` 会分别
-  自动 patch `iuserfunc=20/27/-27/28/29/95/96/97/98/49/50/51/52`。
+  自动 patch `iuserfunc=1/2/20/27/-27/28/29/95/96/97/98/49/50/51/52`。
   runner 优先复制所选 Multiwfn 同目录的 `settings.ini`，只 patch
   `iuserfunc` 后通过 run-local `-set` 传入；
   `-1/-3` 外部格点插值和 `57/58/59` Shubin 特殊模式暂不走这个通用路线
@@ -658,19 +659,20 @@ multiwfn2vesta grid-run --list-functions
   从所选 Multiwfn 的 `settings.ini` 复制后 patch
 - `user-function` / `userfunc`：函数 `100`，原始输出 `userfunc.cub`，
   默认接 `cube-preset user-function`，按正/负等值面显示；通用路由必须传
-  `--user-function-index IUSERFUNC`。也可直接用命名路由 `dori`、
+  `--user-function-index IUSERFUNC`。也可直接用命名路由
+  `alpha-density`、`beta-density`、`dori`、
   `local-electron-affinity`、`local-electron-attachment-energy`、
   `local-mulliken-electronegativity`、`local-hardness`、
   `orbital-weighted-fukui-plus`、`orbital-weighted-fukui-minus`、
   `orbital-weighted-fukui-zero`、`orbital-weighted-dual-descriptor`、
   `information-gain-density`、`shannon-entropy-density`、
   `fisher-information-density`、`second-fisher-information-density`，这些会
-  自动设置 `iuserfunc=20/27/-27/28/29/95/96/97/98/49/50/51/52`；
+  自动设置 `iuserfunc=1/2/20/27/-27/28/29/95/96/97/98/49/50/51/52`；
   LEA/LEAE 若要画成 density surface 上的染色图，可在 `grid-run` 中加
   `--surface-cube density.cub` 自动选 `lea` / `leae` mapped preset，也可
   手动用 `cube-preset lea` / `cube-preset leae`；局域 Mulliken
-  electronegativity 和 local hardness 默认走通用 `surface-map`，需要时用
-  `--tex-physical` 或 `--tex-percent` 调整色标
+  electronegativity、local hardness、alpha/beta density 默认走通用
+  `surface-map`，需要时用 `--tex-physical` 或 `--tex-percent` 调整色标
 - `electron-delocalization-range` / `edr`：函数 `20`，原始输出
   `EDR.cub`，默认接 `cube-preset electron-delocalization-range`，按单正值
   等值面显示；必须传 `--edr-length D_BOHR`
@@ -707,6 +709,16 @@ multiwfn2vesta grid-run --list-functions
   `--tex-physical MIN MAX`、`--tex-percent MIN MAX`、
   `--tex-range-source surface-band`、`--surface-band` 和
   `--surface-nearest` 直接控制 texture 色标
+- `alpha-density` / `beta-density`：函数 `100`，原始输出
+  `userfunc.cub`，自动写 run-local `iuserfunc=1` / `2`，默认接
+  `density` preset；Multiwfn 源码调用 `fspindens(x,y,z,'a')` /
+  `fspindens(x,y,z,'b')`，适合检查自旋通道密度。如果目标是
+  alpha-minus-beta 差值，则继续用 `grid-run --function spin-density`。
+  闭壳层体系中两个通道通常只是总密度的一半；对 ABACUS 来说主要面向
+  最新 `molden.py` 正确导出的 `nspin=2` LCAO Molden。`nspin=4`、SOC、
+  多 k 点和金属分数占据仍需要谨慎解释。Multiwfn 源码里 `fspindens`
+  路径不像 `fdens` 那样覆盖所有 EDF 密度贡献，因此特殊 EDF/ECP 输入中
+  alpha+beta 未必严格等于 total density
 - `orbital-weighted-fukui-plus` / `orbital-weighted-fukui-minus` /
   `orbital-weighted-fukui-zero`：函数 `100`，原始输出 `userfunc.cub`，
   自动写 run-local `iuserfunc=95` / `96` / `97`，默认接 `density`

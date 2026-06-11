@@ -46,8 +46,9 @@ point.
   Hirshfeld-partition Delta-g, standalone IRI scalar, standalone DORI scalar
   and DORI+sign(lambda2)rho mapped surfaces, and standalone vdW potential
   cubes with run-local probe-atom control, local Mulliken electronegativity
-  and local hardness function-100 routes, ABACUS direct cube presets for potential,
-  partial-charge, and wavefunction-norm cubes,
+  and local hardness function-100 routes, spin-channel alpha/beta density
+  function-100 routes, ABACUS direct cube presets for potential, partial-charge,
+  and wavefunction-norm cubes,
   charged-state `fukui-run` orchestration, orbital-weighted Fukui/dual
   function-100 routes, aIGM/amIGM trajectory-average
   weak-interaction generation, cube/grid domain extraction, basin cube VESTA
@@ -121,6 +122,10 @@ then delete the temporary branch.
 - Combine compatible cube files with linear arithmetic for density
   differences, alpha-minus-beta spin density, Fukui functions, and dual
   descriptors, then optionally write a VESTA file through `cube-preset`.
+- Run spin-resolved alpha and beta electron density cubes through Multiwfn
+  function `100` `iuserfunc=1/2`, useful when an open-shell or spin-polarized
+  wavefunction should be inspected by channel rather than only as total
+  density or alpha-minus-beta spin density.
 - Run high-level Fukui/dual-descriptor maps from neutral, anion, and cation
   wavefunction files by generating Multiwfn density cubes on a shared neutral
   grid and then delegating the map arithmetic to `cube-arith`.
@@ -148,8 +153,9 @@ then delete the temporary branch.
   orbital-overlap distance D(r), pair/correlation functions with run-local
   `pairfunctype`/`paircorrtype`, source function with run-local
   `srcfuncmode`, user-defined `iuserfunc` cubes such as DORI, LEA/LEAE, and
-  information-theory densities, Becke atomic/overlap weight, Hirshfeld weight,
-  promolecular Delta-g, Hirshfeld-partition Delta-g, vdW potential with
+  information-theory densities, spin-resolved alpha/beta density, Becke
+  atomic/overlap weight, Hirshfeld weight, promolecular Delta-g,
+  Hirshfeld-partition Delta-g, vdW potential with
   run-local `ivdwprobe` probe selection, and related scalar cubes, export
   multiple orbitals through
   isolated batch runs, optionally write VESTA files through `cube-preset`,
@@ -258,6 +264,8 @@ multiwfn2vesta grid-run input.molden grid_products \
   --source-function-mode 1
 multiwfn2vesta grid-run input.molden grid_products \
   --function local-electron-affinity
+multiwfn2vesta grid-run input.molden grid_products \
+  --function alpha-density
 multiwfn2vesta grid-run input.molden grid_products \
   --function orbital-weighted-dual-descriptor
 multiwfn2vesta grid-run input.molden grid_products \
@@ -464,6 +472,7 @@ installation settings are not modified.  The VESTA preset shows signed
 Use `user-function`/`userfunc` for generic Multiwfn function `100`
 `userfunc.cub`; this generic route requires `--user-function-index
 IUSERFUNC`.  Source-backed named routes now imply common `iuserfunc` values:
+`alpha-density` / `beta-density` set `1` / `2`,
 `dori` sets `20`, `local-electron-affinity` sets `27`,
 `local-electron-attachment-energy` sets `-27`,
 `local-mulliken-electronegativity` sets `28`, `local-hardness` sets `29`,
@@ -481,9 +490,10 @@ density.cub` is supplied.  Local Mulliken electronegativity and local
 hardness use the generic `surface-map` mapped preset when `--surface-cube`
 is supplied; pass `--tex-physical`, `--tex-range-source surface-band`,
 `--surface-band`, or `--tex-percent` to tune the texture scale from
-`grid-run`.  Orbital-weighted Fukui+/Fukui-/Fukui0 use the `density` preset,
-the orbital-weighted dual descriptor uses the `signed` preset, and all four
-can use the generic `surface-map` mapped preset with `--surface-cube`;
+`grid-run`.  Alpha/beta density and orbital-weighted Fukui+/Fukui-/Fukui0
+use the `density` preset, the orbital-weighted dual descriptor uses the
+`signed` preset, and these routes can use the generic `surface-map` mapped
+preset with `--surface-cube`;
 explicit `--tex-physical MIN MAX` is recommended for mapped dual-descriptor
 figures.  These orbital-weighted routes are single-wavefunction approximations,
 not replacements for `fukui-run` charged-state density differences.  Use them
@@ -718,15 +728,26 @@ Common functions:
 - `user-function` / `userfunc`: generic function `100`, raw `userfunc.cub`,
   preset `user-function`, signed by default.  Pass `--user-function-index
   IUSERFUNC` unless using a named route below.  Named routes
+  `alpha-density`, `beta-density`,
   `dori`, `local-electron-affinity`, `local-electron-attachment-energy`,
   `local-mulliken-electronegativity`, `local-hardness`,
   `orbital-weighted-fukui-plus`, `orbital-weighted-fukui-minus`,
   `orbital-weighted-fukui-zero`, `orbital-weighted-dual-descriptor`,
   `information-gain-density`, `shannon-entropy-density`,
   `fisher-information-density`, and `second-fisher-information-density`
-  automatically patch `iuserfunc=20/27/-27/28/29/95/96/97/98/49/50/51/52`
+  automatically patch `iuserfunc=1/2/20/27/-27/28/29/95/96/97/98/49/50/51/52`
   into a run-local `-set` settings file, leaving global Multiwfn settings
   untouched.
+- `alpha-density` and `beta-density`: function `100`, raw `userfunc.cub`,
+  run-local `iuserfunc=1` / `2`, default `density` preset.  Multiwfn evaluates
+  `fspindens(x,y,z,'a')` / `fspindens(x,y,z,'b')`; use these for
+  spin-channel density inspection, and use `spin-density` when the desired
+  product is alpha minus beta.  Closed-shell inputs usually make each channel
+  half of total density.  For ABACUS, this is most useful with current LCAO
+  Molden files from `nspin=2`; SOC/noncollinear and multi-k cases still need
+  separate validation.  Multiwfn's `fspindens` path does not include every EDF
+  density contribution handled by `fdens`, so alpha plus beta may not exactly
+  equal total density for special EDF/ECP inputs.
 - `electron-delocalization-range` / `edr`: function `20`, raw `EDR.cub`,
   preset `electron-delocalization-range`, single positive surface by default.
   Pass `--edr-length D_BOHR`; Multiwfn asks for this EDR length scale before

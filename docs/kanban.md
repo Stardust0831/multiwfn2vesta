@@ -1,6 +1,35 @@
 # Project Kanban
 
-Updated: 2026-06-11 21:15 CST
+Updated: 2026-06-11 21:28 CST
+
+## Active Goal Continuation: 2026-06-11 Next ABACUS/Multiwfn VESTA Analysis Route
+
+- [x] Record automatic continuation of the long-running objective: keep
+  surveying valuable Multiwfn wavefunction analyses that can be visualized in
+  VESTA, prioritizing routes that ABACUS can feed through current LCAO Molden
+  files or direct cube outputs.
+- [x] Recheck current repository state, pushed branch alignment, existing
+  `grid-run`/`cube-preset`/analysis-matrix coverage, and local Multiwfn source
+  before selecting the next bounded source-backed increment.  Current `main`,
+  `origin/main`, and `origin/HEAD` are aligned at
+  `c43d37ca0486be07ae8502256d0eaa5846fba615`; only this kanban update plus
+  local untracked `domain.cub` and `domain.pdb` were present before the new
+  increment.  Selected increment: function-100 alpha/beta density routes
+  from local Multiwfn `iuserfunc=1/2`, which call
+  `fspindens(x,y,z,'a'/'b')` and export `userfunc.cub`.
+- [x] Implement one additional valuable route or visualization control with
+  focused tests, README/usage/skill/research/worklog/kanban notes, root-docs
+  mirror, validation, commit, push, and branch verification while preserving
+  untracked `domain.cub` and `domain.pdb`.  Code/tests/docs now include
+  `grid-run --function alpha-density` and `beta-density`, aliases
+  `rho-alpha`/`alpha-rho`/`rho-beta`/`beta-rho`, standalone `density` preset,
+  mapped `surface-map`, and caveats for closed-shell, EDF/ECP, and ABACUS
+  `nspin=2` Molden usage.  Read-only subagent review supported the route and
+  flagged alias/caveat refinements that were handled.  Validation passed:
+  `py_compile`, 72 focused `tests.test_multiwfn_grid` tests, 125 focused
+  `tests.test_multiwfn_grid tests.test_cli` tests, 336 full no-GUI tests,
+  CLI smokes, and `git diff --check`.  Final root-docs mirror, commit hash,
+  push result, and branch verification are reported in the assistant response.
 
 ## Current Request: 2026-06-11 README Refresh And Branch Closeout For Orbital-Weighted Fukui Routes
 

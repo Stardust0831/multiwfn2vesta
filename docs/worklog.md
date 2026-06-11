@@ -1,5 +1,38 @@
 # Worklog
 
+## 2026-06-11: spin-channel alpha/beta density routes
+
+- Continued the ABACUS/Multiwfn/VESTA analysis survey after the
+  orbital-weighted Fukui closeout by selecting a low-risk spin-resolved density
+  route that ABACUS `nspin=2` LCAO Molden files can feed.
+- Rechecked local Multiwfn 2026.6.2 source evidence.  `function.f90` maps
+  function-100 `iuserfunc=1` to alpha density and `iuserfunc=2` to beta
+  density through `fspindens(x,y,z,'a')` and `fspindens(x,y,z,'b')`;
+  `0123dim.f90` exports function `100` as `userfunc.cub`.
+- Added named `grid-run --function alpha-density` and
+  `grid-run --function beta-density` routes with aliases `rho-alpha`,
+  `alpha-rho`, `rho-beta`, and `beta-rho`.  The routes patch only
+  `iuserfunc` through a run-local settings file passed with Multiwfn `-set`,
+  use the existing `density` preset for standalone products, and use
+  `surface-map` with `--surface-cube`.
+- Read-only subagent review supported the route and recommended avoiding
+  aliases that could be confused with alpha-minus-beta `spin-density`; those
+  confusing aliases were not kept.  The review also flagged caveats now
+  documented in README/usage/skills/research notes: closed-shell cases usually
+  split total density in half, special EDF/ECP inputs may not have exact
+  alpha+beta equality with total density, and ABACUS use should be limited to
+  validated `nspin=2` Molden files until SOC/noncollinear/multi-k exports are
+  separately checked.
+- Focused resolver, command-stream, standalone alpha-density, and mapped
+  beta-density tests were added.
+- Validation passed before commit: focused `py_compile`, focused
+  `tests.test_multiwfn_grid` with 72 tests, focused
+  `tests.test_multiwfn_grid tests.test_cli` with 125 tests, full no-GUI
+  `unittest discover -s tests -v` with 336 tests, CLI smokes for
+  `bin/multiwfn2vesta --help`, `grid-run --list-functions`,
+  `grid-run --help`, and `cube-preset --list-presets`, plus
+  `git diff --check`.
+
 ## 2026-06-11: orbital-weighted Fukui and dual descriptor routes
 
 - Continued the ABACUS/Multiwfn/VESTA analysis survey by adding a

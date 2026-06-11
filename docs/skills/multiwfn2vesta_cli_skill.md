@@ -428,6 +428,7 @@ Common functions include `density`, `gradient`, `orbital --orbital h`,
 `hamiltonian-ked`, `lagrangian-ked`, `local-information-entropy`, `elf`,
 `lol`, `esp`, `alie`,
 `pair-function`, `source-function`, `user-function`, `dori`,
+`alpha-density`, `beta-density`,
 `local-electron-affinity`, `local-electron-attachment-energy`,
 `orbital-weighted-fukui-plus`, `orbital-weighted-fukui-minus`,
 `orbital-weighted-fukui-zero`, `orbital-weighted-dual-descriptor`,
@@ -451,6 +452,8 @@ function-specific where possible: `gradient.cub` uses `gradient-norm`,
 `promolecular-rdg`, `Delta_g.cub` uses
 `promolecular-delta-g`, Multiwfn function `23` generic `griddata.cub` uses
 `hirshfeld-delta-g`, `IRI.cub` uses `iri-scalar`,
+`grid-run --function alpha-density` and `grid-run --function beta-density`
+write `userfunc.cub` with `iuserfunc=1/2` and use `density`,
 `grid-run --function dori` writes `userfunc.cub` with `iuserfunc=20` and
 uses `dori-scalar`, and `vdWpot.cub` uses
 `vdw-potential` with `+/-1.0`
@@ -477,6 +480,8 @@ ELF/LOL definitions, or `--elflol-type d-over-d0` for the ELF-only D/D0 term
 without changing global settings.
 Generic `grid-run --function user-function` requires `--user-function-index
 IUSERFUNC`; named routes automatically patch common source-backed values:
+`alpha-density` / `rho-alpha` = `1`,
+`beta-density` / `rho-beta` = `2`,
 `dori` / `density-overlap-regions-indicator` = `20`,
 `local-electron-affinity` / `lea` = `27`,
 `local-electron-attachment-energy` / `leae` = `-27`,
@@ -492,18 +497,24 @@ IUSERFUNC`; named routes automatically patch common source-backed values:
 copied from the selected Multiwfn `settings.ini` when available and passed
 with `-set`.  LEA/LEAE named routes also auto-select mapped presets
 `lea`/`leae` when `--surface-cube` is supplied; local electronegativity and
-local hardness plus the orbital-weighted Fukui/dual routes use
-`surface-map`.  Fukui+/Fukui-/Fukui0 standalone products use `density`, and
-orbital-weighted dual descriptor uses `signed`.  These 95..98 routes are
-single-wavefunction approximations, not `fukui-run` charged-state density
-differences; the current runner leaves Multiwfn `orbwei_delta` at its source
-default `0.1` a.u.  `grid-run --surface-cube` forwards
+local hardness plus alpha/beta density and the orbital-weighted Fukui/dual
+routes use `surface-map`.  Alpha/beta density and Fukui+/Fukui-/Fukui0
+standalone products use `density`, and orbital-weighted dual descriptor uses
+`signed`.  These 95..98 routes are single-wavefunction approximations, not
+`fukui-run` charged-state density differences; the current runner leaves
+Multiwfn `orbwei_delta` at its source default `0.1` a.u.
+`grid-run --surface-cube` forwards
 `--tex-physical`, `--tex-percent`, `--tex-range-source`, `--surface-band`,
 and `--surface-nearest` to the downstream `cube-preset`; the interactive
 global CLI prompts for these after a surface cube is entered.  DORI+
 sign(lambda2)rho uses the lower-level `cube-preset dori DORI.cub ...
 --texture-cube sl2r.cub` direction from Multiwfn `DORIfill.vmd`, not
 `grid-run --surface-cube`.
+For alpha/beta density, closed-shell inputs usually give two half-density
+channels; ABACUS use should be limited to validated `nspin=2` LCAO Molden
+files until SOC/noncollinear and multi-k exports have separate checks.
+Special EDF/ECP inputs may not have exact alpha+beta equality with total
+density because Multiwfn `fspindens` is not the same path as `fdens`.
 `grid-run --function becke` requires
 `--becke-atoms I J`; `I J` requests Becke overlap weight and `I 0` requests
 Becke atomic weight.  `grid-run --function hirshfeld` requires
@@ -558,6 +569,10 @@ multiwfn2vesta grid-run input.fch hardness_map \
   --tex-physical -0.2 0.2 \
   --tex-range-source surface-band \
   --surface-band 0.25
+
+multiwfn2vesta grid-run input.fch spin_channels \
+  --function alpha-density \
+  --grid-points 80 80 80
 
 multiwfn2vesta grid-run input.fch ow_dual_map \
   --function ow-dd \

@@ -231,7 +231,8 @@ multiwfn2vesta grid-run ABACUS_Multiwfn.molden grid_products \
 
 Useful `grid-run` functions for ABACUS-compatible Molden files include
 `density`, `gradient`, `orbital --orbital h`, `orbital-density --orbital h`,
-`spin-density`, `spin-polarization`, `laplacian`, `hamiltonian-ked`,
+`spin-density`, `spin-polarization`, `alpha-density`, `beta-density`,
+`laplacian`, `hamiltonian-ked`,
 `lagrangian-ked`, `elf`, `lol`, `local-information-entropy`, `esp`, `rdg`,
 `promolecular-rdg`,
 `pair-function`, `source-function`, `edr`, `edrdmax`, `becke`, `hirshfeld`,
@@ -260,6 +261,12 @@ For Multiwfn function `5`, `grid-run --function spin-density` forces
 `ipolarpara=0`, while `grid-run --function spin-polarization` forces
 `ipolarpara=1`; both settings are written to a run-local file copied from the
 selected Multiwfn `settings.ini` when available and passed with `-set`.
+For spin-channel densities, `grid-run --function alpha-density` and
+`grid-run --function beta-density` patch function-100 `iuserfunc=1/2` and
+write `userfunc.cub` through the `density` display preset.  This is mainly
+useful for validated ABACUS `nspin=2` LCAO Molden exports; closed-shell inputs
+normally give half of total density in each channel, and SOC/noncollinear,
+multi-k, or metallic fractional-occupation cases require separate checks.
 For orbital-weighted Fukui and dual descriptor, use the function-100 named
 routes (`iuserfunc=95/96/97/98`) only when the ABACUS Molden file contains
 complete occupied/virtual orbital information and the single-determinant

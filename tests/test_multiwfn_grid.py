@@ -231,6 +231,10 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertIn("local-mulliken-electronegativity", text)
         self.assertIn("local-hardness", text)
         self.assertIn("mapped preset with --surface-cube: surface-map", text)
+        self.assertIn("alpha-density", text)
+        self.assertIn("beta-density", text)
+        self.assertIn("default iuserfunc=1", text)
+        self.assertIn("default iuserfunc=2", text)
         self.assertIn("default iuserfunc=20", text)
         self.assertIn("default iuserfunc=27", text)
         self.assertIn("default iuserfunc=-27", text)
@@ -294,6 +298,12 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertEqual(resolve_grid_function("user-function").index, 100)
         self.assertEqual(resolve_grid_function("userfunc").output_filename, "userfunc.cub")
         self.assertEqual(resolve_grid_function(None, 100).name, "user-function")
+        self.assertEqual(resolve_grid_function("alpha-density").preset, "density")
+        self.assertEqual(resolve_grid_function("rho-alpha").default_user_function_index, 1)
+        self.assertEqual(resolve_grid_function("alpha-rho").mapped_preset, "surface-map")
+        self.assertEqual(resolve_grid_function("beta-density").preset, "density")
+        self.assertEqual(resolve_grid_function("rho-beta").default_user_function_index, 2)
+        self.assertEqual(resolve_grid_function("beta-rho").mapped_preset, "surface-map")
         self.assertEqual(resolve_grid_function("local-electron-affinity").preset, "user-function")
         self.assertEqual(resolve_grid_function("local-electron-affinity").default_user_function_index, 27)
         self.assertEqual(resolve_grid_function("local-electron-affinity").mapped_preset, "lea")
@@ -493,6 +503,10 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         )
         self.assertEqual(
             build_grid_commands(resolve_grid_function("local-hardness"), grid_mode="low"),
+            ["5", "100", "1", "2", "0", "q"],
+        )
+        self.assertEqual(
+            build_grid_commands(resolve_grid_function("alpha-density"), grid_mode="low"),
             ["5", "100", "1", "2", "0", "q"],
         )
         self.assertEqual(
@@ -1129,6 +1143,88 @@ class TestMultiwfnGridRunner(unittest.TestCase):
             manifest = result.vesta_result.manifest_path.read_text(encoding="utf-8")
             self.assertIn("canonical_preset: `signed`", manifest)
             self.assertIn("effective_surface_mode: `signed`", manifest)
+
+    def test_run_alpha_density_uses_named_iuserfunc_and_density_preset(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            wavefunction = root / "h2o.fch"
+            wavefunction.write_text("wavefunction", encoding="utf-8")
+            candidate = self.make_candidate(root)
+            (candidate.path.parent / "settings.ini").write_text("iuserfunc= 0\n", encoding="utf-8")
+
+            def fake_run(command, **kwargs):
+                cwd = Path(kwargs["cwd"])
+                (cwd / "userfunc.cub").write_text(USER_FUNCTION_CUBE, encoding="utf-8")
+                return subprocess.CompletedProcess(command, 0, stdout="ok", stderr="")
+
+            with patch("multiwfn2vesta.multiwfn_grid.find_multiwfn", return_value=candidate):
+                with patch("multiwfn2vesta.multiwfn_grid.subprocess.run", side_effect=fake_run):
+                    result = run_multiwfn_grid(
+                        wavefunction,
+                        root / "products",
+                        function_name="rho-alpha",
+                        stem="case",
+                        grid_mode="low",
+                    )
+
+            self.assertTrue(result.success)
+            self.assertEqual(result.user_function_index, 1)
+            self.assertIn("iuserfunc= 1", result.settings_override.read_text(encoding="utf-8"))
+            self.assertEqual(result.raw_cube.name, "userfunc.cub")
+            self.assertEqual(result.cube.name, "case_alpha-density.cub")
+            self.assertIsNotNone(result.vesta_result)
+            self.assertEqual(result.vesta_result.vesta_path.name, "case_alpha-density_density_cube.vesta")
+            recipe = result.recipe_path.read_text(encoding="utf-8")
+            self.assertIn("function_name: `alpha-density`", recipe)
+            self.assertIn("function_index: `100`", recipe)
+            self.assertIn("user_function_index_iuserfunc: `1`", recipe)
+            self.assertIn("auto_vesta_preset: `density`", recipe)
+            manifest = result.vesta_result.manifest_path.read_text(encoding="utf-8")
+            self.assertIn("canonical_preset: `density`", manifest)
+            self.assertIn("effective_surface_mode: `single`", manifest)
+
+    def test_run_beta_density_surface_map_uses_named_iuserfunc(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            wavefunction = root / "h2o.fch"
+            wavefunction.write_text("wavefunction", encoding="utf-8")
+            surface_cube = root / "density.cub"
+            surface_cube.write_text(DENSITY_CUBE, encoding="utf-8")
+            candidate = self.make_candidate(root)
+            (candidate.path.parent / "settings.ini").write_text("iuserfunc= 0\n", encoding="utf-8")
+
+            def fake_run(command, **kwargs):
+                cwd = Path(kwargs["cwd"])
+                (cwd / "userfunc.cub").write_text(USER_FUNCTION_CUBE, encoding="utf-8")
+                return subprocess.CompletedProcess(command, 0, stdout="ok", stderr="")
+
+            with patch("multiwfn2vesta.multiwfn_grid.find_multiwfn", return_value=candidate):
+                with patch("multiwfn2vesta.multiwfn_grid.subprocess.run", side_effect=fake_run):
+                    result = run_multiwfn_grid(
+                        wavefunction,
+                        root / "products",
+                        function_name="rho-beta",
+                        surface_cube=surface_cube,
+                        tex_physical=(0.0, 0.01),
+                        tex_range_source="surface-band",
+                        stem="case",
+                        grid_mode="low",
+                    )
+
+            self.assertTrue(result.success)
+            self.assertEqual(result.user_function_index, 2)
+            self.assertIn("iuserfunc= 2", result.settings_override.read_text(encoding="utf-8"))
+            self.assertEqual(result.cube.name, "case_beta-density.cub")
+            self.assertEqual(result.mapped_preset, "surface-map")
+            self.assertIsNotNone(result.vesta_result)
+            recipe = result.recipe_path.read_text(encoding="utf-8")
+            self.assertIn("function_name: `beta-density`", recipe)
+            self.assertIn("user_function_index_iuserfunc: `2`", recipe)
+            self.assertIn("auto_vesta_preset: `density`", recipe)
+            self.assertIn("mapped_vesta_preset: `surface-map`", recipe)
+            manifest = result.vesta_result.manifest_path.read_text(encoding="utf-8")
+            self.assertIn("canonical_preset: `surface-map`", manifest)
+            self.assertIn("effective_tex_physical: `0.0` to `0.01`", manifest)
 
     def test_run_orbital_weighted_dual_descriptor_surface_map_passes_texture_scale(self):
         with tempfile.TemporaryDirectory() as tmp:
