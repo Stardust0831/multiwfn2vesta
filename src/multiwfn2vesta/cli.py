@@ -744,6 +744,11 @@ def interactive_grid_run() -> int:
             argv.append("--orbitals")
             argv.extend(orbitals)
 
+    if function_name.strip().lower() in {"25", "vdw", "vdwpot", "vdw-potential", "van-der-waals-potential"}:
+        vdw_probe = _prompt("vdW probe atom symbol or atomic number (empty for C/6)")
+        if vdw_probe:
+            argv.extend(["--vdw-probe", vdw_probe])
+
     multiwfn = _prompt("Multiwfn executable or directory (empty for auto-discovery)")
     if multiwfn:
         argv.extend(["--multiwfn", multiwfn])

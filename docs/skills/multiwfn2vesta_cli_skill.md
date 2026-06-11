@@ -447,7 +447,9 @@ function-specific where possible: `gradient.cub` uses `gradient-norm`,
 `promolecular-delta-g`, Multiwfn function `23` generic `griddata.cub` uses
 `hirshfeld-delta-g`, `IRI.cub` uses `iri-scalar`, and `vdWpot.cub` uses
 `vdw-potential` with `+/-1.0`
-kcal/mol signed surfaces.  `grid-run --function pair-function` requires
+kcal/mol signed surfaces.  `grid-run --function vdw-potential` writes
+run-local `ivdwprobe=6` by default and accepts `--vdw-probe ELEMENT_OR_Z`.
+`grid-run --function pair-function` requires
 `--reference-point X Y Z`; `--pair-function-type` and
 `--pair-correlation-type` patch Multiwfn `pairfunctype`/`paircorrtype`
 through a run-local settings file copied from the selected Multiwfn

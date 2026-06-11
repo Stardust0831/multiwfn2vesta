@@ -25,9 +25,9 @@ point.
   local `main`, `origin/main`, and `origin/HEAD`; `git ls-remote --heads
   origin` returned only `refs/heads/main`.  No merge-back was needed because
   there was no extra local or remote feature branch to consolidate.
-- Feature closeouts, including the user-function, spin-polarization, and
-  ELF/LOL definition-control grid routes, are kept on the maintained `main`
-  branch.  Use
+- Feature closeouts, including the user-function, spin-polarization,
+  ELF/LOL definition-control, and vdW-probe grid routes, are kept on the
+  maintained `main` branch.  Use
   `git log --oneline --decorate -5` after pulling if an exact current commit
   hash is needed.
 - Local untracked probe files such as `domain.cub` and `domain.pdb` are not
@@ -44,7 +44,8 @@ point.
   Becke atomic/overlap weight, Hirshfeld weight, standalone RDG,
   promolecular RDG, promolecular Delta-g,
   Hirshfeld-partition Delta-g, standalone IRI scalar, and standalone vdW
-  potential cubes, ABACUS direct cube presets for potential,
+  potential cubes with run-local probe-atom control, ABACUS direct cube
+  presets for potential,
   partial-charge, and wavefunction-norm cubes,
   charged-state `fukui-run` orchestration, aIGM/amIGM trajectory-average
   weak-interaction generation, cube/grid domain extraction, basin cube VESTA
@@ -142,8 +143,9 @@ then delete the temporary branch.
   `pairfunctype`/`paircorrtype`, source function with run-local
   `srcfuncmode`, user-defined `iuserfunc` cubes such as LEA/LEAE and
   information-theory densities, Becke atomic/overlap weight, Hirshfeld weight,
-  promolecular Delta-g, Hirshfeld-partition Delta-g, and related
-  scalar cubes, export multiple orbitals through
+  promolecular Delta-g, Hirshfeld-partition Delta-g, vdW potential with
+  run-local `ivdwprobe` probe selection, and related scalar cubes, export
+  multiple orbitals through
   isolated batch runs, optionally write VESTA files through `cube-preset`,
   and map generated ESP/ALIE/vdW/sign(lambda2)rho cubes as textures on a
   provided density/surface cube.
@@ -228,7 +230,8 @@ multiwfn2vesta aigm-run trajectory.xyz aigm_products \
   --grid-mode spacing --grid-spacing 0.25
 multiwfn2vesta grid-run input.molden grid_products --function density
 multiwfn2vesta grid-run input.molden grid_products --function spin-polarization
-multiwfn2vesta grid-run input.molden grid_products --function vdw-potential
+multiwfn2vesta grid-run input.molden grid_products --function vdw-potential \
+  --vdw-probe C
 multiwfn2vesta grid-run input.molden grid_products \
   --function edr \
   --edr-length 0.85
@@ -398,11 +401,13 @@ bundled Multiwfn `molsurfmap.vmd` template.
 
 Use `vdw-potential` for standalone Multiwfn function `25` `vdWpot.cub`
 isosurfaces; it uses signed surfaces at `+/-1.0` kcal/mol, matching
-Multiwfn's main-function-5 display default.  Use `vdw-map`/`vdw-surface`
-when a vdW potential cube should color a density/surface cube.  Use
-`potential` for direct `out_pot`/potential cube isosurfaces.  Use `esp`
-when a density or molecular surface cube should be colored by a potential
-texture cube.
+Multiwfn's main-function-5 display default.  `grid-run` fixes the Multiwfn
+`ivdwprobe` probe atom to carbon/6 by default and accepts `--vdw-probe O`,
+`--vdw-probe Cl`, or an atomic number for other UFF probe atoms.  Use
+`vdw-map`/`vdw-surface` when a vdW potential cube should color a
+density/surface cube.  Use `potential` for direct `out_pot`/potential cube
+isosurfaces.  Use `esp` when a density or molecular surface cube should be
+colored by a potential texture cube.
 
 Use `electron-delocalization-range`/`edr` for Multiwfn function `20`
 `EDR.cub`; `grid-run` requires `--edr-length D_BOHR` because Multiwfn asks
@@ -698,6 +703,8 @@ Common functions:
   `vdw-potential`, signed at `+/-1.0` kcal/mol by default.  With
   `--surface-cube`, it maps through `cube-preset vdw-map` instead so the
   generated vdW potential cube colors an existing density/surface cube.
+  `grid-run` writes run-local `ivdwprobe=6` by default and accepts
+  `--vdw-probe ELEMENT_OR_Z` for other probe atoms.
 - `elf` and `lol`: localization cubes, defaulting to `cube-preset elf/lol`.
   The runner copies the selected Multiwfn `settings.ini` when available and
   writes run-local `ELFLOL_type=0` for ordinary Becke ELF/LOL definitions.

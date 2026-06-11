@@ -283,7 +283,9 @@ uses standalone `promolecular-delta-g`, function `23` generic
 `griddata.cub` uses standalone `hirshfeld-delta-g`, `IRI.cub` uses
 standalone `iri-scalar`, and `vdWpot.cub` uses standalone
 `vdw-potential` with `+/-1.0` kcal/mol signed
-surfaces.  Use the existing two-cube `cube-preset iri` route when a
+surfaces; `grid-run --function vdw-potential` defaults the UFF probe to
+carbon/6 through run-local `ivdwprobe` and accepts `--vdw-probe` for other
+probe atoms.  Use the existing two-cube `cube-preset iri` route when a
 sign(lambda2)rho-like texture cube is available; use `vdw-map` when a vdW
 potential cube should color a density/surface cube.  IGM/IGMH fragment
 `dg_inter.cub` remains a separate mapped-surface workflow through

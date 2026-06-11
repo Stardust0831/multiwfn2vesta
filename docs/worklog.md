@@ -1,5 +1,42 @@
 # Worklog
 
+## 2026-06-11: vdW potential probe control
+
+- Continued the ABACUS/Multiwfn/VESTA analysis survey by tightening an
+  existing valuable route rather than adding another unbounded workflow.
+- Rechecked local Multiwfn 2026.6.2 source evidence: `settings.ini` defines
+  `ivdwprobe=6` as the element index of the vdW potential probe atom;
+  `function.f90` lists function `25` as van der Waals potential with the
+  current probe element in the function list; `vdwpotfunc` uses `ivdwprobe`
+  to look up UFF probe parameters; and `0123dim.f90` exports `vdWpot.cub`
+  with display `sur_value=1.0`.
+- `grid-run --function vdw-potential` now writes run-local `ivdwprobe=6` by
+  default, preserving the carbon-probe convention even if global Multiwfn
+  settings were changed.
+- Added `--vdw-probe ELEMENT_OR_Z`, accepting element symbols such as `O` or
+  `Cl` and atomic numbers, for explicit UFF probe selection.  The value is
+  recorded in the grid recipe as `vdw_probe_atomic_number_ivdwprobe`.
+- Rechecked the README/branch-consolidation request after
+  `git fetch --prune origin`: current branch is `main`, `origin/HEAD` points
+  to `origin/main`, the remote exposes only `refs/heads/main`, repository
+  identity is `Stardust0831 <13862180016@163.com>`, and no branch merge-back
+  is needed in this pass.
+- Updated cube-preset notes, README, usage notes, reusable skill notes,
+  research matrix, and kanban before full validation and commit closeout.
+- Read-only subagent review found no blocker.  Its low-risk follow-ups were
+  handled by adding default/numeric/lowercase/boundary `--vdw-probe` tests
+  and exposing the probe prompt in the unified interactive `grid-run` flow;
+  local untracked `domain.cub` and `domain.pdb` remain deliberately outside
+  the commit.
+- Validation passed after the final CLI/test patch: focused `py_compile`,
+  focused `tests.test_multiwfn_grid` with 64 tests, focused
+  `tests.test_multiwfn_grid tests.test_cli` with 116 tests, combined
+  `tests.test_multiwfn_grid tests.test_cube_preset` with 108 tests, full
+  no-GUI `unittest discover -s tests -v` with 325 tests, CLI smoke for
+  `grid-run --list-functions`, `grid-run --help`, and
+  `cube-preset --list-presets`, `git diff --check`, and root docs checksum
+  mirror dry-run.
+
 ## 2026-06-11: ELF/LOL run-local definition control
 
 - Continued the long-running ABACUS/Multiwfn/VESTA analysis objective by

@@ -1,6 +1,65 @@
 # Project Kanban
 
-Updated: 2026-06-11 19:29 CST
+Updated: 2026-06-11 19:56 CST
+
+## Current Request: 2026-06-11 README Refresh And Branch Consolidation For vdW Probe Route
+
+- [x] Record user request immediately: update README, inspect the unusual
+  branch state, converge back to one maintained branch if needed, and keep
+  repository-local git identity as `Stardust0831`.
+- [x] Confirm current branch and identity before staging anything.  Current
+  branch is `main`; repository identity is
+  `Stardust0831 <13862180016@163.com>`.
+- [x] Finish the in-progress `grid-run --function vdw-potential
+  --vdw-probe` route, including README/usage/skills/research/worklog notes,
+  validation after the latest CLI/test changes, root docs sync, review-agent
+  closeout, commit, push, and final branch verification.  Code/docs are
+  updated and validation passed: focused `py_compile`,
+  `tests.test_multiwfn_grid` with 64 tests,
+  `tests.test_multiwfn_grid tests.test_cli` with 116 tests,
+  `tests.test_multiwfn_grid tests.test_cube_preset` with 108 tests, full
+  no-GUI regression with 325 tests, CLI smoke, and `git diff --check`.
+  Root docs checksum mirror dry-run is empty.  Final commit/push and
+  post-push branch verification are reported in the assistant response.
+- [x] Recheck local/remote branch topology after fetch/prune and keep only
+  the maintained `main` branch workflow unless a real remote side branch is
+  found.  After `git fetch --prune origin`, local `main`, `origin/main`, and
+  `origin/HEAD` are aligned at
+  `e1ee45483eefc8cc9961994bb6ab4d2bfe02b26a`; `git ls-remote --heads origin`
+  exposes only `refs/heads/main`, so no merge-back is needed.  Preserve local
+  untracked probe files `domain.cub` and `domain.pdb` outside the commit.
+
+## Active Goal Continuation: 2026-06-11 Next Wavefunction Analysis Survey
+
+- [x] Record automatic continuation of the long-running objective: survey
+  valuable Multiwfn wavefunction analyses that can be visualized in VESTA,
+  prioritizing routes fed by ABACUS LCAO Molden files or ABACUS direct cube
+  outputs.
+- [x] Recheck current repository state, current `grid-run`/`cube-preset`
+  coverage, and local Multiwfn source before selecting the next bounded
+  feature increment.  Current `main` is aligned with `origin/main` at
+  `e1ee45483eefc8cc9961994bb6ab4d2bfe02b26a`, with only local untracked
+  `domain.cub` and `domain.pdb` probes plus this kanban update.  `grid-run`
+  already covers main-function-5 functions `1-25`, `44`, `100`, `111`, and
+  `112`; the next useful increment is run-local control of a source setting
+  that changes an existing function's physical meaning.
+- [x] Select and implement one source-backed analysis route that moves the
+  project closer to broad Multiwfn-to-VESTA coverage, with tests, docs, root
+  docs sync, validation, review, commit, push, and branch verification.
+  Selected increment: expose `ivdwprobe` for `grid-run --function
+  vdw-potential`.  Source evidence: local Multiwfn `settings.ini` defines
+  `ivdwprobe=6` as the vdW potential probe atom; `function.f90` reports the
+  selected probe in function `25` and `vdwpotfunc` uses it for UFF probe
+  parameters; `0123dim.f90` exports `vdWpot.cub` and sets display
+  `sur_value=1.0`.  Implementation in progress: default `ivdwprobe=6`,
+  `--vdw-probe ELEMENT_OR_Z`, recipe recording, tests, README/usage/skill/
+  research/worklog updates.  Validation passed after the final CLI/test
+  patch: focused `py_compile`, `tests.test_multiwfn_grid` with 64 tests,
+  `tests.test_multiwfn_grid tests.test_cli` with 116 tests, combined
+  cube/grid tests with 108 tests, full no-GUI regression with 325 tests, CLI
+  smoke, `git diff --check`, and root docs checksum mirror dry-run passed.
+  Final commit hash and post-push branch alignment are reported in the
+  assistant response to avoid a self-referential hash here.
 
 ## Active Goal Continuation: 2026-06-11 Next Wavefunction Visualization Increment
 

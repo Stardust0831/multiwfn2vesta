@@ -13,13 +13,32 @@ from pathlib import Path
 from typing import Dict, List, NamedTuple, Optional, Sequence, Tuple
 
 from .cube_preset import run_preset
-from .cube_vesta import CubeVestaResult
+from .cube_vesta import CubeVestaResult, PERIODIC_SYMBOLS
 from .executables import ExecutableCandidate, find_multiwfn
 from .multiwfn_aim import read_command_file
 
 
 GRID_OUTPUT_MISSING_CODE = 3
 GRID_PROCESSING_FAILED_CODE = 4
+VDW_PROBE_SYMBOLS = tuple(PERIODIC_SYMBOLS) + (
+    "Fr",
+    "Ra",
+    "Ac",
+    "Th",
+    "Pa",
+    "U",
+    "Np",
+    "Pu",
+    "Am",
+    "Cm",
+    "Bk",
+    "Cf",
+    "Es",
+    "Fm",
+    "Md",
+    "No",
+    "Lr",
+)
 
 
 @dataclass(frozen=True)
@@ -174,6 +193,7 @@ GRID_FUNCTIONS: Tuple[GridFunction, ...] = (
         "vdw-potential",
         ("vdw", "vdwpot", "van-der-waals-potential"),
         mapped_preset="vdw-map",
+        settings_updates=(("ivdwprobe", 6),),
     ),
     GridFunction("orbital-density", 44, "orbdens.cub", "orbital-density", ("orbdens", "mo-density"), True),
     GridFunction(
@@ -290,6 +310,7 @@ class MultiwfnGridResult(NamedTuple):
     source_function_mode: Optional[int]
     user_function_index: Optional[int]
     elflol_type: Optional[int]
+    vdw_probe: Optional[int]
     settings_override: Optional[Path]
 
 
@@ -535,6 +556,25 @@ def _normalize_elflol_type(value: Optional[object]) -> Optional[int]:
             "--elflol-type must be one of 0/becke, 1/tsirelson, "
             "2/tian-lu, or 3/d-over-d0"
         )
+
+
+def _normalize_vdw_probe(value: Optional[object]) -> Optional[int]:
+    if value is None:
+        return None
+    text = str(value).strip()
+    if not text:
+        raise ValueError("--vdw-probe must be an element symbol or atomic number")
+    if re.fullmatch(r"[+-]?\d+", text):
+        atomic_number = int(text)
+    else:
+        symbol = text[0].upper() + text[1:].lower()
+        try:
+            atomic_number = VDW_PROBE_SYMBOLS.index(symbol)
+        except ValueError as exc:
+            raise ValueError("--vdw-probe must be an element symbol or atomic number") from exc
+    if atomic_number < 1 or atomic_number >= len(VDW_PROBE_SYMBOLS):
+        raise ValueError("--vdw-probe atomic number must be in the range 1..103")
+    return atomic_number
 
 
 def _write_run_local_settings(
@@ -847,6 +887,7 @@ def _write_recipe(
     source_function_mode: Optional[int] = None,
     user_function_index: Optional[int] = None,
     elflol_type: Optional[int] = None,
+    vdw_probe: Optional[int] = None,
     settings_override: Optional[Path] = None,
     error: Optional[str] = None,
 ) -> None:
@@ -875,6 +916,7 @@ def _write_recipe(
         source_function_mode = result.source_function_mode
         user_function_index = result.user_function_index
         elflol_type = result.elflol_type
+        vdw_probe = result.vdw_probe
         settings_override = result.settings_override
 
     lines = [
@@ -913,6 +955,7 @@ def _write_recipe(
             f"- source_function_mode: `{source_function_mode}`",
             f"- user_function_index_iuserfunc: `{user_function_index}`",
             f"- elflol_type: `{elflol_type}`",
+            f"- vdw_probe_atomic_number_ivdwprobe: `{vdw_probe}`",
             f"- local_settings_file: `{settings_override}`",
             f"- vesta_file: `{vesta_result.vesta_path if vesta_result is not None else None}`",
             f"- vesta_recipe: `{vesta_result.manifest_path if vesta_result is not None else None}`",
@@ -926,6 +969,7 @@ def _write_recipe(
             "- Function `17` uses `pairfunc(refx,refy,refz,x,y,z)` for correlation hole/factor, exchange-correlation density, or pair density; the maintained stream sets the reference point through main menu `1000 -> 1`, copies the selected Multiwfn `settings.ini` when available, patches `pairfunctype` and `paircorrtype`, and passes the run-local settings file through `-set`.",
             "- Function `19` source function uses global `refx,refy,refz` and `srcfuncmode`; the maintained stream sets the reference point through main menu `1000 -> 1`, copies the selected Multiwfn `settings.ini` when available, patches `srcfuncmode`, and passes the run-local settings file through `-set`.",
             "- Functions `9` and `10` evaluate ELF/LOL according to `ELFLOL_type`; the maintained stream defaults ordinary `elf`/`lol` to Becke definitions (`0`) and can patch other supported definitions through a run-local settings file.  D/D0 type `3` is accepted only for ELF because Multiwfn implements it only in the ELF branch.",
+            "- Function `25` van der Waals potential uses `ivdwprobe` to select the UFF probe atom; the maintained stream defaults it to carbon (`6`) and can patch another probe element through a run-local settings file.",
             "- Function `20` EDR(r;d) asks for length scale `d` in Bohr before grid setup and exports `EDR.cub`.",
             "- Function `21` D(r) can use Multiwfn's default EDR exponent set `20, 2.50, 1.50` or a manual count/start/increment set and exports `EDRDmax.cub`.",
             "- Function `100` evaluates `userfunc(x,y,z)` using `iuserfunc` from settings; the maintained stream copies the selected Multiwfn `settings.ini` when available, patches `iuserfunc`, passes the run-local settings file through `-set`, and exports `userfunc.cub`.  Special external-grid modes `-1`, `-3`, and Shubin `57/58/59` are intentionally excluded from this generic route.",
@@ -1030,6 +1074,7 @@ def run_multiwfn_grid(
     source_function_mode: Optional[int] = None,
     user_function_index: Optional[int] = None,
     elflol_type: Optional[object] = None,
+    vdw_probe: Optional[object] = None,
     timeout: Optional[int] = None,
     nthreads: Optional[int] = None,
     stem: Optional[str] = None,
@@ -1068,6 +1113,7 @@ def run_multiwfn_grid(
     normalized_source_function_mode: Optional[int] = None
     normalized_user_function_index: Optional[int] = None
     normalized_elflol_type: Optional[int] = None
+    normalized_vdw_probe: Optional[int] = None
     if function.index in {17, 19}:
         normalized_reference_point = _normalize_reference_point(reference_point)
         normalized_reference_unit = _normalize_reference_unit(reference_unit)
@@ -1103,6 +1149,10 @@ def run_multiwfn_grid(
             raise ValueError("--elflol-type 3/d-over-d0 is only valid for elf, not lol")
     elif elflol_type is not None:
         raise ValueError("--elflol-type is only valid for elf and lol")
+    if function.index == 25:
+        normalized_vdw_probe = _normalize_vdw_probe(vdw_probe)
+    elif vdw_probe is not None:
+        raise ValueError("--vdw-probe is only valid for vdw-potential")
     candidate = find_multiwfn(multiwfn_path)
     if candidate is None:
         raise FileNotFoundError(
@@ -1151,6 +1201,13 @@ def run_multiwfn_grid(
         normalized_elflol_type
         if normalized_elflol_type is not None
         else settings_updates.get("ELFLOL_type")
+    )
+    if function.index == 25 and normalized_vdw_probe is not None:
+        settings_updates["ivdwprobe"] = normalized_vdw_probe
+    effective_vdw_probe = (
+        normalized_vdw_probe
+        if normalized_vdw_probe is not None
+        else settings_updates.get("ivdwprobe")
     )
 
     settings_override: Optional[Path] = None
@@ -1251,6 +1308,7 @@ def run_multiwfn_grid(
             source_function_mode=normalized_source_function_mode,
             user_function_index=normalized_user_function_index,
             elflol_type=effective_elflol_type,
+            vdw_probe=effective_vdw_probe,
             settings_override=settings_override,
             error=error,
         )
@@ -1285,6 +1343,7 @@ def run_multiwfn_grid(
             source_function_mode=normalized_source_function_mode,
             user_function_index=normalized_user_function_index,
             elflol_type=effective_elflol_type,
+            vdw_probe=effective_vdw_probe,
             settings_override=settings_override,
         )
     except OSError as exc:
@@ -1314,6 +1373,7 @@ def run_multiwfn_grid(
             source_function_mode=normalized_source_function_mode,
             user_function_index=normalized_user_function_index,
             elflol_type=effective_elflol_type,
+            vdw_probe=effective_vdw_probe,
             settings_override=settings_override,
             error=error,
         )
@@ -1348,6 +1408,7 @@ def run_multiwfn_grid(
             source_function_mode=normalized_source_function_mode,
             user_function_index=normalized_user_function_index,
             elflol_type=effective_elflol_type,
+            vdw_probe=effective_vdw_probe,
             settings_override=settings_override,
         )
 
@@ -1441,6 +1502,7 @@ def run_multiwfn_grid(
         source_function_mode=normalized_source_function_mode,
         user_function_index=normalized_user_function_index,
         elflol_type=effective_elflol_type,
+        vdw_probe=effective_vdw_probe,
         settings_override=settings_override,
     )
     _write_recipe(recipe_path, result=result)
@@ -1726,6 +1788,15 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "definitions."
         ),
     )
+    parser.add_argument(
+        "--vdw-probe",
+        default=None,
+        help=(
+            "Probe atom for function 25 vdW potential, as an element symbol "
+            "or atomic number. Defaults to carbon/6 through a run-local "
+            "ivdwprobe setting."
+        ),
+    )
     parser.add_argument("--timeout", type=int)
     parser.add_argument("--nthreads", type=int)
     parser.add_argument("--stem")
@@ -1807,6 +1878,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 or args.source_function_mode is not None
                 or args.user_function_index is not None
                 or args.elflol_type is not None
+                or args.vdw_probe is not None
             ):
                 raise ValueError(
                     "--edr-length, --edr-exponents, --becke-atoms, "
@@ -1814,7 +1886,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     "--reference-point, --reference-unit, "
                     "--pair-function-type, --pair-correlation-type, and "
                     "--source-function-mode, --user-function-index, and "
-                    "--elflol-type are not supported with --orbitals"
+                    "--elflol-type, and --vdw-probe are not supported with "
+                    "--orbitals"
                 )
             result = run_multiwfn_grid_batch(
                 args.wavefunction,
@@ -1878,6 +1951,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             source_function_mode=args.source_function_mode,
             user_function_index=args.user_function_index,
             elflol_type=args.elflol_type,
+            vdw_probe=args.vdw_probe,
             timeout=args.timeout,
             nthreads=args.nthreads,
             stem=args.stem,

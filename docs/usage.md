@@ -361,8 +361,9 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
   `vdw-potential-cube`、`van-der-waals-potential`，用于 Multiwfn 函数
   `25` 的 `vdWpot.cub`；Multiwfn 源码中此函数按 UFF 参数计算 vdW
   potential，单位 kcal/mol，并把 main-function-5 `sur_value` 设为
-  `1.0`；如果是把 vdW potential 染色到 density/surface cube 上，用
-  `vdw-map`
+  `1.0`；通过 `grid-run` 生成时默认写 run-local `ivdwprobe=6`，即 C
+  探针，也可用 `--vdw-probe O`、`--vdw-probe Cl` 或原子序数改探针元素；
+  如果是把 vdW potential 染色到 density/surface cube 上，用 `vdw-map`
 - `potential`：正/负等值面，别名包括 `abacus-potential`、`out-pot`、
   `pot-es`，用于 ABACUS `out_pot` 直接势场 cube；如果是密度表面按电势染色，
   用 `esp`
@@ -648,7 +649,8 @@ multiwfn2vesta grid-run --list-functions
 - `vdw-potential` / `vdw`：函数 `25`，原始输出 `vdWpot.cub`，默认接
   `cube-preset vdw-potential`，按正/负 `1.0` kcal/mol 等值面显示；配合
   `--surface-cube` 时默认走 `cube-preset vdw-map`，把生成的 vdW potential
-  cube 作为已有 density/surface cube 的 texture
+  cube 作为已有 density/surface cube 的 texture；`--vdw-probe` 可选择
+  UFF 探针元素，默认 C/6
 - `alie` / `avglocion`：函数 `18`，原始输出 `avglocion.cub`；常规 ALIE
   表面图可以用 `--surface-cube density.cub` 自动把生成的 ALIE cube 作为
   `cube-preset alie` 的 texture

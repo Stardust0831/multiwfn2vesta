@@ -706,6 +706,43 @@ class TestUnifiedCli(unittest.TestCase):
             ]
         )
 
+    def test_interactive_grid_run_builds_vdw_probe_args(self):
+        answers = iter(
+            [
+                "10",
+                "input.molden",
+                "grid_products",
+                "",
+                "vdw-potential",
+                "O",
+                "",
+                "",
+                "",
+                "",
+                "low",
+                "y",
+            ]
+        )
+        with patch("builtins.input", lambda _prompt: next(answers)):
+            with patch("sys.stdout", io.StringIO()):
+                with patch("multiwfn2vesta.cli.multiwfn_grid.main", return_value=0) as mocked:
+                    code = cli.main([])
+
+        self.assertEqual(code, 0)
+        mocked.assert_called_once_with(
+            [
+                "input.molden",
+                "grid_products",
+                "--function",
+                "vdw-potential",
+                "--vdw-probe",
+                "O",
+                "--grid-mode",
+                "low",
+                "--no-vesta",
+            ]
+        )
+
     def test_interactive_fukui_run_builds_expected_args(self):
         answers = iter(
             [

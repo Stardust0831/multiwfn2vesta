@@ -159,7 +159,9 @@ multiwfn2vesta grid-run --list-functions
   `van-der-waals-potential`: function `25`, raw `vdWpot.cub`, preset
   `vdw-potential` with signed `+/-1.0` kcal/mol isosurfaces.  Multiwfn
   evaluates the UFF vdW potential and sets main-function-5 `sur_value=1.0`.
-  Mapped preset `vdw-map` is used with `--surface-cube`.
+  The maintained stream writes run-local `ivdwprobe=6` by default and accepts
+  `--vdw-probe ELEMENT_OR_Z` for other probe atoms.  Mapped preset `vdw-map`
+  is used with `--surface-cube`.
 - `orbital-density`: function `44`, raw `orbdens.cub`, preset
   `orbital-density`, requires `--orbital` for one orbital or `--orbitals` for
   batch export.

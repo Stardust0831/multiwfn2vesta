@@ -314,8 +314,10 @@ passes it back through `cube-preset`.
   `van-der-waals-potential`; positive/negative surfaces for standalone
   Multiwfn function `25` `vdWpot.cub`, default magnitude `1.0` kcal/mol.
   Multiwfn evaluates this UFF vdW potential and sets main-function-5
-  `sur_value=1.0`.  Use `vdw-map` instead when the vdW potential cube should
-  color a density/surface cube.
+  `sur_value=1.0`.  `grid-run` defaults the UFF probe to carbon/6 with
+  run-local `ivdwprobe` and accepts `--vdw-probe` for other probe atoms.  Use
+  `vdw-map` instead when the vdW potential cube should color a density/surface
+  cube.
 - `potential` aliases: `abacus-potential`, `out-pot`, `local-potential`,
   `pot-es`; signed direct potential cube isosurfaces, default magnitude
   `0.05`.  Use `esp` instead for density-surface potential coloring.

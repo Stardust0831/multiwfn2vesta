@@ -191,6 +191,7 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertIn("settings: ipolarpara=0", text)
         self.assertIn("settings: ipolarpara=1", text)
         self.assertIn("settings: ELFLOL_type=0", text)
+        self.assertIn("settings: ivdwprobe=6", text)
         self.assertIn("preset=laplacian", text)
         self.assertIn("preset=hamiltonian-ked", text)
         self.assertIn("preset=lagrangian-ked", text)
@@ -252,6 +253,7 @@ class TestMultiwfnGridRunner(unittest.TestCase):
         self.assertEqual(resolve_grid_function("interaction-region-indicator").output_filename, "IRI.cub")
         self.assertEqual(resolve_grid_function("vdw").preset, "vdw-potential")
         self.assertEqual(resolve_grid_function("vdwpot").output_filename, "vdWpot.cub")
+        self.assertEqual(resolve_grid_function("vdw").settings_updates, (("ivdwprobe", 6),))
         self.assertEqual(resolve_grid_function("van-der-waals-potential").index, 25)
         self.assertEqual(resolve_grid_function("edr").index, 20)
         self.assertEqual(resolve_grid_function("edr").output_filename, "EDR.cub")
@@ -1196,6 +1198,10 @@ class TestMultiwfnGridRunner(unittest.TestCase):
             wavefunction = root / "h2o.fch"
             wavefunction.write_text("wavefunction", encoding="utf-8")
             candidate = self.make_candidate(root)
+            (candidate.path.parent / "settings.ini").write_text(
+                "ivdwprobe= 8 // stale probe\nother_setting= keep\n",
+                encoding="utf-8",
+            )
 
             def fake_run(command, **kwargs):
                 cwd = Path(kwargs["cwd"])
@@ -1203,17 +1209,32 @@ class TestMultiwfnGridRunner(unittest.TestCase):
                 return subprocess.CompletedProcess(command, 0, stdout="ok", stderr="")
 
             with patch("multiwfn2vesta.multiwfn_grid.find_multiwfn", return_value=candidate):
-                with patch("multiwfn2vesta.multiwfn_grid.subprocess.run", side_effect=fake_run):
+                with patch("multiwfn2vesta.multiwfn_grid.subprocess.run", side_effect=fake_run) as mocked_run:
                     result = run_multiwfn_grid(
                         wavefunction,
                         root / "products",
                         function_name="vdw",
+                        vdw_probe="U",
                         stem="case",
                         grid_points=(10, 11, 12),
                     )
 
             self.assertTrue(result.success)
+            self.assertEqual(
+                mocked_run.call_args.args[0],
+                [
+                    str(candidate.path),
+                    str(wavefunction.resolve()),
+                    "-set",
+                    str((root / "products" / "multiwfn_grid_raw" / "multiwfn_grid_settings.ini").resolve()),
+                ],
+            )
             self.assertEqual(result.command_file.read_text(encoding="utf-8"), "5\n25\n4\n10,11,12\n2\n0\nq\n")
+            self.assertEqual(result.vdw_probe, 92)
+            self.assertIsNotNone(result.settings_override)
+            settings_text = result.settings_override.read_text(encoding="utf-8")
+            self.assertIn("ivdwprobe= 92 // stale probe", settings_text)
+            self.assertIn("other_setting= keep", settings_text)
             self.assertEqual(result.raw_cube.name, "vdWpot.cub")
             self.assertEqual(result.cube.name, "case_vdw-potential.cub")
             self.assertIsNotNone(result.vesta_result)
@@ -1224,11 +1245,70 @@ class TestMultiwfnGridRunner(unittest.TestCase):
             recipe = result.recipe_path.read_text(encoding="utf-8")
             self.assertIn("function_name: `vdw-potential`", recipe)
             self.assertIn("function_index: `25`", recipe)
+            self.assertIn("vdw_probe_atomic_number_ivdwprobe: `92`", recipe)
             self.assertIn("auto_vesta_preset: `vdw-potential`", recipe)
             manifest = result.vesta_result.manifest_path.read_text(encoding="utf-8")
             self.assertIn("canonical_preset: `vdw-potential`", manifest)
             self.assertIn("effective_isosurface: `1.0`", manifest)
             self.assertIn("kcal/mol", manifest)
+
+    def test_run_multiwfn_grid_rejects_vdw_probe_for_other_functions(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            with self.assertRaisesRegex(ValueError, "only valid for vdw-potential"):
+                run_multiwfn_grid(
+                    Path(tmp) / "h2o.fch",
+                    Path(tmp) / "products",
+                    function_name="density",
+                    vdw_probe="O",
+                )
+
+    def test_run_multiwfn_grid_vdw_probe_defaults_and_normalizes_inputs(self):
+        cases = (
+            (None, "6"),
+            ("17", "17"),
+            ("cl", "17"),
+        )
+        for requested_probe, expected_probe in cases:
+            with self.subTest(requested_probe=requested_probe):
+                with tempfile.TemporaryDirectory() as tmp:
+                    root = Path(tmp)
+                    wavefunction = root / "h2o.fch"
+                    wavefunction.write_text("wavefunction", encoding="utf-8")
+                    candidate = self.make_candidate(root)
+
+                    def fake_run(command, **kwargs):
+                        Path(kwargs["cwd"], "vdWpot.cub").write_text(VDW_POTENTIAL_CUBE, encoding="utf-8")
+                        return subprocess.CompletedProcess(command, 0, stdout="ok", stderr="")
+
+                    with patch("multiwfn2vesta.multiwfn_grid.find_multiwfn", return_value=candidate):
+                        with patch("multiwfn2vesta.multiwfn_grid.subprocess.run", side_effect=fake_run):
+                            result = run_multiwfn_grid(
+                                wavefunction,
+                                root / "products",
+                                function_name="vdw-potential",
+                                vdw_probe=requested_probe,
+                                stem="case",
+                                grid_mode="low",
+                                make_vesta=False,
+                            )
+
+                    self.assertTrue(result.success)
+                    self.assertEqual(result.vdw_probe, int(expected_probe))
+                    self.assertIsNotNone(result.settings_override)
+                    settings_text = result.settings_override.read_text(encoding="utf-8")
+                    self.assertIn(f"ivdwprobe= {expected_probe}", settings_text)
+
+    def test_run_multiwfn_grid_rejects_invalid_vdw_probe_boundaries(self):
+        for requested_probe in ("0", "104"):
+            with self.subTest(requested_probe=requested_probe):
+                with tempfile.TemporaryDirectory() as tmp:
+                    with self.assertRaisesRegex(ValueError, "range 1..103"):
+                        run_multiwfn_grid(
+                            Path(tmp) / "h2o.fch",
+                            Path(tmp) / "products",
+                            function_name="vdw-potential",
+                            vdw_probe=requested_probe,
+                        )
 
     def test_run_multiwfn_grid_edr_uses_length_scale_and_dedicated_preset(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -1747,6 +1827,42 @@ class TestMultiwfnGridRunner(unittest.TestCase):
             )
             settings = root / "products" / "multiwfn_grid_raw" / "multiwfn_grid_settings.ini"
             self.assertIn("ELFLOL_type= 2", settings.read_text(encoding="utf-8"))
+
+    def test_main_vdw_accepts_probe_symbol(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            wavefunction = root / "h2o.fch"
+            wavefunction.write_text("wavefunction", encoding="utf-8")
+            candidate = self.make_candidate(root)
+
+            def fake_run(command, **kwargs):
+                Path(kwargs["cwd"], "vdWpot.cub").write_text(VDW_POTENTIAL_CUBE, encoding="utf-8")
+                return subprocess.CompletedProcess(command, 0, stdout="ok", stderr="")
+
+            with patch("multiwfn2vesta.multiwfn_grid.find_multiwfn", return_value=candidate):
+                with patch("multiwfn2vesta.multiwfn_grid.subprocess.run", side_effect=fake_run):
+                    with patch("sys.stdout", io.StringIO()):
+                        code = __import__("multiwfn2vesta.multiwfn_grid", fromlist=["main"]).main(
+                            [
+                                str(wavefunction),
+                                str(root / "products"),
+                                "--function",
+                                "vdw-potential",
+                                "--vdw-probe",
+                                "O",
+                                "--grid-mode",
+                                "low",
+                                "--no-vesta",
+                            ]
+                        )
+
+            self.assertEqual(code, 0)
+            self.assertEqual(
+                (root / "products" / "multiwfn_grid_input.txt").read_text(encoding="utf-8"),
+                "5\n25\n1\n2\n0\nq\n",
+            )
+            settings = root / "products" / "multiwfn_grid_raw" / "multiwfn_grid_settings.ini"
+            self.assertIn("ivdwprobe= 8", settings.read_text(encoding="utf-8"))
 
     def test_main_pair_function_accepts_reference_and_pair_options(self):
         with tempfile.TemporaryDirectory() as tmp:

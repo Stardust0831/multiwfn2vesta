@@ -174,6 +174,8 @@ PRESETS: Tuple[CubePreset, ...] = (
             "Use for Multiwfn vdWpot.cub from real-space function 25. "
             "Multiwfn evaluates the UFF van der Waals potential in kcal/mol and sets "
             "main-function-5 sur_value=1.0 for this function. "
+            "grid-run defaults the Multiwfn ivdwprobe probe atom to carbon/6 and "
+            "accepts --vdw-probe for other elements. "
             "For vdW potential mapped on a density/surface cube, use preset `vdw-map`."
         ),
     ),
