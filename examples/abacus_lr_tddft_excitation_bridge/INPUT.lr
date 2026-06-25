@@ -1,0 +1,39 @@
+INPUT_PARAMETERS
+suffix               abacus_h2o_lr
+pseudo_dir           ../../../downloads/abacus_latest_molden/abacus-develop/tests/PP_ORB
+orbital_dir          ../../../downloads/abacus_latest_molden/abacus-develop/tests/PP_ORB
+
+calculation          scf
+esolver_type         ks-lr
+basis_type           lcao
+gamma_only           1
+nbands               20
+symmetry             -1
+nspin                1
+
+ecutwfc              60
+scf_thr              1e-8
+scf_nmax             150
+
+smearing_method      gaussian
+smearing_sigma       0.005
+mixing_type          pulay
+mixing_beta          0.35
+mixing_gg0           0
+
+lr_nstates           5
+xc_kernel            lda
+lr_solver            dav
+lr_thr               1e-3
+pw_diag_ndim         4
+nocc                 4
+nvirt                16
+out_wfc_lr           1
+out_alllog           1
+
+abs_wavelen_range    40 180
+abs_broadening       0.01
+abs_gauge            length
+
+# Use velocity for periodic production systems after the H2O bridge smoke is stable.
+# abs_gauge          velocity
