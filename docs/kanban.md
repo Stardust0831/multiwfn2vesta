@@ -9,7 +9,7 @@
 - [x] 验证: `abacus-lr-to-multiwfn` sample、`abacus-esp-align` sample、`cube-preset esp` sample 均可由 CLI 重新生成；`compileall`、`unittest tests.test_abacus_lr_to_multiwfn tests.test_abacus_esp_align tests.test_cli tests.test_cube_preset` 共 132 tests OK；`examples --id cof_direct_cube_suite --verify` 通过。
 - [x] 提交前检查: scoped diff check 和 cached diff check 通过；暂存范围仅包含 LR bridge / ESP workflow 闭环相关文件。
 - [x] 提交: 已提交 `f34ef60 Close ABACUS LR and ESP workflows`。
-- [ ] 推送: 将提交推送到远端 `origin/main`。
+- [x] 推送: 已推送到远端 `origin/main`，最新远端提交 `1216034`。
 
 ## Current Request: 2026-07-02 VESTA Export Bond Display Fields
 
