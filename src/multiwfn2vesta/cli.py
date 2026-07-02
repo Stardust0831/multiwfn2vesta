@@ -7,6 +7,8 @@ from typing import Dict, List, Optional, Sequence, Tuple
 import sys
 
 from . import (
+    abacus_esp_align,
+    abacus_lr_to_multiwfn,
     abacus_molden,
     abacus_mulliken,
     aim_igmh_vesta,
@@ -34,6 +36,8 @@ from .executables import discovery_report
 
 COMMANDS: Dict[str, Tuple[str, str]] = {
     "discover": ("Find Multiwfn and VESTA executables", "executables"),
+    "abacus-esp-align": ("Align ABACUS electrostatic-potential cube zero to a vacuum plateau", "abacus_esp_align"),
+    "abacus-lr-to-multiwfn": ("Convert ABACUS LR-TDDFT amplitudes to Multiwfn excitation text", "abacus_lr_to_multiwfn"),
     "abacus-molden": ("Generate and validate ABACUS Molden files", "abacus_molden"),
     "molden-check": ("Check Molden sections before Multiwfn workflows", "molden_check"),
     "cube-vesta": ("Create a VESTA file from cube data", "cube_vesta"),
@@ -64,6 +68,12 @@ COMMANDS: Dict[str, Tuple[str, str]] = {
 ALIASES = {
     "where": "discover",
     "env": "discover",
+    "esp-align": "abacus-esp-align",
+    "abacus-pot-align": "abacus-esp-align",
+    "vacuum-align-esp": "abacus-esp-align",
+    "abacus-lr-excitation": "abacus-lr-to-multiwfn",
+    "abacus-excitation": "abacus-lr-to-multiwfn",
+    "lr-to-multiwfn": "abacus-lr-to-multiwfn",
     "molden": "abacus-molden",
     "abacus-multiwfn-molden": "abacus-molden",
     "check-molden": "molden-check",
@@ -134,6 +144,10 @@ Usage:
 
 Commands:
   discover   Find Multiwfn and VESTA executables from env/PATH/workspace.
+  abacus-esp-align
+             Shift ABACUS electrostatic-potential cube zero to a vacuum plateau.
+  abacus-lr-to-multiwfn
+             Convert ABACUS LR-TDDFT amplitudes to Multiwfn excitation text.
   abacus-molden
              Generate ABACUS LCAO Molden with latest ABACUS Multiwfn interface.
   molden-check
@@ -172,6 +186,10 @@ Commands:
 
 Aliases:
   where, env  Aliases for discover.
+  esp-align, abacus-pot-align, vacuum-align-esp
+             Aliases for abacus-esp-align.
+  abacus-lr-excitation, abacus-excitation, lr-to-multiwfn
+             Aliases for abacus-lr-to-multiwfn.
   molden, abacus-multiwfn-molden
              Aliases for abacus-molden.
   cube       Alias for cube-vesta.
@@ -215,6 +233,8 @@ Aliases:
 
 Examples:
   multiwfn2vesta discover
+  multiwfn2vesta abacus-esp-align OUT.test/potes.cube esp_vacuum0.cube --axis z --vacuum-side high --profile-csv esp_profile.csv
+  multiwfn2vesta abacus-lr-to-multiwfn OUT.lr h2o_singlet.excit.txt --label singlet
   multiwfn2vesta abacus-molden abacus_calc ABACUS_Multiwfn.molden
   multiwfn2vesta molden-check ABACUS_Multiwfn.molden --abacus
   multiwfn2vesta cube-vesta density.cub cube_products --isosurface 0.01
@@ -375,6 +395,63 @@ def interactive_abacus_molden() -> int:
         argv.append("--no-check")
 
     return abacus_molden.main(argv)
+
+
+def interactive_abacus_esp_align() -> int:
+    print("\nABACUS electrostatic potential cube -> vacuum-zero shifted cube")
+    input_cube = _prompt("ABACUS electrostatic potential cube, e.g. potes.cube", required=True)
+    output_cube = _prompt("output shifted cube", default=str(Path(input_cube).with_name("esp_vacuum0.cube")))
+    argv: List[str] = [input_cube, output_cube]
+
+    axis = _prompt("vacuum/slab normal axis (x/y/z)", default="z")
+    argv.extend(["--axis", axis])
+    side = _prompt("vacuum side (low/high/both)", default="high")
+    argv.extend(["--vacuum-side", side])
+    window = _prompt("explicit vacuum plane window START END (empty to use side/fraction)")
+    if window:
+        parts = window.split()
+        if len(parts) != 2:
+            print("Vacuum window needs exactly two integer plane indices.")
+            return 2
+        argv.extend(["--vacuum-start", parts[0], "--vacuum-end", parts[1]])
+    else:
+        fraction = _prompt("vacuum fraction from selected side", default="0.1")
+        argv.extend(["--vacuum-fraction", fraction])
+
+    if _yes_no("write planar-average profile CSV", default=True):
+        argv.extend(["--profile-csv", str(Path(output_cube).with_suffix(".profile.csv"))])
+    if _yes_no("write markdown alignment report", default=True):
+        argv.extend(["--report-md", str(Path(output_cube).with_suffix(".alignment.md"))])
+    return abacus_esp_align.main(argv)
+
+
+def interactive_abacus_lr_to_multiwfn() -> int:
+    print("\nABACUS LR-TDDFT amplitudes -> Multiwfn excitation text")
+    calc_dir = _prompt("ABACUS LR output directory", required=True)
+    output = _prompt("output Multiwfn excitation text", default=str(Path(calc_dir).resolve() / "abacus_lr.excit.txt"))
+    argv: List[str] = [calc_dir, output]
+
+    label = _prompt("ABACUS label (singlet/triplet/openshell)", default="singlet")
+    argv.extend(["--label", label])
+    nocc = _prompt("nocc used in ABACUS LR (empty to infer from running log/INPUT)")
+    if nocc:
+        argv.extend(["--nocc", nocc])
+    nvirt = _prompt("nvirt used in ABACUS LR (empty to infer from running log/INPUT)")
+    if nvirt:
+        argv.extend(["--nvirt", nvirt])
+
+    rank = _prompt("ABACUS amplitude rank suffix", default="0")
+    argv.extend(["--rank", rank])
+    threshold = _prompt("drop coefficients below abs threshold", default="0")
+    argv.extend(["--coeff-threshold", threshold])
+    scale = _prompt("scale ABACUS amplitudes before writing", default="0.7071067811865475")
+    argv.extend(["--coefficient-scale", scale])
+    unit = _prompt("energy unit in Excitation_Energy file (ry/ev)", default="ry")
+    argv.extend(["--energy-unit", unit])
+    if _yes_no("allow other rank files to exist", default=False):
+        argv.append("--allow-multiple-rank-files")
+
+    return abacus_lr_to_multiwfn.main(argv)
 
 
 def interactive_aim_igmh() -> int:
@@ -1232,11 +1309,17 @@ def interactive_main() -> int:
     print("19) List curated examples / gallery / runbooks")
     print("20) Rendered trajectory PNG frames -> MP4")
     print("21) XYZ/extXYZ trajectory -> VESTA frame files")
+    print("22) ABACUS electrostatic potential cube -> vacuum-zero shifted cube")
+    print("23) ABACUS LR-TDDFT amplitudes -> Multiwfn excitation text")
     print("q) Quit")
     choice = _prompt("choice", default="19").lower()
     if choice in {"0", "discover", "where", "env"}:
         print(discovery_report())
         return 0
+    if choice in {"22", "abacus-esp-align", "esp-align", "abacus-pot-align", "vacuum-align-esp"}:
+        return interactive_abacus_esp_align()
+    if choice in {"23", "abacus-lr-to-multiwfn", "abacus-lr-excitation", "abacus-excitation", "lr-to-multiwfn"}:
+        return interactive_abacus_lr_to_multiwfn()
     if choice in {"1", "aim-run", "multiwfn-aim"}:
         return interactive_aim_run()
     if choice in {"2", "aim-pdb", "aim-vesta"}:
@@ -1293,6 +1376,10 @@ def run_command(command: str, args: Sequence[str]) -> int:
     if command == "discover":
         print(discovery_report(), end="")
         return 0
+    if command == "abacus-esp-align":
+        return abacus_esp_align.main(args)
+    if command == "abacus-lr-to-multiwfn":
+        return abacus_lr_to_multiwfn.main(args)
     if command == "abacus-molden":
         return abacus_molden.main(args)
     if command == "molden-check":

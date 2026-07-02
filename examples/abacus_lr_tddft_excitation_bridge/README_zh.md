@@ -14,6 +14,9 @@ plain text，并在 Multiwfn 主功能 18 中读入验证。
 - `INPUT.lr`: LR-TDDFT 输入，关键是 `esolver_type ks-lr` 和 `out_wfc_lr 1`。
 - `STRU`: ABACUS 官方 LR-TDDFT H2O 示例的超胞结构。
 - `KPT`: Gamma-only。
+- `sample_lr/`: 不依赖 ABACUS 的离线最小样例，包含一组
+  `Excitation_Energy_singlet.dat`、`Excitation_Amplitude_singlet_0.dat`、
+  `INPUT.lr` 以及已生成的 Multiwfn plain text 输出。
 
 ## 运行草案
 
@@ -68,6 +71,37 @@ Multiwfn plain text 大致形如：
 这条 plain text 路线适合空穴-电子、NTO 和跃迁密度图，但不携带振子强度；
 UV-Vis 谱相关信息应保存在内部 excitation-record，或后续做 Multiwfn 原生
 ABACUS parser。
+
+## 离线 sample
+
+仓库内 `sample_lr/` 可直接验证转换格式，不需要真的跑 ABACUS：
+
+```bash
+multiwfn2vesta abacus-lr-to-multiwfn \
+  examples/abacus_lr_tddft_excitation_bridge/sample_lr \
+  examples/abacus_lr_tddft_excitation_bridge/sample_lr/h2o_singlet.excit.txt \
+  --label singlet \
+  --coeff-threshold 0.05
+```
+
+输入文件：
+
+```text
+sample_lr/INPUT.lr
+sample_lr/OUT.abacus_h2o_lr/Excitation_Energy_singlet.dat
+sample_lr/OUT.abacus_h2o_lr/Excitation_Amplitude_singlet_0.dat
+```
+
+输出文件：
+
+```text
+sample_lr/h2o_singlet.excit.txt
+sample_lr/h2o_singlet.excit.txt.recipe.md
+```
+
+这个 sample 设置 `nocc=2, nvirt=3`，两条 singlet 激发；能量文件单位按
+默认 Ry 转 eV，系数默认乘 `1/sqrt(2)`，并用 `--coeff-threshold 0.05`
+丢掉接近 0 的跃迁项。
 
 ## 迁移到周期体系
 

@@ -1,6 +1,7 @@
 import tempfile
 import unittest
 from pathlib import Path
+import shutil
 
 from multiwfn2vesta.abacus_lr_to_multiwfn import (
     RY_TO_EV,
@@ -11,6 +12,31 @@ from multiwfn2vesta.abacus_lr_to_multiwfn import (
 
 
 class TestAbacusLrToMultiwfn(unittest.TestCase):
+    def test_committed_sample_lr_matches_generated_output(self):
+        source = Path(__file__).resolve().parents[1] / "examples" / "abacus_lr_tddft_excitation_bridge" / "sample_lr"
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "sample_lr"
+            shutil.copytree(source, root)
+            output = root / "h2o_singlet.excit.txt"
+            expected = output.read_text(encoding="utf-8")
+
+            result = convert_abacus_lr_to_multiwfn(
+                root,
+                output,
+                label="singlet",
+                coeff_threshold=0.05,
+            )
+
+            self.assertEqual(result.nocc, 2)
+            self.assertEqual(result.nvirt, 3)
+            self.assertEqual(len(result.states), 2)
+            self.assertEqual(result.skipped_coefficients, 6)
+            self.assertEqual(output.read_text(encoding="utf-8"), expected)
+            recipe = output.with_suffix(output.suffix + ".recipe.md").read_text(encoding="utf-8")
+            self.assertIn("- energy_file: `OUT.abacus_h2o_lr/Excitation_Energy_singlet.dat`", recipe)
+            self.assertIn("- dimension_source: `INPUT.lr`", recipe)
+            self.assertNotIn(str(Path(__file__).resolve().parents[1]), recipe)
+
     def test_convert_singlet_files_to_multiwfn_plain_text(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

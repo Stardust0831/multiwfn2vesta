@@ -13,6 +13,8 @@ requires-python = ">=3.7"
 [project.scripts]
 multiwfn2vesta = "multiwfn2vesta.cli:main"
 multiwfn2vesta-discover = "multiwfn2vesta.executables:main"
+multiwfn2vesta-abacus-esp-align = "multiwfn2vesta.abacus_esp_align:main"
+multiwfn2vesta-abacus-lr-to-multiwfn = "multiwfn2vesta.abacus_lr_to_multiwfn:main"
 multiwfn2vesta-abacus-molden = "multiwfn2vesta.abacus_molden:main"
 multiwfn2vesta-molden-check = "multiwfn2vesta.molden_check:main"
 multiwfn2vesta-cube-vesta = "multiwfn2vesta.cube_vesta:main"

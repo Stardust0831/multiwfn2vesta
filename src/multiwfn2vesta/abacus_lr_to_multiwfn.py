@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 import re
 import sys
 from dataclasses import dataclass
@@ -284,16 +285,30 @@ def write_multiwfn_excitation(states: Sequence[ExcitedState], output: Path) -> N
 def write_recipe(result: ConversionResult) -> None:
     if result.recipe_file is None:
         return
+    result.recipe_file.parent.mkdir(parents=True, exist_ok=True)
+    base_dir = result.recipe_file.parent
+
+    def fmt_path(path: Path) -> str:
+        try:
+            return os.path.relpath(path, base_dir)
+        except ValueError:
+            return str(path)
+
+    def fmt_source(source: str) -> str:
+        if source == "not inferred" or source.startswith("explicit "):
+            return source
+        return fmt_path(Path(source))
+
     lines = [
         "# ABACUS LR-TDDFT To Multiwfn Excitation Recipe",
         "",
         f"- label: `{result.label}`",
-        f"- energy_file: `{result.energy_file}`",
-        f"- amplitude_file: `{result.amplitude_file}`",
-        f"- output_file: `{result.output_file}`",
+        f"- energy_file: `{fmt_path(result.energy_file)}`",
+        f"- amplitude_file: `{fmt_path(result.amplitude_file)}`",
+        f"- output_file: `{fmt_path(result.output_file)}`",
         f"- nocc: `{result.nocc}`",
         f"- nvirt: `{result.nvirt}`",
-        f"- dimension_source: `{result.dimension_source}`",
+        f"- dimension_source: `{fmt_source(result.dimension_source)}`",
         f"- coefficient_scale: `{result.coefficient_scale}`",
         f"- states: `{len(result.states)}`",
         f"- skipped_coefficients: `{result.skipped_coefficients}`",
@@ -310,7 +325,6 @@ def write_recipe(result: ConversionResult) -> None:
         "the sum of squared excitation coefficients is expected to be about 0.5.",
         "",
     ]
-    result.recipe_file.parent.mkdir(parents=True, exist_ok=True)
     result.recipe_file.write_text("\n".join(lines), encoding="utf-8")
 
 

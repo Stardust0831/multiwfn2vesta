@@ -189,6 +189,7 @@ multiwfn2vesta examples --closure-report
 | --- | --- | --- | --- |
 | ABACUS LCAO 计算目录 | `abacus-molden` | Multiwfn 可读 Molden | AIM、IGMH、IRI、grid-run、STM |
 | ABACUS LR-TDDFT 输出目录 | `abacus-lr-to-multiwfn` | Multiwfn plain text 激发组态 | Multiwfn 主功能 18 的 hole/electron、transition density、NTO |
+| ABACUS `chg.cube` + `potes.cube` | `abacus-esp-align` + `cube-preset esp` | vacuum-zero ESP cube + `.vesta` | COF/slab 范德华表面静电势染色 |
 | ABACUS/Multiwfn cube | `cube-vesta` / `cube-preset` | `.vesta` + recipe | 密度、势、ELF、轨道、弱相互作用等值面 |
 | Multiwfn 可读波函数 | `grid-run` | scalar cube + `.vesta` | density、orbital、ESP、KED、ELF/LOL、vdW、FOD 等 |
 | neutral/anion/cation 波函数 | `fukui-run` | Fukui/dual cube + `.vesta` | 反应性区域 |
@@ -232,6 +233,33 @@ multiwfn2vesta abacus-lr-to-multiwfn OUT.lr h2o_singlet.excit.txt \
 分布式 LR 向量错误拼接。
 默认会用 `--coefficient-scale 0.7071067811865475` 把 ABACUS LR 振幅缩放到
 Multiwfn 闭壳层 TDDFT 分析的归一化约定；若要写原始振幅，可显式设为 `1.0`。
+
+离线 sample 可直接检查格式：
+
+```bash
+multiwfn2vesta abacus-lr-to-multiwfn \
+  examples/abacus_lr_tddft_excitation_bridge/sample_lr \
+  examples/abacus_lr_tddft_excitation_bridge/sample_lr/h2o_singlet.excit.txt \
+  --label singlet --coeff-threshold 0.05
+```
+
+ABACUS 静电势范德华表面染色流程：
+
+```bash
+multiwfn2vesta abacus-esp-align OUT.cof12000n2_esp/potes.cube products/potes_vacuum0.cube \
+  --axis z --vacuum-side high --vacuum-fraction 0.10 \
+  --profile-csv products/potes_profile.csv \
+  --report-md products/potes_alignment.md
+
+multiwfn2vesta cube-preset esp OUT.cof12000n2_esp/chg.cube products/esp_surface \
+  --texture-cube products/potes_vacuum0.cube \
+  --isosurface 0.001 \
+  --tex-physical -0.08 0.08 \
+  --tex-range-source surface-band \
+  --structure crystal
+```
+
+可离线检查的小 cube sample 在 `examples/cof_direct_cube_suite/sample_esp/`。
 
 ## 6. Cube 到 VESTA
 

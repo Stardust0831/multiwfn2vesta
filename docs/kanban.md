@@ -1,5 +1,15 @@
 # Project Kanban
 
+## Current Request: 2026-07-02 Excited-State Bridge And ESP VdW Surface Closure
+
+- [x] 需求入板: 补齐 ABACUS LR-TDDFT 激发态转换入口和 ABACUS ESP 范德华表面染色流程，要求给出测试用例、输入输出文件和完整文档。
+- [x] 激发态入口审计: 已有 `abacus-lr-to-multiwfn` CLI、console script 和单元测试；补上 example 输入/输出样本和文档后即可闭环。
+- [x] ESP 流程审计: 已有 `abacus-esp-align`、COF direct cube 输入和单元测试；补上 example 输入/输出样本、VESTA recipe 和文档后即可闭环。
+- [x] 补齐缺口: 已生成 sample LR 输入/输出与 sample ESP 输入/输出，并把 example README 和文档说明接上。
+- [x] 验证: `abacus-lr-to-multiwfn` sample、`abacus-esp-align` sample、`cube-preset esp` sample 均可由 CLI 重新生成；`compileall`、`unittest tests.test_abacus_lr_to_multiwfn tests.test_abacus_esp_align tests.test_cli tests.test_cube_preset` 共 132 tests OK；`examples --id cof_direct_cube_suite --verify` 通过。
+- [x] 提交前检查: scoped diff check 和 cached diff check 通过；暂存范围仅包含 LR bridge / ESP workflow 闭环相关文件。
+- [ ] 提交/推送: 将这两条功能线分组提交并推送。
+
 ## Current Request: 2026-07-02 VESTA Export Bond Display Fields
 
 - [x] 需求入板: 检查当前 `.vesta` 导出是否包含成键信息，并修正 `SBOND` / 结构 bond 显示字段，让 VESTA 载入后能正确显示结构成键。

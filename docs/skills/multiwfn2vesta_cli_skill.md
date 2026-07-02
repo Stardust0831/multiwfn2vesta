@@ -30,6 +30,8 @@ Scriptable subcommands:
 ```bash
 multiwfn2vesta discover
 multiwfn2vesta examples --help
+multiwfn2vesta abacus-lr-to-multiwfn --help
+multiwfn2vesta abacus-esp-align --help
 multiwfn2vesta abacus-molden --help
 multiwfn2vesta cube-preset --help
 multiwfn2vesta surface-extrema --help
@@ -57,6 +59,12 @@ Aliases:
 - `multiwfn2vesta where` and `multiwfn2vesta env` are aliases for `discover`.
 - `multiwfn2vesta example`, `multiwfn2vesta gallery`, and
   `multiwfn2vesta example-gallery` are aliases for `examples`.
+- `multiwfn2vesta abacus-lr-excitation ...`,
+  `multiwfn2vesta abacus-excitation ...`, and
+  `multiwfn2vesta lr-to-multiwfn ...` are aliases for
+  `abacus-lr-to-multiwfn`.
+- `multiwfn2vesta esp-align ...`, `multiwfn2vesta abacus-pot-align ...`, and
+  `multiwfn2vesta vacuum-align-esp ...` are aliases for `abacus-esp-align`.
 - `multiwfn2vesta molden ...` and `multiwfn2vesta abacus-multiwfn-molden ...`
   are aliases for `abacus-molden`.
 - `multiwfn2vesta cube ...` is an alias for `cube-vesta`.
@@ -234,7 +242,8 @@ multiwfn2vesta abacus-molden \
 ```
 
 The command exports the ABACUS converter from
-`interfaces/Multiwfn_interface/molden.py`, writes logs/recipe metadata, keeps
+`tools/molden/molden.py` and falls back to `interfaces/Multiwfn_interface/molden.py`,
+writes logs/recipe metadata, keeps
 `[Nval]` enabled by default, and runs `molden-check --abacus` on the output.
 The selected Python must be able to import `numpy`, `scipy`, and
 `matplotlib`; use `--python /path/to/python` if the default `python3`

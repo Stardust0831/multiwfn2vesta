@@ -153,8 +153,9 @@ then delete the temporary branch.
   information-gain, Shannon/Fisher/Ghosh/Renyi, phase-space Fisher,
   disequilibrium, USI, and BNI function-100 diagnostics,
   shape function, average local ESP, local energy-density/per-electron,
-  bond-metallicity, momentum-fluctuation, density-ellipticity, eta, SCI,
-  and stiffness function-100 bonding/energy diagnostics,
+  energy-density gradient norm/Laplacian, bond-metallicity,
+  momentum-fluctuation, density-ellipticity, eta, SCI, and stiffness
+  function-100 bonding/energy diagnostics,
   steric/SBL energy-density, potential, force-magnitude, and charge fields,
   IGM/IGMH/aIGM weak-interaction maps, ALIE/LEA/LEAE, and vdW-potential
   mapped surfaces.
@@ -236,8 +237,9 @@ then delete the temporary branch.
   extended KED difference/local-temperature/KED-potential diagnostics with
   `iuserfunc=1201/1202/1203/1204/1210`,
   and bonding/energy diagnostics such as shape function, average local ESP,
-  local energy density, bond metallicity, density anisotropy, SCI, and
-  stiffness with `iuserfunc=8/9/10/11/-11/12/13/15/16/17/25/30/31/32/37/115`,
+  local energy density, energy-density gradient norm/Laplacian, bond
+  metallicity, density anisotropy, SCI, and stiffness with
+  `iuserfunc=8/9/10/11/-11/12/13/15/16/17/25/30/31/32/37/79/80/115`,
   and related scalar cubes, export
   multiple orbitals through
   isolated batch runs, optionally write VESTA files through `cube-preset`,
@@ -590,7 +592,7 @@ multiwfn2vesta cube-preset dori-scalar userfunc.cub cube_products
 multiwfn2vesta cube-preset vdw-potential vdWpot.cub cube_products
 multiwfn2vesta cube-preset vdw-repulsion-potential userfunc.cub cube_products
 multiwfn2vesta cube-preset vdw-dispersion-potential userfunc.cub cube_products
-multiwfn2vesta cube-preset potential pot_es.cube cube_products
+multiwfn2vesta cube-preset potential potes.cube cube_products
 multiwfn2vesta cube-preset electron-esp userfunc.cub cube_products
 multiwfn2vesta cube-preset rose userfunc.cub cube_products
 multiwfn2vesta cube-preset sedd userfunc.cub cube_products
@@ -1100,6 +1102,17 @@ Common functions:
   useful for adsorption/interface repulsion and energy-decomposition
   diagnostics, but the default isosurfaces are starting values and must be
   retuned after inspecting cube ranges.
+- `energy-density-gradient-norm` / `energy-density-gradient`: function
+  `100`, raw `userfunc.cub`, run-local `iuserfunc=79`, default
+  `energy-density-gradient-norm` preset.  The inspected Multiwfn source calls
+  `energydens_grdn(x,y,z)`, the norm of the energy-density gradient, so the
+  field is nonnegative and may be sharp near shells, BCPs, interfaces, or
+  low-density regions.
+- `energy-density-laplacian`: function `100`, raw `userfunc.cub`,
+  run-local `iuserfunc=80`, default `energy-density-laplacian` preset.  The
+  inspected source calls `energydens_lapl(x,y,z)`, implemented by finite
+  differences of the energy-density gradient, so signed surfaces are used
+  and formal figures must record the cube range and isosurface.
 - `vdw-potential` / `vdw`: function `25`, raw `vdWpot.cub`, preset
   `vdw-potential`, signed at `+/-1.0` kcal/mol by default.  With
   `--surface-cube`, it maps through `cube-preset vdw-map` instead so the
@@ -1657,8 +1670,9 @@ multiwfn2vesta abacus-molden \
   /path/to/ABACUS_Multiwfn.molden
 ```
 
-The wrapper exports `interfaces/Multiwfn_interface/molden.py` from the selected
-ABACUS git ref, runs it with an absolute `-o`, writes stdout/stderr logs and a
+The wrapper exports `tools/molden/molden.py` from the selected ABACUS git ref,
+falling back to `interfaces/Multiwfn_interface/molden.py` for older checkouts.
+It runs the script with an absolute `-o`, writes stdout/stderr logs and a
 recipe markdown file, and then runs the same validation as
 `molden-check --abacus`.
 
@@ -1672,7 +1686,8 @@ Defaults:
 
 - ABACUS repo: `/mnt/g/work/multiwfn2vesta/downloads/abacus_latest_molden/abacus-develop`
 - Git ref: `origin/develop`
-- Source path: `interfaces/Multiwfn_interface/molden.py`
+- Source path: `tools/molden/molden.py`, with legacy fallback to
+  `interfaces/Multiwfn_interface/molden.py`
 - `--with-cell true`
 - `--with-Nval true`
 - `--with-pseudo false`
@@ -1695,6 +1710,67 @@ and `out_wfc_lcao 1`.  It supports `nspin=1/2` and single Gamma/one-k-point
 workflows; `nspin=4`/SOC and multi-k are not supported by the converter.
 ABACUS' NAO-to-GTO conversion may write `.gto` and `.gto.png` files beside the
 orbital files, so run it where `orbital_dir` is writable.
+
+## ABACUS LR-TDDFT to Multiwfn Excitation Text
+
+Multiwfn excited-state analysis needs both a reference wavefunction, such as
+`ABACUS_Multiwfn.molden`, and a separate excitation configuration file.  ABACUS
+LR-TDDFT can write `Excitation_Energy_<label>.dat` and
+`Excitation_Amplitude_<label>_<rank>.dat`; convert the single-rank/Gamma-only
+case with:
+
+```bash
+multiwfn2vesta abacus-lr-to-multiwfn OUT.lr h2o_singlet.excit.txt \
+  --label singlet \
+  --coeff-threshold 0.01
+```
+
+The converter maps ABACUS pair index `iocc * nvirt + ivirt` to Multiwfn
+1-based MO transitions `iocc+1 -> nocc+ivirt+1`, writes energies in eV, and
+inserts a blank line after every state because Multiwfn uses that blank line to
+terminate the state in its plain-text reader.  `nocc/nvirt` are inferred from
+ABACUS running logs or INPUT files when possible, and can still be overridden
+with `--nocc/--nvirt`.  Coefficients are scaled by `1/sqrt(2)` by default to
+match Multiwfn's closed-shell TDDFT hole/electron normalization convention;
+use `--coefficient-scale 1.0` to preserve raw ABACUS amplitudes.  Multiple
+amplitude rank files are rejected by default until the distributed LR vector
+can be gathered with ABACUS' Parallel_2D metadata.
+
+Repository sample:
+
+```bash
+multiwfn2vesta abacus-lr-to-multiwfn \
+  examples/abacus_lr_tddft_excitation_bridge/sample_lr \
+  examples/abacus_lr_tddft_excitation_bridge/sample_lr/h2o_singlet.excit.txt \
+  --label singlet \
+  --coeff-threshold 0.05
+```
+
+## ABACUS ESP Vacuum Alignment For VdW-Like Surface Coloring
+
+For slab, surface, or 2D material calculations, use the ABACUS density cube as
+the surface and the electrostatic-potential cube as texture.  Since periodic
+electrostatic potentials have an arbitrary constant offset, shift the vacuum
+plateau to zero before VESTA coloring:
+
+```bash
+multiwfn2vesta abacus-esp-align OUT.cof12000n2_esp/potes.cube products/potes_vacuum0.cube \
+  --axis z \
+  --vacuum-side high \
+  --vacuum-fraction 0.10 \
+  --profile-csv products/potes_profile.csv \
+  --report-md products/potes_alignment.md
+
+multiwfn2vesta cube-preset esp OUT.cof12000n2_esp/chg.cube products/esp_surface \
+  --texture-cube products/potes_vacuum0.cube \
+  --isosurface 0.001 \
+  --tex-physical -0.08 0.08 \
+  --tex-range-source surface-band \
+  --structure crystal
+```
+
+The committed smoke input/output files are in
+`examples/cof_direct_cube_suite/sample_esp/`.
 
 ## ABACUS Mulliken Atom Coloring
 

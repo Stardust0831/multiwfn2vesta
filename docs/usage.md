@@ -70,6 +70,8 @@ multiwfn2vesta trajectory-video --help
 - `abacus-lr-to-multiwfn`: 把 ABACUS LR-TDDFT `Excitation_Energy_*` /
   `Excitation_Amplitude_*` 转成 Multiwfn 主功能 18 可读的 plain text
   激发组态文件
+- `abacus-esp-align`: 把 ABACUS `out_pot 2` electrostatic-potential cube
+  按真空平面平均势归零，供 density/vdW-like surface texture coloring 使用
 - `molden-check`: 在调用 Multiwfn 前检查 Molden 文件是否含有必要段；ABACUS
   模式会要求 `[Cell]` 和 `[Nval]`
 - `cube-vesta`: 从 ABACUS/Multiwfn scalar cube 直接生成 `.vesta`，可选
@@ -1797,6 +1799,43 @@ Multiwfn 闭壳层 TDDFT hole/electron 分析期望的归一化；若要写 ABAC
 随后用 Multiwfn 读 `ABACUS_Multiwfn.molden`，进入主功能 18 时把
 `h2o_singlet.excit.txt` 作为激发信息文件输入，即可继续做 hole/electron、
 transition density、NTO 等分析。
+
+仓库内可离线验证的最小样例：
+
+```bash
+multiwfn2vesta abacus-lr-to-multiwfn \
+  examples/abacus_lr_tddft_excitation_bridge/sample_lr \
+  examples/abacus_lr_tddft_excitation_bridge/sample_lr/h2o_singlet.excit.txt \
+  --label singlet \
+  --coeff-threshold 0.05
+```
+
+## ABACUS ESP 范德华表面染色
+
+ABACUS slab、二维材料或含真空层体系可用 `out_chg` 的电子密度 cube 作
+`rho=0.001 a.u.` 附近的范德华表面，用 `out_pot 2` 的 electrostatic potential
+cube 作颜色 texture。由于周期性静电势零点任意，应先把真空平台区平面平均势
+平移到 0：
+
+```bash
+multiwfn2vesta abacus-esp-align OUT.cof12000n2_esp/potes.cube products/potes_vacuum0.cube \
+  --axis z \
+  --vacuum-side high \
+  --vacuum-fraction 0.10 \
+  --profile-csv products/potes_profile.csv \
+  --report-md products/potes_alignment.md
+
+multiwfn2vesta cube-preset esp OUT.cof12000n2_esp/chg.cube products/esp_surface \
+  --texture-cube products/potes_vacuum0.cube \
+  --isosurface 0.001 \
+  --tex-physical -0.08 0.08 \
+  --tex-range-source surface-band \
+  --structure crystal
+```
+
+离线 sample 位于 `examples/cof_direct_cube_suite/sample_esp/`，包含小 cube 输入、
+真空归零后的 `potes_demo_vacuum0.cube`、profile/report，以及
+`vesta_demo/rho_demo_esp_cube.vesta`。
 
 ## 波函数文件到 AIM VESTA
 

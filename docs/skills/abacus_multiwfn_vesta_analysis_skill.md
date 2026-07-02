@@ -10,9 +10,9 @@ VESTA workflow for ABACUS-generated data.
 2. Use ABACUS Molden only when Multiwfn needs a full wavefunction, for example
    AIM, IGMH, IRI/RDG from actual density, STM/LDOS, orbital cubes, ELF/LOL,
    ALIE, or density derivatives.
-3. For ABACUS Molden, use the latest
-   `interfaces/Multiwfn_interface/molden.py` from `abacus-develop`, not the old
-   `tools/molden/molden.py` path.
+3. For ABACUS Molden, use the latest `tools/molden/molden.py` from
+   `abacus-develop`, with `interfaces/Multiwfn_interface/molden.py` as a
+   fallback for older checkouts.
 4. Reject or warn on non-Gamma/multi-k, `nspin=4`, SOC spinors, missing
    `[Nval]`, or missing `[Cell]` when the workflow claims to be periodic.
 5. Choose the VESTA representation:
@@ -36,6 +36,52 @@ calculation get_pchg + out_pchg ...       # partial charge cubes
 calculation get_wf + out_wfc_norm ...      # wavefunction norm cubes
 calculation get_wf + out_wfc_re_im ...     # real/imaginary wavefunction cubes
 ```
+
+Parallel sanity rule for ABACUS direct cubes:
+
+- Always run a tiny electron-count regression before trusting a new
+  ABACUS/module/device/parallel combination.  For H2, `sum(rho)*voxel` should
+  be close to `2 e`.
+- Current server evidence from 2026-06-24:
+  `abacus/LTSv3.10.1-sm70-auto` LCAO/GPU H2 is consistent for `np=1` and
+  `np=8`; LTS PW/GPU `np=8` aborts with `nks == 0` for Gamma-only instead of
+  writing a wrong cube; `abacus/v3.11.0-beta4-sm70-avx512` PW/GPU `np=8`
+  previously wrote a bad density cube, while its LCAO path fails in this module
+  even for `np=1`.
+- Do not infer pure CPU execution from the first device-report line alone.
+  ABACUS may print a two-line block such as `CPU / ...` followed by
+  `GPU / Tesla ...`.  In a H2O no-device/default probe on 2026-06-24,
+  `basis_type=pw`, `gamma_only=1`, `NPROC=2`, and a GPU allocation produced a
+  silent bad cube: electron count `6.434633317900327 e` instead of `8 e`, final
+  energy `-9.684406411563097 eV` instead of the `np=1` value
+  `-460.6065895528702 eV`.  The same H2O input with explicit `device gpu` and
+  `np=2` aborted with `nks == 0`, so no-device/default is not a safe substitute
+  for an explicit device policy.
+- Source audit note: in the current `abacus-develop` checkout, `device` defaults
+  to `auto`, but the `kpar` input item's reset hook is registered before the
+  `device` input item's reset hook.  The PW/GPU auto-reset
+  `kpar = NPROC / bndpar` is guarded by the raw condition
+  `device == "gpu" && basis_type == "pw"`.  Therefore explicit `device gpu`
+  changes `kpar` early, while omitted `device` is still `auto` at that point;
+  only later is `auto` resolved to `gpu`.  For Gamma-only `NPROC=2`, explicit
+  GPU creates `KPAR=2` and hits the `nks == 0` guard, while no-device keeps
+  `KPAR=1`, leaves both ranks inside one pool, and can enter unsupported
+  GPU PW FFT code that asserts `poolnproc == 1`.
+- Upstream fix preference: finalize the `device` string before general
+  reset hooks that depend on it, but keep actual GPU context initialization
+  after MPI broadcast.  This is cleaner than special-casing `auto` inside
+  `kpar`: `get_device_flag(device, basis_type)` only depends on the raw device
+  value, `basis_type`, and hardware availability; `basis_type` is already read
+  before the reset loop.  After that, add explicit fail-fast guards for
+  `KPAR > nkstot` and GPU/PW `NPROC_IN_POOL > 1` when distributed GPU FFT is
+  not implemented.
+- For Gamma-only PW/GPU, do not rely on automatic `kpar=NPROC/bndpar`.
+  K-point parallelism is only meaningful when `kpar <= nks`.  If the GPU PW
+  build cannot do multi-rank FFT inside one k point, use `device cpu`, a
+  validated single-rank GPU run, LCAO, or a different validated ABACUS build.
+- CPU PW is different: it supports multiple MPI ranks inside one k-point pool
+  through distributed FFT gather/scatter, so `device cpu` Gamma-only `np>1`
+  can be valid after the same electron-count check.
 
 Prepare these cubes for VESTA with the maintained no-GUI generator:
 
@@ -74,7 +120,7 @@ multiwfn2vesta cube-preset dori-scalar userfunc.cub cube_products
 multiwfn2vesta cube-preset vdw-potential vdWpot.cub cube_products
 multiwfn2vesta cube-preset vdw-repulsion-potential userfunc.cub cube_products
 multiwfn2vesta cube-preset vdw-dispersion-potential userfunc.cub cube_products
-multiwfn2vesta cube-preset potential pot_es.cube cube_products
+multiwfn2vesta cube-preset potential potes.cube cube_products
 multiwfn2vesta cube-preset partial-charge pchg.cube cube_products
 multiwfn2vesta cube-preset wavefunction-norm wfc_norm.cube cube_products
 multiwfn2vesta cube-preset elf ELF.cub cube_products
@@ -183,11 +229,12 @@ multiwfn2vesta abacus-molden \
   /path/to/ABACUS_Multiwfn.molden
 ```
 
-The wrapper exports `interfaces/Multiwfn_interface/molden.py` from the ABACUS
-git ref, records the source path/commit/SHA256, runs the converter with an
-absolute `-o`, writes stdout/stderr logs, and runs `molden-check --abacus`.
-Use `--fetch --git-ref origin/develop` when refreshing the local ABACUS
-checkout before conversion.
+The wrapper exports `tools/molden/molden.py` from the ABACUS git ref, falls
+back to `interfaces/Multiwfn_interface/molden.py` on older checkouts, records
+the source path/commit/SHA256, runs the converter with an absolute `-o`, writes
+stdout/stderr logs, and runs `molden-check --abacus`. Use
+`--fetch --git-ref origin/develop` when refreshing the local ABACUS checkout
+before conversion.
 
 The upstream converter imports `numpy`, `scipy`, and `matplotlib`.
 `abacus-molden` runs a dependency preflight with the selected Python before
@@ -208,6 +255,45 @@ multiwfn2vesta molden-check ABACUS_Multiwfn.molden --abacus
 ```
 
 `[Nval]` must be present for pseudopotential systems.
+
+For LR-TDDFT excitation analysis, Molden is only the reference wavefunction
+half of the bridge.  Convert ABACUS `Excitation_Energy_<label>.dat` and
+`Excitation_Amplitude_<label>_0.dat` to Multiwfn's plain excitation text before
+entering Multiwfn main function 18:
+
+```bash
+multiwfn2vesta abacus-lr-to-multiwfn OUT.lr h2o_singlet.excit.txt \
+  --label singlet \
+  --coeff-threshold 0.01
+```
+
+The maintained converter is intentionally narrow: single-rank, Gamma-only,
+LCAO, restricted singlet/triplet-style output first.  It maps ABACUS pair
+index `iocc * nvirt + ivirt` to Multiwfn `iocc+1 -> nocc+ivirt+1`, writes a
+blank line after every state for Multiwfn's parser, and rejects multiple
+amplitude rank files by default because distributed LR vectors need ABACUS
+Parallel_2D metadata.  The default coefficient scale is `1/sqrt(2)` so that
+closed-shell TDDFT coefficients satisfy Multiwfn's expected normalization near
+`0.5`; use `--coefficient-scale 1.0` only when raw ABACUS amplitudes are needed.
+
+For direct ESP surface coloring, shift `out_pot 2` electrostatic-potential
+cubes to a vacuum-zero reference before using them as VESTA texture:
+
+```bash
+multiwfn2vesta abacus-esp-align OUT.cof12000n2_esp/potes.cube products/potes_vacuum0.cube \
+  --axis z \
+  --vacuum-side high \
+  --vacuum-fraction 0.10 \
+  --profile-csv products/potes_profile.csv \
+  --report-md products/potes_alignment.md
+
+multiwfn2vesta cube-preset esp OUT.cof12000n2_esp/chg.cube products/esp_surface \
+  --texture-cube products/potes_vacuum0.cube \
+  --isosurface 0.001 \
+  --tex-physical -0.08 0.08 \
+  --tex-range-source surface-band \
+  --structure crystal
+```
 
 For IRI/RDG from a full wavefunction, use the maintained command stream
 wrapper:
