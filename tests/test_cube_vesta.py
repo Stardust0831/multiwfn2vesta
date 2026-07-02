@@ -4,6 +4,7 @@ from pathlib import Path
 
 from multiwfn2vesta.cube_vesta import (
     BOHR_TO_ANGSTROM,
+    COVALENT_RADII,
     _read_cube_summary,
     _structure_mode,
     run_workflow,
@@ -104,11 +105,30 @@ class TestCubeVesta(unittest.TestCase):
             self.assertIn("SURFS   0  1  1", text)
             self.assertIn("SECTS   0  0", text)
             self.assertIn("ISURF\n  1   1        0.3", text)
-            self.assertIn("\nMOLECULE\n", text)
+            self.assertIn("\nCRYSTAL\n", text)
+            self.assertEqual(text.count("\nCRYSTAL\n"), 1)
             self.assertIn(" O1", text)
             self.assertIn(" H1", text)
+            self.assertIn("SBOND\n", text)
+            self.assertIn("    O     H    0.00000    1.07520  0  1  1  0  1  0.250  2.000 127 127 127", text)
+            self.assertIn("BONDS   1", text)
             self.assertIn("structure_phase: `molecule`", manifest)
             self.assertTrue((root / "products" / "surface.cub").exists())
+
+    def test_covalent_radius_table_covers_periodic_table_for_generic_bond_rules(self):
+        for symbol in ("H", "C", "Ag", "U", "Og"):
+            self.assertIn(symbol, COVALENT_RADII)
+
+    def test_structure_bonds_off_leaves_empty_sbond(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            cube = self.write_tmp(root, "surface.cub", MOLECULE_CUBE)
+
+            result = run_workflow(cube, root / "products", show_structure_bonds=False)
+
+            text = result.vesta_path.read_text(encoding="utf-8")
+            self.assertIn("BONDS   0", text)
+            self.assertIn("SBOND\n  0 0 0 0\nSITET", text)
 
     def test_texture_cube_uses_import_texture_and_percent_tex3p_not_physical_values(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -130,6 +150,9 @@ class TestCubeVesta(unittest.TestCase):
 
             self.assertIn("IMPORT_TEXTURE", text)
             self.assertIn("+1.000000 texture.cub", text)
+            self.assertEqual(text.count("\nCRYSTAL\n"), 1)
+            self.assertLess(text.index("IMPORT_DENSITY 1"), text.index("IMPORT_TEXTURE"))
+            self.assertLess(text.index("IMPORT_TEXTURE"), text.index("STRUC"))
             self.assertIn("TEX3P\n  1  1.25000E-01  3.75000E-01", text)
             self.assertNotIn(" -5.00000E-02  5.00000E-02", text)
             self.assertIn("tex_physical_range: `-0.05` to `0.05`", manifest)
@@ -256,7 +279,7 @@ class TestCubeVesta(unittest.TestCase):
             result = run_workflow(cube, root / "products", isosurface=0.2, stem="periodic")
             text = result.vesta_path.read_text(encoding="utf-8")
 
-        self.assertEqual(text.count("\nCRYSTAL\n"), 2)
+        self.assertEqual(text.count("\nCRYSTAL\n"), 1)
         self.assertNotIn("\nMOLECULE\n", text)
         self.assertIn("0.500000   0.500000   0.500000    1a     1", text)
 

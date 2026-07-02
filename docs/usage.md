@@ -64,12 +64,17 @@ multiwfn2vesta trajectory-video --help
   `--verify` 检查仓库内
   runbook/gallery/manifest，`--verify-smoke` 检查工作区本地大文件或历史渲染证据
 - `abacus-molden`: 从 ABACUS LCAO 计算目录调用最新
+  `tools/molden/molden.py`，并自动回退到旧版
   `interfaces/Multiwfn_interface/molden.py`，生成并验证给 Multiwfn 用的
   Molden 文件
+- `abacus-lr-to-multiwfn`: 把 ABACUS LR-TDDFT `Excitation_Energy_*` /
+  `Excitation_Amplitude_*` 转成 Multiwfn 主功能 18 可读的 plain text
+  激发组态文件
 - `molden-check`: 在调用 Multiwfn 前检查 Molden 文件是否含有必要段；ABACUS
   模式会要求 `[Cell]` 和 `[Nval]`
 - `cube-vesta`: 从 ABACUS/Multiwfn scalar cube 直接生成 `.vesta`，可选
-  texture/color cube，默认关闭 section plane
+  texture/color cube，默认关闭 section plane；结构 phase 默认按全元素
+  covalent radius 表写 VESTA `SBOND` 成键规则
 - `cube-preset`: 在 `cube-vesta` 后端上套用常见分析默认值，例如 density、
   orbital/signed、spin density、Laplacian、K(r)/G(r)、ABACUS direct
   potential、partial charge、wavefunction norm、ELF/LOL、IRI/RDG/NCI、DORI、
@@ -281,6 +286,8 @@ multiwfn2vesta cube-preset user-function userfunc.cub cube_products
 multiwfn2vesta cube-preset shape-function userfunc.cub cube_products
 multiwfn2vesta cube-preset average-local-electrostatic-potential userfunc.cub cube_products
 multiwfn2vesta cube-preset energy-density userfunc.cub cube_products
+multiwfn2vesta cube-preset energy-density-gradient-norm userfunc.cub cube_products
+multiwfn2vesta cube-preset energy-density-laplacian userfunc.cub cube_products
 multiwfn2vesta cube-preset local-energy-per-electron userfunc.cub cube_products
 multiwfn2vesta cube-preset bond-metallicity userfunc.cub cube_products
 multiwfn2vesta cube-preset sci userfunc.cub cube_products
@@ -303,7 +310,7 @@ multiwfn2vesta cube-preset dori-scalar userfunc.cub cube_products
 multiwfn2vesta cube-preset vdw-potential vdWpot.cub cube_products
 multiwfn2vesta cube-preset vdw-repulsion-potential userfunc.cub cube_products
 multiwfn2vesta cube-preset vdw-dispersion-potential userfunc.cub cube_products
-multiwfn2vesta cube-preset potential pot_es.cube cube_products
+multiwfn2vesta cube-preset potential potes.cube cube_products
 multiwfn2vesta cube-preset electron-esp userfunc.cub cube_products
 multiwfn2vesta cube-preset partial-charge pchg.cube cube_products
 multiwfn2vesta cube-preset wavefunction-norm wfc_norm.cube cube_products
@@ -377,6 +384,11 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
   `energy-density`、`scaled-energy-density` 和
   `local-nuclear-attraction-energy-density` 等 function-100
   `iuserfunc=10/11/-11/12` 路线；默认幅值 `0.01`
+- `energy-density-gradient-norm`：单正值等值面，用于 function-100
+  `iuserfunc=79` 的能量密度梯度范数；默认等值面 `0.01`
+- `energy-density-laplacian`：正/负等值面，用于 function-100
+  `iuserfunc=80` 的能量密度拉普拉斯；默认幅值 `0.01`，该量由有限差分导数得到，
+  正式图前要检查 cube range
 - `local-energy-per-electron`：正/负等值面，用于
   `lagrangian-ked-per-electron` 和 `energy-density-per-electron`
   `iuserfunc=13/17`；默认幅值 `0.05`，因为要除以电子密度，低密度区要谨慎
@@ -494,11 +506,12 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
   `potential-energy-density`、`energy-density`、`scaled-energy-density`、
   `local-nuclear-attraction-energy-density`、`lagrangian-ked-per-electron`、
   `bond-metallicity`、`dimensionless-bond-metallicity`、
-  `energy-density-per-electron`、`momentum-fluctuation-magnitude`、
+  `energy-density-per-electron`、`energy-density-gradient-norm`、
+  `energy-density-laplacian`、`momentum-fluctuation-magnitude`、
   `electron-density-ellipticity`、`eta-index`、`modified-eta-index`、
   `sci`、`stiffness`、
   `usi`、`bni` 会分别
-  自动 patch `iuserfunc=1/2/8/9/10/11/-11/12/13/14/15/16/17/20/25/27/-27/28/29/30/31/32/37/90/93/94/95/96/97/98/100/101/102/103/114/115/1200/1201/1202/1203/1204/1210/49/50/51/52/53/54/55/56/70/819/820`。
+  自动 patch `iuserfunc=1/2/8/9/10/11/-11/12/13/14/15/16/17/20/25/27/-27/28/29/30/31/32/37/79/80/90/93/94/95/96/97/98/100/101/102/103/114/115/1200/1201/1202/1203/1204/1210/49/50/51/52/53/54/55/56/70/819/820`。
   KED 变体还会额外 patch run-local `iKEDsel`。
   runner 优先复制所选 Multiwfn 同目录的 `settings.ini`，只 patch
   当前路线需要的 run-local 键后通过 `-set` 传入；
@@ -1541,6 +1554,11 @@ CLI 会保留 stdout/stderr 日志并返回非零码。
 XYZ 或 extXYZ 轨迹，写逐帧 `.vesta` 文件和一个 manifest/recipe，不依赖
 ASE，不启动 VESTA，也不输出 PNG。
 
+成键显示依赖两层字段：`BONDS   1` 是全局显示开关，`SBOND` 是具体元素对
+距离规则。`cube-vesta` / `cube-preset` 会根据结构中出现的元素和全元素
+covalent radius 表自动写默认 `SBOND`；`trajectory-frames --bond E1 E2 MIN MAX`
+用于给轨迹或特殊配位体系手动指定/放宽元素对距离。
+
 最小 Cd/Cl example：
 
 ```bash
@@ -1702,9 +1720,9 @@ multiwfn2vesta abacus-molden \
 
 这个命令默认从
 `/mnt/g/work/multiwfn2vesta/downloads/abacus_latest_molden/abacus-develop`
-的 `origin/develop` 导出
-`interfaces/Multiwfn_interface/molden.py`，把脚本副本放在输出 Molden 同目录，
-再运行 ABACUS converter。运行结束后会写：
+的 `origin/develop` 导出 `tools/molden/molden.py`，若老 checkout 没有该路径，
+会回退到 `interfaces/Multiwfn_interface/molden.py`，把脚本副本放在输出 Molden
+同目录，再运行 ABACUS converter。运行结束后会写：
 
 - `<stem>_abacus_molden.py`: 实际使用的 ABACUS converter 副本
 - `<stem>_abacus_molden.stdout.txt`
@@ -1745,6 +1763,40 @@ out_wfc_lcao 1
 和多 k。`--with-Nval true` 是默认值，也是赝势体系给 Multiwfn 使用时应保留
 的设置。ABACUS 的 NAO2GTO 过程可能会在 `orbital_dir` 旁边写 `.gto` 和
 `.gto.png` 副产物，因此该目录需要可写。
+
+## ABACUS LR-TDDFT 到 Multiwfn 激发组态
+
+ABACUS `out_wfc_lr true` 会输出 `Excitation_Energy_<label>.dat` 和
+`Excitation_Amplitude_<label>_<rank>.dat`。Multiwfn 主功能 18 不能直接读这些
+文件，因此需要先转成 plain text 激发组态文件：
+
+```bash
+multiwfn2vesta abacus-lr-to-multiwfn OUT.lr h2o_singlet.excit.txt \
+  --label singlet \
+  --coeff-threshold 0.01
+```
+
+第一版转换器只维护单 rank、Gamma-only、LCAO 输出。ABACUS amplitude 文件本身
+不写 `nocc/nvirt`；工具会优先从 ABACUS `running*.log`，其次从
+`INPUT`/`INPUT.lr` 自动推断，必要时仍可用 `--nocc/--nvirt` 显式覆盖。
+pair index 按 ABACUS 源码
+`iocc * nvirt + ivirt` 解释，并写成 Multiwfn 1-based MO 编号
+`iocc+1 -> nocc+ivirt+1`。每个 excited state 后会写一个空行，因为 Multiwfn
+plain text 读取器用空行判断当前态的跃迁列表结束。`singlet` 默认多重度 1，
+`triplet` 默认多重度 3。
+
+默认 `--coefficient-scale` 为 `1/sqrt(2)`，用于把 ABACUS LR 振幅转换到
+Multiwfn 闭壳层 TDDFT hole/electron 分析期望的归一化；若要写 ABACUS 原始
+振幅，可用 `--coefficient-scale 1.0`。
+
+默认会拒绝同一 label 下存在多个 `Excitation_Amplitude_<label>_<rank>.dat`
+文件的情况。原因是多 rank 输出是 ABACUS 二维分布式 LR 向量的本地片段，缺少
+`Parallel_2D` gather 元数据时不能安全地直接拼接，否则可能把振幅分配给错误的
+占据/虚轨道对。
+
+随后用 Multiwfn 读 `ABACUS_Multiwfn.molden`，进入主功能 18 时把
+`h2o_singlet.excit.txt` 作为激发信息文件输入，即可继续做 hole/electron、
+transition density、NTO 等分析。
 
 ## 波函数文件到 AIM VESTA
 

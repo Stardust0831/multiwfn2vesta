@@ -19,6 +19,9 @@ DEFAULT_TEX_PERCENT_RANGE = (0.0, 1.0)
 
 RGB = Tuple[int, int, int]
 Vector3 = Tuple[float, float, float]
+BOND_RGB: RGB = (127, 127, 127)
+BOND_RADIUS = 0.250
+BOND_WIDTH = 2.000
 
 
 PERIODIC_SYMBOLS = [
@@ -109,6 +112,38 @@ PERIODIC_SYMBOLS = [
     "Po",
     "At",
     "Rn",
+    "Fr",
+    "Ra",
+    "Ac",
+    "Th",
+    "Pa",
+    "U",
+    "Np",
+    "Pu",
+    "Am",
+    "Cm",
+    "Bk",
+    "Cf",
+    "Es",
+    "Fm",
+    "Md",
+    "No",
+    "Lr",
+    "Rf",
+    "Db",
+    "Sg",
+    "Bh",
+    "Hs",
+    "Mt",
+    "Ds",
+    "Rg",
+    "Cn",
+    "Nh",
+    "Fl",
+    "Mc",
+    "Lv",
+    "Ts",
+    "Og",
 ]
 
 ELEMENT_STYLES: Dict[str, Tuple[float, RGB]] = {
@@ -126,6 +161,128 @@ ELEMENT_STYLES: Dict[str, Tuple[float, RGB]] = {
     "Ag": (1.4400, (183, 187, 189)),
 }
 DEFAULT_ELEMENT_STYLE = (0.7000, (180, 180, 180))
+
+COVALENT_RADII: Dict[str, float] = {
+    "H": 0.32,
+    "He": 0.37,
+    "Li": 1.30,
+    "Be": 0.99,
+    "B": 0.84,
+    "C": 0.75,
+    "N": 0.71,
+    "O": 0.64,
+    "F": 0.60,
+    "Ne": 0.62,
+    "Na": 1.60,
+    "Mg": 1.40,
+    "Al": 1.24,
+    "Si": 1.14,
+    "P": 1.09,
+    "S": 1.04,
+    "Cl": 1.00,
+    "Ar": 1.01,
+    "K": 2.00,
+    "Ca": 1.74,
+    "Sc": 1.59,
+    "Ti": 1.48,
+    "V": 1.44,
+    "Cr": 1.30,
+    "Mn": 1.29,
+    "Fe": 1.24,
+    "Co": 1.18,
+    "Ni": 1.17,
+    "Cu": 1.22,
+    "Zn": 1.20,
+    "Ga": 1.23,
+    "Ge": 1.20,
+    "As": 1.20,
+    "Se": 1.18,
+    "Br": 1.17,
+    "Kr": 1.16,
+    "Rb": 2.15,
+    "Sr": 1.90,
+    "Y": 1.76,
+    "Zr": 1.64,
+    "Nb": 1.56,
+    "Mo": 1.46,
+    "Tc": 1.38,
+    "Ru": 1.36,
+    "Rh": 1.34,
+    "Pd": 1.30,
+    "Ag": 1.36,
+    "Cd": 1.40,
+    "In": 1.42,
+    "Sn": 1.40,
+    "Sb": 1.40,
+    "Te": 1.37,
+    "I": 1.36,
+    "Xe": 1.36,
+    "Cs": 2.38,
+    "Ba": 2.06,
+    "La": 1.94,
+    "Ce": 1.84,
+    "Pr": 1.90,
+    "Nd": 1.88,
+    "Pm": 1.86,
+    "Sm": 1.85,
+    "Eu": 1.83,
+    "Gd": 1.82,
+    "Tb": 1.81,
+    "Dy": 1.80,
+    "Ho": 1.79,
+    "Er": 1.77,
+    "Tm": 1.77,
+    "Yb": 1.78,
+    "Lu": 1.74,
+    "Hf": 1.64,
+    "Ta": 1.58,
+    "W": 1.50,
+    "Re": 1.41,
+    "Os": 1.36,
+    "Ir": 1.32,
+    "Pt": 1.30,
+    "Au": 1.30,
+    "Hg": 1.32,
+    "Tl": 1.44,
+    "Pb": 1.45,
+    "Bi": 1.50,
+    "Po": 1.42,
+    "At": 1.48,
+    "Rn": 1.46,
+    "Fr": 2.42,
+    "Ra": 2.11,
+    "Ac": 2.01,
+    "Th": 1.90,
+    "Pa": 1.84,
+    "U": 1.83,
+    "Np": 1.80,
+    "Pu": 1.80,
+    "Am": 1.73,
+    "Cm": 1.68,
+    "Bk": 1.68,
+    "Cf": 1.68,
+    "Es": 1.65,
+    "Fm": 1.67,
+    "Md": 1.73,
+    "No": 1.76,
+    "Lr": 1.61,
+    "Rf": 1.57,
+    "Db": 1.49,
+    "Sg": 1.43,
+    "Bh": 1.41,
+    "Hs": 1.34,
+    "Mt": 1.29,
+    "Ds": 1.28,
+    "Rg": 1.21,
+    "Cn": 1.22,
+    "Nh": 1.36,
+    "Fl": 1.43,
+    "Mc": 1.62,
+    "Lv": 1.75,
+    "Ts": 1.65,
+    "Og": 1.57,
+}
+DEFAULT_COVALENT_RADIUS = 0.77
 
 
 class CubeAtom(NamedTuple):
@@ -174,6 +331,13 @@ class TextureReferenceRange(NamedTuple):
 class IsosurfaceSpec(NamedTuple):
     level: float
     rgb: RGB
+
+
+class VestaBondRule(NamedTuple):
+    element1: str
+    element2: str
+    distance_min: float
+    distance_max: float
 
 
 @dataclass
@@ -355,6 +519,47 @@ def _symbol(atomic_number: int) -> str:
 
 def _element_style(element: str) -> Tuple[float, RGB]:
     return ELEMENT_STYLES.get(element, DEFAULT_ELEMENT_STYLE)
+
+
+def _vesta_bond_distance_max(element1: str, element2: str) -> float:
+    radius1 = COVALENT_RADII.get(element1, DEFAULT_COVALENT_RADIUS)
+    radius2 = COVALENT_RADII.get(element2, DEFAULT_COVALENT_RADIUS)
+    if element1 == "H" and element2 == "H":
+        return radius1 + radius2
+    scale = 1.12 if "H" in {element1, element2} else 1.23
+    return (radius1 + radius2) * scale
+
+
+def default_vesta_bond_rules(elements: Sequence[str]) -> List[VestaBondRule]:
+    unique_elements: List[str] = []
+    for element in elements:
+        if element not in unique_elements:
+            unique_elements.append(element)
+    rules: List[VestaBondRule] = []
+    for left_index, element1 in enumerate(unique_elements):
+        for element2 in unique_elements[left_index:]:
+            rules.append(VestaBondRule(element1, element2, 0.0, _vesta_bond_distance_max(element1, element2)))
+    return rules
+
+
+def format_vesta_sbond_rule(
+    index: int,
+    element1: str,
+    element2: str,
+    distance_min: float,
+    distance_max: float,
+    *,
+    bond_radius: float = BOND_RADIUS,
+    bond_width: float = BOND_WIDTH,
+    bond_rgb: RGB = BOND_RGB,
+) -> str:
+    r, g, b = bond_rgb
+    return (
+        f"{index:4d} {element1:>5s} {element2:>5s}"
+        f" {distance_min:10.5f} {distance_max:10.5f}"
+        f"  0  1  1  0  1 {bond_radius:6.3f} {bond_width:6.3f}"
+        f" {r:3d} {g:3d} {b:3d}"
+    )
 
 
 def _structure_mode(summary: CubeSummary, requested: str) -> str:
@@ -612,12 +817,50 @@ def _density_phase_lines(
     return lines
 
 
+def _phase_tail_lines(
+    summary: CubeSummary,
+    *,
+    mode: str,
+    boundary: Tuple[float, float, float, float, float, float],
+    write_bond_rules: bool = True,
+) -> List[str]:
+    if mode == "none":
+        return _empty_phase_tail(boundary)
+    structure_kind = "CRYSTAL" if mode == "crystal" else "MOLECULE"
+    suffix = "    1a     1" if structure_kind == "CRYSTAL" else "    1        -"
+    sites = _structure_sites(summary, mode)
+    lines = ["STRUC"]
+    for site in sites:
+        x, y, z = site.coords
+        lines.append(
+            f"{site.index:4d}  {site.element:<2s}        {site.label:<12s} 1.0000"
+            f" {x:10.6f} {y:10.6f} {z:10.6f}{suffix}"
+        )
+        lines.append("                            0.000000   0.000000   0.000000  0.00")
+    lines.extend(["  0 0 0 0 0 0 0", "THERI 1"])
+    for site in sites:
+        lines.append(f"{site.index:4d} {site.label:>12s} -0.000000")
+    lines.extend(_post_theri_tail_lines(boundary, sites, write_bond_rules=write_bond_rules))
+    return lines
+
+
 def _empty_phase_tail(boundary: Tuple[float, float, float, float, float, float]) -> List[str]:
     return [
         "STRUC",
         "  0 0 0 0 0 0 0",
         "THERI 1",
         "  0 0 0",
+        *_post_theri_tail_lines(boundary, []),
+    ]
+
+
+def _post_theri_tail_lines(
+    boundary: Tuple[float, float, float, float, float, float],
+    sites: Sequence[StructureSite],
+    *,
+    write_bond_rules: bool = True,
+) -> List[str]:
+    lines = [
         "SHAPE",
         "  0       0       0       0   0.000000  0   192   192   192   192",
         "BOUND",
@@ -626,28 +869,61 @@ def _empty_phase_tail(boundary: Tuple[float, float, float, float, float, float])
         "QCORIG",
         "        0         0         0",
         "SBOND",
-        "  0 0 0 0",
-        "SITET",
-        "  0 0 0 0 0 0",
-        "VECTR",
-        " 0 0 0 0 0",
-        "VECTT",
-        " 0 0 0 0 0",
-        "SPLAN",
-        "  0   0   0   0",
-        "LBLAT",
-        " -1",
-        "LBLSP",
-        " -1",
-        "DLATM",
-        " -1",
-        "DLBND",
-        " -1",
-        "DLPLY",
-        " -1",
-        "PLN2D",
-        "  0   0   0   0",
     ]
+    if write_bond_rules and sites:
+        rules = default_vesta_bond_rules([site.element for site in sites])
+        for index, rule in enumerate(rules, start=1):
+            lines.append(
+                format_vesta_sbond_rule(
+                    index,
+                    rule.element1,
+                    rule.element2,
+                    rule.distance_min,
+                    rule.distance_max,
+                )
+            )
+    lines.extend(["  0 0 0 0", "SITET"])
+    for site in sites:
+        r, g, b = site.rgb
+        lines.append(
+            f"{site.index:4d} {site.label:>12s} {site.radius:7.4f}"
+            f" {r:3d} {g:3d} {b:3d} {r:3d} {g:3d} {b:3d} 204  0"
+        )
+    lines.extend(
+        [
+            "  0 0 0 0 0 0",
+            "VECTR",
+            " 0 0 0 0 0",
+            "VECTT",
+            " 0 0 0 0 0",
+            "SPLAN",
+            "  0   0   0   0",
+            "LBLAT",
+            " -1",
+            "LBLSP",
+            " -1",
+            "DLATM",
+            " -1",
+            "DLBND",
+            " -1",
+            "DLPLY",
+            " -1",
+            "PLN2D",
+            "  0   0   0   0",
+        ]
+    )
+    if sites:
+        lines.append("ATOMT")
+        unique_elements: List[str] = []
+        for site in sites:
+            if site.element not in unique_elements:
+                unique_elements.append(site.element)
+        for index, element in enumerate(unique_elements, start=1):
+            radius, rgb = _element_style(element)
+            r, g, b = rgb
+            lines.append(f"{index:3d} {element:>10s} {radius:7.4f} {r:3d} {g:3d} {b:3d} {r:3d} {g:3d} {b:3d} 204")
+        lines.append("  0 0 0 0 0 0")
+    return lines
 
 
 def _structure_phase_lines(
@@ -680,60 +956,7 @@ def _structure_phase_lines(
     lines.extend(["  0 0 0 0 0 0 0", "THERI 1"])
     for site in sites:
         lines.append(f"{site.index:4d} {site.label:>12s} -0.000000")
-    lines.extend(
-        [
-            "  0 0 0",
-            "SHAPE",
-            "  0       0       0       0   0.000000  0   192   192   192   192",
-            "BOUND",
-            f" {boundary[0]:7.3f} {boundary[1]:7.3f} {boundary[2]:7.3f} {boundary[3]:7.3f} {boundary[4]:7.3f} {boundary[5]:7.3f}",
-            "  0   0   0   0  0",
-            "QCORIG",
-            "        0         0         0",
-            "SBOND",
-            "  0 0 0 0",
-            "SITET",
-        ]
-    )
-    for site in sites:
-        r, g, b = site.rgb
-        lines.append(
-            f"{site.index:4d} {site.label:>12s} {site.radius:7.4f}"
-            f" {r:3d} {g:3d} {b:3d} {r:3d} {g:3d} {b:3d} 204  0"
-        )
-    lines.extend(
-        [
-            "  0 0 0 0 0 0",
-            "VECTR",
-            " 0 0 0 0 0",
-            "VECTT",
-            " 0 0 0 0 0",
-            "SPLAN",
-            "  0   0   0   0",
-            "LBLAT",
-            " -1",
-            "LBLSP",
-            " -1",
-            "DLATM",
-            " -1",
-            "DLBND",
-            " -1",
-            "DLPLY",
-            " -1",
-            "PLN2D",
-            "  0   0   0   0",
-            "ATOMT",
-        ]
-    )
-    unique_elements: List[str] = []
-    for site in sites:
-        if site.element not in unique_elements:
-            unique_elements.append(site.element)
-    for index, element in enumerate(unique_elements, start=1):
-        radius, rgb = _element_style(element)
-        r, g, b = rgb
-        lines.append(f"{index:3d} {element:>10s} {radius:7.4f} {r:3d} {g:3d} {b:3d} {r:3d} {g:3d} {b:3d} 204")
-    lines.extend(["  0 0 0 0 0 0"])
+    lines.extend(_post_theri_tail_lines(boundary, sites))
     return lines
 
 
@@ -770,13 +993,12 @@ def render_cube_vesta_text(
             boundary=boundary,
         )
     )
-    lines.extend(
-        _structure_phase_lines(
-            summary,
-            mode=structure_mode,
-            title=f"{title} structure",
-            boundary=boundary,
-        )
+    density_tail_start = lines.index("STRUC")
+    lines[density_tail_start:] = _phase_tail_lines(
+        summary,
+        mode=structure_mode,
+        boundary=boundary,
+        write_bond_rules=show_structure_bonds,
     )
 
     sects_line = "SECTS   0  0" if sections == "off" else "SECTS  32  1"

@@ -1,6 +1,148 @@
 # Project Kanban
 
-Updated: 2026-06-12 07:09 CST
+## Current Request: 2026-07-02 VESTA Export Bond Display Fields
+
+- [x] 需求入板: 检查当前 `.vesta` 导出是否包含成键信息，并修正 `SBOND` / 结构 bond 显示字段，让 VESTA 载入后能正确显示结构成键。
+- [x] 生成器审计: 已检查 cube/cube-preset 后端、trajectory-frames、AIM/IGMH overlay 等 `.vesta` writer；AIM path/BCP phase 保持空 `SBOND` 是有意避免伪键，结构 phase 需要非空 `SBOND`。
+- [x] 参考文件对照: 已与 VESTA 原生保存文件对照，确认 `BONDS   1` 只是显示开关，`SBOND` 规则行还需要 `0  1  1  0  1  radius width RGB` 等字段。
+- [x] 实现修复: `cube-vesta` / `cube-preset` 现在按 1-118 号元素 covalent radius 表为结构 phase 自动写默认 `SBOND`；`trajectory-frames --bond` 复用同一 VESTA 兼容格式；`--structure-bonds-off` 写 `BONDS 0` 且保持空 `SBOND`。
+- [x] 验证: `unittest tests.test_cube_vesta tests.test_trajectory_frames tests.test_cube_preset` 80 tests OK；`compileall` 和 `git diff --check` 通过；临时 H2O cube 导出含 O-O/O-H/H-H `SBOND`。
+- [x] 文档同步: 已同步 usage、中文手册和 cube/ESP VESTA skills。
+
+## Current Request: 2026-06-26 ABACUS Gamma-Only LR-TDDFT To Multiwfn Bridge
+
+- [x] 需求入板: 实际运行一次 ABACUS `gamma_only` 电子激发计算，基于 ABACUS 结果生成 Molden 和激发组态文本，并交给 Multiwfn；重点关注 `Excitation_Energy_*` / `Excitation_Amplitude_*` 到 Multiwfn 主功能 18 plain text 的转换过程。
+- [x] 算例准备: 已选 H2O LCAO/Gamma-only smoke；服务器 PP/ORB 位于 `/opt/apps/abacus/abacus-develop-LTSv3.10.1/tests/PP_ORB`。首版 `nbands=28` 因 `NLOCAL < NBANDS` 被 ABACUS 拒绝；已改用 `nbands=20, nocc=4, nvirt=16` 并提交新作业。
+- [x] ABACUS 计算: `565015` 显式 `device cpu` 的 H2O LCAO/Gamma-only SCF+LR 已完成，输出 `OUT.abacus_h2o_lr/Excitation_Energy_singlet.dat` 和 `Excitation_Amplitude_singlet_0.dat`；`565005` 的 GPU LR 失败经验保留为 LCAO/GPU `gint_rho_gpu.cu` illegal memory access/segfault 记录。
+- [x] Molden 导出: 已用本地最新 `origin/develop` 可用的 `interfaces/Multiwfn_interface/molden.py` 生成 `smoke/abacus_h2o_lr_bridge_20260626/products/ABACUS_Multiwfn.molden`，包含 `[Cell]`/`[Nval]`，`molden-check --abacus` 通过；当前 latest develop 仍未提供 `tools/molden/molden.py` 路径。
+- [x] 激发转换: `abacus-lr-to-multiwfn` 已支持从 ABACUS `running*.log` 或 `INPUT`/`INPUT.lr` 自动推断 `nocc/nvirt`，默认将 ABACUS LR 系数乘 `1/sqrt(2)` 以匹配 Multiwfn 闭壳层 TDDFT 归一化；focused tests、CLI help、compileall 和 diff check 已通过。
+- [x] Multiwfn 验证: `Multiwfn_noGUI` 已载入 ABACUS Molden，并在主功能 `18 -> 1` 中读入转换后的 `h2o_singlet.excit.txt`；识别 5 个 singlet 态，S1 系数平方和 `0.499713`，到期望 `0.5` 的偏差 `0.000287`。
+- [ ] 代码与文档: 将转换经验、命令、测试和必要代码提交到 multiwfn2vesta 项目合适位置，并用 `Stardust0831` 身份 commit/push。
+
+## Current Request: 2026-06-26 Real Excited-State Hole/Electron Case From Sobereva 634
+
+- [x] 需求入板: 参考 `sobereva.com/634` 的周期体系 UV-Vis/电子-空穴对分析思路，跑一个真实 case，目标是从 ABACUS 或可转换输入得到参考波函数和激发组态，再进入 Multiwfn 主功能 18 生成 hole/electron/transition-density 产物。
+- [x] 资料抓取: 已保存 Sobereva 634 页面和附件包到 `smoke/sobereva634_excited_state_case_20260626/`。附件含 `bulk.cif`、`bulk_TDDFT.inp/out`、已补晶胞的 `bulk_TDDFT-MOS-1_0.molden`、`hole.cub`、`electron.cub`、`CDD.cub`、`transdens.cub`、`supercell.pdb`。原文重点分析 S13: 1.92496 eV、f=4.13484，是强吸收的电荷转移激发。
+- [x] 算例选择: 本轮先复用 Sobereva 634 原文真实 CP2K+Multiwfn 产物闭环可视化和 Multiwfn 电子-空穴分析流程；ABACUS 同结构 LR-TDDFT 作为后续迁移任务，需另行准备 PP/ORB 和验证 ABACUS LR 输出。
+- [ ] 计算执行: 在干净目录准备 SCF/LR 输入，运行 ABACUS，收集 `Excitation_Energy_*`、`Excitation_Amplitude_*`、Molden 和日志；必要时在服务器上跑，所有本地记录仍写入工作区。
+- [x] CP2K/Multiwfn 真实复现: 本地 `Multiwfn_noGUI` 在设置 `OMP_STACKSIZE=2G`、`KMP_STACKSIZE=2G` 和 `ulimit -s unlimited` 后，可载入原文 `bulk_TDDFT-MOS-1_0.molden` 与 `bulk_TDDFT.out`，进入主功能 18 分析 S13，并复现关键数值：最高涉及 `HOMO+28`、激发能 `1.925 eV`、hole/electron/transition-density 积分等。未设置栈时会在生成密度矩阵阶段 segfault。
+- [x] VESTA 可视化: 已用原文附件中同一计算导出的真实 `hole.cub`、`electron.cub`、`CDD.cub`、`transdens.cub` 生成 VESTA 文件；路径位于 `smoke/sobereva634_excited_state_case_20260626/products/*_vesta/`，另生成无 GUI 投影预览 `products/s13_cube_projection_preview.png`。CDD 用 `±0.001`，transition density 用 `±0.0005`。
+- [x] 经验沉淀: 已新增 `docs/research/sobereva634_real_excited_state_case_20260626.md` 和 project 镜像，记录体系、S13 结论、Multiwfn 栈设置、VESTA 命令、产物路径和 ABACUS 迁移限制。
+- [ ] ABACUS 迁移: 尚未对 192 原子晶体运行 ABACUS LR-TDDFT；后续需要先准备 H/C/N/F PP/ORB、验证 ABACUS LCAO+LR 输出，并用 `abacus-lr-to-multiwfn` 生成 Multiwfn 激发组态文本。
+
+## Current Request: 2026-06-25 ABACUS Molden + Multiwfn Excitation Bridge
+
+- [x] 需求入板: 继续推进 ABACUS + latest Molden + Multiwfn 的电子激发桥接，先把能稳定复用的基态参考波函数导出路径和激发态输入缺口写清楚。
+- [x] 路径兼容: `abacus-molden` 现在默认尝试 `tools/molden/molden.py`，并自动回退到 `interfaces/Multiwfn_interface/molden.py`，避免老/新 ABACUS checkout 目录搬家导致导出失败。
+- [x] 入口审计: 已重新确认 Multiwfn 主功能 18 需要“参考波函数 + 激发组态文件”，而不是只靠 Molden；ABACUS LR-TDDFT 仍需把 `Excitation_Energy_*` / `Excitation_Amplitude_*` 转成 Multiwfn 可读的 plain text 激发文件。
+- [x] 桥接解析器需求细化: 需要把 ABACUS LR-TDDFT `Excitation_Energy_*` / `Excitation_Amplitude_*` 转成 Multiwfn plain text 激发组态文件，让 Multiwfn 主功能 18 能读取 ABACUS 激发信息。
+- [x] 桥接解析器: 已新增 `abacus-lr-to-multiwfn`，把 ABACUS `Excitation_Energy_<label>.dat` / `Excitation_Amplitude_<label>_0.dat` 转成 Multiwfn 主功能 18 可读的 plain text 激发组态；第一版支持单 rank、Gamma-only、LCAO、`singlet/triplet` label；多 rank amplitude 默认拒绝，避免缺 BLACS/Parallel_2D 分布映射时误拼。
+- [x] 格式验证: 已按 Multiwfn `excittrans.f90` plain-text parser 补齐每个 excited state 后的空行终止符，并按 ABACUS `lr_spectrum.cpp` 的 `iocc * nvirt + ivirt` 规则写 1-based MO pair。focused unit tests、模块 `--help`、统一 CLI `--help` 和 compileall 已通过。
+- [x] 文档同步: usage、README、research note、CLI skill、ABACUS analysis skill 和 project/root docs 镜像已记录 `nocc/nvirt` 自动推断/显式覆盖、能量单位、空行规则、多 rank 限制和 Multiwfn 主功能 18 使用方式。
+- [x] 真实算例: 已跑通 H2O bridge smoke，导出 `ABACUS_Multiwfn.molden` 和 Multiwfn 可读激发文本；本轮验证到主功能 18 能进入目标激发态，未继续生成 hole/electron cube。
+
+## Current Request: 2026-06-24 COF ESP VdW Surface With LCAO Explicit GPU
+
+- [x] 需求入板: 将之前 VESTA 的 COF ESP 范德华表面染色图改用 ABACUS `basis_type lcao`，并显式写 `device gpu` 重跑；目标仍是电子密度等值面作 vdW surface，静电势 cube 作 texture coloring。
+- [x] 现有流程审计: 已核对 `project/examples/cof_direct_cube_suite/`、上次 `smoke/cof_esp_abacus_20260621/` 产物、`abacus-esp-align` / `cube-preset density` 后处理入口；服务器 `/opt/apps/abacus/abacus-develop-LTSv3.10.1/tests/PP_ORB` 有 COF 所需 C/H/N/O PP/ORB。
+- [x] 服务器计算: 已在干净目录准备 LCAO/GPU 输入并多次尝试。v3.11.0-beta4 的 `np=8` 在 ELPA/OpenMPI/UCX 路径失败，`np=1` 在 ELPA GPU 路径 segfault/kill；成功路径为 `abacus/LTSv3.10.1-sm70-auto`、显式 `device gpu`、coarse `ecutwfc=35`、`np=8` 作业 `556999`，输出 `SPIN1_CHG.cube` 和 `ElecStaticPot.cube`，密度积分 `233.9994 e` 接近预期 `234 e`。
+- [x] 后处理和渲染: 已用 `rho=0.001 a.u.` 电子密度等值面 + 真空归零 ESP texture 生成 VESTA 文件；VESTA CLI/no-focus 导出仅得到 `40x40` 无效 PNG，Linux VESTA 缺 `libGLU.so.1`，因此另生成 cube 数据 top-view 诊断 PNG。主要产物在 `smoke/cof_esp_lcao_gpu_20260624/products/`。
+- [x] 追加解释: v3.11.0-beta4 的 `np=1` 失败不是 k 点/pool/MPI rank 拆分问题，而是单 rank 下仍调用 GPU ELPA 对角化库；COF 的 744 维 LCAO 广义本征问题在该 v3.11 GPU/ELPA 组合中触发 `libelpa_openmp.so` 的 segfault/kill。LTS 同输入成功，说明更像 v3.11 构建/ELPA/GPU 求解器路径回归或兼容性问题。
+- [x] 追加测试: 完整矩阵 job `559510` 已完成。`cusolver np=1/8` 成功，default reset 为 `cusolver` 且 `np=1/8` 成功，`elpa np=1/8` 成功，`genelpa np=1/8` 失败。因此 v3.11 LCAO/GPU 问题集中在 `genelpa` 路径，不是 cuSolver 或 native `elpa` 普遍坏。
+- [x] 并行策略回答: 已总结 Gamma-only 大体系策略。LCAO/GPU default/cusolver 可跑但 Gamma-only 下按 k 点分配无法有效多卡；`ks_solver=elpa` 的 native ELPA 分布式 dense solver 才是 LCAO Gamma-only 多 rank/潜在多 GPU方向。PW/GPU Gamma-only 仍需要 pool 内分布式 FFT/G-space/grid 并行，不能靠 KPAR 解决。
+- [ ] 多卡 ELPA 测试: 在 `abacus/v3.11.0-beta4-sm70-avx512` 下用 COF coarse、Gamma-only、LCAO、显式 `device gpu`、`ks_solver=elpa` 申请多张 GPU，测试 `np=2`/`np=8` 的稳定性与日志中 GPU 识别情况。
+- [x] 术语修正: 已区分 `ks_solver=genelpa`、`ks_solver=elpa` 与 GPU ELPA 支持。源码中 `genelpa` 走 `DiagoElpa`/`module_genelpa::ELPA_Solver`，未直接设置 `nvidia-gpu`；`elpa` 走 `DiagoElpaNative`，会在 `ELPA_WITH_NVIDIA_GPU_VERSION` 且 `device=gpu` 时设置 `nvidia-gpu` 和 `ELPA_2STAGE_REAL_NVIDIA_GPU`。
+
+## Current Request: 2026-06-24 ABACUS Issue Draft And H2O Reproducer Bundle
+
+- [x] 需求入板: 整理英文 Markdown issue 草稿，并同步中文翻译；把 H2O 相关测试文件整理到单独文件夹，便于一并上传 upstream issue。
+- [x] H2O 复现包: 已新建 `issue_assets/abacus_device_auto_kpar_h2o/`，包含显式 GPU、no-device、CPU 对照输入、STRU/KPT、分析脚本、Slurm/README；并打包为 `issue_assets/abacus_device_auto_kpar_h2o.tar.gz`，便于一并上传 issue。
+- [x] Issue 文档: 已新增英文 issue draft `docs/research/abacus_device_auto_kpar_issue_draft_en.md` 和中文翻译 `docs/research/abacus_device_auto_kpar_issue_draft_zh.md`，并同步到 `project/docs/research/`。
+- [x] Issue 语气补充: 已在中英文 issue 草稿中说明我愿意在维护者商定 input 参数优先级/依赖关系修复策略后，贡献相应 PR。
+
+## Current Request: 2026-06-24 Brief ABACUS Bug Report For Developers
+
+- [x] 需求入板: 长报告过长；需要面向开发者反馈的简洁版，凝练 bug 触发条件、表现、影响范围、根因和修改建议，不堆本地路径。
+- [x] 文档撰写: 已新增 `docs/research/abacus_device_auto_kpar_bug_brief_zh.md`，同步到 `project/docs/research/abacus_device_auto_kpar_bug_brief_zh.md`；同时生成 3 页 brief PDF `docs/research/abacus_device_auto_kpar_bug_brief_zh.pdf` 和 project 镜像。该版本面向开发者反馈，去掉本地路径细节，重点凝练触发条件、表现、影响范围、根因和修改建议。
+
+## Current Request: 2026-06-24 ABACUS Device-Auto KPAR Bug Report
+
+- [x] 需求入板: 把当前 `device auto`/PW-GPU/`kpar` bug 的原因整理成中文 Markdown 文档，并附带当前测试用例说明和修改建议；可同步渲染 PDF。
+- [x] 文档撰写: 已新增 `docs/research/abacus_device_auto_kpar_bug_zh.md`，并同步到 `project/docs/research/abacus_device_auto_kpar_bug_zh.md`。内容包括摘要、H2O/H2/LTS 测试证据、源码原因、非孤立风险、修改建议、回归测试矩阵和 upstream issue 摘要。
+- [x] PDF 渲染: 本机无 `pandoc/weasyprint/wkhtmltopdf`，但可用 PIL + Noto CJK 字体生成图片型 PDF；已输出 `docs/research/abacus_device_auto_kpar_bug_zh.pdf` 和 `project/docs/research/abacus_device_auto_kpar_bug_zh.pdf`，均为 8 页 PDF 1.4。
+
+## Current Request: 2026-06-24 ABACUS Input Dependency Audit Beyond Device
+
+- [x] 需求入板: 判断会被其它参数依赖的 input 是否只有 `basis_type` 和 `device`，以及同类解析顺序错误是否可能影响其它参数。
+- [x] 源码审计: 已扫描 `read_input_item_*.cpp` 的 `reset_value`。依赖关系不止 `basis_type/device`：`calculation` 会被 `esolver_type=lr` 改写并被 `symmetry/init_chg/scf_nmax/scf_thr` 等依赖；`basis_type/device` 被 `kpar/ks_solver/scf_thr/scf_thr_type/out_*` 依赖；`kpar` 还依赖 `bndpar`，但 `bndpar` reset 在 `kpar` 之后；`ks_solver` 也可能被后续 reset 得到，影响 `bndpar` 逻辑。
+- [x] 结论沉淀: 同类解析顺序错误有可能影响其它参数。当前最明确的风险除 `device auto -> kpar` 外，还有 `kpar` 使用尚未 finalized 的 `bndpar`，以及 `bndpar` 使用尚未 finalized 的 `ks_solver`。建议把 `basis_type/device/calculation/esolver_type/ks_solver/bndpar` 这类会影响并行、solver 和默认阈值的核心参数放进显式 finalize/derived-default 阶段，或至少为 no-device GPU、explicit GPU、bndpar+ks_solver、esolver_type=lr、basis-dependent scf defaults 建回归测试。
+
+## Current Request: 2026-06-24 ABACUS Basis-Type Meaning
+
+- [x] 需求入板: 解释 ABACUS `basis_type` 有哪些选择，以及 `lcao_in_pw` 是什么。
+- [x] 结论沉淀: 源码中 `basis_type` 可选值为 `pw`、`lcao`、`lcao_in_pw`；`lcao_in_pw` 表示把局域/数值原子轨道放到平面波框架里展开或求解的混合路线。源码注释说明它用于在平面波基中展开 localized atomic set，scf 流程偏 PW，Wannier/nscf 某些接口又偏 LCAO；当前 GPU 不支持，因此会影响 `device` 解析。
+
+## Current Request: 2026-06-24 Why Basis-Type Before Device Finalize
+
+- [x] 需求入板: 解释为什么 `basis_type` 也需要在 `device` finalize 前先得到规范化值。
+- [x] 结论沉淀: `basis_type` 是 `device` finalize 的输入依赖；当前源码中 `get_device_flag(device, basis_type)` 会在 `result=="gpu" && basis_type=="lcao_in_pw"` 时直接拒绝，因此应先确定 canonical basis type，再解析 device。否则可能用还没规范化的 basis 判断 GPU 合法性，产生过早拒绝或错误放行。对当前 bug 的最小修复可只保证 `basis_type` read/default 已完成；更稳的设计是先做轻量 basis canonicalization，再做 device finalization。
+
+## Current Request: 2026-06-24 Robustness Of Pre-Reset Finalize Design
+
+- [x] 需求入板: 评估 pre-reset 是否会变成“人为选取优先 reset 参数”的新脆弱点，并说明如何保证工程化和鲁棒性。
+- [x] 设计结论: 不能把 pre-reset 设计成随手挑参数提前 reset 的白名单；应区分 `read raw input -> finalize primitive state -> apply derived defaults/reset -> validate/init`。`finalize primitive state` 只允许无副作用、低成本、其它 reset 会依赖的规范化，例如 `basis_type` 归一和 `device auto -> cpu/gpu` 字符串解析；不允许分配资源或做计算 setup。更完整实现可给 input item 增加 phase/depends_on 并做拓扑排序；最小 PR 可用小型 `finalize_core_input()` 加清晰注释、invariant check 和 no-device/explicit-device 回归测试来锁住行为。
+
+## Current Request: 2026-06-24 Explain Pre-Reset Finalize Stage
+
+- [x] 需求入板: 用工程化语言解释明确的 pre-reset/finalize 阶段在 ABACUS input 读取流程里做什么、为什么比依赖 item 顺序更稳。
+- [x] 结论沉淀: pre-reset/finalize 是“把其它 reset 会依赖的基础输入先规范化”的阶段。例如先把 `basis_type` 的简单别名/派生状态归一，再把 `device=auto` 解析成最终 `cpu/gpu` 字符串；它不做重计算、不初始化 GPU、不分配 FFT/波函数，也不做完整物理 setup。后续普通 reset hook 可以稳定读取这些 finalized 基础状态，而不是依赖 item 注册顺序。
+
+## Current Request: 2026-06-24 ABACUS Device-Auto Early Resolution Design
+
+- [x] 需求入板: 判断让 `device auto` 优先解析是否合理、是否存在不能优先解析的 case，并给出最优雅的源码修复方案。
+- [x] 源码审计: `device` 最终解析调用 `get_device_flag(device, basis_type)`，只依赖原始 `device`、`basis_type` 和硬件探测；`read_txt_input()` 先读完用户显式给出的所有参数，再进入 reset loop，因此显式 `basis_type` 已经可用，未显式给出时默认 `pw` 也可用。GPU context 初始化仍在 `read_parameters()` 的 bcast 之后，不能提前。
+- [x] 设计结论: 让 `device auto` 优先解析是合理的，但应只提前解析字符串，不提前初始化 GPU。最优雅方案是引入一个 pre-reset/finalize-device pass，在通用 reset hook 之前把 `auto/cpu/gpu` 归一化；再让 `kpar` 和其它 reset 逻辑只看最终 device。备选是把 `device` item 移到 `kpar` item 前，但这继续依赖 item 顺序，扩展性较差。还需回归覆盖 no-device GPU allocation、显式 `device gpu`、显式 `device cpu`、无 GPU 环境 `auto->cpu`、`lcao_in_pw` 禁用 GPU、Gamma-only `KPAR>nkstot` 早停，以及 GPU/PW `poolnproc>1` 早停。
+
+## Current Request: 2026-06-24 ABACUS Explicit GPU Vs No-Device Source Audit
+
+- [x] 需求入板: 解释为什么显式写 `device gpu` 和不写 `device` 会影响 ABACUS v3.11.0-beta4 的计算行为；要求从源码里说明 `device` 默认值、输入读取、PW/GPU 自动并行重置和 `nks == 0` 早停差异。
+- [x] 源码审计: 已检查本地 `downloads/abacus_latest_molden/abacus-develop/source`。`device` 在 `input_parameter.h` 默认是 `auto`；`read_input.cpp` 先读用户显式给出的 item，再按注册顺序跑所有 item 的 `reset_value`；`read_input_item_system.cpp` 中 `kpar` item 位于 `device` item 之前，且 PW/GPU 自动 `kpar=NPROC/bndpar` 只在当时 `device=="gpu" && basis_type=="pw"` 时触发。
+- [x] 结论沉淀: 已更新看板和 ABACUS skill。解释: 显式 `device gpu` 在 `kpar` reset 时已经是 `gpu`，所以 `np=2` 被改成 `KPAR=2`，Gamma-only `nkstot=1` 触发 `nks == 0` 早停；不写 `device` 时 `kpar` reset 看到的是默认 `auto`，不改 `KPAR=1`，随后 `device auto` 才解析成 `gpu`，两个 rank 留在同一个 pool，进入 GPU PW FFT 中 `assert(poolnproc==1)` 所代表的未支持路径，release build 可静默写坏 cube。建议修复方向: 先解析最终 device 再做 kpar reset，另加 `KPAR>nkstot` 与 GPU/PW `poolnproc>1` 的 fail-fast。
+
+## Current Request: 2026-06-24 H2O PW No-Device Probe For ABACUS v3.11 Default Path
+
+- [x] 需求入板: 验证 ABACUS v3.11.0-beta4 的 H2O PW case 在不写 `device gpu` 时的行为；重点回答日志里只显示 `RUNNING WITH DEVICE : CPU` 是否可能仍部分走 GPU，以及 no-device/default 路径是否会复现 H2 的 silent bad cube。
+- [x] 本地输入准备: 已在 `smoke/abacus_h2o_pw_gpu_2rank_probe_20260624_inputs/` 添加 `INPUT.nodevice` 和 `run_h2o_nodevice_probe.slurm`；输入保留 PW/Gamma/out_chg/out_pot/H2O 18 A 盒子，只移除 `device` 行；Slurm 仍申请 `--gres=gpu:2` 并分别跑 `np=1`、`np=2`。
+- [x] 服务器执行: 已同步 no-device 输入到 `SAI-saiuser01:~/multiwfn2vesta_runs/h2o_pw_gpu_2rank_probe_20260624`，提交作业 `551908` 并拉回结果到 `smoke/abacus_h2o_pw_gpu_2rank_probe_20260624_results/nodevice/`。`np=1` 正常，`chg.cube` 积分 `7.999953955320376 e`，能量 `-460.6065895528702 eV`；`np=2` 静默写坏 cube，积分 `6.434633317900327 e`，最小密度 `-0.015059193886`，能量 `-9.684406411563097 eV`。
+- [x] 结论沉淀: 已更新 H2O reproducer README、ABACUS direct cube trust-boundary 技能记录和看板。结论: ABACUS 设备报告要看完整块，第一行 `RUNNING WITH DEVICE : CPU` 后面可能还有 `GPU / Tesla...`；no-device/default 在 GPU allocation 下不是安全 CPU fallback，反而绕过了显式 `device gpu` 的 `nks == 0` 早停，能写出错误 direct cubes。
+
+## Current Request: 2026-06-21 ABACUS ESP Surface Coloring And Periodic Excitation Analysis
+
+- [x] 需求入板: 收集 ABACUS 计算周期体系静电势/Hartree 势的算例，用于 VdW 表面静电势染色图；重点处理势能零点任意性，优先研究真空区平面平均势归零。
+- [x] 新需求入板: 展示 ESP 当前效果；同时开始筹备 ABACUS 周期/材料激发态算例，为后续 Multiwfn 空穴-电子分析桥接准备输入、runbook 和预期产物。
+- [x] 调研 ABACUS direct cube / Hartree potential / electrostatic potential 输出选项、示例输入、输出文件命名和单位；形成可复用 runbook。结论: 当前 ABACUS develop 源码 `out_pot 2` 输出 electrostatic potential 到 `OUT.{suffix}/potes.cube`，单位 Ry；旧/漂移文档可能写 `pot_es.cube` 或 `ElecStaticPot.cube`；`out_pot 1` 是 total local potential，额外含 XC 等项，不应直接当 ESP。
+- [x] 设计并实现 cube 后处理：新增 `multiwfn2vesta abacus-esp-align` / `multiwfn2vesta-abacus-esp-align`，读取 ABACUS 势能 cube，按真空方向做平面平均，选择真空平台归零，并输出 shifted cube/profile/report；后续交给 `cube-preset density --texture-cube` 或 `cube-vesta` 做 VdW/密度表面染色。
+- [x] ESP 效果展示: 本地未找到真实 ABACUS `potes.cube/chg.cube`，因此先生成 synthetic slab-like smoke demo，产物位于 `smoke/esp_vacuum_alignment_demo_20260621/`；`esp_demo_summary.png` 展示真空归零前后平面平均曲线和密度表面 ESP 染色代理图，`vesta/synthetic_chg_density_cube.vesta` 可用 VESTA 打开检查 texture workflow。
+- [x] 用户纠偏: synthetic ESP demo 只能作为算法 smoke，不能作为科学效果图。真实目标应是 COF/晶体表面或 slab 的 `rho=0.001` 电子密度范德华表面，用 ABACUS direct `out_chg` 电子密度 cube 作 surface，用 `out_pot 2` 的 `potes.cube` 作 electrostatic-potential texture，并按真空平台归零。
+- [x] 重新获取或计算真实 ABACUS direct cubes：服务器 `SAI-saiuser01` 上 COF 单层 PW fast job `533630` 已在 `~/multiwfn2vesta_runs/cof_esp_fast_20260621` 收敛，参数 `ecutwfc=35/scf_thr=1e-5`，第 9 电子步 density deviation `5.49334e-06`；已输出真实 `chg.cube` 和 `potes.cube`。严格 job `533613` 因 `scf_thr=1e-7` 在 `~1e-3` 附近振荡已取消并保留日志；preview job `533641` 在 fast 成功后已取消。
+- [ ] ESP 单位/等值面修正: 用户确认 `rho=0.001 a.u.` 本身是目标阈值；本轮排查表明主线 `esp_surface_singlephase`、`esp_surface_tuned`、`esp_surface_rawgeom_iso_0.00675` 中的 `chg.cube` 与 raw ABACUS `chg.cube` sha256 完全一致，后处理未改坏 density cube。ABACUS develop 源码文档声称 `out_chg 1` 输出 Bohr^-3，`write_vdata_palgrid` 也不缩放数据；但这份 raw cube 用 ABACUS `cal_rho2ne=sum(rho)*omega/nxyz` 公式积分为 `81.33 e`，不是体系 `234 e`，且约 37% 网格点为负值。进一步逐层统计显示 `rho>=0.001` 只出现在 z=69..113 的 45 个完整平面，每个 `(x,y)` 柱恰好有 45 个点超过阈值；所有原子都在 z=0.5 单层平面，说明片状表面一部分来自二维 COF 本身的横向贯通电子密度，但积分不守恒仍说明该 `out_chg` 文件不能直接作为生产级 vdW density surface。已在服务器新建 `~/multiwfn2vesta_runs/outchg_probe_20260622` 做 H2 最小对照：同一 GPU/PW 输入下 `np=1` 的 `chg.cube` 积分 `1.99998849 e` 正常，而 `np=8` 积分 `0.24513058 e` 且总能量异常；追加 `device cpu` 后 `np=1` 和 `np=8` 均积分 `1.99998849 e`。因此问题归因到当前 ABACUS v3.11.0-beta4 PW/GPU 多 MPI rank 路径，COF 的 8-rank GPU `chg.cube` 不应作为生产级 vdW density surface，需重跑 `device cpu` 或验证单 rank GPU/其它版本。`chg_angstrom_density_eA3_for_vesta.cube` 仍仅保留为反例诊断，不作为主路线。
+- [x] 真实 ESP 后处理与效果图: 原始 cube 已拉回 `smoke/cof_esp_abacus_20260621/raw/OUT.cof12000n2_esp_fast/`；`abacus-esp-align` 生成 `products/potes_vacuum0.cube`，真空 offset `4.670271116877 Ry`；`cube-preset density --isosurface 0.001 --texture-cube ...` 生成 VESTA。初始 `-0.06..0.06 Ry` 色标整片偏蓝，按 surface-nearest 范围改为 `--tex-physical -12.8 -1.6` 后得到 tuned 图 `smoke/cof_esp_abacus_20260621/products/cof_esp_surface_tuned.png`，对应 VESTA 文件 `products/esp_surface_tuned/chg_density_cube_nocomps.vesta`。
+- [x] COF direct ESP 算例模板: `examples/cof_direct_cube_suite/` 已新增 `INPUT.esp` 和 `STRU`，用于跑 `out_chg 1 8` + `out_pot 2 8`；README 已改成 `rho=0.001` density surface + vacuum-aligned `potes.cube` texture workflow。2026-06-21 修正：默认模板改为 `basis_type pw`，避免 N `.orb` 缺失导致 LCAO direct cube 算例不可跑。
+- [x] 服务器运行经验入板: SAI `4V100PX` 分区单 GPU 作业需 `--qos=rush-1o2gpu --gres=gpu:1` 且不要显式写 `--cpus-per-task`；`srun abacus` 会启动多个串行 ABACUS 实例互相覆盖输出，应使用 `mpirun --bind-to none --map-by slot -np 8 abacus`。
+- [x] 调研 Sobereva 电子-空穴分析相关文章线索和 Multiwfn 对 CP2K/其它周期激发信息的读取需求；对照 ABACUS 周期激发/TDDFT 输出。当前证据见 `docs/research/abacus_esp_vacuum_alignment_and_excitation_zh.md`。
+- [x] 初步评估 `abacus2cp2k` 或更通用 excitation-record 格式：不建议把伪 CP2K 输出作为主路线；短期原型优先 `ABACUS LR-TDDFT + ABACUS Molden -> Multiwfn plain text 激发文件`，适合空穴-电子/NTO/跃迁密度但不含振子强度；正式路线再定义内部 excitation-record 或给 Multiwfn 加 ABACUS 原生 parser。此项仅为设计完成，真实 ABACUS LR-TDDFT parser/周期电子-空穴 cube 尚未跑通，不能标为功能 ready。
+- [x] 激发态算例筹备: 新增 `examples/abacus_lr_tddft_excitation_bridge/`，用 H2O Gamma-only 超胞作为 ABACUS LR-TDDFT bridge smoke，包含 `INPUT.scf`、`INPUT.lr`、`STRU`、`KPT` 和中文 runbook；目标是先收集 `Excitation_Energy_*` / `Excitation_Amplitude_*`，再实现 Multiwfn plain text exporter。
+- [x] 本轮验证: `tests.test_abacus_esp_align tests.test_cli tests.test_cube_preset` 共 123 tests 通过；`abacus-esp-align --help`、统一 CLI help、最小 cube smoke、`git diff --check` 和 root docs mirror dry-run 通过。未运行真实 ABACUS SCF/LR-TDDFT，也未生成 VESTA 渲染图。
+
+Updated: 2026-06-21 21:36 CST
+
+## Active Goal Continuation: 2026-06-12 Energy-Density Derivative Grid Routes
+
+- [x] 需求入板: 继续长期目标，调研并实现更多 ABACUS LCAO Molden 可支撑、能由 VESTA 表达的 Multiwfn 波函数分析路线；本轮从上次源码审计 P1 候选中选择一个边界清晰的增量。
+- [x] 审计当前仓库状态和覆盖: `main` 与 `origin/main` 对齐，工作树干净；`grid-run` / `cube-preset` 已覆盖 bonding/energy diagnostics、信息论、USI/BNI、steric/SBL、KED diagnostics 等路线，尚未维护能量密度梯度/拉普拉斯 `iuserfunc=79/80`。
+- [ ] 审计本地 Multiwfn 2026.6.2 源码证据: 确认 function-100 `iuserfunc=79/80` 的物理含义、是否需要额外交互/设置、输出符号性质和适合 VESTA 的默认 preset。
+- [ ] 实现 `grid-run` named routes、`cube-preset` presets、tests、README/中文手册/usage/feature/status/research/skill/worklog/kanban 文档；状态先保持 `needs-render`，推荐真实体系为 Ag(111)+benzene、GC、COF 孔边缘或 benzene/phenol dimer。
+- [ ] 运行 focused/full no-GUI tests、CLI smokes、docs mirror、markdown/link checks、`git diff --check`；通过后用 `Stardust0831` 身份提交并推送。
 
 ## Current Request: 2026-06-12 Feature Closure Phase 9, Functional Examples, UX, Renders, And Chinese Manual
 
@@ -2498,3 +2640,154 @@ Updated: 2026-06-12 07:09 CST
   - [x] Recheck branch/worktree and source evidence for RoSE (`iuserfunc=18`) and SEDD (`iuserfunc=19`).  Local Multiwfn source maps function-100 `iuserfunc=18/19` to RoSE and SEDD, exported as `userfunc.cub`.
   - [x] Add named `grid-run` routes and VESTA presets with focused tests.  Current focused test set passes after using a fake cube whose range covers the default `0.5` isosurface.
   - [ ] Update docs/skills/research/worklog/status notes, mirror docs, validate, commit, and push with `Stardust0831` identity.  Documentation is being synchronized with the broader feature-closure audit; full validation is still pending.
+
+## Active Diagnostic: 2026-06-22 ABACUS PW/GPU Multi-Rank Trust Boundary
+
+- **User request:** Explain why the current server ABACUS `v3.11.0-beta.4`
+  PW/GPU multi-MPI-rank path is not trustworthy, and inspect source for the
+  likely failure point.
+- **Current status:** [x] Empirical H2 probe shows GPU/default `np=1`
+  integrates `chg.cube` to about `1.99999 e`, but GPU/default `np=8`
+  integrates to about `0.24513 e` and also changes total energy.  CPU-only
+  controls integrate to about `1.99999 e` for both `np=1` and `np=8`.
+- **Source finding:** [x] ABACUS GPU PW FFT code in
+  `source_basis/module_pw/pw_transform_gpu.cpp` and
+  `source_basis/module_pw/pw_transform_k.cpp` asserts
+  `poolnproc == 1` before full 3D FFT calls.  Density construction in
+  `source_estate/elecstate_pw.cpp::rhoBandK()` reaches this GPU transform
+  through `basis->recip_to_real(...)`.
+- **Interpretation:** [x] The likely bug class is an unsupported multi-rank
+  GPU/PW FFT path running silently when release builds disable `assert`, not a
+  VESTA/cube post-processing bug.
+- **Next:** [ ] Treat COF ESP direct cube images from GPU `np=8` as diagnostic
+  only.  Production density/potential cubes should be regenerated with
+  `device cpu`, validated single-rank GPU, LCAO, or another ABACUS build after
+  a tiny electron-count regression passes.
+
+## Active Diagnostic: 2026-06-24 ABACUS LCAO/PW Parallel Probe
+
+- **User request:** Determine whether the PW/GPU multi-rank issue also affects
+  LCAO, explain CPU PW parallelism, compare current `v3.11.0-beta.4` and LTS
+  LCAO/PW behavior, and outline a fix direction.
+- **Current status:** [x] Ran a remote H2 Gamma-only probe in
+  `SAI-saiuser01:~/multiwfn2vesta_runs/abacus_parallel_probe_20260624`; local
+  inputs are in `smoke/abacus_parallel_probe_20260624_inputs/`, results in
+  `smoke/abacus_parallel_probe_20260624_results/`.
+- **Results:** [x] `abacus/LTSv3.10.1-sm70-auto` LCAO/GPU is consistent for
+  `np=1` and `np=8`: charge cube integrals are both `~1.9999964 e`, and final
+  energies agree.  LTS PW/GPU `np=8` does not silently corrupt density; it
+  aborts with `nks == 0, some processor have no k point!`.
+- **Results:** [x] `abacus/v3.11.0-beta4-sm70-avx512` LCAO fails in this
+  server module for both `device gpu` and `device cpu`: `np=1` reports
+  `Integer overflow in xmallocarray`; `np=8` segfaults in the ELPA stack.  This
+  appears separate from the PW/GPU k-pool dilution bug.
+- **Interpretation:** [x] LCAO is not hit by the specific PW/GPU automatic
+  `kpar=NPROC/bndpar` path; current source stores LCAO k parallelism in
+  `kpar_lcao` and resets the main `kpar` to 1.  CPU PW supports pool-internal
+  multi-rank FFT via distributed gather/scatter, while GPU PW currently asserts
+  `poolnproc == 1`.
+- **Fix direction:** [ ] Upstream should reject or cap invalid `kpar > nks`
+  before pool construction, refuse Gamma-only GPU/PW multi-rank when
+  distributed GPU FFT is unavailable, and eventually implement true multi-GPU
+  intra-k-point FFT/grid parallelism.
+
+## Active Diagnostic: 2026-06-24 H2O PW/GPU Two-Rank Reproducer
+
+- **User request:** Prepare a more realistic single-H2O, vacuum-box, two-GPU
+  Gamma-only reproducer to explain why PW/GPU cannot use k-point parallelism
+  for Gamma-only systems, and advise whether to file an issue or PR.
+- **Current status:** [x] Ran
+  `SAI-saiuser01:~/multiwfn2vesta_runs/h2o_pw_gpu_2rank_probe_20260624` with
+  `abacus/v3.11.0-beta4-sm70-avx512`; local inputs are in
+  `smoke/abacus_h2o_pw_gpu_2rank_probe_20260624_inputs/`, results in
+  `smoke/abacus_h2o_pw_gpu_2rank_probe_20260624_results/`.
+- **Result:** [x] Single-rank PW/GPU is numerically sane for this H2O box:
+  `chg.cube` integrates to `7.999953955320376 e` versus expected `8 e`, final
+  energy `-460.6065895528702 eV`.
+- **Result:** [x] Two-rank/two-GPU PW/GPU aborts with `nks == 0, some
+  processor have no k points!`; no charge cube is written.  This is a compact
+  reproducer for invalid `kpar > nks` in Gamma-only PW/GPU.
+- **Recommendation:** [ ] File an upstream issue first with the H2O reproducer
+  and the earlier H2 silent bad-cube evidence.  A minimal PR can then add a
+  fail-fast guard; true distributed GPU FFT is a larger feature PR.
+
+## Active Diagnostic: 2026-06-24 ABACUS LCAO/GPU Native ELPA Two-Card Probe
+
+- **User request:** Try native `ks_solver elpa` for Gamma-only LCAO/GPU on two
+  GPUs, preferably on `4v100pxn07`, which currently appears to have two idle
+  V100 cards.
+- **Current status:** [x] Submitted Slurm job `560212` in
+  `SAI-saiuser01:~/multiwfn2vesta_runs/abacus_v311_lcao_gpu_elpa_2gpu_20260624`.
+  Slurm accepted `--nodelist=4v100pxn07` with `--gres=gpu:2`; both `np=2` and
+  `np=8` cases have finished.
+- **Checkpoints:** [x] Confirmed `np=2` and `np=8` both finish with
+  `abacus_rc=0`; ABACUS reports `GPU / Tesla V100-SXM2-16GB (x2)` on
+  `4v100pxn07`.  Final energies agree within `~6.6e-5 eV`.  For this small
+  `NBASE=744` probe, `np=8` is slower (`elpa_solve=11.14 s`) than `np=2`
+  (`1.12 s`), so larger-basis scaling is still untested.
+- **Clarification:** [ ] Explain why LCAO native ELPA can use two GPUs while
+  earlier Gamma-only PW/GPU H2O/H2 tests either abort or produce bad charge
+  cubes depending on whether `device gpu` is explicitly parsed early enough.
+- **Clarification:** [ ] Clarify whether PW can use ELPA-style distributed
+  diagonalization and why that does not solve the PW/GPU Gamma-only multi-rank
+  FFT/grid problem.
+
+## Active Workflow: 2026-06-25 COF ESP vdW Surface Rendering
+
+- **User request:** Based on the current COF system, process ESP for a
+  density-isosurface electrostatic-potential coloring workflow.
+- **Current status:** [x] Rechecked existing COF LCAO/GPU direct cubes.  The
+  density cube integrates to `233.99939580839157 e` versus expected `234 e`.
+  The z-vacuum plateaus are stable (`~0.035137`), so a high-z 10% vacuum
+  offset was subtracted from `ElecStaticPot.cube`.
+- **Outputs:** [x] Generated
+  `smoke/cof_esp_vdw_surface_20260625/products/ElecStaticPot_vacuum0_high10.cube`,
+  VESTA scene
+  `products/esp_vdw_surface/cof12000n2_esp_vdw_surface_cube.vesta`, and a
+  data diagnostic PNG
+  `products/cof12000n2_esp_vdw_surface_topview_diagnostic.png`.
+- **Guardrails:** [x] All files stayed under `/mnt/g/work/multiwfn2vesta`;
+  used the reliable LCAO/GPU density/ESP cubes, not the known-risk PW/GPU
+  multi-rank cube path.
+- **Render note:** [x] Initial Windows VESTA CLI/no-focus export produced
+  invalid `60 x 60` icon-like PNGs.  Retrying with multiple `-flush` commands
+  after `-open` produced valid `2432 x 1420` PNGs.  VESTA still exits with
+  return code `255`, so output dimensions must be checked.
+- **Retry:** [x] Valid renders:
+  `products/cof12000n2_esp_vdw_surface_vesta_retry_flush2.png` and zoomed
+  `products/cof12000n2_esp_vdw_surface_vesta_zoom_flush.png`.
+- **User-adjusted style:** [x] Preserve the manually edited
+  `cof12000n2_esp_vdw_surface_zoom_render.vesta`, verify/reconstruct its
+  physical ESP texture limits from VESTA `TEX3P` percentages, support the
+  requested `-0.08..0.08 a.u.` color scale, and ensure structure bonds are
+  visible in the rendered scene.
+- **User-adjusted style result:** [x] Preserved the user-edited file and added
+  derived `cof12000n2_esp_vdw_surface_zoom_render_bonds.vesta` with C/H/N/O
+  `SBOND` rules.  Rendered
+  `products/cof12000n2_esp_vdw_surface_vesta_zoom_bonds.png`; bonds are
+  visible.  `TEX3P -1 0.0209774 1.04690` plus known `-0.08..0.08 a.u.`
+  implies texture reference `-0.0832715762378..0.0726856080566`.
+
+## Active Workflow: 2026-06-25 ESP Runbook Closure
+
+- **User request:** Treat the COF ESP workflow as mostly closed and distill the
+  reusable experience.
+- **Current status:** [ ] Convert the successful COF density-surface ESP
+  workflow into a reusable skill/runbook, including vacuum alignment, VESTA
+  `TEX3P` percentage inversion, delayed `-flush` image export, and bond
+  display via `SBOND`.
+- **Result:** [x] Added reusable skill
+  `docs/skills/abacus_esp_vdw_surface_vesta_skill.md` and mirrored it under
+  `project/docs/skills/`.  The skill records density-integral checks, vacuum
+  ESP alignment, VESTA texture scaling, `TEX3P` inversion, `SBOND` bond rules,
+  and delayed-flush PNG export.
+
+## Active Workflow: 2026-06-25 ABACUS Molden Multiwfn Excited-State Preparation
+
+- **User request:** Prepare an ABACUS + latest ABACUS `tools/molden.py` +
+  Multiwfn electronic-excitation workflow.
+- **Current status:** [ ] Inspect current local scripts/docs, fetch/verify the
+  latest ABACUS `molden.py` interface expectations, and map the gap between
+  ABACUS outputs and Multiwfn excited-state/electron-hole analysis input.
+- **Guardrails:** [ ] Keep all local files under `/mnt/g/work/multiwfn2vesta`;
+  use clean remote directories only if server calculations become necessary.

@@ -188,6 +188,7 @@ multiwfn2vesta examples --closure-report
 | 起点 | 推荐命令 | 产物 | 典型用途 |
 | --- | --- | --- | --- |
 | ABACUS LCAO 计算目录 | `abacus-molden` | Multiwfn 可读 Molden | AIM、IGMH、IRI、grid-run、STM |
+| ABACUS LR-TDDFT 输出目录 | `abacus-lr-to-multiwfn` | Multiwfn plain text 激发组态 | Multiwfn 主功能 18 的 hole/electron、transition density、NTO |
 | ABACUS/Multiwfn cube | `cube-vesta` / `cube-preset` | `.vesta` + recipe | 密度、势、ELF、轨道、弱相互作用等值面 |
 | Multiwfn 可读波函数 | `grid-run` | scalar cube + `.vesta` | density、orbital、ESP、KED、ELF/LOL、vdW、FOD 等 |
 | neutral/anion/cation 波函数 | `fukui-run` | Fukui/dual cube + `.vesta` | 反应性区域 |
@@ -205,7 +206,8 @@ multiwfn2vesta examples --closure-report
 ## 5. ABACUS 到 Multiwfn
 
 ABACUS 需要 LCAO、单 Gamma/单 k、`nspin=1/2`，并输出 LCAO 波函数。推荐用最新 ABACUS
-`interfaces/Multiwfn_interface/molden.py`，项目命令会导出 converter 并记录来源。
+`tools/molden/molden.py`，项目命令会自动回退到旧版
+`interfaces/Multiwfn_interface/molden.py` 并记录来源。
 
 ```bash
 multiwfn2vesta abacus-molden abacus_calc ABACUS_Multiwfn.molden
@@ -213,6 +215,23 @@ multiwfn2vesta molden-check ABACUS_Multiwfn.molden --abacus
 ```
 
 ABACUS 伪势体系必须保留 `[Nval]`，这样 Multiwfn 看到的是有效价电子核电荷，而不是全电子原子序数。
+
+电子激发分析还需要 ABACUS LR-TDDFT 的激发组态文件。Molden 只提供参考波函数；
+进入 Multiwfn 主功能 18 前，需要把 ABACUS 的 `Excitation_Energy_*` 和
+`Excitation_Amplitude_*` 转成 plain text：
+
+```bash
+multiwfn2vesta abacus-lr-to-multiwfn OUT.lr h2o_singlet.excit.txt \
+  --label singlet \
+  --coeff-threshold 0.01
+```
+
+第一版只维护单 rank、Gamma-only、LCAO、限制性 singlet/triplet 风格输出。
+`nocc/nvirt` 会优先从 ABACUS LR 日志和输入自动推断，推断失败时再显式传
+`--nocc/--nvirt`；多 rank amplitude 默认拒绝，避免把
+分布式 LR 向量错误拼接。
+默认会用 `--coefficient-scale 0.7071067811865475` 把 ABACUS LR 振幅缩放到
+Multiwfn 闭壳层 TDDFT 分析的归一化约定；若要写原始振幅，可显式设为 `1.0`。
 
 ## 6. Cube 到 VESTA
 
@@ -285,6 +304,7 @@ multiwfn2vesta grid-run --list-functions
 - `usi`, `bni`
 - `shape-function`, `average-local-electrostatic-potential`, `potential-energy-density`, `energy-density`, `scaled-energy-density`
 - `lagrangian-ked-per-electron`, `bond-metallicity`, `dimensionless-bond-metallicity`, `energy-density-per-electron`
+- `energy-density-gradient-norm`, `energy-density-laplacian`
 - `momentum-fluctuation-magnitude`, `electron-density-ellipticity`, `eta-index`, `modified-eta-index`, `sci`, `stiffness`
 - `becke`, `hirshfeld`, `hirshfeld-delta-g`
 - `pair-function`, `source-function`
@@ -322,6 +342,8 @@ multiwfn2vesta grid-run input.molden bni --function bni
 multiwfn2vesta grid-run input.molden shape --function shape-function
 multiwfn2vesta grid-run input.molden avg_esp --function average-local-electrostatic-potential
 multiwfn2vesta grid-run input.molden energy_density --function energy-density
+multiwfn2vesta grid-run input.molden energy_density_gradient --function energy-density-gradient
+multiwfn2vesta grid-run input.molden energy_density_laplacian --function energy-density-laplacian
 multiwfn2vesta grid-run input.molden bond_metallicity --function bond-metallicity
 multiwfn2vesta grid-run input.molden sci --function sci
 ```
@@ -392,6 +414,8 @@ bonding/energy diagnostics 也是 function `100` 命名路线，当前已有 CLI
   `G(r)/rho(r)` 在 BCP 附近可辅助区分共价和闭壳层相互作用。
 - `bond-metallicity` / `dimensionless-bond-metallicity`: `iuserfunc=15/16`，signed preset；Laplacian 分母附近要谨慎。
 - `momentum-fluctuation-magnitude`: `iuserfunc=25`，单正值 preset。
+- `energy-density-gradient-norm`: `iuserfunc=79`，源码调用 `energydens_grdn(x,y,z)`，即能量密度梯度范数；单正值 preset。
+- `energy-density-laplacian`: `iuserfunc=80`，源码调用 `energydens_lapl(x,y,z)`，由能量密度梯度有限差分得到；signed preset。
 - `electron-density-ellipticity`, `eta-index`, `modified-eta-index`: `iuserfunc=30/31/32`，用于密度各向异性诊断。
 - `sci`: `iuserfunc=37`，Multiwfn 源码调用 `ELF_LOL(...,"SCI")`，作为强共价相互作用指标显示。
 - `stiffness`: `iuserfunc=115`，源码调用 `densellip(...,3)`，单正值 stiffness preset。
@@ -399,6 +423,9 @@ bonding/energy diagnostics 也是 function `100` 命名路线，当前已有 CLI
 这组功能优先用 benzene/phenol dimer 或 GC 碱基对做分子间相互作用/BCP 附近对照；Ag(111)+benzene
 可用于界面 metallicity、局域能量密度或 stiffness。正式图必须先记录 cube range，再调
 `--isosurface` 或通过 `--surface-cube` 映射到统一的 density/interaction surface。
+能量密度梯度范数和能量密度拉普拉斯也归在这一组：它们适合看 BCP 附近、金属-分子界面或 COF 孔边缘的
+能量密度变化，但数值导数场通常比原始能量密度更尖锐，第一张正式图建议先从 GC 碱基对或
+benzene/phenol dimer 的小范围网格开始，再推广到 Ag(111)+benzene。
 
 扩展 KED diagnostics 也走 function `100` 和 run-local `-set`，不会改全局
 `settings.ini`：
@@ -498,10 +525,14 @@ multiwfn2vesta trajectory-frames examples/cdcl_trajectory_video/cdcl_tiny.extxyz
 常用选项：
 
 - `--reference-vesta saved.vesta`: 复用已保存 VESTA 的 `SCENE`/`STYLE` 尾段，适合继承视角和显示风格。
-- `--bond E1 E2 MIN MAX`: 写 VESTA `SBOND` 成键规则，可重复；Cd-Cl 轨迹常用 `0 3.5` 放宽判据。
+- `--bond E1 E2 MIN MAX`: 写 VESTA `SBOND` 成键规则，可重复；Cd-Cl 轨迹常用 `0 3.5` 放宽判据。成键显示需要 `BONDS   1` 和非空 `SBOND` 同时存在。
 - `--boundary XMIN XMAX YMIN YMAX ZMIN ZMAX`: 扩展周期显示范围，例如三个方向都用 `-0.05 1.05`。
 - `--cell-vectors ...`: 普通 XYZ 没有 extXYZ `Lattice` 时手动给 9 个晶胞向量分量。
 - `--stride N`: 只输出部分帧，便于先做预览。
+
+`cube-vesta` / `cube-preset` 从 cube 原子表生成结构 phase 时，会按 1-118 号元素
+covalent radius 表自动写默认 `SBOND` 元素对距离；`--structure-bonds-off` 只关闭
+全局 `BONDS` 显示。轨迹和特殊配位体系仍可用 `--bond` 手工覆盖更合适的距离。
 
 输出包括：
 
@@ -554,6 +585,14 @@ multiwfn2vesta trajectory-video \
 - 只有命令设计或单元测试的标为“缺真实体系”。
 - 图已存在但不够适合手册展示的标为调试证据或待重调视角，不算完成。
 - 暂不维护的 NICS/箭头作为 misc，不进入主功能完成度。
+
+新增或补图一个功能时，建议按同一个闭环顺序执行：
+
+1. 用 `multiwfn2vesta examples --command <功能名>` 查当前 example、体系和状态。
+2. 如果状态是 `needs-example`，先补 `examples/<example_id>/README_zh.md`，不要先画 toy 图。
+3. 如果状态是 `needs-render`，优先复用 Ag(111)+benzene、GC、benzene/phenol dimer、COF、Fukui 三态或 Cd/Cl 轨迹这些已记录的真实体系。
+4. 跑 Multiwfn/ABACUS 时把大文件留在 `smoke/` 或本地计算目录，只把轻量 recipe、runbook 和精选 PNG 放进项目。
+5. PNG 进入 `docs/assets/gallery/` 后，再把 `examples.py`、`feature_examples_zh.md`、`example_status_matrix_zh.md` 和本手册里的状态从 `needs-render` 升级。
 
 ## 11. 常见问题
 

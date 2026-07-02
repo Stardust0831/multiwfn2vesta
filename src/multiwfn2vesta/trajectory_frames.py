@@ -10,7 +10,7 @@ import sys
 from pathlib import Path
 from typing import Dict, Iterable, Iterator, List, NamedTuple, Optional, Sequence, Tuple
 
-from .cube_vesta import DEFAULT_ELEMENT_STYLE, ELEMENT_STYLES
+from .cube_vesta import DEFAULT_ELEMENT_STYLE, ELEMENT_STYLES, format_vesta_sbond_rule
 
 
 Vector3 = Tuple[float, float, float]
@@ -342,10 +342,15 @@ def render_frame_vesta_text(
     br, bg, bb = bond_rgb
     for index, rule in enumerate(bond_rules, start=1):
         lines.append(
-            f"{index:4d} {rule.element1:<2s} {rule.element2:<2s}"
-            f" {rule.distance_min:8.5f} {rule.distance_max:8.5f}"
-            f"  0  1  1  0  {bond_radius:7.4f} {bond_radius:7.4f}"
-            f" {br:3d} {bg:3d} {bb:3d}"
+            format_vesta_sbond_rule(
+                index,
+                rule.element1,
+                rule.element2,
+                rule.distance_min,
+                rule.distance_max,
+                bond_radius=bond_radius,
+                bond_rgb=(br, bg, bb),
+            )
         )
     lines.extend(["  0 0 0 0", "SITET"])
     for index, (atom, label) in enumerate(zip(frame.atoms, labels), start=1):

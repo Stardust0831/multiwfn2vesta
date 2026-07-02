@@ -85,7 +85,7 @@ class TestTrajectoryFrames(unittest.TestCase):
 
         text = trajectory_frames.render_frame_vesta_text(frame, title="cdcl", bond_rules=(rule,))
 
-        self.assertIn("Cd Cl  0.00000  3.50000", text)
+        self.assertIn("   Cd    Cl    0.00000    3.50000  0  1  1  0  1  0.250  2.000 127 127 127", text)
         self.assertIn("BONDS   1", text)
 
     def test_write_trajectory_frames_selects_stride_and_writes_manifest(self):

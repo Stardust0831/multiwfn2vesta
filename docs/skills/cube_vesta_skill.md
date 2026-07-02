@@ -82,7 +82,7 @@ multiwfn2vesta cube-preset dori-scalar userfunc.cub cube_products
 multiwfn2vesta cube-preset rose userfunc.cub cube_products
 multiwfn2vesta cube-preset sedd userfunc.cub cube_products
 multiwfn2vesta cube-preset vdw-potential vdWpot.cub cube_products
-multiwfn2vesta cube-preset potential pot_es.cube cube_products
+multiwfn2vesta cube-preset potential potes.cube cube_products
 multiwfn2vesta cube-preset partial-charge pchg.cube cube_products
 multiwfn2vesta cube-preset wavefunction-norm wfc_norm.cube cube_products
 multiwfn2vesta cube-preset elf ELF.cub cube_products
@@ -104,6 +104,12 @@ multiwfn2vesta cube-preset vdw-surface density.cub cube_products \
 
 `cube-preset` is a thin layer over `cube-vesta`; it selects maintained
 defaults but does not duplicate VESTA-writing logic.
+
+Structure bonds need both the global `BONDS` display flag and per-element
+`SBOND` search rules.  `cube-vesta` / `cube-preset` now write default `SBOND`
+rules from a static 1-118 element covalent radius table when a structure phase
+is exported; use `--structure-bonds-off` only when the structure itself should
+be shown without bonds.
 
 IGM/IGMH/aIGM presets are available when Multiwfn has already produced the
 compatible cube pair:
