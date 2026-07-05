@@ -19,6 +19,7 @@ Human-facing tool discovery supports:
 multiwfn2vesta --lang zh
 multiwfn2vesta tools --lang zh
 multiwfn2vesta tools --lang en
+multiwfn2vesta tools interactive --lang zh
 ```
 
 Keep low-level scriptable commands stable and mostly English so existing

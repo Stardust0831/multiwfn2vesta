@@ -41,6 +41,9 @@ multiwfn2vesta tools run excitation-bridge -- OUT.lr h2o_singlet.excit.txt --lab
 multiwfn2vesta tools run trajectory-video -- png_frames movie.mp4 --bitrate 20M --run
 ```
 
+`tools interactive` 是数字菜单式交互：先选功能编号，再逐项询问输入文件、输出
+文件/目录和常用参数，最后显示将使用的参数并确认是否执行。
+
 底层命令仍然保留给调试和脚本复用，例如 `cube-preset`、`abacus-esp-align`、
 `abacus-lr-to-multiwfn`、`aim-igmh`、`trajectory-frames`。如果只是想完成常见任务，
 先看 `tools`，不要从长命令列表里硬找。

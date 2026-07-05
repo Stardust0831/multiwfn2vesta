@@ -78,6 +78,46 @@ class TestHumanFacingTools(unittest.TestCase):
             self.assertIn("TEX3P", vesta_text)
             self.assertIn("vesta:", stdout.getvalue())
 
+    def test_interactive_guided_esp_surface_builds_outputs(self):
+        root = Path(__file__).resolve().parents[1]
+        density = root / "examples" / "cof_direct_cube_suite" / "sample_esp" / "rho_demo.cube"
+        esp = root / "examples" / "cof_direct_cube_suite" / "sample_esp" / "potes_demo.cube"
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp) / "guided_esp"
+            answers = iter(
+                [
+                    "4",
+                    "n",
+                    str(density),
+                    str(esp),
+                    str(out),
+                    "z",
+                    "high",
+                    "0.5",
+                    "0.001",
+                    "-3.5 1.5",
+                    "",
+                    "y",
+                ]
+            )
+            stdout = io.StringIO()
+            with patch("builtins.input", lambda _prompt: next(answers)), patch("sys.stdout", stdout):
+                code = tools.main(["interactive", "--lang", "zh"])
+
+            self.assertEqual(code, 0)
+            self.assertTrue((out / "potes_demo_vacuum0.cube").exists())
+            self.assertTrue((out / "vesta" / "esp_surface_cube.vesta").exists())
+            self.assertIn("将使用的参数", stdout.getvalue())
+
+    def test_interactive_manual_mode_forwards_raw_args(self):
+        answers = iter(["5", "y", "OUT.lr state.excit.txt --label singlet", "y"])
+        with patch("builtins.input", lambda _prompt: next(answers)), patch("sys.stdout", io.StringIO()):
+            with patch("multiwfn2vesta.tools.abacus_lr_to_multiwfn.main", return_value=0) as mocked:
+                code = tools.main(["interactive", "--lang", "en"])
+
+        self.assertEqual(code, 0)
+        mocked.assert_called_once_with(["OUT.lr", "state.excit.txt", "--label", "singlet"])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -4,11 +4,16 @@ Use these through:
 
 ```bash
 multiwfn2vesta tools --lang zh
+multiwfn2vesta tools interactive --lang zh
 multiwfn2vesta tools run <tool> -- <args>
 ```
 
 Only list a workflow here when it has local tests, committed sample inputs, or
 the user explicitly confirmed it works.
+
+`tools interactive` is the human-first entry: select a numbered tool, answer
+prompts for input files, output files/directories, and common options, then
+confirm the assembled command arguments. Use `tools run` for scripts.
 
 | Tool | Purpose | Backing command | Stability note |
 | --- | --- | --- | --- |

@@ -36,7 +36,9 @@ multiwfn2vesta tools run esp-surface -- chg.cube potes.cube esp_products --axis 
 
 Use the `tools` layer first for normal user workflows.  It only lists
 locally tested or user-confirmed stable tools and keeps experimental runbooks
-out of the main chooser.
+out of the main chooser.  `tools interactive` is number-driven and prompts for
+required input files, output paths, and common options before confirming the
+assembled command arguments.
 
 Scriptable subcommands:
 

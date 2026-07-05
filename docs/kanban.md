@@ -11,6 +11,9 @@
 - [x] 双语 UX: `multiwfn2vesta tools --lang zh/en`、`tools interactive --lang zh` 和全局 `--lang zh --help` 已可用；默认英文底层脚本用法保持兼容。
 - [x] 验证与同步: 已新增 `tests/test_tools.py` / `tests/test_project_skill.py`，更新 CLI 测试；`unittest tests.test_tools tests.test_project_skill tests.test_cli tests.test_abacus_esp_align tests.test_abacus_lr_to_multiwfn tests.test_cube_preset` 共 139 tests OK；`tools run esp-surface` 和 `tools run excitation-bridge` sample smoke 均通过；scoped diff check 通过。
 - [ ] 提交/推送: 将本轮 tools/skill/双语 CLI 改动提交并推送到 GitHub；release 仅在确认需要二进制/归档发布时再发。
+- [ ] 新需求入板: 将 stable tools 的交互入口升级为类似 Multiwfn 的数字菜单和逐项输入/输出文件提示；完成后发布 prerelease。
+- [x] Guided CLI: `multiwfn2vesta tools interactive --lang zh` 支持按编号选择功能，并根据功能逐项询问输入文件、输出目录/文件和常用选项，最后显示参数并确认执行；仍保留手动参数行模式。
+- [ ] Prerelease: 提交并推送代码后打预发布 tag，创建 GitHub prerelease，说明这是工具入口预览版而非正式稳定版。
 
 ## Current Request: 2026-07-02 Excited-State Bridge And ESP VdW Surface Closure
 

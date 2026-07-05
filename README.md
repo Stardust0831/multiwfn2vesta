@@ -22,6 +22,10 @@ multiwfn2vesta tools interactive --lang zh
 multiwfn2vesta tools run esp-surface -- chg.cube potes.cube esp_products --axis z --tex-physical -0.08 0.08
 ```
 
+The interactive `tools` mode is number-driven and prompts for the required
+input files, output files/directories, and common options before showing the
+command arguments and asking for confirmation.
+
 Lower-level commands such as `cube-preset`, `abacus-esp-align`,
 `abacus-lr-to-multiwfn`, `aim-igmh`, and `trajectory-frames` remain available
 for scripting and debugging.

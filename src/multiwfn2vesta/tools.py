@@ -200,6 +200,192 @@ def _strip_separator(args: Sequence[str]) -> List[str]:
     return values
 
 
+def _prompt(label_en: str, label_zh: str, lang: Lang, default: Optional[str] = None, required: bool = False) -> str:
+    label = _text(label_en, label_zh, lang)
+    suffix = f" [{default}]" if default is not None else ""
+    while True:
+        value = input(f"{label}{suffix}: ").strip()
+        if not value and default is not None:
+            return default
+        if value or not required:
+            return value
+        print(_text("This value is required.", "此项必填。", lang))
+
+
+def _yes_no(label_en: str, label_zh: str, lang: Lang, default: bool = False) -> bool:
+    default_text = "Y/n" if default else "y/N"
+    while True:
+        value = input(f"{_text(label_en, label_zh, lang)} [{default_text}]: ").strip().lower()
+        if not value:
+            return default
+        if value in {"y", "yes", "1", "true", "是", "对"}:
+            return True
+        if value in {"n", "no", "0", "false", "否", "不"}:
+            return False
+        print(_text("Please answer y or n.", "请输入 y 或 n。", lang))
+
+
+def _default_output_dir(input_path: str, suffix: str) -> str:
+    path = Path(input_path).expanduser()
+    if path.name:
+        return str(path.parent / suffix)
+    return suffix
+
+
+def _append_optional(argv: List[str], option: str, value: str) -> None:
+    if value:
+        argv.extend([option, value])
+
+
+def _append_float_range(argv: List[str], option: str, value: str, *, expected: int) -> bool:
+    if not value:
+        return True
+    parts = value.split()
+    if len(parts) != expected:
+        return False
+    argv.extend([option, *parts])
+    return True
+
+
+def build_guided_args(tool_name: str, lang: Lang) -> Optional[List[str]]:
+    """Ask for common inputs/outputs for stable tools. Return None for manual mode."""
+    lang = normalize_lang(lang)
+    manual = _yes_no(
+        "Enter a raw argument line instead of guided prompts",
+        "改为手动输入整串参数",
+        lang,
+        default=False,
+    )
+    if manual:
+        raw = _prompt("Raw argument line", "参数行", lang)
+        return shlex.split(raw)
+
+    if tool_name == "discover":
+        return []
+    if tool_name == "examples":
+        mode = _prompt(
+            "Example view: summary/coverage/ready/all",
+            "算例视图: summary/coverage/ready/all",
+            lang,
+            default="summary",
+        )
+        if mode == "coverage":
+            return ["--coverage"]
+        if mode == "ready":
+            return ["--status", "ready"]
+        if mode == "all":
+            return []
+        return ["--summary"]
+    if tool_name == "cube":
+        cube = _prompt("Input cube file", "输入 cube 文件", lang, required=True)
+        output = _prompt("Output directory", "输出目录", lang, default=_default_output_dir(cube, "cube_products"))
+        preset = _prompt("Preset name", "Preset 名称", lang, default="density")
+        argv = [cube, output, "--preset", preset]
+        isosurface = _prompt("Isosurface value", "等值面数值", lang)
+        _append_optional(argv, "--isosurface", isosurface)
+        texture = _prompt("Texture/color cube (empty to skip)", "纹理/染色 cube（留空跳过）", lang)
+        _append_optional(argv, "--texture-cube", texture)
+        tex_range = _prompt("Physical texture range MIN MAX (empty to skip)", "物理色标范围 MIN MAX（留空跳过）", lang)
+        if not _append_float_range(argv, "--tex-physical", tex_range, expected=2):
+            print(_text("Texture range needs two numbers.", "色标范围需要两个数字。", lang), file=sys.stderr)
+            return None
+        return argv
+    if tool_name == "esp-surface":
+        density = _prompt("ABACUS density cube, e.g. chg.cube", "ABACUS 电子密度 cube，例如 chg.cube", lang, required=True)
+        esp = _prompt("ABACUS electrostatic potential cube, e.g. potes.cube", "ABACUS 静电势 cube，例如 potes.cube", lang, required=True)
+        output = _prompt("Output workflow directory", "输出工作目录", lang, default=_default_output_dir(density, "esp_surface_products"))
+        axis = _prompt("Vacuum/slab normal axis x/y/z", "真空/表面法向 x/y/z", lang, default="z")
+        side = _prompt("Vacuum side low/high/both", "真空侧 low/high/both", lang, default="high")
+        fraction = _prompt("Vacuum fraction", "真空平台比例", lang, default="0.1")
+        iso = _prompt("Density isosurface", "电子密度等值面", lang, default="0.001")
+        tex = _prompt("ESP color range MIN MAX", "ESP 色标范围 MIN MAX", lang, default="-0.08 0.08")
+        argv = [density, esp, output, "--axis", axis, "--vacuum-side", side, "--vacuum-fraction", fraction, "--isosurface", iso]
+        if not _append_float_range(argv, "--tex-physical", tex, expected=2):
+            print(_text("ESP color range needs two numbers.", "ESP 色标范围需要两个数字。", lang), file=sys.stderr)
+            return None
+        boundary = _prompt(
+            "Boundary XMIN XMAX YMIN YMAX ZMIN ZMAX (empty to skip)",
+            "Boundary XMIN XMAX YMIN YMAX ZMIN ZMAX（留空跳过）",
+            lang,
+        )
+        if not _append_float_range(argv, "--boundary", boundary, expected=6):
+            print(_text("Boundary needs six numbers.", "Boundary 需要六个数字。", lang), file=sys.stderr)
+            return None
+        return argv
+    if tool_name == "excitation-bridge":
+        calc = _prompt("ABACUS LR output directory", "ABACUS LR 输出目录", lang, required=True)
+        output = _prompt("Output Multiwfn excitation text", "输出 Multiwfn 激发组态文本", lang, default=str(Path(calc) / "abacus_lr.excit.txt"))
+        label = _prompt("ABACUS label", "ABACUS label", lang, default="singlet")
+        threshold = _prompt("Coefficient threshold", "系数阈值", lang, default="0.01")
+        return [calc, output, "--label", label, "--coeff-threshold", threshold]
+    if tool_name == "aim-pdb":
+        paths = _prompt("paths.pdb", "paths.pdb", lang, required=True)
+        output = _prompt("Output VESTA file", "输出 VESTA 文件", lang, default=str(Path(paths).with_name("aim_atoms_only.vesta")))
+        argv = [paths, output]
+        cps = _prompt("CPs.pdb (empty to skip)", "CPs.pdb（留空跳过）", lang)
+        _append_optional(argv, "--cps-pdb", cps)
+        return argv
+    if tool_name == "aim-igmh":
+        vesta = _prompt("Input AIM+IGMH VESTA file", "输入 AIM+IGMH VESTA 文件", lang, required=True)
+        output = _prompt("Output directory", "输出目录", lang, default=_default_output_dir(vesta, "aim_igmh_products"))
+        argv = [vesta, output]
+        stem = _prompt("Output stem (empty to use input stem)", "输出文件名前缀（留空则自动）", lang)
+        _append_optional(argv, "--stem", stem)
+        if _yes_no("Label BCP sites", "标注 BCP site", lang, default=True):
+            argv.append("--label-bcp-sites")
+        return argv
+    if tool_name == "trajectory-frames":
+        traj = _prompt("XYZ/extXYZ trajectory file", "XYZ/extXYZ 轨迹文件", lang, required=True)
+        output = _prompt("Output frame directory", "输出帧目录", lang, default=_default_output_dir(traj, "vesta_frames"))
+        argv = [traj, output]
+        stride = _prompt("Stride", "步长 stride", lang, default="1")
+        argv.extend(["--stride", stride])
+        reference = _prompt("Reference VESTA for view/style (empty to skip)", "参考 VESTA 视角/样式（留空跳过）", lang)
+        _append_optional(argv, "--reference-vesta", reference)
+        boundary = _prompt(
+            "Boundary XMIN XMAX YMIN YMAX ZMIN ZMAX (empty to skip)",
+            "Boundary XMIN XMAX YMIN YMAX ZMIN ZMAX（留空跳过）",
+            lang,
+        )
+        if not _append_float_range(argv, "--boundary", boundary, expected=6):
+            print(_text("Boundary needs six numbers.", "Boundary 需要六个数字。", lang), file=sys.stderr)
+            return None
+        while True:
+            bond = _prompt("Bond rule E1 E2 MIN MAX (empty when done)", "成键规则 E1 E2 MIN MAX（留空结束）", lang)
+            if not bond:
+                break
+            parts = bond.split()
+            if len(parts) != 4:
+                print(_text("Bond rule needs four fields.", "成键规则需要四项。", lang), file=sys.stderr)
+                return None
+            argv.extend(["--bond", *parts])
+        return argv
+    if tool_name == "trajectory-video":
+        frames = _prompt("PNG frame directory", "PNG 帧目录", lang, required=True)
+        output = _prompt("Output MP4", "输出 MP4", lang, default=str(Path(frames).with_name("trajectory.mp4")))
+        fps = _prompt("FPS", "帧率 FPS", lang, default="24")
+        bitrate = _prompt("Bitrate", "码率", lang, default="20M")
+        argv = [frames, output, "--fps", fps, "--bitrate", bitrate]
+        if _yes_no("Run ffmpeg now", "现在运行 ffmpeg", lang, default=False):
+            argv.append("--run")
+        return argv
+    if tool_name == "abacus-atom-color":
+        vesta = _prompt("Input VESTA file", "输入 VESTA 文件", lang, required=True)
+        table = _prompt("ABACUS mulliken.txt", "ABACUS mulliken.txt", lang, required=True)
+        output = _prompt("Output VESTA file", "输出 VESTA 文件", lang, default=str(Path(vesta).with_name("mulliken_colored.vesta")))
+        prop = _prompt("Property charge/magnetism", "属性 charge/magnetism", lang, default="charge")
+        return [vesta, table, output, "--property", prop]
+    if tool_name == "atom-table-color":
+        vesta = _prompt("Input VESTA file", "输入 VESTA 文件", lang, required=True)
+        table = _prompt("Atom scalar table", "原子标量表", lang, required=True)
+        output = _prompt("Output VESTA file", "输出 VESTA 文件", lang, default=str(Path(vesta).with_name("atom_table_colored.vesta")))
+        argv = [vesta, table, output]
+        column = _prompt("Value column (empty to infer)", "数值列名（留空自动判断）", lang)
+        _append_optional(argv, "--value-column", column)
+        return argv
+    return None
+
+
 def list_tools(*, lang: Lang = "en", as_json: bool = False) -> None:
     lang = normalize_lang(lang)
     if as_json:
@@ -354,9 +540,19 @@ def interactive(lang: Lang = "en") -> int:
             return 2
         name = STABLE_TOOLS[index - 1].name
     else:
-        name = raw
-    args_line = input(_text("Arguments for this tool", "该工具的参数", lang) + ": ").strip()
-    return run_tool(name, shlex.split(args_line))
+        name = TOOL_ALIASES.get(raw, raw)
+    if name not in TOOL_BY_NAME:
+        print(_text("Unknown stable tool.", "未知稳定工具。", lang), file=sys.stderr)
+        return 2
+    tool_args = build_guided_args(name, lang)
+    if tool_args is None:
+        return 2
+    display = " ".join(shlex.quote(item) for item in tool_args)
+    print(_text("Command arguments:", "将使用的参数:", lang))
+    print(f"  {name} -- {display}")
+    if not _yes_no("Run this tool now", "现在运行此工具", lang, default=True):
+        return 0
+    return run_tool(name, tool_args)
 
 
 def build_parser() -> argparse.ArgumentParser:
