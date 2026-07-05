@@ -13,7 +13,8 @@
 - [x] 提交/推送: 已提交并推送 `d28622a Add stable tools layer and project skill` 与 `3af9dda Add guided stable tools interaction` 到 GitHub。
 - [x] 新需求入板: 将 stable tools 的交互入口升级为类似 Multiwfn 的数字菜单和逐项输入/输出文件提示；完成后发布 prerelease。
 - [x] Guided CLI: `multiwfn2vesta tools interactive --lang zh` 支持按编号选择功能，并根据功能逐项询问输入文件、输出目录/文件和常用选项，最后显示参数并确认执行；仍保留手动参数行模式。
-- [ ] Prerelease: 准备 `v0.1.0-rc.1` 预发布说明，打 tag 并创建 GitHub prerelease；说明这是工具入口预览版而非正式稳定版。
+- [x] Prerelease tag: 已提交 `db9716d Document v0.1.0 rc1 prerelease`，推送 `main`，并推送 annotated tag `v0.1.0-rc.1` 到 GitHub；release notes 在 `docs/releases/v0.1.0-rc.1.md`。
+- [ ] GitHub prerelease object: 本机没有 `gh` CLI，也没有 `GH_TOKEN`/`GITHUB_TOKEN`，无法自动调用 GitHub Release API；需要在 GitHub 网页用 tag `v0.1.0-rc.1` 创建 prerelease，或提供 token 后再自动创建。
 
 ## Current Request: 2026-07-02 Excited-State Bridge And ESP VdW Surface Closure
 
