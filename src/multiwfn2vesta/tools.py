@@ -533,6 +533,8 @@ def interactive(lang: Lang = "en") -> int:
     raw = input(_text("\nTool name or number", "\n工具名或编号", lang) + ": ").strip()
     if not raw:
         return 0
+    if raw.lower() in {"q", "quit", "exit"}:
+        return 0
     if raw.isdigit():
         index = int(raw)
         if index < 1 or index > len(STABLE_TOOLS):

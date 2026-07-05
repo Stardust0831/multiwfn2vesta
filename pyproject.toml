@@ -7,7 +7,7 @@ name = "multiwfn-vesta-interface"
 version = "0.1.0"
 description = "Interface for Multiwfn calculations and VESTA visualization"
 authors = [{name = "Stardust0831", email = "13862180016@163.com"}]
-dependencies = []
+dependencies = ["numpy>=1.21"]
 requires-python = ">=3.7"
 
 [project.scripts]

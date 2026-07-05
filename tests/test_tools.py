@@ -118,6 +118,15 @@ class TestHumanFacingTools(unittest.TestCase):
         self.assertEqual(code, 0)
         mocked.assert_called_once_with(["OUT.lr", "state.excit.txt", "--label", "singlet"])
 
+    def test_interactive_accepts_quit_shortcut(self):
+        with patch("builtins.input", return_value="q"), patch("sys.stdout", io.StringIO()), patch(
+            "sys.stderr", io.StringIO()
+        ) as stderr:
+            code = tools.main(["interactive", "--lang", "zh"])
+
+        self.assertEqual(code, 0)
+        self.assertEqual(stderr.getvalue(), "")
+
 
 if __name__ == "__main__":
     unittest.main()

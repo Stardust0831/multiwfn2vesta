@@ -1,5 +1,13 @@
 # Project Kanban
 
+## Current Request: 2026-07-06 Deliver User-Facing Executable
+
+- [x] 需求入板: 用户提醒需要此前要求的可执行程序；目标是把已有数字菜单/交互式 tools 入口打包成可直接运行的程序，并尽量挂到 prerelease。
+- [x] 打包审计: `multiwfn2vesta` CLI 已有稳定 tools/interactive 入口；实际导入链需要 `numpy`，已补入 `pyproject.toml` 依赖。
+- [x] 本地产物: 已在 `dist/local/` 生成 `multiwfn2vesta-linux-x86_64` 单文件 Linux 程序和 `multiwfn2vesta-portable-python.zip` 轻量 zipapp 包，未修改系统级位置。
+- [x] Release 产物: 已新增 `.github/workflows/build-rc1-executables.yml`，推送后由 GitHub Actions 构建 Linux/Windows 单文件程序和 portable zipapp，并上传到 `v0.1.0-rc.1`。
+- [x] 验证: 本地 Linux 单文件程序 `tools --lang zh` 通过；`tools interactive --lang zh` 输入 `q` 可安静退出；portable `.pyz` 在有 `numpy` 的 Python 环境中通过工具列表 smoke。
+
 ## Current Request: 2026-07-05 GitHub Prerelease Object Via SSH/GH
 
 - [x] 需求入板: 用户确认本机可 SSH 到 GitHub，要求继续尝试创建 GitHub prerelease；所有操作继续限制在 `/mnt/g/work/multiwfn2vesta` 内。
