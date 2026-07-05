@@ -1,5 +1,13 @@
 # Project Kanban
 
+## Current Request: 2026-07-05 GitHub Prerelease Object Via SSH/GH
+
+- [x] 需求入板: 用户确认本机可 SSH 到 GitHub，要求继续尝试创建 GitHub prerelease；所有操作继续限制在 `/mnt/g/work/multiwfn2vesta` 内。
+- [x] Git/SSH 状态: `origin` 使用 `Github:Stardust0831/multiwfn2vesta.git`，SSH 配置此前已确认可通过 `Github` host 认证；tag `v0.1.0-rc.1` 和 main 已推送。
+- [ ] GH API 认证: 当前 `gh auth status --hostname github.com` 仍显示未登录；Release 对象需要 GitHub API 认证，SSH key 只能覆盖 git 传输。首次 `gh auth login --web` 得到设备码 `1465-443D`，但等待期间未完成浏览器授权，最终 GitHub 返回 `slow_down`。
+- [x] GitHub Actions 旁路: 因本机无 `gh` API token，新增 `.github/workflows/create-rc1-prerelease.yml`，用远端仓库 `GITHUB_TOKEN` 在 push/workflow_dispatch 时创建 prerelease；若 release 已存在则跳过。
+- [ ] 创建 prerelease: 推送 workflow 后等待 GitHub Actions 执行；若 Actions 未启用或 `contents: write` 权限受限，则仍需本机 `gh auth login` 或 `GH_TOKEN`。
+
 ## Current Request: 2026-07-02 Human-Friendly Tools And Skills Packaging
 
 - [x] 需求入板: 评估当前项目是否足够人类易用，是否应将常用功能打包成 tools，并把 VESTA/Multiwfn/ABACUS 经验沉淀为可触发 skill。
