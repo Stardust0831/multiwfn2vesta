@@ -1,0 +1,4 @@
+interface:
+  display_name: "multiwfn2vesta Operator"
+  short_description: "Operate stable Multiwfn, ABACUS, and VESTA workflows"
+  default_prompt: "Use this skill to choose stable multiwfn2vesta tools, preserve project records, and interpret VESTA files."

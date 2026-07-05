@@ -28,6 +28,7 @@ from . import (
     multiwfn_iri,
     multiwfn_stm,
     surface_extrema_vesta,
+    tools,
     trajectory_frames,
     trajectory_video,
 )
@@ -36,6 +37,7 @@ from .executables import discovery_report
 
 COMMANDS: Dict[str, Tuple[str, str]] = {
     "discover": ("Find Multiwfn and VESTA executables", "executables"),
+    "tools": ("List and run stable human-facing tools", "tools"),
     "abacus-esp-align": ("Align ABACUS electrostatic-potential cube zero to a vacuum plateau", "abacus_esp_align"),
     "abacus-lr-to-multiwfn": ("Convert ABACUS LR-TDDFT amplitudes to Multiwfn excitation text", "abacus_lr_to_multiwfn"),
     "abacus-molden": ("Generate and validate ABACUS Molden files", "abacus_molden"),
@@ -68,6 +70,8 @@ COMMANDS: Dict[str, Tuple[str, str]] = {
 ALIASES = {
     "where": "discover",
     "env": "discover",
+    "toolbox": "tools",
+    "stable-tools": "tools",
     "esp-align": "abacus-esp-align",
     "abacus-pot-align": "abacus-esp-align",
     "vacuum-align-esp": "abacus-esp-align",
@@ -131,11 +135,12 @@ ALIASES = {
 }
 
 
-def print_help() -> None:
-    print(
-        """multiwfn2vesta - maintained workflow launcher
+HELP_EN = """multiwfn2vesta - maintained workflow launcher
 
 Usage:
+  multiwfn2vesta --lang zh
+      Start the stable tools chooser in Chinese.
+
   multiwfn2vesta
       Start the interactive workflow chooser.
 
@@ -144,6 +149,7 @@ Usage:
 
 Commands:
   discover   Find Multiwfn and VESTA executables from env/PATH/workspace.
+  tools      List or run stable human-facing tools; supports --lang en|zh.
   abacus-esp-align
              Shift ABACUS electrostatic-potential cube zero to a vacuum plateau.
   abacus-lr-to-multiwfn
@@ -233,6 +239,9 @@ Aliases:
 
 Examples:
   multiwfn2vesta discover
+  multiwfn2vesta tools --lang zh
+  multiwfn2vesta tools interactive --lang zh
+  multiwfn2vesta tools run esp-surface -- chg.cube potes.cube esp_products --axis z --tex-physical -0.08 0.08
   multiwfn2vesta abacus-esp-align OUT.test/potes.cube esp_vacuum0.cube --axis z --vacuum-side high --profile-csv esp_profile.csv
   multiwfn2vesta abacus-lr-to-multiwfn OUT.lr h2o_singlet.excit.txt --label singlet
   multiwfn2vesta abacus-molden abacus_calc ABACUS_Multiwfn.molden
@@ -272,7 +281,50 @@ Examples:
 
 Use `multiwfn2vesta <command> --help` for workflow-specific options.
 """
-    )
+
+
+HELP_ZH = """multiwfn2vesta - Multiwfn / ABACUS / VESTA 工作流入口
+
+用法:
+  multiwfn2vesta --lang zh
+      进入中文稳定工具交互选择器。
+
+  multiwfn2vesta tools --lang zh
+      列出只包装已测试或已明确认可可用的稳定工具。
+
+  multiwfn2vesta tools interactive --lang zh
+      进入中文稳定工具交互选择器。
+
+  multiwfn2vesta tools run <tool> -- <参数>
+      运行稳定工具。`--` 后面的参数传给具体工具。
+
+稳定 tools:
+  discover            查找 Multiwfn/VESTA 可执行文件。
+  examples            查看已整理算例、图库和闭环状态。
+  cube                cube -> VESTA preset。
+  esp-surface         ABACUS density cube + ESP cube -> 真空归零 ESP 表面染色 VESTA。
+  excitation-bridge   ABACUS LR-TDDFT -> Multiwfn plain text 激发组态。
+  aim-pdb             Multiwfn AIM PDB -> atoms-only VESTA。
+  aim-igmh            整理已保存 AIM+IGMH VESTA 叠图。
+  trajectory-frames   XYZ/extXYZ 轨迹 -> 逐帧 VESTA。
+  trajectory-video    已渲染 PNG 帧 -> MP4。
+  abacus-atom-color   ABACUS Mulliken 电荷/磁矩 -> VESTA 原子着色。
+  atom-table-color    通用原子标量表 -> VESTA 原子着色。
+
+常用示例:
+  multiwfn2vesta tools --lang zh
+  multiwfn2vesta tools run esp-surface -- chg.cube potes.cube esp_products --axis z --tex-physical -0.08 0.08
+  multiwfn2vesta tools run excitation-bridge -- OUT.lr h2o_singlet.excit.txt --label singlet
+  multiwfn2vesta tools run trajectory-video -- png_frames movie.mp4 --bitrate 20M --run
+
+底层命令仍可直接使用，例如 `cube-preset`, `abacus-esp-align`,
+`abacus-lr-to-multiwfn`, `aim-igmh`, `trajectory-frames`。使用
+`multiwfn2vesta <command> --help` 查看底层参数。
+"""
+
+
+def print_help(lang: str = "en") -> None:
+    print(HELP_ZH if lang == "zh" else HELP_EN)
 
 
 def _prompt(label: str, default: Optional[str] = None, required: bool = False) -> str:
@@ -1287,7 +1339,8 @@ def interactive_trajectory_frames() -> int:
 
 def interactive_main() -> int:
     print("multiwfn2vesta interactive launcher\n")
-    print("0) Discover Multiwfn/VESTA executables")
+    print("0) Stable tools chooser")
+    print("00) Discover Multiwfn/VESTA executables")
     print("1) Wavefunction -> Multiwfn AIM -> atoms-only VESTA")
     print("2) AIM PDB -> atoms-only VESTA")
     print("3) AIM+IGMH overlay -> styled VESTA / optional three views")
@@ -1312,8 +1365,10 @@ def interactive_main() -> int:
     print("22) ABACUS electrostatic potential cube -> vacuum-zero shifted cube")
     print("23) ABACUS LR-TDDFT amplitudes -> Multiwfn excitation text")
     print("q) Quit")
-    choice = _prompt("choice", default="19").lower()
-    if choice in {"0", "discover", "where", "env"}:
+    choice = _prompt("choice", default="0").lower()
+    if choice in {"0", "tools", "toolbox", "stable-tools"}:
+        return tools.interactive("en")
+    if choice in {"00", "discover", "where", "env"}:
         print(discovery_report())
         return 0
     if choice in {"22", "abacus-esp-align", "esp-align", "abacus-pot-align", "vacuum-align-esp"}:
@@ -1376,6 +1431,8 @@ def run_command(command: str, args: Sequence[str]) -> int:
     if command == "discover":
         print(discovery_report(), end="")
         return 0
+    if command == "tools":
+        return tools.main(args)
     if command == "abacus-esp-align":
         return abacus_esp_align.main(args)
     if command == "abacus-lr-to-multiwfn":
@@ -1433,16 +1490,25 @@ def run_command(command: str, args: Sequence[str]) -> int:
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
+    lang = "en"
+    if args and args[0].startswith("--lang="):
+        lang = tools.normalize_lang(args[0].split("=", 1)[1])
+        args = args[1:]
+    elif len(args) >= 2 and args[0] == "--lang":
+        lang = tools.normalize_lang(args[1])
+        args = args[2:]
     if not args:
+        if lang == "zh":
+            return tools.interactive("zh")
         return interactive_main()
     if args[0] in {"-h", "--help", "help"}:
-        print_help()
+        print_help(lang=lang)
         return 0
 
     command = ALIASES.get(args[0], args[0])
     if command not in COMMANDS:
         print(f"Unknown command: {args[0]}\n", file=sys.stderr)
-        print_help()
+        print_help(lang=lang)
         return 2
     return run_command(command, args[1:])
 

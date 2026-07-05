@@ -12,7 +12,19 @@ multi-phase VESTA figures, plus MP4 encoding from rendered VESTA trajectory
 PNG frames.
 
 The project is still experimental, but the CLI below is the maintained entry
-point.
+point.  Human-facing stable workflows are exposed through the `tools` layer,
+which only lists locally tested or user-confirmed workflows:
+
+```bash
+multiwfn2vesta tools --lang en
+multiwfn2vesta tools --lang zh
+multiwfn2vesta tools interactive --lang zh
+multiwfn2vesta tools run esp-surface -- chg.cube potes.cube esp_products --axis z --tex-physical -0.08 0.08
+```
+
+Lower-level commands such as `cube-preset`, `abacus-esp-align`,
+`abacus-lr-to-multiwfn`, `aim-igmh`, and `trajectory-frames` remain available
+for scripting and debugging.
 
 ## Current Snapshot
 
@@ -2116,5 +2128,7 @@ and `aim_atoms_only.vesta` without launching VESTA.
   ABACUS direct-cube, ABACUS Molden, Multiwfn, and VESTA routes.
 - `docs/skills/vesta_camera_and_layers_skill.md`: VESTA camera, layers, and
   three-view export notes.
+- `docs/codex_skills/multiwfn2vesta-operator/`: Codex-style project skill
+  with stable tool policy, VESTA field reference, and packaging rules.
 - `docs/worklog.md`: implementation history and smoke results.
 - `docs/kanban.md`: current project board.

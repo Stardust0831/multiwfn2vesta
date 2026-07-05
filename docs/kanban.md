@@ -1,5 +1,17 @@
 # Project Kanban
 
+## Current Request: 2026-07-02 Human-Friendly Tools And Skills Packaging
+
+- [x] 需求入板: 评估当前项目是否足够人类易用，是否应将常用功能打包成 tools，并把 VESTA/Multiwfn/ABACUS 经验沉淀为可触发 skill。
+- [x] 现状审计: 已检查 `docs/skills/`、CLI 入口、中文手册和 VESTA 相关文档；当前功能覆盖较多，但 skills 偏维护者 runbook，普通用户仍需要知道很多命令名和 VESTA 内部字段。
+- [x] 新需求入板: 用户确认开始实施；目标是把测试过且用户明确认可可用的功能整理成 tools，把项目规范和 VESTA 字段经验提炼成 skill，并补中文/英文 CLI 交互入口。
+- [x] 范围收敛: 只把明确跑通过的功能标为 stable tools；未验证或仍有风险的路线保留为 experimental/runbook。
+- [x] Tools 实现: 已新增 `multiwfn2vesta tools` 高层命令、`tools run` 转发入口和 `esp-surface` 组合工具，内部复用现有底层 CLI，不重复实现算法。
+- [x] Skill/Reference 实现: 已新增项目内 Codex skill `docs/codex_skills/multiwfn2vesta-operator/`，含项目操作规范、稳定 tools、VESTA 字段 reference 和打包规则。
+- [x] 双语 UX: `multiwfn2vesta tools --lang zh/en`、`tools interactive --lang zh` 和全局 `--lang zh --help` 已可用；默认英文底层脚本用法保持兼容。
+- [x] 验证与同步: 已新增 `tests/test_tools.py` / `tests/test_project_skill.py`，更新 CLI 测试；`unittest tests.test_tools tests.test_project_skill tests.test_cli tests.test_abacus_esp_align tests.test_abacus_lr_to_multiwfn tests.test_cube_preset` 共 139 tests OK；`tools run esp-surface` 和 `tools run excitation-bridge` sample smoke 均通过；scoped diff check 通过。
+- [ ] 提交/推送: 将本轮 tools/skill/双语 CLI 改动提交并推送到 GitHub；release 仅在确认需要二进制/归档发布时再发。
+
 ## Current Request: 2026-07-02 Excited-State Bridge And ESP VdW Surface Closure
 
 - [x] 需求入板: 补齐 ABACUS LR-TDDFT 激发态转换入口和 ABACUS ESP 范德华表面染色流程，要求给出测试用例、输入输出文件和完整文档。

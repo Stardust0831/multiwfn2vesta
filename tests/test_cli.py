@@ -12,6 +12,7 @@ class TestUnifiedCli(unittest.TestCase):
         pyproject = (root / "pyproject.toml").read_text(encoding="utf-8")
         setup_py = (root / "setup.py").read_text(encoding="utf-8")
         expected = (
+            "multiwfn2vesta-tools=multiwfn2vesta.tools:main",
             "multiwfn2vesta-abacus-mulliken-color=multiwfn2vesta.abacus_mulliken:main",
             "multiwfn2vesta-multiwfn-atom-color=multiwfn2vesta.multiwfn_atom_table:main",
         )
@@ -28,6 +29,7 @@ class TestUnifiedCli(unittest.TestCase):
         self.assertEqual(code, 0)
         text = output.getvalue()
         self.assertIn("discover", text)
+        self.assertIn("tools", text)
         self.assertIn("abacus-molden", text)
         self.assertIn("molden-check", text)
         self.assertIn("cube-vesta", text)
@@ -390,8 +392,17 @@ class TestUnifiedCli(unittest.TestCase):
 
         self.assertEqual(code, 0)
 
-    def test_interactive_default_lists_examples(self):
+    def test_interactive_default_opens_stable_tools(self):
         with patch("builtins.input", return_value=""):
+            with patch("sys.stdout", io.StringIO()):
+                with patch("multiwfn2vesta.cli.tools.interactive", return_value=0) as mocked:
+                    code = cli.main([])
+
+        self.assertEqual(code, 0)
+        mocked.assert_called_once_with("en")
+
+    def test_interactive_examples_still_available_by_number(self):
+        with patch("builtins.input", return_value="19"):
             with patch("sys.stdout", io.StringIO()):
                 with patch("multiwfn2vesta.cli.examples_index.main", return_value=0) as mocked:
                     code = cli.main([])

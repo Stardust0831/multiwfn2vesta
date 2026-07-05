@@ -25,6 +25,19 @@ Interactive chooser:
 multiwfn2vesta
 ```
 
+Human-facing stable tools:
+
+```bash
+multiwfn2vesta tools --lang en
+multiwfn2vesta tools --lang zh
+multiwfn2vesta tools interactive --lang zh
+multiwfn2vesta tools run esp-surface -- chg.cube potes.cube esp_products --axis z --tex-physical -0.08 0.08
+```
+
+Use the `tools` layer first for normal user workflows.  It only lists
+locally tested or user-confirmed stable tools and keeps experimental runbooks
+out of the main chooser.
+
 Scriptable subcommands:
 
 ```bash

@@ -11,6 +11,7 @@ setup(
         'console_scripts': [
             'multiwfn2vesta=multiwfn2vesta.cli:main',
             'multiwfn2vesta-discover=multiwfn2vesta.executables:main',
+            'multiwfn2vesta-tools=multiwfn2vesta.tools:main',
             'multiwfn2vesta-abacus-esp-align=multiwfn2vesta.abacus_esp_align:main',
             'multiwfn2vesta-abacus-lr-to-multiwfn=multiwfn2vesta.abacus_lr_to_multiwfn:main',
             'multiwfn2vesta-abacus-molden=multiwfn2vesta.abacus_molden:main',

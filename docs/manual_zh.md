@@ -12,6 +12,8 @@ VESTA 可打开、可渲染、可复用视角的文件。当前项目仍是实�
 cd /mnt/g/work/multiwfn2vesta/project
 export PATH=/mnt/g/work/multiwfn2vesta/project/bin:$PATH
 multiwfn2vesta --help
+multiwfn2vesta tools --lang zh
+multiwfn2vesta tools interactive --lang zh
 multiwfn2vesta examples --summary
 multiwfn2vesta examples --closure-report
 multiwfn2vesta examples
@@ -29,6 +31,19 @@ multiwfn2vesta --help
 ```bash
 multiwfn2vesta <command> [options]
 ```
+
+普通用户优先用稳定 tools 层。这里只列出已经有本地测试、已提交样例，或用户明确认可可用的功能：
+
+```bash
+multiwfn2vesta tools --lang zh
+multiwfn2vesta tools run esp-surface -- chg.cube potes.cube esp_products --axis z --tex-physical -0.08 0.08
+multiwfn2vesta tools run excitation-bridge -- OUT.lr h2o_singlet.excit.txt --label singlet
+multiwfn2vesta tools run trajectory-video -- png_frames movie.mp4 --bitrate 20M --run
+```
+
+底层命令仍然保留给调试和脚本复用，例如 `cube-preset`、`abacus-esp-align`、
+`abacus-lr-to-multiwfn`、`aim-igmh`、`trajectory-frames`。如果只是想完成常见任务，
+先看 `tools`，不要从长命令列表里硬找。
 
 从零到第一张图建议走这条顺序：
 
