@@ -95,7 +95,7 @@ jobs:
           py "%~dp0multiwfn2vesta.pyz" %*
           BAT
           cp docs/executable_distribution_zh.md build/portable/README_zh.md
-          (cd build/portable && zip -r ../../multiwfn2vesta-portable-python.zip .)
+          (cd build/portable && zip -r ../multiwfn2vesta-portable-python.zip .)
 
       - name: Upload release asset
         env:
