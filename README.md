@@ -30,6 +30,11 @@ Lower-level commands such as `cube-preset`, `abacus-esp-align`,
 `abacus-lr-to-multiwfn`, `aim-igmh`, and `trajectory-frames` remain available
 for scripting and debugging.
 
+Beginner-oriented Chinese article with real ABACUS/CP2K, Multiwfn,
+VESTA/VMD cases and figures:
+
+- [`docs/posts/first_principles_multiwfn_visualization_zh.md`](docs/posts/first_principles_multiwfn_visualization_zh.md)
+
 ## Current Snapshot
 
 - Use `main` as the maintained branch.  A fresh `git fetch --prune origin`

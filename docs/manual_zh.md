@@ -4,6 +4,10 @@
 VESTA 可打开、可渲染、可复用视角的文件。当前项目仍是实验性工具，但推荐统一入口已经收敛到
 `multiwfn2vesta`。
 
+面向新人的完整案例文章：
+
+- [从第一性原理计算到可发表图片：ABACUS/CP2K + Multiwfn + VESTA/VMD 实用工作流](posts/first_principles_multiwfn_visualization_zh.md)
+
 ## 1. 基本入口
 
 在仓库内使用：

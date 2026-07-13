@@ -1,5 +1,21 @@
 # Project Kanban
 
+## Current Request: 2026-07-13 Beginner Article On First-Principles Visualization
+
+- [x] 需求入板: 面向计算化学公社新人撰写一篇普适、符合实际的中文教程，主线为 ABACUS/CP2K + Multiwfn + VESTA/VMD。
+- [x] 素材审计: 已核对 COF ESP、Ag(111)+benzene IGMH+AIM、CP2K Sobereva 634 TDDFT、ABACUS H2O LR bridge、Cd/Cl 轨迹/视频；排除了 40x40/60x60 失败导出和仅用于诊断的图片。
+- [x] 外部资料: 已核对 Sobereva 434/445/621/634、CP2K `MO_MOLDEN` 手册、ABACUS develop Molden converter、VESTA 官方页面与 VMD cube plugin；正文区分方法原理、程序接口和本地经验限制。
+- [x] 文章撰写: 已新增 `docs/posts/first_principles_multiwfn_visualization_zh.md`，按“程序分工 -> 波函数接口 -> ESP -> IGMH+AIM -> TDDFT -> VESTA/VMD -> 三视图/轨迹/视频”组织，并给出实际命令。
+- [x] 图片整理: 已新增 `docs/assets/posts/first_principles_visualization/`，含 7 张来自既有计算的文章图和 provenance README；Ag 三视图仅裁剪/缩放，TDDFT 四联图补面板标签。
+- [x] 工具适配: 现有稳定 CLI 足够支撑文章，不新增功能；只在 README 和中文手册顶部加入文章入口。文章明确 AIM+IGMH phase 合并、VESTA PNG 渲染和 ABACUS 多 rank LR 尚有边界。
+- [x] 验证交付: ESP sample、ABACUS LR sample、extXYZ frame、trajectory-video dry-run 均通过；7 个本地图片链接存在，12 个外部链接可达（DOI 对无浏览器 curl 返回 403，但 DOI 本身有效），`git diff --check` 通过；只读子 agent 的 8 项高价值审阅意见已处理。
+
+## Current Request: 2026-07-11 Locate COF ESP Example
+
+- [x] 需求入板: 定位此前完成的 COF 静电势（ESP）范德华表面染色算例及可直接查看的主要文件。
+- [x] 路径核对: 完整闭环位于 `smoke/cof_esp_vdw_surface_20260625/`；已核对原始 ABACUS density/ESP cube、真空归零 ESP、最终 `.vesta` 场景和有效渲染图。
+- [x] 使用指引: 推荐优先打开带成键的 `cof12000n2_esp_vdw_surface_zoom_render_bonds.vesta`；对应正式 PNG 为 `cof12000n2_esp_vdw_surface_vesta_zoom_bonds.png`。`three_views/` 中的 60x60 PNG 是失败导出，不作为结果。
+
 ## Current Request: 2026-07-06 Deliver User-Facing Executable
 
 - [x] 需求入板: 用户提醒需要此前要求的可执行程序；目标是把已有数字菜单/交互式 tools 入口打包成可直接运行的程序，并尽量挂到 prerelease。
