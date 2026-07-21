@@ -791,12 +791,13 @@ def _density_phase_lines(
     title: str,
     density_path_text: str,
     texture_path_text: Optional[str],
+    structure_mode: str,
     boundary: Tuple[float, float, float, float, float, float],
 ) -> List[str]:
     lines = _phase_common_lines(
         summary,
         title=title,
-        structure_kind="CRYSTAL",
+        structure_kind="CRYSTAL" if structure_mode == "crystal" else "MOLECULE",
         cell_line=_format_cell_line(summary),
     )
     insert_at = lines.index("GROUP")
@@ -990,6 +991,7 @@ def render_cube_vesta_text(
             title=density_title,
             density_path_text=density_path_text,
             texture_path_text=texture_path_text,
+            structure_mode=structure_mode,
             boundary=boundary,
         )
     )
